@@ -48,6 +48,7 @@ module.exports = {
 	},
 	dev: process.env.NODE_ENV === 'DEV',
 	css: [
-		'@/assets/css/global.css'
+		'~/assets/style/app.styl',
+		'~/assets/style/global.css'
 	]
 }
