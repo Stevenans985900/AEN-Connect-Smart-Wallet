@@ -4,10 +4,7 @@
 			<img width="256" src="~/assets/img/logo.png">
 			<h1>front change</h1>
 			<h2>AENChain web / desktop wallet</h2>
-			<a href="https://nuxtjs.org/" target="_blank" class="btn btn-primary">Documentation</a>
-			<a href="https://github.com/nuxt/nuxt.js" target="_blank" class="btn btn-primary">GitHub</a>
-			<a href="https://electronjs.org/" target="_blank" class="btn btn-secondary">Electron</a>
-			<a href="https://github.com/electron-userland/electron-builder" target="_blank" class="btn btn-secondary">Electron Builder</a>
+			<nuxt-link to="/page">Inner</nuxt-link>
 		</div>
 	</section>
 </template>

@@ -1,10 +1,39 @@
 module.exports = {
 	mode: 'spa',
-	head: {title: 'wallet-vue-electron'}, // Headers of the page
+	head: {
+    title: '{{ name }}',
+    meta: [
+      { charset: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { hid: 'description', name: 'description', content: '{{ description }}' }
+    ],
+    link: [
+      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+      { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' }
+    ]
+  },
 	loading: false, // Disable default loading bar
+	modules: [
+    '@nuxtjs/axios'
+  ],
+  plugins: [
+    '~/plugins/globals.js',
+    { src: '~/plugins/localStorage.js', ssr: false },
+		'~/plugins/vuetify',
+		'~/plugins/wallet'
+  ],
 	build: {
+		extractCSS: true,
+		vendor: [
+			'vuetify',
+			'chain-js-sdk',
+			'formidable',
+			'nem2-library',
+			'nem2-sdk',
+			'superagent'
+		],
 		extend (config, { isDev, isClient }) {
-			if (isDev && isClient) {
+			// if (isDev && isClient) {
 				// Run ESLint on save
 				config.module.rules.push({
 					enforce: 'pre',
@@ -12,7 +41,7 @@ module.exports = {
 					loader: 'eslint-loader',
 					exclude: /(node_modules)/
 				})
-			}
+			// }
 			// Extend only webpack config for client-bundle
 			if (isClient) { config.target = 'electron-renderer' }
 		}

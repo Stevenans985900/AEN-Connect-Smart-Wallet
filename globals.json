@@ -1,0 +1,23 @@
+{
+    "faucet_url": "http://faucet.aencoin.io",
+    "reference_address": "TD5C6ZEHS7NOQQQ522VYI4BXJZ33HVJFY5AFAL3P",
+    "api_endpoints": [
+        {
+            "alias": "Master",
+            "address": "http://api-1.aencoin.io:3000"
+        }
+    ],
+    "available_networks": [
+        {
+            "name": "TestNet",
+            "identifier": "PUBLIC_TEST",
+            "byte": 152
+        }
+    ],
+    "faucets": [
+        {
+            "name": "TestNet Faucet",
+            "address": "TD5C6ZEHS7NOQQQ522VYI4BXJZ33HVJFY5AFAL3P"
+        }
+    ]
+}
