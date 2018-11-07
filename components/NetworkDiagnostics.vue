@@ -6,9 +6,11 @@
         :nudge-width="200"
         offset-x
       >
-        <v-btn slot="activator">
-          <v-icon>signal_cellular_{{ connectionStrength }}_bar</v-icon>
-        </v-btn>
+				<v-btn slot="activator" flat>
+					<v-avatar size="24">
+						  <v-icon>signal_cellular_{{ connectionStrength }}_bar</v-icon>
+					</v-avatar>
+				</v-btn>
 
         <v-card>
           <v-card-title>Network</v-card-title>

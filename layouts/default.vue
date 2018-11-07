@@ -12,7 +12,7 @@
           router
           :to="item.to"
           :key="i"
-          v-for="(item, i) in items"
+          v-for="(item, i) in visibleLinks"
           exact
         >
           <v-list-tile-action>
@@ -27,6 +27,7 @@
 
 		<!-- TOP BAR -->
     <v-toolbar fixed app>
+
       <v-toolbar-side-icon @click="drawer = !drawer"></v-toolbar-side-icon>
 			<v-avatar
         size="24"
@@ -43,19 +44,23 @@
         </v-btn>
       </template>
 
+			<network-diagnostics></network-diagnostics>
+
+
 			<!-- USER DROPDOWN -->
-      <v-menu
-        v-if="account.account"
+			<v-menu
+        v-if="account.account.length != 0"
         v-model="menu"
         :close-on-content-click="false"
       >
-			<v-avatar slot="activator" size="24">
+			<v-btn slot="activator" flat>
+				<v-avatar size="24">
 					<img
 						src="https://cdn.vuetifyjs.com/images/john.jpg"
 						alt="John"
 					>
 				</v-avatar>
-
+			</v-btn>
 				<v-card>
           <v-card-title>
 	          <div>
@@ -69,7 +74,7 @@
 	                <v-list-tile-title>Local Node</v-list-tile-title>
 	              </v-list-tile>
 	            </v-list>
-	            <network-diagnostics></network-diagnostics>
+
 	          </div>
 	        </v-card-title>
 	        <v-card-actions>
@@ -102,7 +107,6 @@
             Close
           </v-btn>
         </v-snackbar>
-
         <!-- NUXT BEGINNING -->
         <nuxt />
 			</v-container>
@@ -127,6 +131,15 @@ export default {
 		NetworkDiagnostics
 	},
 	computed: {
+		visibleLinks () {
+			if (this.$store.state.meta.account_present === true) {
+				return this.items
+			}
+			var map = this.items.filter(a => {
+				if(!a.hasOwnProperty('requireLogged')) { return a }
+			})
+			return map
+		},
 		account () { return this.$account.$store.state },
 		currentPing () { return this.$store.state.internal.api_ping },
 		currentApi () { return this.$store.state.internal.api_endpoint },
@@ -232,9 +245,10 @@ export default {
 			drawer: false,
 			hydrated: false,
 			items: [
-				{ icon: 'apps', title: 'Dashboard', to: '/dashboard' },
-				{ icon: 'account_balance_wallet', title: 'Ledger', to: '/ledger' },
-				{ icon: 'contacts', title: 'Address Book', to: '/address-book' }
+				{ icon: 'settings_system_daydream', title: 'Start', to: '/' },
+				{ icon: 'apps', title: 'Dashboard', to: '/dashboard', requireLogged: true },
+				{ icon: 'account_balance_wallet', title: 'Ledger', to: '/ledger', requireLogged: true },
+				{ icon: 'contacts', title: 'Address Book', to: '/address-book', requireLogged: true }
 			],
 			title: 'AENChain Wallet',
 			menu: false,

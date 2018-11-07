@@ -88,6 +88,14 @@ export default {
 		}
 	},
 	created: function () {
+		console.log('P:I:Index Page Started')
+
+		// Check if there is a network set and use the first available
+		if(!this.network) {
+			console.log('I:Setting a default network to first available')
+			this.network = this.availableNetworks[0]
+		}
+
 		// Only start once global loading finished
 		var preperationInterval = setInterval(function () {
 			if (this.$store.getters.booting === false) {
