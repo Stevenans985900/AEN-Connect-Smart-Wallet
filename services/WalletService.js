@@ -36,14 +36,8 @@ export default {
 				console.debug(this.wallet)
 				return this.wallet
 			},
-			hydrate (
-				walletName,
-				password,
-				walletPrivateKey,
-				networkIdentifier,
-				networkIdentifierByte,
-				accountPrivateKey
-			) {
+			hydrate (walletName, password, walletPrivateKey, networkIdentifier, networkIdentifierByte, accountPrivateKey)
+			{
 				console.debug('F:H:Hydrate')
 				const passwordObject = new Password(password)
 
@@ -166,6 +160,7 @@ export default {
 			},
 			updateApiEndpoint (endpointAddress) {
 				if (endpointAddress !== this.apiEndpoint) {
+					
 					this.$store.state.services.accountHttp = new AccountHttp(endpointAddress)
 					this.$store.state.services.mosaicHttp = new MosaicHttp(endpointAddress)
 					this.$store.state.services.namespaceHttp = new NamespaceHttp(endpointAddress)

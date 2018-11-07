@@ -1,5 +1,4 @@
-import { Account, AccountHttp, Address, BlockchainHttp, MosaicAmountView, MosaicHttp, NamespaceHttp, MosaicService, Password, PublicAccount, SimpleWallet, XEM } from 'chain-js-sdk'
-import { flatMap } from 'rxjs/operators'
+import { BlockchainHttp } from 'chain-js-sdk'
 import Vue from 'vue'
 const generator = require('generate-password')
 
@@ -11,7 +10,7 @@ export const state = () => ({
 		name: 'aen-wallet',
 		private_key: false,
 		wallet_private_key: false,
-		password: '',
+		password: false,
 		publicly_accessible: false
 	},
 	notification: {
@@ -24,6 +23,7 @@ export const state = () => ({
 		local_node: true
 	},
 	meta: {
+		mode: 'web',
 		account_present: false,
 		wallet_present: false
 	},
@@ -32,7 +32,7 @@ export const state = () => ({
 	},
 	internal: {
 		// Array used for storing ping ranking for external api nodes
-		api_endpoint: '',
+		api_endpoint: false,
 		api_ping: 9999,
 		busy: {
 			global: true,
@@ -71,8 +71,10 @@ export const actions = {
 		context.commit('setPassword', password)
 	},
 	rank_api_nodes (context) {
+		console.debug('F:RAN:Rank API Nodes')
 		// Get list of hardcoded endpoints for possible use
 		var apiEndpoints = Vue.prototype.$g('api_endpoints')
+		var stateContext = context
 
 		// Encapsulate the function for variable scoping
 		var check = function (currentRound) {
@@ -84,15 +86,17 @@ export const actions = {
 				.then((response) => {
 					apiEndpoints[position].scanEnd = new Date()
 					apiEndpoints[position].scanTime = apiEndpoints[position].scanEnd - apiEndpoints[position].scanStart
+					console.debug('RAN: Scan for ' + thisAddress + ' took ' + apiEndpoints[position].scanTime + 'ms')
 					if (apiEndpoints[position].scanTime < lowestPing) {
+						console.debug('RAN: Setting new API endpoint')
 						lowestPing = apiEndpoints[position].scanTime
-						context.commit('setApiEndpoint', apiEndpoints[position].address)
-						context.commit('setPingTime', lowestPing)
+						stateContext.commit('setApiEndpoint', apiEndpoints[position].address)
+						stateContext.commit('setPingTime', lowestPing)
 					}
 				})
 				.catch((error) => {
 					console.log('Node offline: ' + thisAddress)
-					console.log(error)
+					console.debug(error)
 				})
 		}.bind(this)
 
@@ -148,8 +152,8 @@ export const mutations = {
    * t = type
    * v = boolean conditions
    * m = message
-   * @param {*} state 
-   * @param {*} loadingObject 
+   * @param {*} state
+   * @param {*} loadingObject
    */
 	setLoading (state, loadingObject) {
 		state.internal.busy[loadingObject.t] = loadingObject.v
@@ -225,10 +229,13 @@ export const mutations = {
 	setElectronProperty (state, input) {
 		state.electron[input.key] = input.value
 	},
-	setWalletProperty (state, input) {
+	setAccountProperty (state, input) {
 		state.account[input.key] = input.value
 	},
 	setMosaics (state, input) {
 		state.mosaics = input
+	},
+	setAppMode (state, mode) {
+		state.meta.mode = mode
 	}
 }

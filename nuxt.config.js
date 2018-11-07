@@ -1,3 +1,5 @@
+const webpack = require('webpack')
+
 module.exports = {
 	mode: 'spa',
 	head: {
@@ -17,6 +19,7 @@ module.exports = {
     '@nuxtjs/axios'
   ],
   plugins: [
+
     '~/plugins/globals.js',
     { src: '~/plugins/localStorage.js', ssr: false },
 		'~/plugins/vuetify',
@@ -24,13 +27,11 @@ module.exports = {
   ],
 	build: {
 		extractCSS: true,
+		plugins: [
+			new webpack.DefinePlugin({ "global.GENTLY": false })
+		],
 		vendor: [
-			'vuetify',
-			'chain-js-sdk',
-			'formidable',
-			'nem2-library',
-			'nem2-sdk',
-			'superagent'
+			'vuetify'
 		],
 		extend (config, { isDev, isClient }) {
 			// if (isDev && isClient) {
