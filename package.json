@@ -1,0 +1,40 @@
+{
+  "name": "wallet-vue-electron",
+  "version": "1.0.0",
+  "description": "AENChain web / desktop wallet",
+  "author": "simon.ball@aencoin.com",
+  "private": true,
+  "main": "main.js",
+  "build": {
+    "appId": "com.aenco.wallet",
+    "directories": {
+      "buildResources": "static"
+    }
+  },
+  "scripts": {
+    "dev": "cross-env NODE_ENV=DEV electron .",
+    "build": "nuxt build && electron-builder"
+  },
+  "dependencies": {
+    "@nuxtjs/axios": "^5.3.4",
+    "nuxt": "^1.4.0",
+    "vuetify": "^1.3.5"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.2.1",
+    "cross-env": "^5.1.4",
+    "electron": "2.0.0-beta.7",
+    "electron-builder": "^20.8.1",
+    "electron-devtools-installer": "^2.2.3",
+    "eslint": "^4.15.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-friendly-formatter": "^3.0.0",
+    "eslint-loader": "^1.7.1",
+    "eslint-plugin-html": "^4.0.6",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-node": "^8.0.0",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "eslint-plugin-vue": "^4.0.0"
+  }
+}
