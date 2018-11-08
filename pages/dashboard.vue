@@ -1,23 +1,23 @@
 <template>
-  <v-layout column justify-center align-center>    
+  <v-layout column justify-center align-center>
         <v-container
             fluid
             grid-list-md
         >
-            <v-layout row wrap>            
-              <!-- ACCOUNT OVERVIEW -->
-              <v-flex xs12 v-if="account.wallet.publiclyAccessible === false">
+            <v-layout row wrap>
+							<!-- ACCOUNT OVERVIEW -->
+              <v-flex xs12 v-if="account.public === false">
                 <v-alert
                   :value="true"
                   type="info"
                 >
-                  Your wallet is currently only local. In order to have a network presence, please add some 
+                  Your wallet is only local. In order to have a network presence, please add some
                   coins to it.
                 </v-alert>
               </v-flex>
-            </v-layout> 
-            <v-layout>
+            </v-layout>
 
+            <v-layout>
             <!-- FAUCET -->
             <!-- TODO Introduce environment check here -->
             <v-flex x12 sm6>

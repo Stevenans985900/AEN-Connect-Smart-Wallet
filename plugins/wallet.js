@@ -5,6 +5,9 @@ import PluginStore from '~/services/PluginStore'
 Vue.use(WalletService, {
 	store: new PluginStore(
 		{
+			// TODO Remove these variables as they are temporary hacks for scope
+			public: false,
+			namespaceAvailable: false,
 			// Group these in meta
 			intervalTime: 5000,
 			intervalReference: false,
@@ -19,6 +22,7 @@ Vue.use(WalletService, {
 			// Group these in to context specific
 			account: {},
 			accountInfo: {},
+			publicAccount: {},
 			address: {},
 			mosaics: [],
 			wallet: {},

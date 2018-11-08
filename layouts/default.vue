@@ -22,6 +22,16 @@
             <v-list-tile-title v-text="item.title"></v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
+
+				<v-list-tile exact @click="exit">
+          <v-list-tile-action>
+            <v-icon>exit_to_app</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>Exit</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
       </v-list>
     </v-navigation-drawer>
 
@@ -49,7 +59,7 @@
 
 			<!-- USER DROPDOWN -->
 			<v-menu
-        v-if="account.account.length != 0"
+        v-if="account.account.address"
         v-model="menu"
         :close-on-content-click="false"
       >
@@ -65,8 +75,8 @@
           <v-card-title>
 	          <div>
 	            <span class="grey--text" v-if="account.wallet.name">{{ account.wallet.name }}</span><br>
-	            <span v-if="account.account.address">{{ account.account.address.address }}</span>
-	            <v-list>
+							<span v-if="account.wallet.address.address">{{ account.wallet.address.address }}</span>
+							<v-list>
 	              <v-list-tile v-if="mode === 'app'">
 	                <v-list-tile-action>
 	                  <v-switch v-model="local_node"></v-switch>
@@ -78,9 +88,10 @@
 	          </div>
 	        </v-card-title>
 	        <v-card-actions>
-	          <v-btn flat nuxt to="/dashboard">Dashboard</v-btn>
+						<v-btn class="warning" flat @click="backupWallet">Backup Wallet</v-btn>
+						<v-btn flat nuxt to="/dashboard">Dashboard</v-btn>
 	          <v-spacer></v-spacer>
-	          <v-btn flat v-if="mode === 'app'">Exit</v-btn>
+	          <v-btn flat v-if="mode === 'app'" @click="exit">Exit</v-btn>
 	        </v-card-actions>
         </v-card>
 
@@ -113,9 +124,14 @@
 		</v-content>
 
 		<!-- FOOTER AREA -->
-    <v-footer app>
-      <span>&copy; {{ new Date().getFullYear() }}</span>
-    </v-footer>
+    <v-footer app
+			height="auto"
+			color="primary"
+		>
+	    &copy; {{ new Date().getFullYear() }} Aenco Solutions Ltd - Global Health Blockchain Financial Solutions
+			<v-spacer></v-spacer>
+			{{ version }}
+	  </v-footer>
 	</v-app>
 </template>
 
@@ -124,6 +140,7 @@ import NetworkDiagnostics from '../components/NetworkDiagnostics'
 import Loading from '../components/Loading'
 // import childProcess from 'child_process'
 const execFile = require('child_process').execFile
+const remote = require('electron').remote
 
 export default {
 	components: {
@@ -131,8 +148,9 @@ export default {
 		NetworkDiagnostics
 	},
 	computed: {
+		version () { return this.$g('version') },
 		visibleLinks () {
-			if (this.$store.state.meta.account_present === true) {
+			if (this.$store.state.meta.wallet_present === true) {
 				return this.items
 			}
 			var map = this.items.filter(a => {
@@ -161,6 +179,48 @@ export default {
 		notification_type () { return this.$store.state.notification.type },
 		notification_message () { return this.$store.state.notification.message }
 	},
+	methods: {
+		// TODO Move this to a separate service
+		backupWallet () {
+			console.debug('F:BW:Backup Wallet')
+			// Encode the current state data
+			var exportData = {
+				// Include software version in case there are any wallet updates needed to do later
+				"publisherVersion": this.version,
+				"name": this.$account.$store.state.wallet.name,
+				"address": this.$account.$store.state.wallet.address.address,
+				"networkIdentifierByte": this.$account.$store.state.wallet.network,
+				"accountPublicKey": this.$account.$store.state.account.publicKey,
+				"accountPrivateKey": this.$account.$store.state.account.privateKey,
+				"walletEncryptedPrivateKey": this.$account.$store.state.wallet.encryptedPrivateKey.encryptedKey
+			}
+			var exportName = exportData.name + '-backup-' + new Date().toISOString().slice(0,10)
+			console.debug('BW:Data to be backed up')
+			console.debug(exportData)
+
+			// Create hidden download anchor and handle for the user
+			var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData))
+	    var downloadAnchorNode = document.createElement('a');
+	    downloadAnchorNode.setAttribute("href",     dataStr);
+	    downloadAnchorNode.setAttribute("download", exportName + ".json");
+	    document.body.appendChild(downloadAnchorNode); // required for firefox
+	    downloadAnchorNode.click();
+	    downloadAnchorNode.remove();
+
+		},
+		exit () {
+			console.debug('F:E:Exit')
+
+			// Check if the user doesn't want to be remembered and reset the state machine
+			if (this.$store.state.meta.remember_user === false) {
+				this.$store.commit('reset')
+				console.debug('E:Resetting state machine')
+			}
+			console.debug('E:Closing window')
+			var window = remote.getCurrentWindow()
+			window.close()
+		}
+	},
 	watch: {
 		hydrated: function () {
 			console.debug('W:H:Hydrated')
@@ -184,6 +244,7 @@ export default {
 	},
 	mounted () {
 		console.debug('P:Root Page Created')
+
 		this.$store.commit('setAppMode', 'web')
 		this.$store.commit('setLoading', { 't': 'global', 'v': true, 'm': 'Page Startup' })
 		// Desktop app setup
@@ -197,7 +258,7 @@ export default {
 					throw error
 				}
 				if (stdout.startsWith('Docker version')) {
-					console.log('Docker Found')
+					console.log('P:Docker can be controlled by Electron')
 					this.$store.commit('setElectronProperty', { 'docker_present': true })
 				}
 			})
@@ -211,16 +272,30 @@ export default {
 			this.$account.updateApiEndpoint(this.$store.state.internal.api_endpoint)
 
 			// Hydrate local state
-			if (this.$store.state.meta.account_present === true) {
+			if (
+				this.$store.state.account.private_key
+				&& this.$store.state.account.wallet_private_key) {
 				console.debug('R:State reports account present')
-				this.hydrated = this.$account.hydrate(
+				this.$account.hydrate(
 					this.$store.state.account.name,
 					this.$store.state.account.password,
 					this.$store.state.account.private_key,
-					this.$store.state.account.network.identifier,
-					this.$store.state.account.network.byte,
-					this.$store.state.account.private_key
+					this.$store.state.account.network.byte
 				)
+
+				// Perform regular checks on wallet until declared as public
+				var publicWalletInterval = setInterval(function() {
+					this.$account.isWalletPublic(this.$account.$store.state.wallet.address.address)
+					if(this.$account.$store.state.public === true) {
+						clearInterval(publicWalletInterval)
+					}
+				}.bind(this), 5000)
+
+			} else {
+				if ($nuxt.$route.name !== 'index') {
+					console.log('R:Sending the user back to home because account not present')
+					this.$nuxt.$router.replace({ path: '/' })
+				}
 			}
 
 			// API Node ping test / ranking
@@ -245,10 +320,11 @@ export default {
 			drawer: false,
 			hydrated: false,
 			items: [
-				{ icon: 'settings_system_daydream', title: 'Start', to: '/' },
+				{ icon: 'settings_system_daydream', title: 'Wallet Creation', to: '/' },
 				{ icon: 'apps', title: 'Dashboard', to: '/dashboard', requireLogged: true },
 				{ icon: 'account_balance_wallet', title: 'Ledger', to: '/ledger', requireLogged: true },
-				{ icon: 'contacts', title: 'Address Book', to: '/address-book', requireLogged: true }
+				{ icon: 'contacts', title: 'Address Book', to: '/address-book', requireLogged: true },
+				{ icon: 'extension', title: 'Create Namespace', to: '/tokens', requireLogged: true }
 			],
 			title: 'AENChain Wallet',
 			menu: false,

@@ -2,15 +2,15 @@ import { BlockchainHttp } from 'chain-js-sdk'
 import Vue from 'vue'
 const generator = require('generate-password')
 
-export const state = () => ({
+export const initialState = {
 	contacts: [],
 	account: {
 		network: {},
-		address: false,
+		address: '',
 		name: 'aen-wallet',
-		private_key: false,
-		wallet_private_key: false,
-		password: false,
+		private_key: '',
+		wallet_private_key: '',
+		password: '',
 		publicly_accessible: false
 	},
 	notification: {
@@ -24,7 +24,7 @@ export const state = () => ({
 	},
 	meta: {
 		mode: 'web',
-		account_present: false,
+		remember_user: false,
 		wallet_present: false
 	},
 	electron: {
@@ -44,7 +44,9 @@ export const state = () => ({
 		block_height: 0,
 		block_score: 0
 	}
-})
+}
+
+export const state = () => (initialState)
 
 export const getters = {
 	notificationState: state => {
@@ -135,18 +137,28 @@ export const actions = {
 }
 
 export const mutations = {
+	reset (state) {
+		Object.keys(state).forEach(key => {
+			Object.assign(state[key], initialState[key])
+		})
+	},
+	setAccountStatus (state, status) {
+		state.meta.wallet_present = status
+	},
 	setWallet (state, wallet) {
 		state.meta.wallet_present = true
 		state.account.wallet_private_key = wallet.encryptedPrivateKey.encryptedKey
 		state.account.address = wallet.address.address
 	},
 	setAccount (state, account) {
-		state.meta.account_present = true
 		state.account.public_key = account.publicKey
 		state.account.private_key = account.privateKey
 	},
 	setPassword (state, password) {
 		state.account.password = password
+	},
+	setRememberUser (state, value) {
+		state.meta.remember_user = value
 	},
 	/**
    * t = type
@@ -230,6 +242,8 @@ export const mutations = {
 		state.electron[input.key] = input.value
 	},
 	setAccountProperty (state, input) {
+		console.log('Setting Account property')
+		console.log(input)
 		state.account[input.key] = input.value
 	},
 	setMosaics (state, input) {

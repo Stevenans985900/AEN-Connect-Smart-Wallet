@@ -1,5 +1,6 @@
 {
-    "faucet_url": "http://faucet.aencoin.io",
+		"version": "0.0.1",
+		"faucet_url": "http://faucet.aencoin.io",
     "reference_address": "TD5C6ZEHS7NOQQQ522VYI4BXJZ33HVJFY5AFAL3P",
     "api_endpoints": [
         {
@@ -12,6 +13,11 @@
             "name": "TestNet",
             "identifier": "PUBLIC_TEST",
             "byte": 152
+        },
+				{
+            "name": "Men men net",
+            "identifier": "PUBLIC_TEST",
+            "byte": 1000
         }
     ],
     "faucets": [

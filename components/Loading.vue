@@ -1,7 +1,6 @@
 <template>
   <v-dialog
       v-model="dialog"
-      hide-overlay
       persistent
       width="300"
     >

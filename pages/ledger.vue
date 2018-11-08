@@ -58,11 +58,134 @@
                         AENC Logo
                     </v-flex>
                     <v-flex>
-                        <template v-if="account.account.address" >Address: {{ account.account.address.address }}</template>
+                        <template v-if="account.wallet.address" >Address: {{ account.wallet.address.address }}</template>
                         Balance: {{ account.meta.balance }}
                     </v-flex>
                 </v-layout>
             </v-card>
+          </v-flex>
+
+					<!-- Current / Historical transactions -->
+          <v-flex xs12>
+              <v-card>
+                <v-tabs
+                    centered
+                    color="cyan"
+                    dark
+                    icons-and-text
+                >
+                    <v-tabs-slider color="yellow"></v-tabs-slider>
+
+                    <v-tab href="#historical">Historical</v-tab>
+                    <v-tab href="#incoming">Incoming ({{ transactions.incoming.length }})</v-tab>
+                    <v-tab href="#outgoing">Outgoing ({{ transactions.outgoing.length }})</v-tab>
+                    <v-tab href="#unconfirmed">Unconfirmed ({{ transactions.unconfirmed.length }})</v-tab>
+
+                    <!-- Historical -->
+                    <v-tab-item value="historical">
+                        <v-card flat>
+                            <v-card-text v-if="transactions.historical">
+
+                                <v-expansion-panel>
+                                    <v-expansion-panel-content
+                                    v-for="(transaction,index) in transactions.historical"
+                                    :key="index"
+                                    >
+                                    <div slot="header">
+                                        <transaction-stringify :transaction="transaction" />
+                                    </div>
+                                    <v-card>
+                                        <v-card-text>
+                                            <strong>The contents below are for debug purposes</strong>
+                                            <hr />
+                                            {{ transaction }}
+                                        </v-card-text>
+                                    </v-card>
+                                    </v-expansion-panel-content>
+                                </v-expansion-panel>
+
+                            </v-card-text >
+                            <v-card-text v-else>
+                                No Transactions
+                            </v-card-text >
+                        </v-card>
+                    </v-tab-item>
+
+                    <!-- Incoming Transactions -->
+                    <v-tab-item value="incoming">
+                        <v-card flat>
+                            <v-card-text>
+                                <v-expansion-panel>
+                                    <v-expansion-panel-content
+                                    v-for="(transaction,index) in transactions.incoming"
+                                    :key="index"
+                                    >
+                                    <div slot="header">
+                                        <transaction-stringify :transaction="transaction" />
+                                    </div>
+                                    <v-card>
+                                        <v-card-text>
+                                            <strong>The contents below are for debug purposes</strong>
+                                            <hr />
+                                            {{ transaction }}
+                                        </v-card-text>
+                                    </v-card>
+                                    </v-expansion-panel-content>
+                                </v-expansion-panel>
+                            </v-card-text>
+                        </v-card>
+                    </v-tab-item>
+
+                    <!-- Outgoing transactions -->
+                    <v-tab-item value="outgoing">
+                        <v-card flat>
+                            <v-card-text>
+                                <v-expansion-panel>
+                                    <v-expansion-panel-content
+                                    v-for="(transaction,index) in transactions.outgoing"
+                                    :key="index"
+                                    >
+                                    <div slot="header">
+                                        <transaction-stringify :transaction="transaction" />
+                                    </div>
+                                    <v-card>
+                                        <v-card-text>
+                                            <strong>The contents below are for debug purposes</strong>
+                                            <hr />
+                                            {{ transaction }}
+                                        </v-card-text>
+                                    </v-card>
+                                    </v-expansion-panel-content>
+                                </v-expansion-panel>
+                            </v-card-text>
+                        </v-card>
+                    </v-tab-item>
+
+                    <v-tab-item value="unconfirmed">
+                        <v-card flat>
+                            <v-card-text>
+                                <v-expansion-panel>
+                                    <v-expansion-panel-content
+                                    v-for="(transaction,index) in transactions.unconfirmed"
+                                    :key="index"
+                                    >
+                                    <div slot="header">
+                                        <transaction-stringify :transaction="transaction" />
+                                    </div>
+                                    <v-card>
+                                        <v-card-text>
+                                            <strong>The contents below are for debug purposes</strong>
+                                            <hr />
+                                            {{ transaction }}
+                                        </v-card-text>
+                                    </v-card>
+                                    </v-expansion-panel-content>
+                                </v-expansion-panel>
+                            </v-card-text>
+                        </v-card>
+                    </v-tab-item>
+                </v-tabs>
+              </v-card>
           </v-flex>
 
             <!-- Mining space -->
@@ -98,8 +221,9 @@ export default {
 		var preperationInterval = setInterval(function () {
 			if (this.$store.getters.booting === false) {
 				clearInterval(preperationInterval)
-				console.log('L:Running Interval')
-				// this.$account.transactions()
+
+				this.$account.startListeners()
+
 				this.$store.commit('setLoading', { 't': 'router', 'v': false })
 			}
 		}.bind(this), 2000)

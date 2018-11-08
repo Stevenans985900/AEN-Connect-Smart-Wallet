@@ -15,7 +15,7 @@
               <v-alert
                 value="That namespace is already in use"
                 type="warning"
-                v-if="existingNamespace"
+                v-if="namespaceAvailable == false && namespace.name !== ''"
               >That namespace is already in use</v-alert>
               <v-layout row wrap>
                 <v-flex xs12>
@@ -70,9 +70,11 @@ export default {
 		computedForm: function () {
 			return Object.assign({}, this.namespace)
 		},
-		existingNamespace: function () { return this.$account.$store.state.contextNamespace },
+		namespaceAvailable: function () {
+			return this.$account.$store.state.namespaceAvailable
+		},
 		valid: function () {
-			if (this.namespace.name !== '' && this.existingNamespace === false) {
+			if (this.namespace.name !== '' && this.namespaceAvailable === true) {
 				return true
 			}
 		}
