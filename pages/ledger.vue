@@ -96,9 +96,7 @@
                                     </div>
                                     <v-card>
                                         <v-card-text>
-                                            <strong>The contents below are for debug purposes</strong>
                                             <hr />
-                                            {{ transaction }}
                                         </v-card-text>
                                     </v-card>
                                     </v-expansion-panel-content>
@@ -125,9 +123,7 @@
                                     </div>
                                     <v-card>
                                         <v-card-text>
-                                            <strong>The contents below are for debug purposes</strong>
                                             <hr />
-                                            {{ transaction }}
                                         </v-card-text>
                                     </v-card>
                                     </v-expansion-panel-content>
@@ -150,9 +146,7 @@
                                     </div>
                                     <v-card>
                                         <v-card-text>
-                                            <strong>The contents below are for debug purposes</strong>
                                             <hr />
-                                            {{ transaction }}
                                         </v-card-text>
                                     </v-card>
                                     </v-expansion-panel-content>
@@ -174,9 +168,7 @@
                                     </div>
                                     <v-card>
                                         <v-card-text>
-                                            <strong>The contents below are for debug purposes</strong>
                                             <hr />
-                                            {{ transaction }}
                                         </v-card-text>
                                     </v-card>
                                     </v-expansion-panel-content>
