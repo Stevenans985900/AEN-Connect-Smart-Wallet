@@ -1,14 +1,14 @@
 # dependencies
-node_modules
+app/node_modules
 
 # logs
-npm-debug.log
+app/npm-debug.log
 
 # Nuxt build
-.nuxt
+app/.nuxt
 
 # Nuxt generate
-dist
+app/dist
 
 # Mac OS
 .DS_Store
