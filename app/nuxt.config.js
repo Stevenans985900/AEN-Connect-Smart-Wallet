@@ -69,7 +69,7 @@ module.exports = {
 					exclude: /(node_modules)/
 				})
 			}
-			
+
 			// Check if we're in Electron and change the renderer if so
 			if (process.env.hasOwnProperty('CHROME_DESKTOP') && process.env.CHROME_DESKTOP === 'Electron.desktop') {
 				console.log('Building for Electron')
@@ -78,6 +78,9 @@ module.exports = {
     }
 	},
 	dev: process.env.NODE_ENV === 'DEV',
+	env: {
+		baseUrl: process.env.BASE_URL || 'http://localhost:3000'
+	},
 	css: [
 		'~/assets/style/app.styl',
 		'~/assets/style/global.css'
