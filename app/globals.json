@@ -1,8 +1,6 @@
 {
 		"version": "0.0.1",
-		"faucet_url": "http://faucet.aencoin.io",
-    "reference_address": "TD5C6ZEHS7NOQQQ522VYI4BXJZ33HVJFY5AFAL3P",
-    "api_endpoints": [
+		"api_endpoints": [
         {
             "alias": "Master",
             "address": "http://api-1.aencoin.io:3000"

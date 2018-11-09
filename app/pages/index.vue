@@ -142,7 +142,9 @@
 import { SimpleWallet } from 'chain-js-sdk'
 import UploadButton from 'vuetify-upload-button'
 import EventEmitter from 'events'
-if (process.server) {
+
+import isElectron from 'is-electron'
+if (isElectron()) {
 	const fs = require ('fs')
 }
 
@@ -327,7 +329,7 @@ export default {
 
 			// Fork condition depending on the environment
 			// TODO If come across more of these conditions, put them in to facade
-			if (process.server) {
+			if (isElectron()) {
 				console.debug('BU:Using local file mode')
 				fs.readFile(file.path, "utf8",  (err, data)  => {
 					if (err) throw err
