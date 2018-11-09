@@ -12,8 +12,12 @@
     }
   },
   "scripts": {
-    "dev": "cross-env NODE_ENV=DEV electron .",
-    "build": "nuxt build && electron-builder"
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate",
+    "electron-dev": "cross-env NODE_ENV=DEV electron .",
+    "electron-build": "nuxt build && electron-builder"
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.3.4",
@@ -21,6 +25,7 @@
     "chain-js-sdk": "0.0.3",
     "child_process": "^1.0.2",
     "generate-password": "^1.4.1",
+    "is-electron": "^2.2.0",
     "lodash.debounce": "^4.0.8",
     "lodash.get": "^4.4.2",
     "nem-sdk": "^1.6.7",

@@ -15,11 +15,11 @@ module.exports = {
     ]
   },
 	loading: false, // Disable default loading bar
+	mode: 'spa',
 	modules: [
     '@nuxtjs/axios'
   ],
   plugins: [
-
     '~/plugins/globals.js',
     { src: '~/plugins/localStorage.js', ssr: false },
 		'~/plugins/vuetify',
@@ -27,6 +27,7 @@ module.exports = {
   ],
 	build: {
 		extractCSS: true,
+		transpile: [/^vuetify/],
 		plugins: [
 			new webpack.DefinePlugin({ "global.GENTLY": false })
 		],
@@ -34,7 +35,16 @@ module.exports = {
 			'vuetify'
 		],
 		extend (config, { isDev, isClient }) {
-			// if (isDev && isClient) {
+			if (isClient) {
+        config.node = {
+					electron: 'empty',
+          fs: 'empty',
+          net: 'empty',
+          tls: 'empty',
+          child_process: 'empty'
+        }
+      }
+			if (isDev && isClient) {
 				// Run ESLint on save
 				config.module.rules.push({
 					enforce: 'pre',
@@ -42,10 +52,16 @@ module.exports = {
 					loader: 'eslint-loader',
 					exclude: /(node_modules)/
 				})
-			// }
-			// Extend only webpack config for client-bundle
-			if (isClient) { config.target = 'electron-renderer' }
-		}
+			}
+			// Check if we're in Electron and change the renderer if so
+			if (
+				typeof window !== 'undefined' && typeof window.process === 'object' && window.process.type === 'renderer'
+				|| typeof process !== 'undefined' && typeof process.versions === 'object' && !!process.versions.electron
+				|| typeof navigator === 'object' && typeof navigator.userAgent === 'string' && navigator.userAgent.indexOf('Electron') >= 0
+			) {
+        config.target = 'electron-renderer'
+			}
+    }
 	},
 	dev: process.env.NODE_ENV === 'DEV',
 	css: [

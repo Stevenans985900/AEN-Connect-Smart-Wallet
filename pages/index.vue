@@ -141,7 +141,10 @@
 <script>
 import { SimpleWallet } from 'chain-js-sdk'
 import UploadButton from 'vuetify-upload-button'
-import fs from 'fs'
+import EventEmitter from 'events'
+if (process.server) {
+	const fs = require ('fs')
+}
 
 export default {
 	components: {
@@ -296,10 +299,14 @@ export default {
 		},
 		backupUploaded (file) {
 			console.debug('F:BU:Backup Uploaded')
-			fs.readFile(file.path, "utf8",  (err, data)  => {
-				if (err) throw err
+
+			// Create the construct to handle both app / browser situations
+			const fileUploadedEmitter = new EventEmitter()
+			fileUploadedEmitter.on('ready', function (walletData) {
 				try {
-					const walletInformation = JSON.parse(data)
+					const walletInformation = JSON.parse(walletData)
+					console.debug('BU:Result')
+					console.debug(walletInformation)
 					this.$store.commit('setAccountProperty', { key: 'name', value: walletInformation.name })
 					this.$store.commit('setAccountProperty', { key: 'private_key', value: walletInformation.accountPrivateKey })
 
@@ -316,8 +323,24 @@ export default {
 					var message = 'The file you uploaded appears invalid, please make sure it is a wallet backup'
 					this.$store.commit('showNotification', { 'type': 'error', 'message': message })
 		    }
-			})
+			}.bind(this))
 
+			// Fork condition depending on the environment
+			// TODO If come across more of these conditions, put them in to facade
+			if (process.server) {
+				console.debug('BU:Using local file mode')
+				fs.readFile(file.path, "utf8",  (err, data)  => {
+					if (err) throw err
+					fileUploadedEmitter.emit('ready', data)
+				})
+			} else {
+				console.log('BU:Using HTML file API')
+				var reader = new FileReader()
+				reader.readAsText(file)
+				reader.onload = function(event) {
+					fileUploadedEmitter.emit('ready', event.target.result)
+			  }
+			}
 		}
 	},
 	watch: {

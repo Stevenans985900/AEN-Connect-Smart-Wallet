@@ -138,9 +138,12 @@
 <script>
 import NetworkDiagnostics from '../components/NetworkDiagnostics'
 import Loading from '../components/Loading'
+import isElectron from 'is-electron'
 // import childProcess from 'child_process'
-const execFile = require('child_process').execFile
-const remote = require('electron').remote
+if (isElectron) {
+	var execFile = require('child_process').execFile
+	var remote = require('electron').remote
+}
 
 export default {
 	components: {
@@ -248,7 +251,7 @@ export default {
 		this.$store.commit('setAppMode', 'web')
 		this.$store.commit('setLoading', { 't': 'global', 'v': true, 'm': 'Page Startup' })
 		// Desktop app setup
-		if (process.versions.hasOwnProperty('electron')) {
+		if (isElectron) {
 			this.$store.commit('setAppMode', 'app')
 			// Electron specific code
 			console.log('P:Running from within Electron, checking if system services installed for running Chain Node')

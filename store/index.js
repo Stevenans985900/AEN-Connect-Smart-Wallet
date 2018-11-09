@@ -1,6 +1,6 @@
 import { BlockchainHttp } from 'chain-js-sdk'
 import Vue from 'vue'
-const generator = require('generate-password')
+import generator from 'generate-password'
 
 export const initialState = {
 	contacts: [],

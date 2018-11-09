@@ -19,9 +19,8 @@
 
             <v-layout>
             <!-- FAUCET -->
-            <!-- TODO Introduce environment check here -->
-            <v-flex x12 sm6>
-              <v-card :href="faucetUrl" target="_blank">
+            <v-flex x12 sm6 v-if="faucets.length">
+              <v-card >
                 <v-img
                   src="/faucet.png"
                 ></v-img>
@@ -30,7 +29,11 @@
                   <div>
                     <h3 class="headline mb-0">Visit Faucet</h3>
                     <div>If you need some coins to get started with the network.</div>
-
+										<v-btn
+											v-for="(faucet) in faucets"
+											:key="faucet.address"
+											:href="faucet.address" target="_blank"
+										>Visit: {{ faucet.name }}</v-btn>
                   </div>
                 </v-card-title>
               </v-card>
@@ -60,10 +63,9 @@
 <script>
 export default {
 	computed: {
-		availableNetworks () { return this.$g('faucets') },
+		faucets () { return this.$g('faucets') },
 		account () { return this.$account.$store.state },
-		networkIdentifier () { return this.$store.state.networkIdentifier },
-		faucetUrl () { return this.$g('faucet_url') }
+		networkIdentifier () { return this.$store.state.networkIdentifier }
 	},
 	created: function () {
 		// Only start once global loading finished

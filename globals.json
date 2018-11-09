@@ -13,11 +13,6 @@
             "name": "TestNet",
             "identifier": "PUBLIC_TEST",
             "byte": 152
-        },
-				{
-            "name": "Men men net",
-            "identifier": "PUBLIC_TEST",
-            "byte": 1000
         }
     ],
     "faucets": [
