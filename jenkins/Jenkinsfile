@@ -1,7 +1,5 @@
 pipeline {
-		agent {
-				docker { image 'node:8-alpine' }
-		}
+    agent any
     parameters {
         string(name: 'TARGET_DEVICE', defaultValue: 'rimmer.aencoin.com', description: 'Where should the built wallet be pushed to?')
         string(name: 'TARGET_PATH', defaultValue: '/home/apache/public_html/wallet.aencoin.io', description: 'Where (on the device file system) should the build be pushed to?')
@@ -18,10 +16,11 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
-            steps {
-                dir('wallet/app') {
-                    sh 'npm i'
+        stage('Project Install') {
+						steps {
+						    dir('wallet/app') {
+                    // TODO Remove the install of cross-env once going beyond standard node image
+                    sh 'ls -la && npm i'
                 }
             }
         }
@@ -35,16 +34,16 @@ pipeline {
         }
 
         stage('Build Distribution') {
-            steps {
+						steps {
                 dir('wallet/app') {
+                    writeFile file: '.env', text: "BASE_URL=${params.BASE_URL}"
                     // Update the version
                     script {
                         props = readJSON file: 'globals.json'
                         props.build_number = params.BUILD_NUMBER
                         writeJSON file: 'globals.json', json: props, pretty: 4
                     }
-                    sh "cross-env BASE_URL=\"${params.BASE_URL}\" npm run build"
-                    sh 'ls -la dist'
+                    sh "npm run build"
                 }
             }
         }
@@ -52,12 +51,14 @@ pipeline {
         stage('Deploy to Server') {
             steps {
                 dir('wallet/app') {
-                    // TODO If using Jenkins to manage credentials, uncomment and change the next line
-                    // withCredentials([sshUserPrivateKey(credentialsId: 'sshTest', keyFileVariable: 'keyFile', passphraseVariable: 'passphrase', usernameVariable: 'username')]) {
-                        // sh "echo scp -r -i ${keyFile} dist ${username}@${params.TARGET_DEVICE}:${params.TARGET_PATH}"
-                        // sh "scp -r -i ${keyFile} dist ${username}@${params.TARGET_DEVICE}:${params.TARGET_PATH}"
+										sh 'ls -la dist'
+										// TODO If using Jenkins (rather than local keyring), change following lines
+										// withCredentials([sshUserPrivateKey(credentialsId: 'sshTest', keyFileVariable: 'keyFile', passphraseVariable: 'passphrase', usernameVariable: 'username')]) {
+                    //     sh "echo scp -r -i ${keyFile} dist ${username}@${params.TARGET_DEVICE}:${params.TARGET_PATH}"
+                    //     sh "scp -r -i ${keyFile} dist ${username}@${params.TARGET_DEVICE}:${params.TARGET_PATH}"
                     // }
-                    sh "scp -r dist/ ${params.TARGET_DEVICE}:${params.TARGET_PATH}"
+										sh "scp -r dist ${params.TARGET_DEVICE}:${params.TARGET_PATH}"
+
                 }
            }
         }
