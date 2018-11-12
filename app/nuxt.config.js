@@ -33,6 +33,7 @@ module.exports = {
 	loading: false, // Disable default loading bar
 	mode: 'spa',
 	modules: [
+		'@nuxtjs/dotenv',
     '@nuxtjs/axios'
   ],
   plugins: [

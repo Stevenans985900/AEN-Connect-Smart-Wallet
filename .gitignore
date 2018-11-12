@@ -12,3 +12,6 @@ app/dist
 
 # Mac OS
 .DS_Store
+
+# DotEnv pickup file
+app/.env

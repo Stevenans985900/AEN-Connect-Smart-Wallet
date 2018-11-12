@@ -32,9 +32,11 @@
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.3.4",
+    "@nuxtjs/dotenv": "^1.3.0",
     "catapult-sdk": "^0.7.8",
     "chain-js-sdk": "0.0.3",
     "child_process": "^1.0.2",
+    "dotenv": "^6.1.0",
     "generate-password": "^1.4.1",
     "is-electron": "^2.2.0",
     "lodash.debounce": "^4.0.8",
