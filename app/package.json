@@ -15,10 +15,21 @@
     "dev": "nuxt",
     "build": "nuxt build",
     "start": "nuxt start",
+		"test": "ava",
     "generate": "nuxt generate",
     "electron-dev": "cross-env NODE_ENV=DEV electron .",
     "electron-build": "nuxt build && electron-builder"
   },
+	"ava": {
+	  "require": [
+	    "babel-register"
+	  ]
+	},
+	"babel": {
+	  "presets": [
+	    "env"
+	  ]
+	},
   "dependencies": {
     "@nuxtjs/axios": "^5.3.4",
     "catapult-sdk": "^0.7.8",
@@ -36,6 +47,7 @@
     "vuex-persistedstate": "^2.5.4"
   },
   "devDependencies": {
+    "ava": "^0.25.0",
     "babel-eslint": "^8.2.1",
     "cross-env": "^5.1.4",
     "electron": "2.0.0-beta.7",
@@ -51,6 +63,7 @@
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
     "eslint-plugin-vue": "^4.0.0",
+    "jsdom": "^13.0.0",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2"
   }

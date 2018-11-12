@@ -12,6 +12,7 @@ A NodeJS project providing an easy to use interface to the AENChain blockchain n
 - [] Interface customisation and branding
 - [] [Cordova](https://cordova.apache.org/) - Middleware for compiling mobile apps based on web projects
 - [] Incorporate feedback form
+- [] Integrate in app analytics so we can guage usage
 - [] Better management panel for namespaces
 - [] More details from the mosaic
 - [] Replace some of the "out of function" scope variable implementations to use event emitters for better efficiency, smaller footprint, simpler to follow code
