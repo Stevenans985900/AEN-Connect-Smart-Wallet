@@ -11,7 +11,7 @@ pipeline {
         stage('Checkout Repositories') {
             steps {
                 dir('wallet') {
-                  git credentialsId: '6e8fe423-1a29-43f4-a5b1-13b307c4c679', url: 'https://github.com/AENCO-Global/chain-wallet'
+                  git credentialsId: 'githubDeployment', url: 'https://github.com/AENCO-Global/chain-wallet'
                 }
             }
         }
