@@ -1,0 +1,63 @@
+pipeline {
+    agent any
+    parameters {
+        string(name: 'TARGET_DEVICE', defaultValue: 'rimmer.aencoin.com', description: 'Where should the built wallet be pushed to?')
+        string(name: 'TARGET_PATH', defaultValue: '/home/apache/public_html/wallet.aencoin.io', description: 'Where (on the device file system) should the build be pushed to?')
+        string(name: 'BASE_URL', defaultValue: 'https://wallet.aencoin.io', description: 'The base URL the project is expecting')
+    }
+
+    stages {
+
+        stage('Checkout Repositories') {
+            steps {
+                dir('wallet') {
+                  git credentialsId: 'plainpass', url: 'https://github.com/AENCO-Global/chain-wallet'
+                }
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                dir('wallet/app') {
+                    sh 'npm i'
+                }
+            }
+        }
+
+        stage('Run tests') {
+            steps {
+                dir('wallet/app') {
+                    sh 'npm run test'
+                }
+            }
+        }
+
+        stage('Build Distribution') {
+            steps {
+                dir('wallet/app') {
+                    // Update the version
+                    script {
+                        props = readJSON file: 'globals.json'
+                        props.build_number = params.BUILD_NUMBER
+                        writeJSON file: 'globals.json', json: props, pretty: 4
+                    }
+                    sh "cross-env BASE_URL=\"${params.BASE_URL}\" npm run build"
+                    sh 'ls -la dist'
+                }
+            }
+        }
+
+        stage('Deploy to Server') {
+            steps {
+                dir('wallet/app') {
+                    // TODO If using Jenkins to manage credentials, uncomment and change the next line
+                    // withCredentials([sshUserPrivateKey(credentialsId: 'sshTest', keyFileVariable: 'keyFile', passphraseVariable: 'passphrase', usernameVariable: 'username')]) {
+                        // sh "echo scp -r -i ${keyFile} dist ${username}@${params.TARGET_DEVICE}:${params.TARGET_PATH}"
+                        // sh "scp -r -i ${keyFile} dist ${username}@${params.TARGET_DEVICE}:${params.TARGET_PATH}"
+                    // }
+                    scp -r dist/ ${params.TARGET_DEVICE}:${params.TARGET_PATH}
+                }
+           }
+        }
+    }
+}
