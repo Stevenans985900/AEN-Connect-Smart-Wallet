@@ -55,7 +55,7 @@ pipeline {
                         // sh "echo scp -r -i ${keyFile} dist ${username}@${params.TARGET_DEVICE}:${params.TARGET_PATH}"
                         // sh "scp -r -i ${keyFile} dist ${username}@${params.TARGET_DEVICE}:${params.TARGET_PATH}"
                     // }
-                    scp -r dist/ ${params.TARGET_DEVICE}:${params.TARGET_PATH}
+                    sh "scp -r dist/ ${params.TARGET_DEVICE}:${params.TARGET_PATH}"
                 }
            }
         }
