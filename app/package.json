@@ -15,7 +15,7 @@
     "dev": "nuxt",
     "build": "nuxt build",
     "start": "nuxt start",
-    "test": "ava --color --verbose",
+    "test": "ava --color",
     "generate": "nuxt generate",
     "electron-dev": "cross-env NODE_ENV=DEV electron .",
     "electron-build": "nuxt build && electron-builder"
