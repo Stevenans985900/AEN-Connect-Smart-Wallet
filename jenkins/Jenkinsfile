@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+		agent {
+				docker { image 'node:8-alpine' }
+		}
     parameters {
         string(name: 'TARGET_DEVICE', defaultValue: 'rimmer.aencoin.com', description: 'Where should the built wallet be pushed to?')
         string(name: 'TARGET_PATH', defaultValue: '/home/apache/public_html/wallet.aencoin.io', description: 'Where (on the device file system) should the build be pushed to?')
