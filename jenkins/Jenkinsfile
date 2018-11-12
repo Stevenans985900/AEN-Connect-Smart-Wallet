@@ -39,8 +39,8 @@ pipeline {
                     writeFile file: '.env', text: "BASE_URL=${params.BASE_URL}"
                     // Update the version
                     script {
-                        props = readJSON file: 'globals.json'
-                        props.build_number = params.BUILD_NUMBER
+                        def props = readJSON file: 'globals.json'
+                        props.build_number = env.BUILD_NUMBER
                         writeJSON file: 'globals.json', json: props, pretty: 4
                     }
                     sh "npm run build"
