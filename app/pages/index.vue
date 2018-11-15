@@ -200,7 +200,7 @@ export default {
 	mounted: function () {
 		console.debug('P:I:Index Page Started')
 
-		if(environment === 'Production') {
+		if(this.environment === 'Production') {
 			console.debug('I:Pulling in Google Recaptcha')
 			let recaptchaScript = document.createElement('script')
 			recaptchaScript.setAttribute(
