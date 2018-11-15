@@ -24,9 +24,9 @@ test.before('Init Nuxt.js', async () => {
 // Example of testing only generated html
 test('Route / exits and render HTML', async t => {
 	const window = await nuxt.renderAndGetWindow('http://localhost:4000/')
-  const element = window.document.querySelector('.headline')
+  const element = window.document.querySelector('.v-toolbar__title')
 	t.not(element, null)
-  t.is(element.textContent, 'Welcome to the AENChain Wallet (local)!')
+  t.is(element.textContent, 'AENChain Wallet')
 })
 
 // Close the Nuxt server
