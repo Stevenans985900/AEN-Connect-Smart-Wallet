@@ -24,6 +24,7 @@ export const initialState = {
 	},
 	meta: {
 		mode: 'web',
+		environment: 'prod',
 		remember_user: false,
 		wallet_present: false
 	},
@@ -53,6 +54,7 @@ export const getters = {
 		return state.notification.show
 	},
 	booting: state => { return state.internal.busy.global },
+	environment: state => { return state.meta.environment },
 	loading: state => {
 		if (
 			state.internal.busy.global === true ||
@@ -144,6 +146,9 @@ export const mutations = {
 	},
 	setAccountStatus (state, status) {
 		state.meta.wallet_present = status
+	},
+	setEnvironment (state, environmentName) {
+		state.meta.environment = environmentName
 	},
 	setWallet (state, wallet) {
 		state.meta.wallet_present = true

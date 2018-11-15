@@ -1,8 +1,11 @@
 <template>
-  <span>
-    {{ contact.name }}
+	<span>
+		<v-btn type="button" class="caption"
+			v-clipboard:copy="contact.address"
+			v-clipboard:success="onCopy"><v-icon small>file_copy</v-icon>&nbsp;&nbsp;{{ contact.displayText }}</v-btn>
+
     <!-- New transfer -->
-    <v-dialog v-model="dialog" v-if="missing" persistent max-width="600px">
+    <v-dialog v-model="dialog" v-if="missing === true && showAdd === true" persistent max-width="600px">
         <v-btn slot="activator" icon outline>
             <v-icon>add</v-icon>
         </v-btn>
@@ -16,7 +19,7 @@
                 <v-flex xs12 sm6>
                         <v-text-field
                         label="Name"
-                        v-model="contact.name"></v-text-field>
+                        v-model="contact.displayText"></v-text-field>
                 </v-flex>
                 <v-flex xs12 sm6>
                     <v-text-field
@@ -28,8 +31,8 @@
             </v-card-text>
             <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="blue darken-1" flat @click.native="dialog = false">Close</v-btn>
-            <v-btn color="blue darken-1" flat @click="addContact">Add</v-btn>
+            <v-btn class="smaller" color="blue darken-1" flat @click.native="dialog = false">Close</v-btn>
+            <v-btn class="smaller" color="blue darken-1" flat @click="addContact">Add</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
@@ -37,11 +40,11 @@
 </template>
 
 <style scoped>
-  button.v-btn {
+  button.smaller {
     height: 18px;
     width: 18px;
   }
-  .v-icon {
+  .v-icon.smaller {
     font-size: 16px;
   }
 </style>
@@ -51,7 +54,7 @@ export default {
 	data () {
 		return {
 			contact: {
-				name: '',
+				displayText: '',
 				address: ''
 			},
 			missing: true,
@@ -59,7 +62,11 @@ export default {
 		}
 	},
 	props: {
-		address: String
+		address: String,
+		showAdd: {
+			type: Boolean,
+			required: false
+		}
 	},
 	created: function () {
 		this.contact.address = this.address
@@ -68,12 +75,16 @@ export default {
 			return contact.address === this.address
 		})
 		if (!result) {
-			this.contact.name = this.address
+			this.contact.displayText = this.address
 		} else {
-			this.contact.name = result.name
+			this.contact.displayText = result.name
 		}
 	},
 	methods: {
+		onCopy () {
+			var message = 'Copied to clipboard'
+			this.$store.commit('showNotification', { 'type': 'error', 'message': message })
+		},
 		addContact () {
 			this.$store.commit('addContact', this.contact)
 			var message = 'Contact added to address book'

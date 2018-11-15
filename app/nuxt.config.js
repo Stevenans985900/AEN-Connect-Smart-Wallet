@@ -37,8 +37,10 @@ module.exports = {
     '@nuxtjs/axios'
   ],
   plugins: [
-    '~/plugins/globals.js',
-    { src: '~/plugins/localStorage.js', ssr: false },
+		'~/plugins/globals.js',
+		'~/plugins/addressRender.js',
+    '~/plugins/clipboard.js',
+		{ src: '~/plugins/localStorage.js', ssr: false },
 		'~/plugins/vuetify',
 		'~/plugins/wallet'
   ],
@@ -62,7 +64,6 @@ module.exports = {
         }
       }
 			if (isDev && isClient) {
-				// Run ESLint on save
 				config.module.rules.push({
 					enforce: 'pre',
 					test: /\.(js|vue)$/,

@@ -179,12 +179,6 @@
                 </v-tabs>
               </v-card>
           </v-flex>
-
-            <!-- Mining space -->
-          <v-flex xs12 sm6>
-              <v-card>Mining Space</v-card>
-          </v-flex>
-
         </v-layout>
       </v-container>
   </v-layout>

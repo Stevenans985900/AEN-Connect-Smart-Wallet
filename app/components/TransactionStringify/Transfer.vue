@@ -5,19 +5,14 @@
     </v-icon>
     <v-icon v-else>call_made</v-icon>
     - {{ value }}
-    - <address-string :address="address"></address-string>
+    - <address-render :address="address" showAdd />
   </span>
 </template>
 
 <script>
-import AddressString from '../Address'
-
 export default {
 	props: {
 		data: Object
-	},
-	components: {
-		AddressString
 	},
 	computed: {
 		address () {

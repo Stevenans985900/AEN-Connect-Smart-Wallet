@@ -23,7 +23,7 @@
           </v-list-tile-content>
         </v-list-tile>
 
-				<v-list-tile exact @click="exit">
+				<v-list-tile exact @click="exit" v-if="appRunTime === 'app'">
           <v-list-tile-action>
             <v-icon>exit_to_app</v-icon>
           </v-list-tile-action>
@@ -45,14 +45,18 @@
         <img src="/logo.png" alt="avatar">
       </v-avatar>
       <v-toolbar-title class="hidden-sm-and-down" v-text="title" ></v-toolbar-title>
+
       <v-spacer></v-spacer>
 
+			<!-- Environment -->
+      <v-btn v-if="environment !== 'prod'" disabled>
+        {{ environment }}
+      </v-btn>
+
       <!-- Quick balance display -->
-      <template v-if="account.meta.balance != 0" >
-        <v-btn>
-          Balance: {{ account.meta.balance }}
-        </v-btn>
-      </template>
+      <v-btn v-if="account.meta.balance != 0" disabled>
+        Balance: {{ account.meta.balance }}
+      </v-btn>
 
 			<network-diagnostics></network-diagnostics>
 
@@ -65,17 +69,16 @@
       >
 			<v-btn slot="activator" flat>
 				<v-avatar size="24">
-					<img
-						src="https://cdn.vuetifyjs.com/images/john.jpg"
-						alt="John"
-					>
+					<v-icon>account_circle</v-icon>
 				</v-avatar>
 			</v-btn>
 				<v-card>
           <v-card-title>
 	          <div>
 	            <span class="grey--text" v-if="account.wallet.name">{{ account.wallet.name }}</span><br>
-							<span v-if="account.wallet.address.address">{{ account.wallet.address.address }}</span>
+							<span v-if="account.wallet.address.address">
+								<address-render :address="account.wallet.address.address" />
+							</span>
 							<v-list>
 	              <v-list-tile v-if="mode === 'app'">
 	                <v-list-tile-action>
@@ -88,7 +91,7 @@
 	          </div>
 	        </v-card-title>
 	        <v-card-actions>
-						<v-btn class="warning" flat @click="backupWallet">Backup Wallet</v-btn>
+						<backup-wallet />
 						<v-btn flat nuxt to="/dashboard">Dashboard</v-btn>
 	          <v-spacer></v-spacer>
 	          <v-btn flat v-if="mode === 'app'" @click="exit">Exit</v-btn>
@@ -136,6 +139,7 @@
 </template>
 
 <script>
+import BackupWallet from '../components/BackupWallet'
 import NetworkDiagnostics from '../components/NetworkDiagnostics'
 import Loading from '../components/Loading'
 import isElectron from 'is-electron'
@@ -147,11 +151,13 @@ if (isElectron()) {
 
 export default {
 	components: {
+		BackupWallet,
 		Loading,
 		NetworkDiagnostics
 	},
 	computed: {
 		version () { return this.$g('version') },
+		appRunTime () { return this.$store.state.meta.mode },
 		visibleLinks () {
 			if (this.$store.state.meta.wallet_present === true) {
 				return this.items
@@ -164,6 +170,7 @@ export default {
 		account () { return this.$account.$store.state },
 		currentPing () { return this.$store.state.internal.api_ping },
 		currentApi () { return this.$store.state.internal.api_endpoint },
+		environment () { return this.$store.state.meta.environment },
 		mode: {
 			get: function () { return this.$store.state.meta.mode },
 			set: function (newVal) { }
@@ -183,34 +190,6 @@ export default {
 		notification_message () { return this.$store.state.notification.message }
 	},
 	methods: {
-		// TODO Move this to a separate service
-		backupWallet () {
-			console.debug('F:BW:Backup Wallet')
-			// Encode the current state data
-			var exportData = {
-				// Include software version in case there are any wallet updates needed to do later
-				"publisherVersion": this.version,
-				"name": this.$account.$store.state.wallet.name,
-				"address": this.$account.$store.state.wallet.address.address,
-				"networkIdentifierByte": this.$account.$store.state.wallet.network,
-				"accountPublicKey": this.$account.$store.state.account.publicKey,
-				"accountPrivateKey": this.$account.$store.state.account.privateKey,
-				"walletEncryptedPrivateKey": this.$account.$store.state.wallet.encryptedPrivateKey.encryptedKey
-			}
-			var exportName = exportData.name + '-backup-' + new Date().toISOString().slice(0,10)
-			console.debug('BW:Data to be backed up')
-			console.debug(exportData)
-
-			// Create hidden download anchor and handle for the user
-			var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData))
-	    var downloadAnchorNode = document.createElement('a');
-	    downloadAnchorNode.setAttribute("href",     dataStr);
-	    downloadAnchorNode.setAttribute("download", exportName + ".json");
-	    document.body.appendChild(downloadAnchorNode); // required for firefox
-	    downloadAnchorNode.click();
-	    downloadAnchorNode.remove();
-
-		},
 		exit () {
 			console.debug('F:E:Exit')
 
@@ -249,6 +228,10 @@ export default {
 		console.debug('P:Root Page Created')
 
 		this.$store.commit('setAppMode', 'web')
+
+		var env = process.env.NODE_ENV || 'dev'
+		this.$store.commit('setEnvironment', env)
+
 		this.$store.commit('setLoading', { 't': 'global', 'v': true, 'm': 'Page Startup' })
 		// Desktop app setup
 		if (isElectron()) {
@@ -326,8 +309,8 @@ export default {
 				{ icon: 'settings_system_daydream', title: 'Wallet Creation', to: '/' },
 				{ icon: 'apps', title: 'Dashboard', to: '/dashboard', requireLogged: true },
 				{ icon: 'account_balance_wallet', title: 'Ledger', to: '/ledger', requireLogged: true },
-				{ icon: 'contacts', title: 'Address Book', to: '/address-book', requireLogged: true },
-				{ icon: 'extension', title: 'Create Namespace', to: '/tokens', requireLogged: true }
+				{ icon: 'contacts', title: 'Address Book', to: '/address-book', requireLogged: true }
+				// { icon: 'extension', title: 'Create Namespace', to: '/tokens', requireLogged: true }
 			],
 			title: 'AENChain Wallet',
 			menu: false,

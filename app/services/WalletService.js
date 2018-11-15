@@ -111,6 +111,7 @@ export default {
 					this.$store.state.publicAccount
 				)
 					.subscribe(transactions => {
+						console.log(transactions)
 						context.$store.state.userTransactions.unconfirmed = transactions
 					})
 			},
@@ -196,17 +197,19 @@ export default {
 
 				var context = this
 				var addressObject = Address.createFromRawAddress(address)
-				var result = this.$store.state.services.accountHttp.getAccountInfo(addressObject)
-					.subscribe((AccountInfo) => {
-						context.$store.state.public = true
-						console.debug('ISW: Found account on blockchain')
-					},
-					error => {
-						console.log(error)
-						context.$store.state.public = false
-					}
-					)
-				console.log(result)
+				try {
+					var result = this.$store.state.services.accountHttp.getAccountInfo(addressObject)
+						.subscribe((AccountInfo) => {
+							context.$store.state.public = true
+							console.debug('ISW: Found account on blockchain')
+						},
+						error => {
+							context.$store.state.public = false
+							// Don't do anything, we are expecting 404 as possible response
+						})
+				} catch (e) {
+					// Don't do anything, we are expecting 404 as possible response
+				}
 				return result
 			},
 			registerNamespace (namespaceDefinition) {

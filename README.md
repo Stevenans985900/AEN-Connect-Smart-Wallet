@@ -10,6 +10,7 @@ A NodeJS project providing an easy to use interface to the AENChain blockchain n
 ## TODO
 
 - [] Interface customisation and branding
+- [] Optimise asset rendering to shrink package size.
 - [] [Cordova](https://cordova.apache.org/) - Middleware for compiling mobile apps based on web projects
 - [] Incorporate feedback form
 - [] Integrate in app analytics so we can guage usage

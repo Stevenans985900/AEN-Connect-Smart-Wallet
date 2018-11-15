@@ -2,7 +2,7 @@
   <span>
     <v-icon>dashboard</v-icon>
     - {{ data.namespaceName }}
-    - <address-string :address="address" />
+    - <address-render :address="address" />
   </span>
 </template>
 

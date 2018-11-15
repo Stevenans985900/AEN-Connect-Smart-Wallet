@@ -4,7 +4,15 @@
             fluid
             grid-list-md
         >
-            <v-layout row wrap>
+
+						<v-layout row wrap>
+							<!-- ADDRESS SUMMARY -->
+							<v-flex xs12>
+								<h1>{{ account.wallet.address.address }}</h1>
+							</v-flex>
+						</v-layout>
+
+						<v-layout row wrap>
 							<!-- ACCOUNT OVERVIEW -->
               <v-flex xs12 v-if="account.public === false">
                 <v-alert
@@ -20,7 +28,7 @@
             <v-layout>
             <!-- FAUCET -->
             <v-flex x12 sm6 v-if="faucets.length">
-              <v-card >
+              <v-card>
                 <v-img
                   src="/faucet.png"
                 ></v-img>
@@ -28,7 +36,7 @@
                 <v-card-title primary-title>
                   <div>
                     <h3 class="headline mb-0">Visit Faucet</h3>
-                    <div>If you need some coins to get started with the network.</div>
+                    <div>If you need some coins to get started with the network.</div>										
 										<v-btn
 											v-for="(faucet) in faucets"
 											:key="faucet.address"

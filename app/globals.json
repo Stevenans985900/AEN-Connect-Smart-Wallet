@@ -1,6 +1,7 @@
 {
 		"version": "0.0.1",
 		"build_number": "",
+		"google_recaptcha_key": "NA",
 		"api_endpoints": [
         {
             "alias": "Master",
@@ -8,11 +9,11 @@
         }
     ],
     "available_networks": [
-        {
-            "name": "TestNet",
-            "identifier": "PUBLIC_TEST",
-            "byte": 152
-        }
+			{
+					"name": "TestNet",
+					"identifier": "PUBLIC_TEST",
+					"byte": 152
+			}
     ],
     "faucets": [
         {
