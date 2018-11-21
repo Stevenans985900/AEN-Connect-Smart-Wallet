@@ -88,6 +88,7 @@ export const actions = {
 			var lowestPing = 9999
 			this.$axios.$get(thisAddress)
 				.then((response) => {
+					console.debug(response)
 					apiEndpoints[position].scanEnd = new Date()
 					apiEndpoints[position].scanTime = apiEndpoints[position].scanEnd - apiEndpoints[position].scanStart
 					console.debug('RAN: Scan for ' + thisAddress + ' took ' + apiEndpoints[position].scanTime + 'ms')
@@ -109,7 +110,7 @@ export const actions = {
 			check(currentRound)
 		}
 	},
-	update_network_information (context, account, wallet) {
+	update_network_information (context) {
 		console.debug('F:UNI:Update Network Information. Using ' + context.state.internal.api_endpoint + ' as API endpoint')
 
 		// Prepare basiuc services for use

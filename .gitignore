@@ -15,3 +15,5 @@ app/dist
 
 # DotEnv pickup file
 app/.env
+
+.idea

@@ -1,42 +1,60 @@
-import { Account, AccountHttp, Address, BlockchainHttp, Deadline, MosaicAmountView, MosaicHttp, NamespaceHttp, NamespaceId, MosaicService, NetworkType, Password, PlainMessage, PublicAccount, QueryParams, RegisterNamespaceTransaction, SimpleWallet, TransferTransaction, TransactionHttp, UInt64, XEM } from 'chain-js-sdk'
-import { mergeMap } from 'rxjs/operators'
+import {
+	Account,
+	AccountHttp,
+	Address,
+	Deadline,
+	MosaicHttp,
+	NamespaceHttp,
+	NamespaceId,
+	MosaicService,
+	Password,
+	PlainMessage,
+	PublicAccount,
+	QueryParams,
+	RegisterNamespaceTransaction,
+	SimpleWallet,
+	TransferTransaction,
+	TransactionHttp,
+	UInt64,
+	XEM
+} from 'chain-js-sdk'
+import {mergeMap} from 'rxjs/operators'
 import PluginStore from '~/services/PluginStore'
 
 export default {
 	Store: PluginStore,
 	install: (Vue, options) => {
 		Vue.mixin({
-			beforeCreate () {
+			beforeCreate() {
 				this.$account.$store = options.store
 			}
 		})
 		Vue.prototype.$account = {
 			$store: {},
-			regenerate_account (privateKey, networkType) {
+			regenerate_account(privateKey, networkType) {
 				console.debug('F:RA:Regenerate Account')
 				this.$store.state.account = Account.createFromPrivateKey(privateKey, networkType)
 				console.debug('F:Result')
 				console.debug(this.$store.state.account)
 			},
 			/**
-       * Create a fresh basic JavaScript object account for use in wallet
-       * @param {} networkIdentifier
-       */
-			generate_account (networkIdentifier) {
+			 * Create a fresh basic JavaScript object account for use in wallet
+			 * @param {} networkIdentifier
+			 */
+			generate_account(networkIdentifier) {
 				console.debug('F:GA:Generate Account. identifier (' + networkIdentifier + ')')
 				this.$store.state.account = Account.generateNewAccount(networkIdentifier)
 				console.debug('GA:Result')
 				console.debug(this.$store.state.account)
 				return this.account
 			},
-			open_wallet (walletName, password, privateKey, networkIdentifierByte) {
+			open_wallet(walletName, password, privateKey, networkIdentifierByte) {
 				console.debug('F:OW:Open Wallet')
 				console.debug(walletName)
 				console.debug(password)
 				console.debug(privateKey)
 				console.debug(networkIdentifierByte)
 
-				const passwordObject = new Password(password)
 				this.$store.state.wallet = SimpleWallet.createFromPrivateKey(
 					walletName,
 					new Password(password),
@@ -46,12 +64,11 @@ export default {
 				console.debug('OW:Result')
 				console.debug(this.$store.state.wallet)
 			},
-			hydrate (
+			hydrate(
 				walletName,
 				password,
 				walletPrivateKey,
-				networkIdentifier)
-			{
+				networkIdentifier) {
 				console.debug('F:H:Hydrate')
 				const passwordObject = new Password(password)
 				this.open_wallet(walletName, password, walletPrivateKey, networkIdentifier)
@@ -61,10 +78,10 @@ export default {
 				return true
 			},
 			/**
-       * START CALL FUNCTIONS
-       * TODO - Move these two individual
-       */
-			getBalance () {
+			 * START CALL FUNCTIONS
+			 * TODO - Move these two individual
+			 */
+			getBalance() {
 				console.debug('F:GB:Get Balance')
 				var context = this
 				this.$store.state.services.mosaicService
@@ -83,7 +100,7 @@ export default {
 						}
 					)
 			},
-			incomingTransactions () {
+			incomingTransactions() {
 				console.debug('F:IT:Incoming Transactions')
 				var context = this
 				console.debug(this.$store.state.accountInfo)
@@ -96,7 +113,7 @@ export default {
 						context.$store.state.userTransactions.incoming = transactions
 					})
 			},
-			outgoingTransactions () {
+			outgoingTransactions() {
 				var context = this
 				this.$store.state.services.accountHttp.outgoingTransactions(
 					this.$store.state.publicAccount
@@ -105,7 +122,7 @@ export default {
 						context.$store.state.userTransactions.outgoing = transactions
 					})
 			},
-			unconfirmedTransactions () {
+			unconfirmedTransactions() {
 				var context = this
 				this.$store.state.services.accountHttp.unconfirmedTransactions(
 					this.$store.state.publicAccount
@@ -116,10 +133,10 @@ export default {
 					})
 			},
 			/**
-       * This function is just a facade for jobs that will run regularly. It is abstracted in to it's own
-       * function because it is used independently and with interval
-       */
-			taskRunners () {
+			 * This function is just a facade for jobs that will run regularly. It is abstracted in to it's own
+			 * function because it is used independently and with interval
+			 */
+			taskRunners() {
 				console.debug('F:TR:Task Runners')
 				this.getBalance()
 				this.transactions()
@@ -128,14 +145,14 @@ export default {
 				this.unconfirmedTransactions()
 			},
 			/**
-       * END CALL FUNCTIONS
-       */
-			startListeners () {
+			 * END CALL FUNCTIONS
+			 */
+			startListeners() {
 				console.debug('F:SL:Start Listeners: Interval time of ' + this.$store.state.intervalTime + 'ms')
 				this.taskRunners()
 				this.intervalReference = setInterval(this.taskRunners.bind(this), this.$store.state.intervalTime)
 			},
-			transactions (blockchainAddress = '') {
+			transactions(blockchainAddress = '') {
 				console.log('F:T:Transactions')
 				if (blockchainAddress) {
 					var addressObject = Address.createFromRawAddress(blockchainAddress)
@@ -157,7 +174,7 @@ export default {
 						})
 				}
 			},
-			transfer (payee) {
+			transfer(payee) {
 				console.debug('F:T:Transfer')
 				const recipientAddress = Address.createFromRawAddress(payee.address)
 				console.log(recipientAddress)
@@ -177,7 +194,7 @@ export default {
 					.announce(signedTransaction)
 					.subscribe(x => console.log(x), err => console.error(err))
 			},
-			updateApiEndpoint (endpointAddress) {
+			updateApiEndpoint(endpointAddress) {
 				if (endpointAddress !== this.apiEndpoint) {
 
 					this.$store.state.services.accountHttp = new AccountHttp(endpointAddress)
@@ -192,7 +209,7 @@ export default {
 				}
 				this.$store.state.apiEndpoint = endpointAddress
 			},
-			isWalletPublic (address) {
+			isWalletPublic(address) {
 				console.debug('F:ISW:Is Wallet Public: ' + address)
 
 				var context = this
@@ -200,39 +217,41 @@ export default {
 				try {
 					var result = this.$store.state.services.accountHttp.getAccountInfo(addressObject)
 						.subscribe((AccountInfo) => {
-							context.$store.state.public = true
-							console.debug('ISW: Found account on blockchain')
-						},
-						error => {
-							context.$store.state.public = false
-							// Don't do anything, we are expecting 404 as possible response
-						})
+								context.$store.state.public = true
+								console.debug('ISW: Found account on blockchain')
+								console.debug(AccountInfo)
+							},
+							error => {
+								context.$store.state.public = false
+								console.debug(error)
+								// Don't do anything, we are expecting 404 as possible response
+							})
 				} catch (e) {
 					// Don't do anything, we are expecting 404 as possible response
 				}
 				return result
 			},
-			registerNamespace (namespaceDefinition) {
+			registerNamespace(namespaceDefinition) {
 				console.log('F:RN:Register Namespace')
 
 				const registerNamespaceTransaction = RegisterNamespaceTransaction.createRootNamespace(
-				    Deadline.create(),
-				    namespaceDefinition.name,
-				    UInt64.fromUint(parseInt(namespaceDefinition.duration)),
-				    this.$store.state.wallet.network);
+					Deadline.create(),
+					namespaceDefinition.name,
+					UInt64.fromUint(parseInt(namespaceDefinition.duration)),
+					this.$store.state.wallet.network);
 
 				const signedTransaction = this.$store.state.account.sign(registerNamespaceTransaction);
 
 				this.$store.state.services.transactionHttp
 					.announce(signedTransaction)
 					.subscribe(x => {
-						console.log(x)
-					},
-					err => {
-						console.error(err)
-					})
+							console.log(x)
+						},
+						err => {
+							console.error(err)
+						})
 			},
-			isNamespaceAvailable (name) {
+			isNamespaceAvailable(name) {
 				console.debug('F:INA:Is Namespace Available with name: ' + name)
 				const namespaceId = new NamespaceId(name)
 				var context = this
