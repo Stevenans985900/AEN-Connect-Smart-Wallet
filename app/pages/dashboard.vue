@@ -7,8 +7,15 @@
 
       <v-layout row wrap>
         <!-- ADDRESS SUMMARY -->
-        <v-flex xs12>
+        <v-flex v-if="account.wallet.address" xs12>
           <h1>{{ account.wallet.address.address }}</h1>
+        </v-flex>
+      </v-layout>
+
+      <v-layout row wrap>
+        <!-- ADDRESS SUMMARY -->
+        <v-flex xs12>
+          <graph-balance-spread />
         </v-flex>
       </v-layout>
 
@@ -70,26 +77,34 @@
 </template>
 
 <script>
-	export default {
-		computed: {
-			faucets() {
-				return this.$g('faucets')
-			},
-			account() {
-				return this.$account.$store.state
-			},
-			networkIdentifier() {
-				return this.$store.state.networkIdentifier
-			}
-		},
-		created: function () {
-			// Only start once global loading finished
-			var preperationInterval = setInterval(function () {
-				if (this.$store.getters.booting === false) {
-					clearInterval(preperationInterval)
-					this.$store.commit('setLoading', {'t': 'router', 'v': false})
-				}
-			}.bind(this), 2000)
-		}
-	}
+import GraphBalanceSpread from "../components/GraphBalanceSpread";
+
+export default {
+  components: {
+    GraphBalanceSpread
+  },
+  computed: {
+    faucets() {
+      return this.$g("faucets");
+    },
+    account() {
+      return this.$account.$store.state;
+    },
+    networkIdentifier() {
+      return this.$store.state.networkIdentifier;
+    }
+  },
+  created: function() {
+    // Only start once global loading finished
+    var preperationInterval = setInterval(
+      function() {
+        if (this.$store.getters.booting === false) {
+          clearInterval(preperationInterval);
+          this.$store.commit("setLoading", { t: "router", v: false });
+        }
+      }.bind(this),
+      2000
+    );
+  }
+};
 </script>
