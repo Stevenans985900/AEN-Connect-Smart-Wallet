@@ -4,12 +4,12 @@
 
       <!-- Initial setup -->
       <v-card>
-        <v-card-title class="headline">Welcome to the AENChain Manager ({{ network.name }})!</v-card-title>
+        <v-card-title class="headline">Welcome to AEN Connect! ({{ network.name }})!</v-card-title>
         <v-card-text>
-          <p>You are receiving this message because you don't yet have any AEN wallets setup.</p>
+          <p>Before proceeding, you need to have an AEN wallet setup on this device. Please choose one of the options below</p>
           <p>
             <v-btn color="success" @click="newAccount = !newAccount">New Wallet</v-btn>
-            <v-btn color="info" @click="existingAccount = !existingAccount">Existing Wallet</v-btn>
+            <v-btn color="info" @click="existingAccount = !existingAccount">Restore Wallet</v-btn>
           </p>
           <hr>
 
@@ -146,6 +146,16 @@
                 </v-card-text>
               </v-card>
             </v-flex>
+            <v-flex v-else xs12 md6 class="text-xs-center">
+              <v-card v-if="newAccount">
+                hello newbie
+              </v-card>
+              <v-card v-if="existingAccount">
+                hey old timer
+              </v-card>
+
+            </v-flex>
+
           </v-layout>
         </v-card-text>
       </v-card>

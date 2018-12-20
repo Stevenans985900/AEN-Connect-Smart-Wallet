@@ -13,22 +13,19 @@
       </v-btn>
 
       <v-card>
-        <v-card-title>Network</v-card-title>
+        <v-card-title>Settings</v-card-title>
         <v-card-text>
-          <p>Ping: {{ currentPing }}</p>
-          <p>Block Height: {{ blockHeight }}</p>
-          <p>Block Score: {{ blockScore }}</p>
-          <v-list>
-            <v-list-tile>
-              <v-select
-                :items="apiEndpoints"
-                :value="currentApi"
-                item-text="alias"
-                item-value="address"
-                label="API Endpoint"
-              />
-            </v-list-tile>
-          </v-list>
+          <v-select
+            :items="apiEndpoints"
+            :value="currentApi"
+            item-text="alias"
+            item-value="address"
+            label="API Endpoint"
+          />
+          <p>
+            Current Ping: {{ currentPing }} - Block Height: {{ blockHeight }}
+          </p>
+
         </v-card-text>
       </v-card>
     </v-menu>

@@ -160,7 +160,11 @@ export default {
       drawer: false,
       hydrated: false,
       items: [
-        { icon: "settings_system_daydream", title: "Wallet Creation", to: "/" },
+        {
+          icon: "settings_system_daydream",
+          title: "Wallet Management",
+          to: "/wallet"
+        },
         {
           icon: "apps",
           title: "Dashboard",

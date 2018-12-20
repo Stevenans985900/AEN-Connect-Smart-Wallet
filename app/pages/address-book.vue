@@ -1,39 +1,39 @@
 <template>
   <v-layout justify-center align-center>
 
-    <!-- New contact -->
-    <v-dialog v-model="dialog" persistent max-width="600px">
-      <v-btn slot="activator" color="primary" fixed fab bottom right>
-        <v-icon>add</v-icon>
-      </v-btn>
-      <v-card>
-        <v-card-title>
-          <span class="headline">Contact</span>
-        </v-card-title>
-        <v-card-text>
-          <v-container grid-list-md>
-            <v-layout wrap>
-              <v-flex xs12 sm6>
-                <v-text-field v-model="contact.name" label="Name" required/>
-              </v-flex>
-              <v-flex xs12 sm6>
-                <v-text-field v-model="contact.address" label="Blockchain Address"
-                              hint="example: TCQS4NLATONNFT2SEY6Y3SZNQTMXF7O5K7TU7L7F"/>
-              </v-flex>
-            </v-layout>
-          </v-container>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer/>
-          <v-btn color="blue darken-1" flat @click.native="dialog = false">Close</v-btn>
-          <v-btn color="blue darken-1" flat @click="save">Save</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
     <!-- Contacts table -->
     <v-flex xs12 sm8 md6>
       <v-card>
+        <!-- New contact -->
+        <v-dialog v-model="dialog" persistent max-width="600px">
+          <v-btn slot="activator" color="primary" absolute fab bottom left>
+            <v-icon>add</v-icon>
+          </v-btn>
+          <v-card>
+            <v-card-title>
+              <span class="headline">Contact</span>
+            </v-card-title>
+            <v-card-text>
+              <v-container grid-list-md>
+                <v-layout wrap>
+                  <v-flex xs12 sm6>
+                    <v-text-field v-model="contact.name" label="Name" required/>
+                  </v-flex>
+                  <v-flex xs12 sm6>
+                    <v-text-field v-model="contact.address" label="Blockchain Address"
+                                  hint="example: TCQS4NLATONNFT2SEY6Y3SZNQTMXF7O5K7TU7L7F"/>
+                  </v-flex>
+                </v-layout>
+              </v-container>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer/>
+              <v-btn color="blue darken-1" flat @click.native="dialog = false">Close</v-btn>
+              <v-btn color="blue darken-1" flat @click="save">Save</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
         <v-card-title>
           <v-text-field
             v-model="search"

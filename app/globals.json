@@ -1,24 +1,27 @@
 {
-		"version": "0.0.1",
-		"build_number": "",
-		"google_recaptcha_key": "NA",
-		"api_endpoints": [
-        {
-            "alias": "Master",
-            "address": "http://api-1.aencoin.io:3000"
-        }
-    ],
-    "available_networks": [
-			{
-					"name": "TestNet",
-					"identifier": "PUBLIC_TEST",
-					"byte": 152
-			}
-    ],
-    "faucets": [
-        {
-            "name": "TestNet Faucet",
-            "address": "TD5C6ZEHS7NOQQQ522VYI4BXJZ33HVJFY5AFAL3P"
-        }
-    ]
+  "version": "0.0.1",
+  "build_number": "",
+  "google_recaptcha_key": "NA",
+  "api_endpoints": [{
+      "alias": "API-2",
+      "address": "http://api-2.aencoin.io:3000"
+    },
+    {
+      "alias": "API-5",
+      "address": "http://api-5.aencoin.io:3000"
+    },
+    {
+      "alias": "API-10",
+      "address": "http://api-10.aencoin.io:3000"
+    }
+  ],
+  "available_networks": [{
+    "name": "TestNet",
+    "identifier": "PUBLIC_TEST",
+    "byte": 152
+  }],
+  "faucets": [{
+    "name": "TestNet Faucet",
+    "address": "TD5C6ZEHS7NOQQQ522VYI4BXJZ33HVJFY5AFAL3P"
+  }]
 }
