@@ -1,27 +1,51 @@
 <template>
   <v-layout column justify-center align-center>
     <v-flex xs12 sm8 md6>
-
       <!-- Initial setup -->
       <v-card>
-        <v-card-title class="headline">Welcome to AEN Connect! ({{ network.name }})!</v-card-title>
+        <v-card-title class="headline">Welcome to AEN Smart Wallet ({{ network.name }})</v-card-title>
         <v-card-text>
+          <p>
+            This Smart wallet allows you to generate and manage accounts on the
+            <a
+              href="https://aencoin.com/"
+              target="_blank"
+            >AENChain network</a>
+          </p>
           <p>Before proceeding, you need to have an AEN wallet setup on this device. Please choose one of the options below</p>
           <p>
-            <v-btn color="success" @click="newAccount = !newAccount">New Wallet</v-btn>
-            <v-btn color="info" @click="existingAccount = !existingAccount">Restore Wallet</v-btn>
+            <v-tooltip bottom>
+              <v-btn
+                slot="activator"
+                color="success"
+                @click="newAccount = !newAccount"
+              >Create a New Wallet</v-btn>
+              <span>To obtain an address and generate a private key.</span>
+            </v-tooltip>
+            <v-tooltip bottom>
+              <v-btn
+                slot="activator"
+                color="info"
+                @click="existingAccount = !existingAccount"
+              >Access My Wallet</v-btn>
+              <span>To send tokens and swap coins.</span>
+            </v-tooltip>
           </p>
           <hr>
 
           <v-layout>
+            <!-- control -->
             <v-flex xs12 md6>
               <!-- Setup wallet for new account -->
               <v-card v-if="newAccount" class="text-xs-center">
                 <v-card-text>
                   <v-layout row wrap>
-
-                    <v-form ref="form" v-model="valid" class="full-width"
-                            @submit.prevent="onSubmit">
+                    <v-form
+                      ref="form"
+                      v-model="valid"
+                      class="full-width"
+                      @submit.prevent="onSubmit"
+                    >
                       <v-select
                         v-if="multipleNetworks"
                         :items="availableNetworks"
@@ -47,20 +71,15 @@
                         counter
                         @click:append="showPassword = !showPassword"
                       />
-                      <v-checkbox
-                        v-model="rememberMe"
-                        label="Remember Me"
+                      <v-checkbox v-model="rememberMe" label="Remember Me"/>
+                      <vue-recaptcha
+                        v-if="environment === 'Production'"
+                        ref="recaptcha"
+                        :sitekey="googleCaptchaKey"
+                        @verify="createAccount"
                       />
-                      <vue-recaptcha v-if="environment === 'Production'"
-                                     ref="recaptcha"
-                                     :sitekey="googleCaptchaKey"
-                                     @verify="createAccount"/>
-                      <v-btn v-else
-                             @click="createAccount"
-                      >Create Account
-                      </v-btn>
+                      <v-btn v-else @click="createAccount">Create Account</v-btn>
                     </v-form>
-
                   </v-layout>
                 </v-card-text>
               </v-card>
@@ -69,12 +88,8 @@
               <v-card v-if="existingAccount" class="text-xs-center">
                 <v-card-text>
                   <v-layout row wrap>
-
                     <v-form ref="form" v-model="valid" class="full-width">
-                      <upload-btn
-                        :file-changed-callback="backupUploaded"
-                        title="Restore from file"
-                      >
+                      <upload-btn :file-changed-callback="backupUploaded" title="Restore from file">
                         <template slot="icon">
                           <v-icon>attach_file</v-icon>
                         </template>
@@ -86,34 +101,18 @@
                         item-text="name"
                         label="Network"
                       />
-                      <v-text-field
-                        v-model="walletName"
-                        label="Wallet Name"
-                        required
-                      />
-                      <v-text-field
-                        v-model="privateKey"
-                        label="Private Key"
-                        required
-                      />
-                      <v-text-field
-                        v-model="walletPassword"
-                        label="Wallet Password"
-                        required
-                      />
-                      <v-checkbox
-                        v-model="rememberMe"
-                        label="Remember Me"
-                      />
+                      <v-text-field v-model="walletName" label="Wallet Name" required/>
+                      <v-text-field v-model="privateKey" label="Private Key" required/>
+                      <v-text-field v-model="walletPassword" label="Wallet Password" required/>
+                      <v-checkbox v-model="rememberMe" label="Remember Me"/>
                       <v-btn @click="loadWallet">Create</v-btn>
                     </v-form>
-
                   </v-layout>
                 </v-card-text>
               </v-card>
             </v-flex>
 
-            <!-- summary -->
+            <!-- summary information column -->
             <v-flex v-if="walletCreated" xs12 md6 class="text-xs-center">
               <v-card>
                 <v-card-text>
@@ -121,13 +120,10 @@
                   <v-img :src="qrData" aspect-ratio="1"/>
 
                   <v-form ref="form" v-model="proceedValid">
-                    <v-checkbox
-                      v-model="eulaAgree"
-                      :rules="[rules.required]"
-                      required
-                    >
+                    <v-checkbox v-model="eulaAgree" :rules="[rules.required]" required>
                       <span slot="label">
-                        I agree to the <a href="http://aencoin.com/eula">AEN EULA</a>
+                        I agree to the
+                        <a href="http://aencoin.com/eula">AEN EULA</a>
                       </span>
                     </v-checkbox>
                     <v-checkbox
@@ -137,25 +133,19 @@
                       label="I have backed up my wallet and understand that keeping it safe is my duty"
                     />
                     <backup-wallet/>
-                    <v-btn
-                      :disabled="!proceedValid"
-                      @click="createAccount"
-                    >Continue
-                    </v-btn>
+                    <v-btn :disabled="!proceedValid" to="/dashboard">Continue</v-btn>
                   </v-form>
                 </v-card-text>
               </v-card>
             </v-flex>
             <v-flex v-else xs12 md6 class="text-xs-center">
-              <v-card v-if="newAccount">
-                hello newbie
-              </v-card>
-              <v-card v-if="existingAccount">
-                hey old timer
-              </v-card>
-
+              <v-card
+                v-if="newAccount"
+              >When you create a new wallet, you aren't part of the network until a transaction involving your address has been completed and becoming part of the ledger</v-card>
+              <v-card
+                v-if="existingAccount"
+              >To restore a wallet, you'll need to know both your private key and the password.</v-card>
             </v-flex>
-
           </v-layout>
         </v-card-text>
       </v-card>
@@ -176,6 +166,7 @@ import EventEmitter from "events";
 import qrCodeGenerator from "qrcode-generator";
 import VueRecaptcha from "vue-recaptcha";
 import isElectron from "is-electron";
+// import zxcvbn from "zxcvbn";
 
 export default {
   components: {
@@ -209,7 +200,7 @@ export default {
   },
   computed: {
     wallets() {
-      return this.$stora.state.wallets;
+      return this.$store.state.wallets;
     },
     account() {
       return this.$account.$store.state;
@@ -234,7 +225,7 @@ export default {
     },
     network: {
       get: function() {
-        return this.$store.state.account.network;
+        return this.$store.state.activeWallet.network;
       },
       set: function(inputValue) {
         this.$store.commit("setNetwork", inputValue);
@@ -255,14 +246,13 @@ export default {
       if (this.$g("available_networks").length > 1) {
         return true;
       }
-      return false;
     },
     walletExists() {
       return this.$store.state.meta.wallet_present;
     },
     walletName: {
       get: function() {
-        return this.$store.state.account.name;
+        return this.$store.state.activeWallet.name;
       },
       set: function(inputValue) {
         this.$store.commit("setAccountProperty", {
@@ -273,7 +263,7 @@ export default {
     },
     walletPassword: {
       get: function() {
-        return this.$store.state.account.password;
+        return this.$store.state.activeWallet.password;
       },
       set: function(inputValue) {
         this.$store.commit("setAccountProperty", {
@@ -284,7 +274,7 @@ export default {
     },
     privateKey: {
       get: function() {
-        return this.$store.state.account.private_key;
+        return this.$store.state.activeWallet.privateKey;
       },
       set: function(inputValue) {
         this.$store.commit("setAccountProperty", {
@@ -320,7 +310,7 @@ export default {
     }
 
     // Check if there is a network set and use the first available
-    if (Object.keys(this.$store.state.account.network).length === 0) {
+    if (Object.keys(this.$store.state.activeWallet.network).length === 0) {
       console.debug("I:Setting a default network to first available");
       this.network = this.availableNetworks[0];
     }
@@ -330,7 +320,7 @@ export default {
       function() {
         if (this.$store.getters.booting === false) {
           // Redirect user to the dashboard if they already have account
-          if (this.wallets) {
+          if (this.$store.state.activeWallet.address) {
             console.debug(
               "I:User has saved wallet present, redirecting to dashboard"
             );
@@ -344,7 +334,7 @@ export default {
     );
 
     // If there is no default password, generate one for the user
-    if (this.$store.state.account.password === false) {
+    if (this.$store.state.activeWallet.password === false) {
       this.regenWalletPassword();
     }
   },
@@ -359,15 +349,28 @@ export default {
     createAccount() {
       console.debug("F:CA:Create Account");
 
-      this.$account.generate_account(
-        this.$store.state.account.network.identifier
+      if (!this.$refs.form.validate()) {
+        console.log("form is invalid");
+        return false;
+      }
+
+      var account = this.$account.newAencAccount(
+        this.$store.state.activeWallet.network
       );
-      this.$account.open_wallet(
-        this.$store.state.account.name,
-        this.$store.state.account.password,
-        this.$account.$store.state.account.privateKey,
-        this.$store.state.account.network.byte
+      console.log("showing the account");
+      console.log(account);
+      this.$store.commit("setAccountProperty", {
+        key: "accountPrivateKey",
+        value: account.privateKey
+      });
+      var wallet = this.$account.openAencWallet(
+        this.$store.state.activeWallet.name,
+        this.$store.state.activeWallet.password,
+        this.$store.state.activeWallet.accountPrivateKey,
+        this.$store.state.activeWallet.network
       );
+      console.log(wallet);
+      this.$store.commit("setActiveWallet", wallet);
 
       // Check if wallet creation was successful
       var message = "Something went wrong during wallet creation";
@@ -400,14 +403,14 @@ export default {
     loadWallet() {
       console.debug("F:LW:Load Wallet");
       this.$account.regenerate_account(
-        this.$store.state.account.private_key,
-        this.$store.state.account.network.byte
+        this.$store.state.activeWallet.private_key,
+        this.$store.state.activeWallet.network.byte
       );
       this.$account.open_wallet(
-        this.$store.state.account.name,
-        this.$store.state.account.password,
-        this.$store.state.account.private_key,
-        this.$store.state.account.network.byte
+        this.$store.state.activeWallet.name,
+        this.$store.state.activeWallet.password,
+        this.$store.state.activeWallet.private_key,
+        this.$store.state.activeWallet.network.byte
       );
       // Load the wallet key in to state storage for reuse
       this.$store.commit("setAccountProperty", {
@@ -446,7 +449,7 @@ export default {
     regenWalletPassword() {
       console.debug("F:RWP:Regen Wallet Password");
       this.$store.dispatch("gen_password");
-      console.debug("RWP:Result = " + this.$store.state.account.password);
+      console.debug("RWP:Result = " + this.$store.state.activeWallet.password);
     },
     backupUploaded(file) {
       console.debug("F:BU:Backup Uploaded");
@@ -467,7 +470,7 @@ export default {
               value: walletInformation.name
             });
             this.$store.commit("setAccountProperty", {
-              key: "private_key",
+              key: "privateKey",
               value: walletInformation.accountPrivateKey
             });
 

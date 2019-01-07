@@ -2,21 +2,22 @@
 
 A NodeJS project providing an easy to use interface to the AENChain blockchain network. This project is based on the following base components:
 
-- [VueJS](https://vuejs.org/) - A modern MVVM Framework from the original creators of Angular (very similar also) who weren't happy about version 2+
-- [NUXT](https://nuxtjs.org/) - VueJS workflow system that makes JavaScript development much smoother
-- [Electron](https://electronjs.org/) - Cross platform desktop app builder
-- [Vuetify](https://vuetifyjs.com/en/) - Google Material Design Component Framework (widget factory)
+-   [VueJS](https://vuejs.org/) - A modern MVVM Framework from the original creators of Angular (very similar also) who weren't happy about version 2+
+-   [NUXT](https://nuxtjs.org/) - VueJS workflow system that makes JavaScript development much smoother
+-   [Electron](https://electronjs.org/) - Cross platform desktop app builder
+-   [Vuetify](https://vuetifyjs.com/en/) - Google Material Design Component Framework (widget factory)
 
 ## TODO
 
-- [] Interface customisation and branding
-- [] Optimise asset rendering to shrink package size.
-- [] [Cordova](https://cordova.apache.org/) - Middleware for compiling mobile apps based on web projects
-- [] Incorporate feedback form
-- [] Integrate in app analytics so we can guage usage
-- [] Better management panel for namespaces
-- [] More details from the mosaic
-- [] Replace some of the "out of function" scope variable implementations to use event emitters for better efficiency, smaller footprint, simpler to follow code
+-   [] Cut up the wallet service in to smaller chunk
+-   [] Interface customisation and branding
+-   [] Optimise asset rendering to shrink package size.
+-   [][cordova](https://cordova.apache.org/) - Middleware for compiling mobile apps based on web projects
+-   [] Incorporate feedback form
+-   [] Integrate in app analytics so we can guage usage
+-   [] Better management panel for namespaces
+-   [] More details from the mosaic
+-   [] Replace some of the "out of function" scope variable implementations to use event emitters for better efficiency, smaller footprint, simpler to follow code
 
 If you plan on running both the web app and Electron app, it is necessary to remove the `node_modules` and `.nuxt` path due to the way the Javascript is compiled.
 

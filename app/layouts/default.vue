@@ -1,20 +1,9 @@
 <template>
   <v-app dark>
-
     <!-- NAV DRAWER -->
-    <v-navigation-drawer
-      v-model="drawer"
-      fixed
-      app
-    >
+    <v-navigation-drawer v-model="drawer" fixed app>
       <v-list>
-        <v-list-tile
-          v-for="(item, i) in visibleLinks"
-          :to="item.to"
-          :key="i"
-          router
-          exact
-        >
+        <v-list-tile v-for="(item, i) in visibleLinks" :to="item.to" :key="i" router exact>
           <v-list-tile-action>
             <v-icon v-html="item.icon"/>
           </v-list-tile-action>
@@ -31,17 +20,13 @@
             <v-list-tile-title>Exit</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
-
       </v-list>
     </v-navigation-drawer>
 
     <!-- TOP BAR -->
     <v-toolbar fixed app>
-
       <v-toolbar-side-icon @click="drawer = !drawer"/>
-      <v-avatar
-        size="24"
-      >
+      <v-avatar size="24">
         <img src="/logo.png" alt="avatar">
       </v-avatar>
       <v-toolbar-title class="hidden-sm-and-down" v-text="title"/>
@@ -49,24 +34,15 @@
       <v-spacer/>
 
       <!-- Environment -->
-      <v-btn v-if="environment !== 'production'" disabled>
-        {{ environment }}
-      </v-btn>
+      <v-btn v-if="environment !== 'production'" disabled>{{ environment }}</v-btn>
 
       <!-- Quick balance display -->
-      <v-btn v-if="account.meta.balance != 0" disabled>
-        Balance: {{ account.meta.balance }}
-      </v-btn>
+      <v-btn v-if="account.meta.balance != 0" disabled>Balance: {{ account.meta.balance }}</v-btn>
 
       <network-diagnostics/>
 
-
       <!-- USER DROPDOWN -->
-      <v-menu
-        v-if="account.account.address"
-        v-model="menu"
-        :close-on-content-click="false"
-      >
+      <v-menu v-if="account.account.address" v-model="menu" :close-on-content-click="false">
         <v-btn slot="activator" flat>
           <v-avatar size="24">
             <v-icon>account_circle</v-icon>
@@ -75,7 +51,8 @@
         <v-card>
           <v-card-title>
             <div>
-              <span v-if="account.wallet.name" class="grey--text">{{ account.wallet.name }}</span><br>
+              <span v-if="account.wallet.name" class="grey--text">{{ account.wallet.name }}</span>
+              <br>
               <span v-if="account.wallet.address.address">
                 <address-render :address="account.wallet.address.address"/>
               </span>
@@ -87,7 +64,6 @@
                   <v-list-tile-title>Local Node</v-list-tile-title>
                 </v-list-tile>
               </v-list>
-
             </div>
           </v-card-title>
           <v-card-actions>
@@ -97,7 +73,6 @@
             <v-btn v-if="mode === 'app'" flat @click="exit">Exit</v-btn>
           </v-card-actions>
         </v-card>
-
       </v-menu>
     </v-toolbar>
 
@@ -107,19 +82,9 @@
         <no-ssr>
           <loading/>
         </no-ssr>
-        <v-snackbar
-          v-model="showNotification"
-          :timeout="timeout"
-          :top="true"
-          :vertical="true"
-        >
+        <v-snackbar v-model="showNotification" :timeout="timeout" :top="true" :vertical="true">
           {{ notification_message }}
-          <v-btn
-            flat
-            @click="showNotification = false"
-          >
-            Close
-          </v-btn>
+          <v-btn flat @click="showNotification = false">Close</v-btn>
         </v-snackbar>
         <!-- NUXT BEGINNING -->
         <nuxt/>
@@ -127,10 +92,7 @@
     </v-content>
 
     <!-- FOOTER AREA -->
-    <v-footer app
-              height="auto"
-              color="primary"
-    >
+    <v-footer app height="auto" color="primary">
       &copy; {{ new Date().getFullYear() }} Aenco Solutions Ltd - Global Health Blockchain Financial Solutions
       <v-spacer/>
       {{ version }}
@@ -289,14 +251,15 @@ export default {
       }
     }
   },
+  /**
+   *
+   */
   mounted() {
-    console.debug("P:Root Page Created");
+    console.debug("P:R:Root Page Created");
 
     this.$store.commit("setAppMode", "web");
-
     var env = process.env.NODE_ENV || "dev";
     this.$store.commit("setEnvironment", env);
-
     this.$store.commit("setLoading", {
       t: "global",
       v: true,
@@ -322,45 +285,50 @@ export default {
       console.log(child);
     }
 
-    this.$store.dispatch("rank_api_nodes");
+    this.$store.dispatch("rankApiNodes");
 
-    // Use a little timeout to give node ranking best chance to ping network first time
+    // Short timeout to give API ranking a chance to get some accurate results
     setTimeout(
       function() {
-        this.$account.updateApiEndpoint(
-          this.$store.state.internal.api_endpoint
+        // Local services for network consumption. Only recreates if new or using different
+        this.$account.updateActiveApiEndpoint(
+          this.$store.state.internal.activeApiEndpoint
         );
 
-        // Hydrate local state
-        if (
-          this.$store.state.account.private_key &&
-          this.$store.state.account.wallet_private_key
-        ) {
-          console.debug("R:State reports account present");
-          this.$account.hydrate(
-            this.$store.state.account.name,
-            this.$store.state.account.password,
-            this.$store.state.account.private_key,
-            this.$store.state.account.network.byte
+        // Hydrate local state from cold storage
+        if (this.$store.state.activeWallet.accountPrivateKey) {
+          console.debug(
+            "P:R:State reports account present. Attempting to warm up wallet"
+          );
+          this.$account.regenerateAccount(
+            this.$store.state.activeWallet.accountPrivateKey,
+            this.$store.state.activeWallet.network
           );
 
-          // Perform regular checks on wallet until declared as public
-          var publicWalletInterval = setInterval(
+          this.$account.openAencWallet(
+            this.$store.state.activeWallet.name,
+            this.$store.state.activeWallet.password,
+            this.$store.state.activeWallet.accountPrivateKey,
+            this.$store.state.activeWallet.network
+          );
+
+          // Regularly run checks on the current wallet until it is considered live
+          var walletOnChainCheckInterval = setInterval(
             function() {
-              this.$account.isWalletPublic(
-                this.$account.$store.state.wallet.address.address
+              this.$account.isWalletOnChain(
+                this.$store.state.activeWallet.address
               );
-              if (this.$account.$store.state.public === true) {
-                clearInterval(publicWalletInterval);
+              if (this.$account.$store.state.onChain === true) {
+                clearInterval(walletOnChainCheckInterval);
               }
             }.bind(this),
-            5000
+            40000
           );
+
+          // User doesn't yet have an AEN wallet so redirect to initial setup screen
         } else {
           if (this.$nuxt.$route.name !== "index") {
-            console.log(
-              "R:Sending the user back to home because account not present"
-            );
+            console.log("P:R:Ensuring user is on initial setup screen");
             this.$nuxt.$router.replace({ path: "/" });
           }
         }
@@ -368,42 +336,48 @@ export default {
         // API Node ping test / ranking
         setInterval(
           function() {
-            this.$store.dispatch("rank_api_nodes");
-            this.$account.updateApiEndpoint(
-              this.$store.state.internal.api_endpoint
+            this.$store.dispatch("rankApiNodes");
+            this.$account.updateActiveApiEndpoint(
+              this.$store.state.internal.activeApiEndpoint
             );
           }.bind(this),
-          60000
+          120000
         );
 
         // Generic network information that can be had without an account
-        this.$store.dispatch("update_network_information");
+        this.$store.dispatch("updateGenericNetworkInformation");
         setInterval(
           function() {
-            this.$store.dispatch("update_network_information");
+            this.$store.dispatch("updateGenericNetworkInformation");
           }.bind(this),
-          20000
+          80000
         );
 
+        // Finished the global loading procedure
         this.$store.commit("setLoading", { t: "global", v: false });
-
-        // Breathing space for API node ranking
       }.bind(this),
       2000
     );
   },
   methods: {
+    /**
+     * Shutdown procedure
+     */
     exit() {
       console.debug("F:E:Exit");
 
       // Check if the user doesn't want to be remembered and reset the state machine
-      if (this.$store.state.meta.remember_user === false) {
+      if (this.$store.state.meta.rememberUser === false) {
         this.$store.commit("reset");
         console.debug("E:Resetting state machine");
       }
-      console.debug("E:Closing window");
-      var window = remote.getCurrentWindow();
-      window.close();
+
+      // If running the smart wallet as an app which has a window which can be closed
+      if (this.$store.state.meta.mode === "app") {
+        console.debug("E:Closing window");
+        var window = remote.getCurrentWindow();
+        window.close();
+      }
     }
   }
 };

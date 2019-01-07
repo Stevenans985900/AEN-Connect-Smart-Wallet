@@ -15,5 +15,5 @@ app/dist
 
 # DotEnv pickup file
 app/.env
-
+.vscode
 .idea

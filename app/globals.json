@@ -2,6 +2,7 @@
   "version": "0.0.1",
   "build_number": "",
   "google_recaptcha_key": "NA",
+  "api_endpoint_test_uri": "/block/1",
   "api_endpoints": [{
       "alias": "API-2",
       "address": "http://api-2.aencoin.io:3000"

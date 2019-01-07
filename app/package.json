@@ -44,6 +44,7 @@
     "lodash.get": "^4.4.2",
     "nem-sdk": "^1.6.7",
     "nem2-sdk": "^0.10.1",
+    "net": "^1.0.2",
     "nuxt": "^1.4.0",
     "qrcode-generator": "^1.4.1",
     "vue-chartjs": "^3.4.0",
