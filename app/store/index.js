@@ -87,14 +87,14 @@ export const actions = {
      * @param {*} context 
      */
     rankApiNodes(context) {
-        console.debug('F:RAN:Rank API Nodes')
-        var apiEndpoints = Vue.prototype.$g('api_endpoints')
+        console.debug('Vuex: Rank API Nodes')
+        var apiEndpoints = Vue.prototype.$g('aen.api_endpoints')
         var stateContext = context
 
         // Test function encapsulate for variable scoping and asynchronous calling
         var check = function (currentRound) {
             var position = currentRound
-            var thisAddress = apiEndpoints[position].address + Vue.prototype.$g('api_endpoint_test_uri')
+            var thisAddress = apiEndpoints[position].address + Vue.prototype.$g('aen.api_endpoint_test_uri')
             apiEndpoints[position].scanStart = new Date()
             var lowestPing = 9999
 
@@ -109,7 +109,7 @@ export const actions = {
 
                     // If the test beats current score, set as endpoint to use
                     if (apiEndpoints[position].scanTime < lowestPing) {
-                        console.debug('RAN: Setting new API endpoint to: ' + apiEndpoints[position].address)
+                        console.debug('Updating AEN API endpoint to: ' + apiEndpoints[position].address)
                         lowestPing = apiEndpoints[position].scanTime
                         stateContext.commit('setApiEndpoint', apiEndpoints[position].address)
                         stateContext.commit('setPingTime', lowestPing)
@@ -174,21 +174,20 @@ export const mutations = {
     setEnvironment(state, environmentName) {
         state.meta.environment = environmentName
     },
+    addWallet(state, wallet) {
+        if (!state.wallets.hasOwnProperty(wallet.address)) {
+            state.wallets[wallet.address] = wallet
+        }
+    },
     // Setting a AEN wallet to main context
     setActiveWallet(state, wallet) {
         state.meta.walletPresent = true
-        state.activeWallet.privateKey = wallet.encryptedPrivateKey.encryptedKey
-        state.activeWallet.address = wallet.address.address
+        state.activeWallet.privateKey = wallet.privateKey
+        state.activeWallet.address = wallet.address
 
         // Check whether the wallet exists in
         if (!state.wallets.hasOwnProperty(state.activeWallet.address)) {
-            state.wallets[state.activeWallet.address] = {
-                type: 'aen',
-                privateKey: state.activeWallet.privateKey,
-                accountPrivateKey: state.activeWallet.accountPrivateKey,
-                password: state.activeWallet.password,
-                network: state.activeWallet.network
-            }
+            state.wallets[state.activeWallet.address] = wallet
         }
 
     },
@@ -234,14 +233,10 @@ export const mutations = {
         state.contacts.push(changeObjects.updated)
     },
     setApiEndpoint(state, value) {
-        state.internal.api_endpoint = value
+        state.internal.activeApiEndpoint = value
     },
     setPingTime(state, value) {
-        state.internal.api_ping = value
-    },
-    setCurrentApi(state, payload) {
-        state.internal.api_endpoint = payload.address
-        state.internal.api_ping = payload.scanTime
+        state.internal.activeApiPing = value
     },
     setPreferredNode(state, address) {
         state.internal.preferredNode = address

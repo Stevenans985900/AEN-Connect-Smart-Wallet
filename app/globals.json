@@ -2,27 +2,33 @@
   "version": "0.0.1",
   "build_number": "",
   "google_recaptcha_key": "NA",
-  "api_endpoint_test_uri": "/block/1",
-  "api_endpoints": [{
-      "alias": "API-2",
-      "address": "http://api-2.aencoin.io:3000"
-    },
-    {
-      "alias": "API-5",
-      "address": "http://api-5.aencoin.io:3000"
-    },
-    {
-      "alias": "API-10",
-      "address": "http://api-10.aencoin.io:3000"
-    }
-  ],
-  "available_networks": [{
-    "name": "TestNet",
-    "identifier": "PUBLIC_TEST",
-    "byte": 152
-  }],
-  "faucets": [{
-    "name": "TestNet Faucet",
-    "address": "TD5C6ZEHS7NOQQQ522VYI4BXJZ33HVJFY5AFAL3P"
-  }]
+  "aen": {
+    "network_version": "0.1",
+    "api_endpoint_test_uri": "/block/1",
+    "api_endpoints": [{
+        "alias": "API-2",
+        "address": "http://api-2.aencoin.io:3000"
+      },
+      {
+        "alias": "API-5",
+        "address": "http://api-5.aencoin.io:3000"
+      },
+      {
+        "alias": "API-10",
+        "address": "http://api-10.aencoin.io:3000"
+      }
+    ],
+    "available_networks": [{
+      "name": "TestNet",
+      "identifier": "PUBLIC_TEST",
+      "byte": 152
+    }],
+    "faucets": [{
+      "name": "TestNet Faucet",
+      "address": "TD5C6ZEHS7NOQQQ522VYI4BXJZ33HVJFY5AFAL3P"
+    }]
+  },
+  "eth": {
+    "api_endpoint": "https://ropsten.infura.io/0HIuuP4qCjvv8DMGjvPm"
+  }
 }

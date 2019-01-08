@@ -67,10 +67,10 @@ export default {
   },
   computed: {
     faucets() {
-      return this.$g("faucets");
+      return this.$g("aen.faucets");
     },
     account() {
-      return this.$account.$store.state;
+      return this.$walletService.$store.state;
     },
     networkIdentifier() {
       return this.$store.state.networkIdentifier;

@@ -1,6 +1,5 @@
 <template>
   <v-layout column justify-center align-center>
-    <v-flex xs12>{{ wallets }}</v-flex>
     <v-flex xs12 sm8 md6>
       <!-- Wallet Management -->
       <v-card>
@@ -18,7 +17,7 @@
           <!-- AEN -->
           <v-tab-item value="aen">
             <v-card flat>
-              <v-form ref="form" v-model="valid" class="full-width" @submit.prevent="onSubmit">
+              <v-form ref="aen-form" v-model="valid" class="full-width" @submit.prevent="onSubmit">
                 <v-select
                   v-if="multipleNetworks"
                   :items="availableNetworks"
@@ -57,7 +56,16 @@
           <!-- ETH -->
           <v-tab-item value="eth">
             <v-card flat>
-              <v-card-text>here ya were</v-card-text>
+              <v-form ref="eth-form" v-model="valid" class="full-width" @submit.prevent="onSubmit">
+                <v-text-field
+                  v-model="walletName"
+                  :rules="[walletRules.required, walletRules.min]"
+                  label="Wallet Name"
+                  required
+                  placeholder="AEN Wallet"
+                />
+                <h1>Have a means of generating extra entropy here</h1>
+              </v-form>
             </v-card>
           </v-tab-item>
         </v-tabs>
@@ -68,20 +76,22 @@
         </v-card-actions>
         <!-- </v-card>
         </v-dialog>-->
+
         <v-card-title class="headline">Wallet Management</v-card-title>
         <v-card-text>
           <v-list two-line>
             <template v-for="(wallet, address) in wallets">
-              <v-list-tile :key="address" avatar ripple @click="toggle(address)">
+              <v-list-tile :key="address" avatar ripple @click="setActiveWallet(wallet)">
                 <v-list-tile-content>
-                  <v-list-tile-title>{{ address }}</v-list-tile-title>
-                  <v-list-tile-sub-title class="text--primary">{{ wallet.type }}</v-list-tile-sub-title>
+                  <v-list-tile-title>{{ wallet.name }}</v-list-tile-title>
+                  <v-list-tile-sub-title class="text--primary">{{ wallet.type }} - {{ address }}</v-list-tile-sub-title>
                 </v-list-tile-content>
 
                 <v-list-tile-action>
-                  <!-- <v-list-tile-action-text>{{ item.action }}</v-list-tile-action-text> -->
-                  <!-- <v-icon v-if="selected.indexOf(index) < 0" color="grey lighten-1">star_border</v-icon> -->
-                  <!-- <v-icon v-else color="yellow darken-2">star</v-icon> -->
+                  <template v-if="wallet.type === 'aen'">
+                    <v-icon v-if="address === currentWallet.address" color="yellow darken-2">star</v-icon>
+                    <v-icon v-else color="grey lighten-1">star_border</v-icon>
+                  </template>
                 </v-list-tile-action>
               </v-list-tile>
               <v-divider :key="address"/>
@@ -138,10 +148,10 @@ export default {
       return this.$store.state.wallets;
     },
     currentWallet() {
-      return this.$account.$store.state;
+      return this.$store.state.activeWallet;
     },
     multipleNetworks() {
-      if (this.$g("available_networks").length > 1) {
+      if (this.$g("aen.available_networks").length > 1) {
         return true;
       }
     }
@@ -158,25 +168,52 @@ export default {
     );
   },
   methods: {
+    setActiveWallet(wallet) {
+      switch (wallet.type) {
+        case 'aen':
+          this.$walletService.walletLoad('aen', wallet)
+          this.$store.commit("setAccountProperty", {
+            key: "accountPrivateKey",
+            value: this.$walletService.$store.state.account.privateKey
+          });
+          this.$store.commit("setAccount", this.$walletService.$store.state.account);
+          this.$store.commit("setActiveWallet", wallet);
+          break;
+      }
+    },
     /**
      * Create a new wallet on one of the various networks
      */
     generateWallet() {
       // Make sure that the form being submitted is valid
-      if (!this.$refs.form.validate()) {
+
+      let formRef = this.walletType+'-form'
+      if (!this.$refs[formRef].validate()) {
         return;
       }
-
+      let options = {}
       switch (this.walletType) {
+        case "eth":
+          options = {
+            name: this.walletName
+          }
+          break
         case "aen":
         default:
-          console.log("Creating AEN Wallet");
-          this.$account.newAencWallet(
-            this.$store.state.account.network.identifier,
-            this.walletName,
-            this.walletPassword
-          );
+          options = {
+            network: this.$store.state.activeWallet.network,
+            name: this.walletName,
+            password: this.walletPassword
+          }
+          break;
+
       }
+      let wallet = this.$walletService.walletNew(this.walletType, options)
+      this.$store.commit('addWallet', wallet)
+      this.$store.commit("showNotification", {
+        type: "success",
+        message: "Your wallet has been successfully setup!"
+      });
     }
   }
 };

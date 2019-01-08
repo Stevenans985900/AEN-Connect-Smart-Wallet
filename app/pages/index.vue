@@ -76,9 +76,9 @@
                         v-if="environment === 'Production'"
                         ref="recaptcha"
                         :sitekey="googleCaptchaKey"
-                        @verify="createAccount"
+                        @verify="createWallet"
                       />
-                      <v-btn v-else @click="createAccount">Create Account</v-btn>
+                      <v-btn v-else @click="createWallet">Create Account</v-btn>
                     </v-form>
                   </v-layout>
                 </v-card-text>
@@ -202,9 +202,6 @@ export default {
     wallets() {
       return this.$store.state.wallets;
     },
-    account() {
-      return this.$account.$store.state;
-    },
     googleCaptchaKey() {
       return this.$g("google_recaptcha_key");
     },
@@ -212,8 +209,8 @@ export default {
       return this.$store.state.meta.environment;
     },
     address() {
-      if (this.$account.$store.state.wallet.hasOwnProperty("address")) {
-        return this.$account.$store.state.wallet.address.address;
+      if (this.$walletService.$store.state.wallet.hasOwnProperty("address")) {
+        return this.$walletService.$store.state.wallet.address.address;
       }
       return "";
     },
@@ -232,7 +229,7 @@ export default {
       }
     },
     availableNetworks() {
-      return this.$g("available_networks");
+      return this.$g("aen.available_networks");
     },
     rememberMe: {
       get: function() {
@@ -243,7 +240,7 @@ export default {
       }
     },
     multipleNetworks() {
-      if (this.$g("available_networks").length > 1) {
+      if (this.$g("aen.available_networks").length > 1) {
         return true;
       }
     },
@@ -297,10 +294,10 @@ export default {
     }
   },
   mounted: function() {
-    console.debug("P:I:Index Page Started");
+    console.debug("Index Page: Started");
 
     if (this.environment === "production") {
-      console.debug("I:Pulling in Google Recaptcha");
+      console.debug("Pulling in Google Recaptcha");
       let recaptchaScript = document.createElement("script");
       recaptchaScript.setAttribute(
         "src",
@@ -346,60 +343,49 @@ export default {
      * CREATE ACCOUNT
      * Set up account in initial state to be used on the blockchain
      */
-    createAccount() {
-      console.debug("F:CA:Create Account");
+    createWallet() {
 
       if (!this.$refs.form.validate()) {
         console.log("form is invalid");
         return false;
       }
 
-      var account = this.$account.newAencAccount(
-        this.$store.state.activeWallet.network
+      let wallet = this.$walletService.walletNew(
+        'aen',
+        {
+          network: this.$store.state.activeWallet.network,
+          name: this.$store.state.activeWallet.name,
+          password: this.$store.state.activeWallet.password
+        }
       );
-      console.log("showing the account");
-      console.log(account);
-      this.$store.commit("setAccountProperty", {
-        key: "accountPrivateKey",
-        value: account.privateKey
-      });
-      var wallet = this.$account.openAencWallet(
-        this.$store.state.activeWallet.name,
-        this.$store.state.activeWallet.password,
-        this.$store.state.activeWallet.accountPrivateKey,
-        this.$store.state.activeWallet.network
-      );
-      console.log(wallet);
-      this.$store.commit("setActiveWallet", wallet);
 
       // Check if wallet creation was successful
-      var message = "Something went wrong during wallet creation";
-      if (this.$account.$store.state.wallet instanceof SimpleWallet) {
+      if (this.$walletService.$store.state.wallet instanceof SimpleWallet) {
         console.debug("CA:Wallet successfully generated");
 
-        if (this.$store.state.meta.remember_user === true) {
-          console.debug(
-            "CA:Remember me option selected, saving details to store"
-          );
-          this.$store.commit("setAccount", this.$account.$store.state.account);
-          this.$store.commit("setWallet", this.$account.$store.state.wallet);
-        } else {
-          this.$store.commit("setAccountStatus", true);
-        }
+        this.$store.commit("setAccountProperty", {
+          key: "accountPrivateKey",
+          value: this.$walletService.$store.state.account.privateKey
+        });
+        this.$store.commit("setAccount", this.$walletService.$store.state.account);
+        this.$store.commit("setActiveWallet", wallet);
+        this.$store.commit("setAccountStatus", true);
         this.walletCreated = true;
-        message = "Your wallet has been successfully setup!";
+
         this.$store.commit("showNotification", {
           type: "success",
-          message: message
+          message: "Your wallet has been successfully setup!"
         });
-        // this.$nuxt.$router.replace({ path: '/dashboard' })
       } else {
         this.$store.commit("showNotification", {
           type: "error",
-          message: message
+          message: "Something went wrong during wallet creation"
         });
       }
     },
+    /**
+     *
+     */
     loadWallet() {
       console.debug("F:LW:Load Wallet");
       this.$account.regenerate_account(

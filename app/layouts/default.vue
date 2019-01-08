@@ -170,13 +170,13 @@ export default {
       return map;
     },
     account() {
-      return this.$account.$store.state;
+      return this.$walletService.$store.state;
     },
     currentPing() {
-      return this.$store.state.internal.api_ping;
+      return this.$store.state.internal.activeApiPing;
     },
     currentApi() {
-      return this.$store.state.internal.api_endpoint;
+      return this.$store.state.internal.activeApiEndpoint;
     },
     environment() {
       return this.$store.state.meta.environment;
@@ -222,14 +222,15 @@ export default {
     hydrated: function() {
       console.debug("W:H:Hydrated");
       // Ping network until address is considered reachable
-      if (this.$store.state.account.publicly_accessible === true) {
-        this.$account.taskRunners();
-        this.$account.startListeners();
-      } else {
+      if (this.$store.state.account.publicly_accessible === false) {
         var addressInterval = setInterval(
           function() {
-            var result = this.$account.isWalletPublic(
-              this.$store.state.account.address
+            var result = this.$walletService.isWalletLive(
+              'aen',
+                    {
+                      address: this.$store.state.activeWallet.address
+                    }
+
             );
             if (result !== false) {
               console.debug(
@@ -241,8 +242,8 @@ export default {
                 key: "publicly_acessible",
                 value: true
               });
-              this.$account.taskRunners();
-              this.$account.startListeners();
+              this.$walletService.taskRunners();
+              this.$walletService.startListeners();
               clearInterval(addressInterval);
             }
           }.bind(this),
@@ -255,10 +256,9 @@ export default {
    *
    */
   mounted() {
-    console.debug("P:R:Root Page Created");
 
     this.$store.commit("setAppMode", "web");
-    var env = process.env.NODE_ENV || "dev";
+    let env = process.env.NODE_ENV || "dev";
     this.$store.commit("setEnvironment", env);
     this.$store.commit("setLoading", {
       t: "global",
@@ -291,34 +291,43 @@ export default {
     setTimeout(
       function() {
         // Local services for network consumption. Only recreates if new or using different
-        this.$account.updateActiveApiEndpoint(
-          this.$store.state.internal.activeApiEndpoint
+        this.$walletService.Aen.updateActiveApiEndpoint({
+          address: this.$store.state.internal.activeApiEndpoint
+        }
         );
 
         // Hydrate local state from cold storage
         if (this.$store.state.activeWallet.accountPrivateKey) {
           console.debug(
-            "P:R:State reports account present. Attempting to warm up wallet"
+            "Local wallet information found, attempting warmup"
           );
-          this.$account.regenerateAccount(
-            this.$store.state.activeWallet.accountPrivateKey,
-            this.$store.state.activeWallet.network
+          this.$walletService.walletLoad(
+                  'aen',
+                  {
+                    accountPrivateKey: this.$store.state.activeWallet.accountPrivateKey,
+                    network: this.$store.state.activeWallet.network,
+                    name: this.$store.state.activeWallet.name,
+                    password: this.$store.state.activeWallet.password,
+                  }
           );
-
-          this.$account.openAencWallet(
-            this.$store.state.activeWallet.name,
-            this.$store.state.activeWallet.password,
-            this.$store.state.activeWallet.accountPrivateKey,
-            this.$store.state.activeWallet.network
-          );
-
           // Regularly run checks on the current wallet until it is considered live
-          var walletOnChainCheckInterval = setInterval(
+          this.$walletService.walletIsLive(
+                  'aen',
+                  {
+                    address: this.$store.state.activeWallet.address
+                  }
+
+          )
+          let walletOnChainCheckInterval = setInterval(
             function() {
-              this.$account.isWalletOnChain(
-                this.$store.state.activeWallet.address
-              );
-              if (this.$account.$store.state.onChain === true) {
+              this.$walletService.walletIsLive(
+                'aen',
+                      {
+                        address: this.$store.state.activeWallet.address
+                      }
+
+              )
+              if (this.$walletService.$store.state.onChain === true) {
                 clearInterval(walletOnChainCheckInterval);
               }
             }.bind(this),
@@ -328,7 +337,7 @@ export default {
           // User doesn't yet have an AEN wallet so redirect to initial setup screen
         } else {
           if (this.$nuxt.$route.name !== "index") {
-            console.log("P:R:Ensuring user is on initial setup screen");
+            console.log("No wallet so redirecting to launch");
             this.$nuxt.$router.replace({ path: "/" });
           }
         }
@@ -337,8 +346,10 @@ export default {
         setInterval(
           function() {
             this.$store.dispatch("rankApiNodes");
-            this.$account.updateActiveApiEndpoint(
-              this.$store.state.internal.activeApiEndpoint
+            this.$walletService.Aen.updateActiveApiEndpoint({
+              address: this.$store.state.internal.activeApiEndpoint
+            }
+
             );
           }.bind(this),
           120000
