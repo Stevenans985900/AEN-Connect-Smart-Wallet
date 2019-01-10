@@ -7,7 +7,7 @@
 </template>
 
 <script>
-    import AddressString from '../Address'
+    import AddressString from '../../Address'
 
     export default {
         components: {

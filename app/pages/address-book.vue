@@ -16,7 +16,7 @@
               <v-container grid-list-md>
                 <v-layout wrap>
                   <v-flex xs12 sm6>
-                    <v-text-field v-model="contact.name" label="Name" required/>
+                    <v-text-field v-model="contact.displayText" label="Name" required/>
                   </v-flex>
                   <v-flex xs12 sm6>
                     <v-text-field
@@ -47,7 +47,7 @@
         </v-card-title>
         <v-data-table :headers="headers" :items="contacts" :search="search">
           <template slot="items" slot-scope="props">
-            <td>{{ props.item.name }}</td>
+            <td>{{ props.item.displayText }}</td>
             <td class="text-xs-right">{{ props.item.address }}</td>
             <td class="justify-center layout px-0">
               <v-icon small class="mr-2" @click="editContact(props.item)">edit</v-icon>
@@ -99,7 +99,7 @@ export default {
   },
   computed: {
     contacts() {
-      return this.$store.state.contacts;
+      return this.$store.state.wallet.contacts;
     }
   },
   created: function() {
@@ -120,8 +120,8 @@ export default {
       if (this.contact.mode === "new") {
         // Check whether the object already exists
         if (
-          this.$store.state.contacts.find(
-            item => item.name === this.contact.name
+          this.$store.state.wallet.contacts.find(
+            item => item.displayText === this.contact.displayText
           ) === undefined
         ) {
           message = "Contact Added";
@@ -131,7 +131,7 @@ export default {
           });
           this.addContact();
           this.dialog = false;
-          this.contact.name = "";
+          this.contact.displayText = "";
           this.contact.address = "";
         } else {
           message = "That name is already in use, please choose another";
@@ -143,7 +143,7 @@ export default {
       } else {
         this.editCommit();
         this.dialog = false;
-        this.contact.name = "";
+        this.contact.displayText = "";
         this.contact.address = "";
         this.contact.mode = "new";
 
@@ -156,19 +156,19 @@ export default {
     },
     addContact() {
       let contact = {
-        name: this.contact.name,
+        displayText: this.contact.displayText,
         address: this.contact.address
       };
-      this.$store.commit("addContact", contact);
+      this.$store.commit("wallet/addContact", contact);
       this.outcome = true;
     },
     deleteContact(contact) {
-      this.$store.commit("deleteContact", contact);
+      this.$store.commit("wallet/deleteContact", contact);
     },
     editContact(contact) {
       // Put the contact in to scope for simple editing
       this.contextObject = contact;
-      this.contact.name = contact.name;
+      this.contact.displayText = contact.displayText;
       this.contact.address = contact.address;
       this.contact.mode = "edit";
       // Show the modal
@@ -176,11 +176,11 @@ export default {
     },
     editCommit() {
       let contact = {
-        name: this.contact.name,
+        displayText: this.contact.displayText,
         address: this.contact.address
       };
       // Push to state management
-      this.outcome = this.$store.commit("editContact", {
+      this.outcome = this.$store.commit("wallet/editContact", {
         original: this.contextObject,
         updated: contact
       });

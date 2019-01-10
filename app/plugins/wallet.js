@@ -1,6 +1,6 @@
 import Vue from 'vue'
-import WalletService from '~/services/WalletService'
-import PluginStore from '~/services/PluginStore'
+import WalletService from '~/modules/WalletService'
+import PluginStore from '~/modules/PluginStore'
 
 Vue.use(WalletService, {
     store: new PluginStore({

@@ -41,7 +41,7 @@
                 <v-card-text>
                   <v-layout row wrap>
                     <v-form
-                      ref="form"
+                      ref="newWalletForm"
                       v-model="valid"
                       class="full-width"
                       @submit.prevent="onSubmit"
@@ -88,7 +88,7 @@
               <v-card v-if="existingAccount" class="text-xs-center">
                 <v-card-text>
                   <v-layout row wrap>
-                    <v-form ref="form" v-model="valid" class="full-width">
+                    <v-form ref="existingWalletForm" v-model="valid" class="full-width">
                       <upload-btn :file-changed-callback="backupUploaded" title="Restore from file">
                         <template slot="icon">
                           <v-icon>attach_file</v-icon>
@@ -177,7 +177,6 @@ export default {
   data() {
     return {
       valid: false,
-      eulaAgree: false,
       backupAgree: false,
       proceedValid: false,
       newAccount: false,
@@ -199,8 +198,9 @@ export default {
     };
   },
   computed: {
-    wallets() {
-      return this.$store.state.wallets;
+    eulaAgree: {
+      get: function() { return this.$store.state.meta.eulaAgree },
+      set: function(val) { this.$store.commit('setMeta', {key: 'eulaAgree', value: val}) }
     },
     googleCaptchaKey() {
       return this.$g("google_recaptcha_key");
@@ -209,10 +209,7 @@ export default {
       return this.$store.state.meta.environment;
     },
     address() {
-      if (this.$walletService.$store.state.wallet.hasOwnProperty("address")) {
-        return this.$walletService.$store.state.wallet.address.address;
-      }
-      return "";
+      return this.$store.state.wallet.context.address
     },
     qrData() {
       var qr = qrCodeGenerator(0, "M");
@@ -222,10 +219,10 @@ export default {
     },
     network: {
       get: function() {
-        return this.$store.state.activeWallet.network;
+        return this.$store.state.wallet.context.network;
       },
       set: function(inputValue) {
-        this.$store.commit("setNetwork", inputValue);
+        this.$store.commit("wallet/setNetwork", inputValue);
       }
     },
     availableNetworks() {
@@ -233,7 +230,7 @@ export default {
     },
     rememberMe: {
       get: function() {
-        return this.$store.state.meta.remember_user;
+        return this.$store.state.meta.rememberUser;
       },
       set: function(inputValue) {
         this.$store.commit("setRememberUser", inputValue);
@@ -244,15 +241,12 @@ export default {
         return true;
       }
     },
-    walletExists() {
-      return this.$store.state.meta.wallet_present;
-    },
     walletName: {
       get: function() {
-        return this.$store.state.activeWallet.name;
+        return this.$store.state.wallet.context.name;
       },
       set: function(inputValue) {
-        this.$store.commit("setAccountProperty", {
+        this.$store.commit("wallet/setContextProperty", {
           key: "name",
           value: inputValue
         });
@@ -260,10 +254,10 @@ export default {
     },
     walletPassword: {
       get: function() {
-        return this.$store.state.activeWallet.password;
+        return this.$store.state.wallet.context.password;
       },
       set: function(inputValue) {
-        this.$store.commit("setAccountProperty", {
+        this.$store.commit("wallet/setContextProperty", {
           key: "password",
           value: inputValue
         });
@@ -271,11 +265,11 @@ export default {
     },
     privateKey: {
       get: function() {
-        return this.$store.state.activeWallet.privateKey;
+        return this.$store.state.wallet.context.privateKey;
       },
       set: function(inputValue) {
-        this.$store.commit("setAccountProperty", {
-          key: "private_key",
+        this.$store.commit("wallet/setContextProperty", {
+          key: "privateKey",
           value: inputValue
         });
       }
@@ -307,33 +301,28 @@ export default {
     }
 
     // Check if there is a network set and use the first available
-    if (Object.keys(this.$store.state.activeWallet.network).length === 0) {
-      console.debug("I:Setting a default network to first available");
+    if (Object.keys(this.$store.state.wallet.context.network).length === 0) {
+      console.debug("Index Page: Setting a default network to first available");
       this.network = this.availableNetworks[0];
     }
 
     // Only start once global loading finished
-    var preperationInterval = setInterval(
+    let intervalBooting = setInterval(
       function() {
         if (this.$store.getters.booting === false) {
           // Redirect user to the dashboard if they already have account
-          if (this.$store.state.activeWallet.address) {
+          if (this.$store.state.wallet.context.address) {
             console.debug(
               "I:User has saved wallet present, redirecting to dashboard"
             );
             this.$nuxt.$router.replace({ path: "/dashboard" });
           }
-          clearInterval(preperationInterval);
+          clearInterval(intervalBooting)
           this.$store.commit("setLoading", { t: "router", v: false });
         }
       }.bind(this),
       2000
     );
-
-    // If there is no default password, generate one for the user
-    if (this.$store.state.activeWallet.password === false) {
-      this.regenWalletPassword();
-    }
   },
   methods: {
     onSubmit: function() {
@@ -345,43 +334,27 @@ export default {
      */
     createWallet() {
 
-      if (!this.$refs.form.validate()) {
+      if (!this.$refs.newWalletForm.validate()) {
         console.log("form is invalid");
         return false;
       }
 
-      let wallet = this.$walletService.walletNew(
-        'aen',
-        {
-          network: this.$store.state.activeWallet.network,
-          name: this.$store.state.activeWallet.name,
-          password: this.$store.state.activeWallet.password
+      this.$store.dispatch('wallet/new',{
+        type: 'aen',
+        network: this.$store.state.wallet.context.network,
+        name: this.$store.state.wallet.context.name,
+        password: this.$store.state.wallet.context.password,
+        main: true
         }
-      );
-
-      // Check if wallet creation was successful
-      if (this.$walletService.$store.state.wallet instanceof SimpleWallet) {
-        console.debug("CA:Wallet successfully generated");
-
-        this.$store.commit("setAccountProperty", {
-          key: "accountPrivateKey",
-          value: this.$walletService.$store.state.account.privateKey
-        });
-        this.$store.commit("setAccount", this.$walletService.$store.state.account);
-        this.$store.commit("setActiveWallet", wallet);
-        this.$store.commit("setAccountStatus", true);
-        this.walletCreated = true;
-
+      ).then((wallet) => {
+        console.debug("Index Page: Wallet successfully generated")
+        console.debug(wallet)
+        this.walletCreated = true
         this.$store.commit("showNotification", {
           type: "success",
           message: "Your wallet has been successfully setup!"
-        });
-      } else {
-        this.$store.commit("showNotification", {
-          type: "error",
-          message: "Something went wrong during wallet creation"
-        });
-      }
+        })
+      })
     },
     /**
      *
@@ -399,7 +372,7 @@ export default {
         this.$store.state.activeWallet.network.byte
       );
       // Load the wallet key in to state storage for reuse
-      this.$store.commit("setAccountProperty", {
+      this.$store.commit("setContextProperty", {
         key: "wallet_private_key",
         value: this.$account.$store.state.wallet.encryptedPrivateKey
           .encryptedKey
@@ -432,11 +405,6 @@ export default {
         });
       }
     },
-    regenWalletPassword() {
-      console.debug("F:RWP:Regen Wallet Password");
-      this.$store.dispatch("gen_password");
-      console.debug("RWP:Result = " + this.$store.state.activeWallet.password);
-    },
     backupUploaded(file) {
       console.debug("F:BU:Backup Uploaded");
 
@@ -451,11 +419,11 @@ export default {
             const walletInformation = JSON.parse(walletData);
             console.debug("BU:Result");
             console.debug(walletInformation);
-            this.$store.commit("setAccountProperty", {
+            this.$store.commit("setContextProperty", {
               key: "name",
               value: walletInformation.name
             });
-            this.$store.commit("setAccountProperty", {
+            this.$store.commit("setContextProperty", {
               key: "privateKey",
               value: walletInformation.accountPrivateKey
             });
@@ -464,7 +432,7 @@ export default {
             const network = this.availableNetworks.filter(obj => {
               return obj.byte === walletInformation.networkIdentifierByte;
             })[0];
-            this.$store.commit("setAccountProperty", {
+            this.$store.commit("setContextProperty", {
               key: "network",
               value: network
             });

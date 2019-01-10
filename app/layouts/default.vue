@@ -36,13 +36,10 @@
       <!-- Environment -->
       <v-btn v-if="environment !== 'production'" disabled>{{ environment }}</v-btn>
 
-      <!-- Quick balance display -->
-      <v-btn v-if="account.meta.balance != 0" disabled>Balance: {{ account.meta.balance }}</v-btn>
-
       <network-diagnostics/>
 
       <!-- USER DROPDOWN -->
-      <v-menu v-if="account.account.address" v-model="menu" :close-on-content-click="false">
+      <v-menu v-if="activeWallet.address !== ''" v-model="menu" :close-on-content-click="false">
         <v-btn slot="activator" flat>
           <v-avatar size="24">
             <v-icon>account_circle</v-icon>
@@ -51,11 +48,9 @@
         <v-card>
           <v-card-title>
             <div>
-              <span v-if="account.wallet.name" class="grey--text">{{ account.wallet.name }}</span>
+              <span class="grey--text">{{ activeWallet.name }}</span>
               <br>
-              <span v-if="account.wallet.address.address">
-                <address-render :address="account.wallet.address.address"/>
-              </span>
+              <address-render :address="activeWallet.address"/>
               <v-list>
                 <v-list-tile v-if="mode === 'app'">
                   <v-list-tile-action>
@@ -123,29 +118,29 @@ export default {
       hydrated: false,
       items: [
         {
+          icon: "apps",
+          title: "Dashboard",
+          to: "/dashboard",
+          requireActiveWallet: true
+        },
+        {
           icon: "settings_system_daydream",
           title: "Wallet Management",
           to: "/wallet"
         },
         {
-          icon: "apps",
-          title: "Dashboard",
-          to: "/dashboard",
-          requireLogged: true
-        },
-        {
           icon: "account_balance_wallet",
           title: "Ledger",
           to: "/ledger",
-          requireLogged: true
+          requireActiveWallet: true
         },
         {
           icon: "contacts",
           title: "Address Book",
           to: "/address-book",
-          requireLogged: true
+          requireActiveWallet: true
         }
-        // { icon: 'extension', title: 'Create Namespace', to: '/tokens', requireLogged: true }
+        // { icon: 'extension', title: 'Create Namespace', to: '/tokens', requireActiveWallet: true }
       ],
       title: "AENChain Wallet",
       menu: false
@@ -155,28 +150,25 @@ export default {
     version() {
       return this.$g("version");
     },
+    activeWallet() {
+      return this.$store.state.activeWallet
+    },
     appRunTime() {
       return this.$store.state.meta.mode;
     },
+    /**
+     * Determine what links should be shown in the main bar
+     */
     visibleLinks() {
-      if (this.$store.state.meta.wallet_present === true) {
+      if (this.$store.state.wallet.context.address !== '') {
         return this.items;
       }
-      var map = this.items.filter(a => {
-        if (!a.hasOwnProperty("requireLogged")) {
+      let map = this.items.filter(a => {
+        if (!a.hasOwnProperty("requireActiveWallet")) {
           return a;
         }
       });
       return map;
-    },
-    account() {
-      return this.$walletService.$store.state;
-    },
-    currentPing() {
-      return this.$store.state.internal.activeApiPing;
-    },
-    currentApi() {
-      return this.$store.state.internal.activeApiEndpoint;
     },
     environment() {
       return this.$store.state.meta.environment;
@@ -218,38 +210,9 @@ export default {
       return this.$store.state.notification.message;
     }
   },
-  watch: {
-    hydrated: function() {
-      console.debug("W:H:Hydrated");
-      // Ping network until address is considered reachable
-      if (this.$store.state.account.publicly_accessible === false) {
-        var addressInterval = setInterval(
-          function() {
-            var result = this.$walletService.isWalletLive(
-              'aen',
-                    {
-                      address: this.$store.state.activeWallet.address
-                    }
-
-            );
-            if (result !== false) {
-              console.debug(
-                "H:Address (" +
-                  this.$store.state.account.address +
-                  ") is on the network"
-              );
-              this.$store.commit("setAccountProperty", {
-                key: "publicly_acessible",
-                value: true
-              });
-              this.$walletService.taskRunners();
-              this.$walletService.startListeners();
-              clearInterval(addressInterval);
-            }
-          }.bind(this),
-          5000
-        );
-      }
+  provide: function () {
+    return {
+      walletService: this.$walletService
     }
   },
   /**
@@ -260,11 +223,13 @@ export default {
     this.$store.commit("setAppMode", "web");
     let env = process.env.NODE_ENV || "dev";
     this.$store.commit("setEnvironment", env);
+
     this.$store.commit("setLoading", {
       t: "global",
       v: true,
       m: "Page Startup"
     });
+
     // Desktop app setup
     if (isElectron()) {
       this.$store.commit("setAppMode", "app");
@@ -285,84 +250,49 @@ export default {
       console.log(child);
     }
 
-    this.$store.dispatch("rankApiNodes");
+    // API Node ping test / ranking
+    let apiEndpointPingInterval = this.$g('internal.apiEndpointPingInterval')
+    if(apiEndpointPingInterval !== false) { this.$store.commit('wallet/setInternalProperty', {
+      key: 'apiEndpointPingInterval',
+      value: apiEndpointPingInterval
+    })}
+    this.$store.dispatch("wallet/rankApiNodes");
+    setInterval(
+      function() {
+        this.$store.dispatch("wallet/rankApiNodes");
+        this.$walletService.updateApiEndpoint('aen', {
+            address: this.$store.state.internal.activeApiEndpoint
+          }
+
+        );
+      }.bind(this),
+      this.$store.state.wallet.internal.apiEndpointPingInterval
+    );
+
+    // Generic network information that can be had without an account
+    let networkInformationInterval = this.$g('internal.apiEndpointPingInterval')
+    if(networkInformationInterval !== false) { this.$store.commit('wallet/setInternalProperty', {
+      key: 'networkInformationInterval',
+      value: networkInformationInterval
+    })}
+    this.$store.dispatch("updateGenericNetworkInformation");
+    setInterval(
+      function() {
+        this.$store.dispatch("updateGenericNetworkInformation");
+      }.bind(this),
+      this.$store.state.wallet.internal.networkInformationInterval
+    );
 
     // Short timeout to give API ranking a chance to get some accurate results
     setTimeout(
       function() {
-        // Local services for network consumption. Only recreates if new or using different
-        this.$walletService.Aen.updateActiveApiEndpoint({
-          address: this.$store.state.internal.activeApiEndpoint
-        }
-        );
-
         // Hydrate local state from cold storage
-        if (this.$store.state.activeWallet.accountPrivateKey) {
-          console.debug(
-            "Local wallet information found, attempting warmup"
-          );
-          this.$walletService.walletLoad(
-                  'aen',
-                  {
-                    accountPrivateKey: this.$store.state.activeWallet.accountPrivateKey,
-                    network: this.$store.state.activeWallet.network,
-                    name: this.$store.state.activeWallet.name,
-                    password: this.$store.state.activeWallet.password,
-                  }
-          );
-          // Regularly run checks on the current wallet until it is considered live
-          this.$walletService.walletIsLive(
-                  'aen',
-                  {
-                    address: this.$store.state.activeWallet.address
-                  }
-
-          )
-          let walletOnChainCheckInterval = setInterval(
-            function() {
-              this.$walletService.walletIsLive(
-                'aen',
-                      {
-                        address: this.$store.state.activeWallet.address
-                      }
-
-              )
-              if (this.$walletService.$store.state.onChain === true) {
-                clearInterval(walletOnChainCheckInterval);
-              }
-            }.bind(this),
-            40000
-          );
-
-          // User doesn't yet have an AEN wallet so redirect to initial setup screen
-        } else {
+        if (this.$store.state.wallet.context.accountPrivateKey === '') {
           if (this.$nuxt.$route.name !== "index") {
             console.log("No wallet so redirecting to launch");
             this.$nuxt.$router.replace({ path: "/" });
           }
         }
-
-        // API Node ping test / ranking
-        setInterval(
-          function() {
-            this.$store.dispatch("rankApiNodes");
-            this.$walletService.Aen.updateActiveApiEndpoint({
-              address: this.$store.state.internal.activeApiEndpoint
-            }
-
-            );
-          }.bind(this),
-          120000
-        );
-
-        // Generic network information that can be had without an account
-        this.$store.dispatch("updateGenericNetworkInformation");
-        setInterval(
-          function() {
-            this.$store.dispatch("updateGenericNetworkInformation");
-          }.bind(this),
-          80000
-        );
 
         // Finished the global loading procedure
         this.$store.commit("setLoading", { t: "global", v: false });

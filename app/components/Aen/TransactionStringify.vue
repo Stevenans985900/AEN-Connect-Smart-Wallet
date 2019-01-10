@@ -40,7 +40,7 @@
 					console.debug(err)
 				}
 			} else {
-				this.component = () => import('./TransactionStringify/Default')
+				this.component = () => import('~/components/Fallback')
 			}
 		}
 	}

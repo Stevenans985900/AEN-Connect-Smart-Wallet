@@ -1,4 +1,4 @@
-import Generic from '~/services/network/Generic.js'
+import Generic from './Generic.js'
 import Web3 from "web3"
 
 export default class Aen extends Generic{

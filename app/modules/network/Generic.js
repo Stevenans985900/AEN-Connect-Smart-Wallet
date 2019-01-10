@@ -27,8 +27,8 @@ export default class Genetic {
     console.debug(this.pluginName+' Plugin: Transfer')
     console.debug(options)
   }
-  updateActiveApiEndpoint(options) {
-    console.debug(this.pluginName+' Plugin: Update Active API Endpoint')
+  updateApiEndpoint(options) {
+    console.debug(this.pluginName+' Plugin: Update API Endpoint')
     console.debug(options)
   }
   walletIsLive(options) {

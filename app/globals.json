@@ -2,6 +2,9 @@
   "version": "0.0.1",
   "build_number": "",
   "google_recaptcha_key": "NA",
+  "internal": {
+    "apiEndpointPingInterval": 300000
+  },
   "aen": {
     "network_version": "0.1",
     "api_endpoint_test_uri": "/block/1",
@@ -27,6 +30,13 @@
       "name": "TestNet Faucet",
       "address": "TD5C6ZEHS7NOQQQ522VYI4BXJZ33HVJFY5AFAL3P"
     }]
+  },
+  "bitcoin": {
+    "api_endpoint_test_uri": "",
+    "api_endpoints": {
+      "name": "TestNet",
+      "identifier": "TESTNET"
+    }
   },
   "eth": {
     "api_endpoint": "https://ropsten.infura.io/0HIuuP4qCjvv8DMGjvPm"

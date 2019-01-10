@@ -1,5 +1,7 @@
 <template>
-  <v-btn class="success" @click="backupWallet">Backup Wallet</v-btn>
+  <v-btn class="success" @click="backupWallet">
+    Backup Wallet
+  </v-btn>
 </template>
 
 <script>

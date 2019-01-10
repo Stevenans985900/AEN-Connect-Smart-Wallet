@@ -26,8 +26,9 @@ export default {
 		},
 		direction () {
 			if (!this.data.hasOwnProperty('recipient')) return ''
-			if (this.data.recipient.address === this.$account.$store.state.account.address.address) {
-				return 'incoming'
+      // Check whether the recipient is in the users wallet list
+      if(this.data.recipient.address in this.$store.state.wallet.wallets) {
+        return 'incoming'
 			} else {
 				return 'outgoing'
 			}

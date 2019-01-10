@@ -3,31 +3,31 @@ import {
     AccountHttp,
     Address,
     Deadline,
-    MosaicHttp,
-    NamespaceHttp,
+    // MosaicHttp,
+    // NamespaceHttp,
     NamespaceId,
-    MosaicService,
+    // MosaicService,
     Password,
     PlainMessage,
-    // PublicAccount,
+    PublicAccount,
     QueryParams,
     RegisterNamespaceTransaction,
     SimpleWallet,
     TransferTransaction,
-    TransactionHttp,
+    // TransactionHttp,
     UInt64,
     XEM
 } from 'chain-js-sdk'
 import {
     mergeMap
 } from 'rxjs/operators'
-import Generic from '~/services/network/Generic.js'
+import Generic from './Generic.js'
 
 
 export default class Aen extends Generic {
-  constructor() {
+  constructor(apiEndpoint) {
     super()
-    this.apiEndpoint = ''
+    this.apiEndpoint = apiEndpoint
     this.pluginName = 'AEN'
   }
     accountLoad(options) {
@@ -70,22 +70,27 @@ export default class Aen extends Generic {
      */
     walletIsLive(options) {
       Generic.prototype.walletIsLive.call(this, options)
+      return new Promise((resolve) => {
+      try {
         let addressObject = Address.createFromRawAddress(options.address)
-        try {
-            return this.services.accountHttp.getAccountInfo(addressObject)
+          let accountHttp = new AccountHttp(this.apiEndpoint)
+            return accountHttp.getAccountInfo(addressObject)
               .subscribe((AccountInfo) => {
                 console.debug(AccountInfo)
-                return true
+                resolve(true)
                 },
-                error => {
+               error => {
+                 console.debug('Wallet not yet recognised on the chain')
                     console.debug(error)
-                  return false
+                  resolve(false)
                   // Don't do anything, we are expecting 404 as possible response
                 })
         } catch (e) {
+          console.debug('Wallet not yet recognised on the chain')
           console.debug(e)
-          return false
+          resolve(false)
         }
+    })
     }
     walletNew(options) {
       console.debug('For AEN: Wallet new = Wallet Load')
@@ -110,13 +115,19 @@ export default class Aen extends Generic {
     transactionsHistorical(options) {
       Generic.prototype.transactionsHistorical.call(this, options)
 
-      this.$store.state.services.accountHttp
-        .transactions(this.$store.state.publicAccount, new QueryParams(this.$store.state.query.resultSize))
-        .subscribe(transactions => {
-          this.$store.state.userTransactions.historical = transactions
-        }, err => {
-          console.error(err)
-        })
+      return new Promise((resolve, reject) => {
+        let accountHttp = new AccountHttp(this.apiEndpoint)
+        let publicAccount = PublicAccount.createFromPublicKey(options.publicKey, options.network.byte)
+        // TODO Edit the page size to use a frontend customised value
+        return accountHttp
+          .transactions(publicAccount, new QueryParams(25))
+          .subscribe(transactions => {
+            resolve(transactions)
+            // this.$store.state.userTransactions.historical = transactions
+          }, err => {
+            reject(err)
+          })
+      })
 
     }
   /**
@@ -183,21 +194,23 @@ export default class Aen extends Generic {
     /**
      * @param endpointAddress
      */
-    updateActiveApiEndpoint(options) {
-      Generic.prototype.updateActiveApiEndpoint.call(this, options)
+    updateApiEndpoint(options) {
+      Generic.prototype.updateApiEndpoint.call(this, options)
 
         if (options.address !== this.apiEndpoint) {
+          console.debug('Refreshing HTTP services')
             this.apiEndpoint = options.address
-            this.services.accountHttp = new AccountHttp(options.address)
-            this.services.mosaicHttp = new MosaicHttp(options.address)
-            this.services.namespaceHttp = new NamespaceHttp(options.address)
-            this.services.mosaicService = new MosaicService(
-              this.services.accountHttp,
-              this.services.mosaicHttp,
-              this.services.namespaceHttp
-            )
-            this.services.transactionHttp = new TransactionHttp(options.address)
+            // this.services.accountHttp = new AccountHttp(options.address)
+            // this.services.mosaicHttp = new MosaicHttp(options.address)
+            // this.services.namespaceHttp = new NamespaceHttp(options.address)
+            // this.services.mosaicService = new MosaicService(
+            //   this.services.accountHttp,
+            //   this.services.mosaicHttp,
+            //   this.services.namespaceHttp
+            // )
+            // this.services.transactionHttp = new TransactionHttp(options.address)
         }
+        console.log(this.services)
     }
 
   /**

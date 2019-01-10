@@ -1,7 +1,6 @@
 import {
     BlockchainHttp
 } from 'chain-js-sdk'
-import Vue from 'vue'
 import generator from 'generate-password'
 
 export const initialState = {
@@ -29,23 +28,21 @@ export const initialState = {
         mode: 'web',
         environment: 'prod',
         rememberUser: false,
-        wallet_present: false
+        wallet_present: false,
+        eulaAgree: false
     },
+    // Electron specific properties
     electron: {
         docker_present: false
     },
+    // Internal app state properties
     internal: {
-        // Array used for storing ping ranking for external api nodes
-        activeApiEndpoint: false,
-        activeApiPing: 9999,
         busy: {
             global: true,
             router: true,
             page: false,
             message: ''
-        },
-        blockHeight: 0,
-        blockScore: 0
+        }
     }
 }
 
@@ -81,58 +78,12 @@ export const actions = {
         context.commit('setPassword', password)
     },
     /**
-     * Cycle through all available API nodes, testing how long it takes to get information on
-     * the first block. Choose node with lowest ping
-     * 
-     * @param {*} context 
-     */
-    rankApiNodes(context) {
-        console.debug('Vuex: Rank API Nodes')
-        var apiEndpoints = Vue.prototype.$g('aen.api_endpoints')
-        var stateContext = context
-
-        // Test function encapsulate for variable scoping and asynchronous calling
-        var check = function (currentRound) {
-            var position = currentRound
-            var thisAddress = apiEndpoints[position].address + Vue.prototype.$g('aen.api_endpoint_test_uri')
-            apiEndpoints[position].scanStart = new Date()
-            var lowestPing = 9999
-
-            // Perform the actual call
-            this.$axios.$get(thisAddress)
-                .then((response) => {
-
-                    // Calculate pint time
-                    console.debug(response)
-                    apiEndpoints[position].scanEnd = new Date()
-                    apiEndpoints[position].scanTime = apiEndpoints[position].scanEnd - apiEndpoints[position].scanStart
-
-                    // If the test beats current score, set as endpoint to use
-                    if (apiEndpoints[position].scanTime < lowestPing) {
-                        console.debug('Updating AEN API endpoint to: ' + apiEndpoints[position].address)
-                        lowestPing = apiEndpoints[position].scanTime
-                        stateContext.commit('setApiEndpoint', apiEndpoints[position].address)
-                        stateContext.commit('setPingTime', lowestPing)
-                    }
-                })
-                .catch((error) => {
-                    console.log('Node offline: ' + thisAddress)
-                    console.debug(error)
-                })
-        }.bind(this)
-
-        // Start performing the checks asynchronously
-        for (var currentRound = 0; apiEndpoints.length > currentRound; currentRound++) {
-            check(currentRound)
-        }
-    },
-    /**
      * Gets some generic (non wallet specific) related blockchain information
      * 
      * @param {*} context 
      */
     updateGenericNetworkInformation(context) {
-        console.debug('F:UGNI:Update Network Information. Using ' + context.state.internal.activeApiEndpoint + ' as API endpoint')
+        console.debug('Vuex: Update Generic Network Information using ' + context.state.internal.activeApiEndpoint)
 
         // Prepare basic services for use
         let apiEndpoint = context.state.internal.activeApiEndpoint
@@ -174,10 +125,16 @@ export const mutations = {
     setEnvironment(state, environmentName) {
         state.meta.environment = environmentName
     },
+    setInternalProperty(state, options) {
+      state.internal[options.key] = options.value
+    },
+    setMeta(state, options) {
+        state.meta[options.key] = options.value
+    },
     addWallet(state, wallet) {
-        if (!state.wallets.hasOwnProperty(wallet.address)) {
+        // if (!state.wallets.hasOwnProperty(wallet.address)) {
             state.wallets[wallet.address] = wallet
-        }
+        // }
     },
     // Setting a AEN wallet to main context
     setActiveWallet(state, wallet) {
@@ -186,9 +143,9 @@ export const mutations = {
         state.activeWallet.address = wallet.address
 
         // Check whether the wallet exists in
-        if (!state.wallets.hasOwnProperty(state.activeWallet.address)) {
+        // if (!state.wallets.hasOwnProperty(state.activeWallet.address)) {
             state.wallets[state.activeWallet.address] = wallet
-        }
+        // }
 
     },
     setAccount(state, account) {
@@ -199,7 +156,7 @@ export const mutations = {
         state.activeWallet.password = password
     },
     setRememberUser(state, value) {
-        state.meta.remember_user = value
+        state.meta.rememberUser = value
     },
     /**
      * t = type

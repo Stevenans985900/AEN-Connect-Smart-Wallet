@@ -1,0 +1,272 @@
+import Vue from 'vue'
+import Aen from '~/modules/network/Aen'
+
+export const initialState = {
+    contacts: [],
+    wallets: {},
+    context: {
+        network: {},
+        address: '',
+        name: '',
+        accountPrivateKey: '',
+        privateKey: '',
+        password: '',
+        onChain: false
+    },
+    internal: {
+        apiEndpointPingInterval: 30000,
+        networkInformationInterval: 30000,
+        // Array used for storing ping ranking for external api nodes
+        activeApiEndpoint: '',
+        activeApiPing: 9999,
+        blockHeight: 0,
+        blockScore: 0
+    }
+}
+
+export const state = () => (initialState)
+
+export const actions = {
+    checkWalletLive(context, wallet) {
+        let networkHandler
+        return new Promise((resolve) => {
+            switch (wallet.type) {
+                case 'aen':
+                    networkHandler = new Aen(context.state.internal.activeApiEndpoint)
+                    networkHandler.walletIsLive(wallet).then(response => {
+                        resolve(response)
+                    })
+                    break
+                case 'eth':
+                    break;
+            }
+        })
+    },
+    load(context, options) {
+        console.debug('Wallet Service:Load '+options.type)
+        // var vm = this
+
+        return new Promise((resolve) => {
+            let wallet = {
+                onChain: false,
+                name: options.name
+            }
+
+            let account, networkHandler, walletObject
+            switch (options.type) {
+                case 'aen':
+                    networkHandler = new Aen
+                    // Do behind the scenes work
+                    account = networkHandler.accountLoad(options)
+                    options.accountPrivateKey = account.privateKey
+                    walletObject = networkHandler.walletLoad(options)
+
+                    // Package wallet up in to simple format for later reference
+                    wallet.type = 'aen'
+                    wallet.password = options.password
+                    wallet.accountPrivateKey = account.privateKey
+                    wallet.privateKey = walletObject.encryptedPrivateKey.encryptedKey
+                    wallet.publicKey = account.publicKey
+                    wallet.address = walletObject.address.address
+                    wallet.network = options.network
+
+                    // Check if the wallet is on the chain
+                    wallet.onChain = networkHandler.walletIsLive(options)
+                    if(options.hasOwnProperty('main')) {
+                        wallet.main = true
+                        context.commit('setContext', wallet)
+                    }
+                    context.commit('setWallet', wallet)
+                    resolve(wallet)
+                    break
+                case 'eth':
+                    break;
+            }
+        })
+    },
+    new(context, options) {
+        console.debug('Wallet Service:New '+options.type)
+        // var vm = this
+
+        return new Promise((resolve) => {
+            let wallet = {
+                onChain: false,
+                name: options.name
+            }
+
+            let account, networkHandler, walletObject
+            switch (options.type) {
+                case 'aen':
+                    networkHandler = new Aen
+                    // Do behind the scenes work
+                    account = networkHandler.accountNew(options)
+                    options.accountPrivateKey = account.privateKey
+                    walletObject = networkHandler.walletLoad(options)
+
+                    // Package wallet up in to simple format for later reference
+                    wallet.type = 'aen'
+                    wallet.password = options.password
+                    wallet.accountPrivateKey = account.privateKey
+                    wallet.privateKey = walletObject.encryptedPrivateKey.encryptedKey
+                    wallet.publicKey = account.publicKey
+                    wallet.address = walletObject.address.address
+                    wallet.network = options.network
+
+                    // Check if the wallet is on the chain
+                    if(options.hasOwnProperty('main')) {
+                        wallet.main = true
+                        context.commit('setContext', wallet)
+                    }
+                    context.commit('setWallet', wallet)
+                    resolve(wallet)
+                    break
+                case 'eth':
+                    break;
+            }
+        })
+    },
+    /**
+     * Cycle through all available API nodes, testing how long it takes to get information on
+     * the first block. Choose node with lowest ping
+     *
+     * @param {*} context
+     */
+    rankApiNodes(context) {
+        console.debug('Vuex: Rank API Nodes')
+        var apiEndpoints = Vue.prototype.$g('aen.api_endpoints')
+        var stateContext = context
+
+        // Test function encapsulate for variable scoping and asynchronous calling
+        var check = function(currentRound) {
+            var position = currentRound
+            var thisAddress = apiEndpoints[position].address + Vue.prototype.$g('aen.api_endpoint_test_uri')
+            apiEndpoints[position].scanStart = new Date()
+            var lowestPing = 9999
+
+            // Perform the actual call
+            this.$axios.$get(thisAddress)
+              .then((response) => {
+
+                  // Calculate ping time, output the response when in debug mode to satisfy linter
+                  console.debug(response)
+                  apiEndpoints[position].scanEnd = new Date()
+                  apiEndpoints[position].scanTime = apiEndpoints[position].scanEnd - apiEndpoints[position].scanStart
+
+                  // If the test beats current score, set as endpoint to use
+                  if (apiEndpoints[position].scanTime < lowestPing) {
+                      console.debug('Updating AEN API endpoint to: ' + apiEndpoints[position].address)
+                      lowestPing = apiEndpoints[position].scanTime
+                      stateContext.commit('setApiEndpoint', apiEndpoints[position].address)
+                      stateContext.commit('setPingTime', lowestPing)
+                  }
+              })
+              .catch((error) => {
+                  console.log('Node offline: ' + thisAddress)
+                  console.debug(error)
+              })
+        }.bind(this)
+
+        // Start performing the checks asynchronously
+        for (var currentRound = 0; apiEndpoints.length > currentRound; currentRound++) {
+            check(currentRound)
+        }
+    }
+}
+
+export const getters = {
+    balance(wallet) {
+        let networkHandler
+        let vm = this
+        return new Promise((resolve) => {
+            switch (wallet.type) {
+                case 'aen':
+                    networkHandler = new Aen(vm.state.internal.activeApiEndpoint)
+                    networkHandler.balance(wallet).then(response => {
+                        resolve(response)
+                    })
+                    break
+            }
+        })
+    }
+}
+export const mutations = {
+    setAccountStatus(state, status) {
+        state.meta.wallet_present = status
+    },
+    setWallet(state, wallet) {
+        state.wallets[wallet.address] = wallet
+    },
+    setProperty(state, options) {
+        console.log('fine up to here')
+        state.wallets[options.address][options.key] = options.value
+    },
+    setContext(state, wallet) {
+        state.context = wallet
+    },
+    setPassword(state, password) {
+        state.activeWallet.password = password
+    },
+    setRememberUser(state, value) {
+        state.meta.remember_user = value
+    },
+    /**
+     * Address Book related information
+     */
+    addContact(state, contact) {
+        state.contacts.push(contact)
+    },
+    deleteContact(state, contact) {
+        const indexPosition = state.contacts.findIndex(i => i === contact)
+        state.contacts.splice(indexPosition, 1)
+    },
+    editContact(state, changeObjects) {
+        const indexPosition = state.contacts.findIndex(i => i === changeObjects.original)
+        state.contacts.splice(indexPosition, 1)
+        state.contacts.push(changeObjects.updated)
+    },
+    setApiEndpoint(state, value) {
+        state.internal.activeApiEndpoint = value
+    },
+    setPingTime(state, value) {
+        state.internal.activeApiPing = value
+    },
+    setPreferredNode(state, address) {
+        state.internal.preferredNode = address
+    },
+    setActiveNodeList(state, nodeList) {
+        state.internal.nodeList = nodeList
+    },
+    setNetwork(state, network) {
+        state.context.network = network
+    },
+    setBlockHeight(state, blockHeight) {
+        state.internal.block_height = blockHeight
+    },
+    setBlockScore(state, blockScore) {
+        state.internal.block_score = blockScore
+    },
+    setIncomingTransactions(state, transactions) {
+        state.transactions.incoming = transactions
+    },
+    setUnconfirmedTransactions(state, transactions) {
+        state.transactions.unconfirmed = transactions
+    },
+    setOutgoingTransactions(state, transactions) {
+        state.transactions.outgoing = transactions
+    },
+    setNotificationStatus(state, status) {
+        state.notification.show = status
+    },
+    setDeviceSetting(state, input) {
+        state.settings[input.key] = input.value
+    },
+    setContextProperty(state, input) {
+        state.context[input.key] = input.value
+    },
+    setInternalProperty(state, input) {
+        state.internal[input.key] = input.value
+    },
+    setMosaics(state, input) {
+        state.mosaics = input
+    }
+}

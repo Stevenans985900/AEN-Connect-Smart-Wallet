@@ -15,7 +15,7 @@
             Your wallet is only local. In order to have a network presence, please add some
             coins to it.
           </v-alert>
-          <graph-balance-spread/>
+          <!--<graph-balance-spread/>-->
         </v-flex>
       </v-layout>
 
@@ -55,6 +55,18 @@
         </v-flex>
       </v-layout>
     </v-container>
+
+    <v-dialog v-model="dialogEulaAgree" persistent max-width="600px">
+      <v-card>
+        <v-checkbox v-model="eulaAgree">
+          <span slot="label">
+            I agree to the
+            <a href="http://aencoin.com/eula">AEN EULA</a>
+          </span>
+        </v-checkbox>
+      </v-card>
+    </v-dialog>
+
   </v-layout>
 </template>
 
@@ -66,6 +78,13 @@ export default {
     GraphBalanceSpread
   },
   computed: {
+    dialogEulaAgree() {
+      return !this.eulaAgree
+    },
+    eulaAgree: {
+      get: function() { return this.$store.state.meta.eulaAgree },
+      set: function(val) { this.$store.commit('setMeta', {key: 'eulaAgree', value: val}) }
+    },
     faucets() {
       return this.$g("aen.faucets");
     },
@@ -77,6 +96,7 @@ export default {
     }
   },
   created: function() {
+
     // Only start once global loading finished
     var preperationInterval = setInterval(
       function() {
@@ -87,6 +107,11 @@ export default {
       }.bind(this),
       2000
     );
+  },
+  methods: {
+    quickTest() {
+      console.debug(this.$walletService.getStoreVariable())
+    }
   }
 };
 </script>

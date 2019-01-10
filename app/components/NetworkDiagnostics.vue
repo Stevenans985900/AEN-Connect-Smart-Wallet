@@ -1,7 +1,6 @@
 <template>
   <div>
     <v-menu v-model="netStatus" :close-on-content-click="false" :nudge-width="200" offset-x>
-
       <v-btn slot="activator" flat>
         <v-avatar size="24">
           <v-icon>signal_cellular_{{ connectionStrength }}_bar</v-icon>
