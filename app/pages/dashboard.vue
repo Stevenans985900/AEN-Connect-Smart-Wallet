@@ -3,14 +3,14 @@
     <v-container fluid grid-list-md>
       <v-layout row wrap>
         <!-- ADDRESS SUMMARY -->
-        <v-flex v-if="account.wallet.address" xs12>
-          <h1>{{ account.wallet.address.address }}</h1>
+        <v-flex v-if="contextWallet.address" xs12>
+          <h1>{{ contextWallet.address }}</h1>
         </v-flex>
       </v-layout>
 
       <v-layout row wrap>
         <!-- ACCOUNT OVERVIEW -->
-        <v-flex v-if="account.public === false" xs12>
+        <v-flex v-if="contextWallet.onChain === false" xs12>
           <v-alert :value="true" type="info">
             Your wallet is only local. In order to have a network presence, please add some
             coins to it.
@@ -88,8 +88,8 @@ export default {
     faucets() {
       return this.$g("aen.faucets");
     },
-    account() {
-      return this.$walletService.$store.state;
+    contextWallet() {
+      return this.$store.state.wallet.context;
     },
     networkIdentifier() {
       return this.$store.state.networkIdentifier;
@@ -107,11 +107,6 @@ export default {
       }.bind(this),
       2000
     );
-  },
-  methods: {
-    quickTest() {
-      console.debug(this.$walletService.getStoreVariable())
-    }
   }
 };
 </script>

@@ -73,7 +73,7 @@
 
     <!-- MAIN CONTENT AREA -->
     <v-content>
-      <v-container>
+      <v-container fluid>
         <no-ssr>
           <loading/>
         </no-ssr>
@@ -127,12 +127,6 @@ export default {
           icon: "settings_system_daydream",
           title: "Wallet Management",
           to: "/wallet"
-        },
-        {
-          icon: "account_balance_wallet",
-          title: "Ledger",
-          to: "/ledger",
-          requireActiveWallet: true
         },
         {
           icon: "contacts",

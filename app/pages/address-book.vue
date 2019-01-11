@@ -1,7 +1,7 @@
 <template>
-  <v-layout justify-center align-center>
+  <v-layout row justify-center align-center>
     <!-- Contacts table -->
-    <v-flex xs12 sm8 md6>
+    <v-flex xs12>
       <v-card>
         <!-- New contact -->
         <v-dialog v-model="dialog" persistent max-width="600px">

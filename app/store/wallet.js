@@ -27,6 +27,19 @@ export const initialState = {
 export const state = () => (initialState)
 
 export const actions = {
+    balance: (context, wallet) => {
+        let networkHandler
+        return new Promise((resolve) => {
+            switch (wallet.type) {
+                case 'aen':
+                    networkHandler = new Aen(context.state.internal.activeApiEndpoint)
+                    networkHandler.balance(wallet).then(response => {
+                        resolve(response)
+                    })
+                    break
+            }
+        })
+    },
     checkWalletLive(context, wallet) {
         let networkHandler
         return new Promise((resolve) => {
@@ -125,6 +138,18 @@ export const actions = {
             }
         })
     },
+    transfer(context, options) {
+        return new Promise((resolve) => {
+            let networkHandler, transfer
+            switch (options.type) {
+                case 'aen':
+                    networkHandler = new Aen(context.internal.activeApiEndpoint)
+                    transfer = networkHandler.transfer(options)
+                    resolve(transfer)
+                    break
+            }
+        })
+    },
     /**
      * Cycle through all available API nodes, testing how long it takes to get information on
      * the first block. Choose node with lowest ping
@@ -173,22 +198,6 @@ export const actions = {
     }
 }
 
-export const getters = {
-    balance(wallet) {
-        let networkHandler
-        let vm = this
-        return new Promise((resolve) => {
-            switch (wallet.type) {
-                case 'aen':
-                    networkHandler = new Aen(vm.state.internal.activeApiEndpoint)
-                    networkHandler.balance(wallet).then(response => {
-                        resolve(response)
-                    })
-                    break
-            }
-        })
-    }
-}
 export const mutations = {
     setAccountStatus(state, status) {
         state.meta.wallet_present = status

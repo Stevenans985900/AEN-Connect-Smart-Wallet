@@ -3,10 +3,10 @@ import {
     AccountHttp,
     Address,
     Deadline,
-    // MosaicHttp,
-    // NamespaceHttp,
+    MosaicHttp,
+    NamespaceHttp,
     NamespaceId,
-    // MosaicService,
+    MosaicService,
     Password,
     PlainMessage,
     PublicAccount,
@@ -14,7 +14,7 @@ import {
     RegisterNamespaceTransaction,
     SimpleWallet,
     TransferTransaction,
-    // TransactionHttp,
+    TransactionHttp,
     UInt64,
     XEM
 } from 'chain-js-sdk'
@@ -49,21 +49,31 @@ export default class Aen extends Generic {
      * @returns {Subscription}
      */
     balance(options) {
-      Generic.prototype.balance.call(this, options)
+
+      return new Promise((resolve, reject) => {
+        let mosaicService = new MosaicService(
+          new AccountHttp(this.apiEndpoint),
+          new MosaicHttp(this.apiEndpoint),
+          new NamespaceHttp(this.apiEndpoint)
+        )
+        let addressObject = Address.createFromRawAddress(options.address)
+
+        Generic.prototype.balance.call(this, options)
         // let balance
-        return this.services.mosaicService
-          .mosaicsAmountViewFromAddress(options.address)
+        return mosaicService
+          .mosaicsAmountViewFromAddress(addressObject)
           .pipe(
             mergeMap((_) => _)
           )
           .subscribe(
             mosaic => {
-                return mosaic.relativeAmount()
+              resolve(mosaic.relativeAmount())
             },
             error => {
-                console.log(error)
+              reject(error)
             }
           )
+      })
     }
     /**
      * @param options
@@ -178,6 +188,9 @@ export default class Aen extends Generic {
     var transferInformation = {}
 
     const recipientAddress = Address.createFromRawAddress(transferInformation.address)
+    const account = Account.createFromPrivateKey(options.source.accountPrivateKey, options.source.network.byte)
+    const transactionHttp = new TransactionHttp(this.apiEndpoint)
+
     const transferTransaction = TransferTransaction.create(
       Deadline.create(23),
       recipientAddress,
@@ -185,8 +198,8 @@ export default class Aen extends Generic {
       PlainMessage.create(transferInformation.message),
       this.$store.state.wallet.network)
 
-    const signedTransaction = this.$store.state.account.sign(transferTransaction)
-    this.$store.state.services.transactionHttp
+    const signedTransaction = account.sign(transferTransaction)
+    transactionHttp
       .announce(signedTransaction)
       .subscribe(x => console.log(x), err => console.error(err))
   }

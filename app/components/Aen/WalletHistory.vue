@@ -1,12 +1,9 @@
 <template>
   <v-layout row wrap>
-    <h1>showing AEN account history</h1>
-    <!-- Current / Historical transactions -->
-    <v-flex xs12>
-      <v-card flat>
-
+    <v-card flat>
+      <v-progress-circular v-if="loading === true" indeterminate />
+      <span v-else>
         <v-card-text v-if="transactions">
-
           <v-expansion-panel>
             <v-expansion-panel-content
               v-for="(transaction,index) in transactions"
@@ -14,7 +11,6 @@
             >
               <div slot="header">
                 <transaction-stringify :transaction="transaction"/>
-
               </div>
               <v-card>
                 <v-card-text>
@@ -23,13 +19,13 @@
               </v-card>
             </v-expansion-panel-content>
           </v-expansion-panel>
-
         </v-card-text>
         <v-card-text v-else>
-          No Transactions
+          <h1>No Transactions</h1>
+          <img src="/nothing.png" alt="nothing">
         </v-card-text>
-      </v-card>
-    </v-flex>
+      </span>
+    </v-card>
   </v-layout>
 </template>
 
@@ -51,14 +47,25 @@ export default {
     },
     data() {
       return {
-        transactions: {}
+        transactions: {},
+        loading: true
       }
     },
     mounted() {
       let networkHelper = new Aen(this.$store.state.wallet.internal.activeApiEndpoint)
       networkHelper.transactionsHistorical(this.wallet).then(transactions => {
         this.transactions = transactions
+        this.loading = false
       })
+
+      setInterval(
+        function() {
+          networkHelper.transactionsHistorical(this.wallet).then(transactions => {
+            this.transactions = transactions
+          })
+        }.bind(this), 15000
+      )
+
     }
 }
 </script>

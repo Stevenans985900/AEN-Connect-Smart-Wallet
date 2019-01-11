@@ -1,6 +1,6 @@
 <template>
-  <v-layout column justify-center align-center>
-    <v-flex xs12 sm8 md6>
+  <v-layout row justify-center align-center>
+    <v-flex xs12>
       <!-- Wallet Management -->
       <v-card>
 
@@ -13,16 +13,18 @@
           <v-list two-line subheader>
             <v-list-tile v-for="(wallet, address) in wallets" :key="address" avatar @click="dialogWallet(wallet)">
               <v-list-tile-avatar>
-                {{ wallet.type }}
-                <!--<v-icon :class="[item.iconClass]">{{ item.icon }}</v-icon>-->
+                <img :src="'/network/' + wallet.type + '.png'">
               </v-list-tile-avatar>
 
               <v-list-tile-content>
                 <v-list-tile-title>{{ wallet.name }}</v-list-tile-title>
-                <v-list-tile-sub-title class="text--primary">{{ address }}</v-list-tile-sub-title>
+                <!--<v-list-tile-sub-title class="text&#45;&#45;primary"></v-list-tile-sub-title>-->
               </v-list-tile-content>
 
-              <v-list-tile-action>{{ balance(wallet) }}</v-list-tile-action>
+              <v-list-tile-action>
+                <balance v-if="wallet.onChain" :wallet="wallet" />
+                <span v-else>NA</span>
+              </v-list-tile-action>
             </v-list-tile>
           </v-list>
         </v-card-text>
@@ -101,31 +103,39 @@
     </v-dialog>
 
     <!-- View Wallet Dialog -->
-    <v-dialog v-model="dialogViewWallet" persistent max-width="600px">
+    <v-dialog v-model="dialogViewWallet" fullscreen="">
       <v-card width="600px">
-        <v-card-title>{{ walletBalance(contextWallet) }}<br >{{ contextWallet.name }}<br >{{ contextWallet.address }}</v-card-title>
+        <v-toolbar dark color="primary">
+          <v-btn icon dark @click="dialogViewWallet = false">
+            <v-icon>close</v-icon>
+          </v-btn>
+          <v-toolbar-title class="white--text">{{ contextWallet.name }}</v-toolbar-title>
+          <v-toolbar-items v-if="contextWallet.onChain === true">
+            <v-btn flat @click="dialogShowAddress = true">Show Business Card</v-btn>
+            <v-btn flat @click="dialogMakeTransfer = true">Make Transfer</v-btn>
+            <v-btn flat @click="dialogReceiveTransfer = true">Receive Transfer</v-btn>
+          </v-toolbar-items>
+        </v-toolbar>
         <v-card-text>
-
+          <h1 class="text-xs-center">{{ contextWallet.address }}</h1>
           <wallet-history v-if="contextWallet.onChain === true" :wallet="contextWallet" />
-          <template v-else>
-            <p>The wallet is not yet active, please make a transfer to the wallet.</p>
-            <p>If you have already made a transfer, it is possible the network has not yet detected it. To manually check click the following button</p>
-            <v-btn @click="checkWalletLive(contextWallet)">Click here</v-btn>
-            <p>If you are still getting the message even after being sure a transfer has taken place, please get in contact with us at <a href="mailto:support@aencoin.io">support@aencoin.io</a>!</p>
-          </template>
-
+          <activation v-else :wallet="contextWallet" />
         </v-card-text>
-        <v-card-actions>
-          <v-btn color="primary" flat @click="dialogMakeTransfer = true">Make Transfer</v-btn>
-          <v-btn color="primary" flat @click="dialogReceiveTransfer = true">Receive Transfer</v-btn>
-          <v-btn color="primary" flat @click="dialogViewWallet = false">Close</v-btn>
-        </v-card-actions>
       </v-card>
     </v-dialog>
 
+    <v-dialog v-model="dialogShowAddress" max-width="400px">
+      <business-card :wallet="contextWallet" />
+    </v-dialog>
     <!-- Make Transfer Dialog -->
     <v-dialog v-model="dialogMakeTransfer" persistent max-width="600px">
-      <!-- Use make transfer component here -->
+      <v-toolbar dark color="primary">
+        <v-btn icon dark @click="dialogMakeTransfer = false">
+          <v-icon>close</v-icon>
+        </v-btn>
+        <v-toolbar-title class="white--text">Make a Transfer from {{ contextWallet.name }}</v-toolbar-title>
+      </v-toolbar>
+      <make-transfer :wallet="contextWallet" />
     </v-dialog>
 
     <!-- View Wallet Dialog -->
@@ -134,18 +144,25 @@
       <!-- show addres -->
       <!-- show QR code -->
     </v-dialog>
-
   </v-layout>
 </template>
 
 <script>
+import Activation from "../components/Activation"
+import Balance from "../components/Balance"
 import BackupWallet from "../components/BackupWallet";
 import VueRecaptcha from "vue-recaptcha";
 import WalletHistory from '../components/WalletHistory';
+import BusinessCard from '../components/BusinessCard';
+import MakeTransfer from "../components/MakeTransfer";
 
 export default {
   components: {
+    MakeTransfer,
+    Activation,
+    Balance,
     BackupWallet,
+    BusinessCard,
     VueRecaptcha,
     WalletHistory
   },
@@ -155,6 +172,7 @@ export default {
       dialogViewWallet: false,
       dialogMakeTransfer: false,
       dialogReceiveTransfer: false,
+      dialogShowAddress: false,
       activeWatchers: [],
       walletType: "aen",
       valid: false,
@@ -206,35 +224,6 @@ export default {
     );
   },
   methods: {
-    balance(wallet) {
-      console.log(this.$store.getters['wallet/balance'](wallet))
-      this.$store.getters['wallet/balance'](wallet).then(response => {
-        return response
-      })
-    },
-    checkWalletLive(wallet) {
-      this.$store.dispatch('wallet/checkWalletLive', wallet).then(response => {
-        this.$store.commit('wallet/setProperty', {
-          address: wallet.address,
-          key: 'onChain',
-          value: response
-        })
-        if(response === true) {
-          this.$store.commit("showNotification", {
-            type: "success",
-            message: "The wallet is recognised on the blockchain"
-          })
-        } else {
-          this.$store.commit("showNotification", {
-            type: "info",
-            message: "The wallet is not yet recognised on the blockchain"
-          })
-        }
-      })
-
-
-      console.log('pass here')
-    },
     setActiveWallet(wallet) {
       switch (wallet.type) {
         case 'aen':
@@ -262,33 +251,31 @@ export default {
       if (!this.$refs[formRef].validate()) {
         return;
       }
-      let options = {}
+
+      let options = {
+        name: this.walletName
+      }
       switch (this.walletType) {
         case "eth":
-          options = {
-            name: this.walletName
-          }
+
           break
         case "aen":
         default:
-          options = {
-            network: this.$store.state.activeWallet.network,
-            name: this.walletName,
-            password: this.walletPassword
-          }
+          options.type = 'aen'
+          options.network = this.$store.state.wallet.context.network
+          options.password = this.walletPassword
           break;
 
       }
-      let wallet = this.$walletService.walletNew(this.walletType, options)
-      this.$store.commit('addWallet', wallet)
-      this.$store.commit("showNotification", {
-        type: "success",
-        message: "Your wallet has been successfully setup!"
+      this.$store.dispatch('wallet/new', options).then((wallet) => {
+        console.debug(wallet)
+        this.$store.commit("showNotification", {
+          type: "success",
+          message: "Your wallet has been successfully setup!"
+        })
       })
-    },
-    walletBalance(wallet) {
-      return this.$walletService.getBalance(wallet) || 0
-    },
+
+    }
   }
 };
 </script>

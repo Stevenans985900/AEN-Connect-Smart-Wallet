@@ -116,8 +116,7 @@
             <v-flex v-if="walletCreated" xs12 md6 class="text-xs-center">
               <v-card>
                 <v-card-text>
-                  <address-render :address="address"/>
-                  <v-img :src="qrData" aspect-ratio="1"/>
+
 
                   <v-form ref="form" v-model="proceedValid">
                     <v-checkbox v-model="eulaAgree" :rules="[rules.required]" required>
