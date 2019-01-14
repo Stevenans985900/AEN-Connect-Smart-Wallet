@@ -3,7 +3,7 @@
     <v-menu v-model="netStatus" :close-on-content-click="false" :nudge-width="200" offset-x>
       <v-btn slot="activator" flat>
         <v-avatar size="24">
-          <v-icon>signal_cellular_{{ connectionStrength }}_bar</v-icon>
+          <v-icon v-text="connectionStrengthIcon" />
         </v-avatar>
       </v-btn>
 
@@ -32,36 +32,37 @@ export default {
     };
   },
   computed: {
-    connectionStrength() {
+    connectionStrengthIcon() {
+      let icon = 'signal_cellular_off'
       if (this.currentPing < 200) {
-        return 4;
+        icon = 'signal_cellular_4_bar';
       } else if (this.currentPing < 500) {
-        return 3;
+        icon = 'signal_cellular_3_bar';
       } else if (this.currentPing < 1500) {
-        return 2;
-      } else if (this.currentPing < 3000) {
-        return 1;
-      } else {
-        return 1;
+        icon = 'signal_cellular_2_bar';
+      } else if (this.currentPing < 5000) {
+        icon = 'signal_cellular_1_bar';
       }
+      console.log('computed strength and going to use: '+icon)
+      return icon
     },
     blockHeight() {
-      return this.$store.state.internal.block_height;
+      return this.$store.state.wallet.internal.blockHeight;
     },
     blockScore() {
-      return this.$store.state.internal.block_score;
+      return this.$store.state.wallet.internal.blockScore;
     },
     currentPing() {
-      return this.$store.state.internal.activeApiPing;
+      return this.$store.state.wallet.internal.activeApiPing;
     },
     currentApi: {
       get: function() {
-        return this.$store.state.internal.activeApiEndpoint;
+        return this.$store.state.wallet.internal.activeApiEndpoint;
       },
       set: function(value) {
         this.$store.commit("setApiEndpoint", value);
         this.$walletService.Aen.updateActiveApiEndpoint({
-                  address: this.$store.state.internal.activeApiEndpoint
+                  address: this.$store.state.wallet.internal.activeApiEndpoint
                 }
         );
       }

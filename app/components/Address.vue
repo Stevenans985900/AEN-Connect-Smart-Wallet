@@ -1,14 +1,11 @@
 <template>
   <span>
-    <v-btn v-clipboard:copy="contact.address" v-clipboard:success="onCopy"
-           type="button"
-           class="caption"
-    >
+    <v-btn v-clipboard:copy="address" v-clipboard:success="onCopy" flat>
       <v-icon
         small
       >
         file_copy
-      </v-icon>&nbsp;&nbsp;{{ contact.displayText }}
+      </v-icon>&nbsp;&nbsp;{{ displayText }}
     </v-btn>
 
     <!-- New transfer -->
@@ -27,13 +24,13 @@
             <v-layout wrap>
               <v-flex xs12 sm6>
                 <v-text-field
-                  v-model="contact.displayText"
+                  v-model="displayText"
                   label="Name"
                 />
               </v-flex>
               <v-flex xs12 sm6>
                 <v-text-field
-                  v-model="contact.address"
+                  v-model="address"
                   label="Blockchain Address"
                 />
               </v-flex>
@@ -80,35 +77,41 @@
     },
     data() {
       return {
-        contact: {
-          displayText: "",
-          address: ""
-        },
+        displayText: "",
         missing: true,
         dialog: false
       };
     },
-    created: function() {
-      this.contact.address = this.address;
-
-      var result = this.$store.state.wallet.contacts.find(contact => {
-        return contact.address === this.address;
-      });
-
-      if (!result) {
-        this.contact.displayText = this.address;
-      } else {
-        this.missing = false;
-        this.contact.displayText = result.displayText;
+    watch: {
+      address: function() {
+        this.renderAddress();
       }
     },
+    created: function() {
+      this.renderAddress()
+    },
     methods: {
+      renderAddress() {
+        var result = this.$store.state.wallet.contacts.find(contact => {
+          return contact.address === this.address;
+        });
+
+        if (result) {
+          this.missing = false;
+          this.displayText = result.displayText;
+        } else {
+          this.displayText = this.address;
+        }
+      },
       onCopy() {
         var message = "Copied to clipboard";
         this.$store.commit("showNotification", { "type": "error", "message": message });
       },
       addContact() {
-        this.$store.commit("wallet/addContact", this.contact);
+        this.$store.commit("wallet/addContact", {
+          'displayText': this.displayText,
+          'address': this.address
+        });
         var message = "Contact added to address book";
         this.$store.commit("showNotification", { "type": "success", "message": message });
         this.dialog = false;

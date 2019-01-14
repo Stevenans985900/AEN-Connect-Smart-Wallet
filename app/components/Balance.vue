@@ -24,7 +24,7 @@
     methods: {
       getBalance() {
         this.$store.dispatch('wallet/balance', this.wallet).then(response => {
-          this.balance = response
+          this.balance = response.balance
         })
       }
     }

@@ -28,7 +28,7 @@
     }],
     "faucets": [{
       "name": "TestNet Faucet",
-      "address": "TD5C6ZEHS7NOQQQ522VYI4BXJZ33HVJFY5AFAL3P"
+      "address": "http://faucet.aencoin.io/"
     }]
   },
   "bitcoin": {
@@ -39,6 +39,12 @@
     }
   },
   "eth": {
-    "api_endpoint": "https://ropsten.infura.io/0HIuuP4qCjvv8DMGjvPm"
+    "available_networks": [
+      {
+        "name": "Ropsten",
+        "api_endpoint": "https://ropsten.infura.io/0HIuuP4qCjvv8DMGjvPm"
+      }
+    ]
+
   }
 }

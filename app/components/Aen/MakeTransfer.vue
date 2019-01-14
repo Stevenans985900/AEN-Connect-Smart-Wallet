@@ -8,7 +8,7 @@
             <v-combobox
               v-model="payee.address"
               :items="contacts"
-              item-text="name"
+              item-text="displayText"
               label="To"
               prepend-icon="contacts"
             />
@@ -61,9 +61,10 @@
     methods: {
       initiateTransfer() {
 
+        console.log('initiating transfer')
         this.$store.dispatch('wallet/transfer', {
           source: this.wallet,
-          payee: this.payee
+          destination: this.payee
         }).then((transfer) => {
           console.debug(transfer)
           this.$store.commit("showNotification", {

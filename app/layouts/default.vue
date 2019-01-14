@@ -1,7 +1,7 @@
 <template>
   <v-app dark>
     <!-- NAV DRAWER -->
-    <v-navigation-drawer v-model="drawer" fixed app>
+    <v-navigation-drawer v-model="drawer" fixed stateless app>
       <v-list>
         <v-list-tile v-for="(item, i) in visibleLinks" :to="item.to" :key="i" router exact>
           <v-list-tile-action>
@@ -114,7 +114,7 @@ export default {
   },
   data() {
     return {
-      drawer: false,
+      drawer: true,
       hydrated: false,
       items: [
         {
@@ -145,7 +145,7 @@ export default {
       return this.$g("version");
     },
     activeWallet() {
-      return this.$store.state.activeWallet
+      return this.$store.state.activeWallet;
     },
     appRunTime() {
       return this.$store.state.meta.mode;
@@ -154,7 +154,7 @@ export default {
      * Determine what links should be shown in the main bar
      */
     visibleLinks() {
-      if (this.$store.state.wallet.context.address !== '') {
+      if (this.$store.state.wallet.context.address !== "") {
         return this.items;
       }
       let map = this.items.filter(a => {
@@ -204,16 +204,15 @@ export default {
       return this.$store.state.notification.message;
     }
   },
-  provide: function () {
+  provide: function() {
     return {
       walletService: this.$walletService
-    }
+    };
   },
   /**
    *
    */
   mounted() {
-
     this.$store.commit("setAppMode", "web");
     let env = process.env.NODE_ENV || "dev";
     this.$store.commit("setEnvironment", env);
@@ -244,31 +243,45 @@ export default {
       console.log(child);
     }
 
+    // Check if there is a network set and use the first available
+    if (Object.keys(this.$store.state.wallet.context.network).length === 0) {
+      this.network = this.$g("aen.available_networks")[0];
+    }
+    if (Object.keys(this.$store.state.wallet.ethereum.network).length === 0) {
+      let ethereumNetwork = this.$g('eth.available_networks')[0]
+      this.$store.commit('wallet/setEthereumProperty', {key: 'network', value: ethereumNetwork.name })
+      this.$store.commit('wallet/setEthereumProperty', {key: 'activeApiEndpoint', value: ethereumNetwork.api_endpoint })
+    }
+
     // API Node ping test / ranking
-    let apiEndpointPingInterval = this.$g('internal.apiEndpointPingInterval')
-    if(apiEndpointPingInterval !== false) { this.$store.commit('wallet/setInternalProperty', {
-      key: 'apiEndpointPingInterval',
-      value: apiEndpointPingInterval
-    })}
+    let apiEndpointPingInterval = this.$g("internal.apiEndpointPingInterval");
+    if (apiEndpointPingInterval !== false) {
+      this.$store.commit("wallet/setInternalProperty", {
+        key: "apiEndpointPingInterval",
+        value: apiEndpointPingInterval
+      });
+    }
     this.$store.dispatch("wallet/rankApiNodes");
     setInterval(
       function() {
         this.$store.dispatch("wallet/rankApiNodes");
-        this.$walletService.updateApiEndpoint('aen', {
-            address: this.$store.state.internal.activeApiEndpoint
-          }
-
-        );
+        this.$walletService.updateApiEndpoint("aen", {
+          address: this.$store.state.internal.activeApiEndpoint
+        });
       }.bind(this),
       this.$store.state.wallet.internal.apiEndpointPingInterval
     );
 
     // Generic network information that can be had without an account
-    let networkInformationInterval = this.$g('internal.apiEndpointPingInterval')
-    if(networkInformationInterval !== false) { this.$store.commit('wallet/setInternalProperty', {
-      key: 'networkInformationInterval',
-      value: networkInformationInterval
-    })}
+    let networkInformationInterval = this.$g(
+      "internal.apiEndpointPingInterval"
+    );
+    if (networkInformationInterval !== false) {
+      this.$store.commit("wallet/setInternalProperty", {
+        key: "networkInformationInterval",
+        value: networkInformationInterval
+      });
+    }
     this.$store.dispatch("updateGenericNetworkInformation");
     setInterval(
       function() {
@@ -281,7 +294,7 @@ export default {
     setTimeout(
       function() {
         // Hydrate local state from cold storage
-        if (this.$store.state.wallet.context.accountPrivateKey === '') {
+        if (this.$store.state.wallet.context.accountPrivateKey === "") {
           if (this.$nuxt.$route.name !== "index") {
             console.log("No wallet so redirecting to launch");
             this.$nuxt.$router.replace({ path: "/" });

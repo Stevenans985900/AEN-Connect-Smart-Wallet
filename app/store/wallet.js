@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Aen from '~/modules/network/Aen'
+import Ethereum from "../modules/network/Ethereum";
 
 export const initialState = {
     contacts: [],
@@ -12,6 +13,11 @@ export const initialState = {
         privateKey: '',
         password: '',
         onChain: false
+    },
+    ethereum: {
+        activeApiEndpoint: '',
+        activeApiPing: 9999,
+        network: ''
     },
     internal: {
         apiEndpointPingInterval: 30000,
@@ -29,15 +35,22 @@ export const state = () => (initialState)
 export const actions = {
     balance: (context, wallet) => {
         let networkHandler
+        // wallet.balance = 0
         return new Promise((resolve) => {
             switch (wallet.type) {
                 case 'aen':
                     networkHandler = new Aen(context.state.internal.activeApiEndpoint)
                     networkHandler.balance(wallet).then(response => {
-                        resolve(response)
+                        context.commit('addWalletProperty', {
+                            wallet: wallet,
+                            key: 'balance',
+                            value: response
+                        })
+                        resolve(wallet)
                     })
                     break
             }
+
         })
     },
     checkWalletLive(context, wallet) {
@@ -56,13 +69,14 @@ export const actions = {
         })
     },
     load(context, options) {
-        console.debug('Wallet Service:Load '+options.type)
+        console.debug('Wallet Service:Load ' + options.type)
         // var vm = this
 
         return new Promise((resolve) => {
             let wallet = {
                 onChain: false,
-                name: options.name
+                name: options.name,
+                balance: 0
             }
 
             let account, networkHandler, walletObject
@@ -85,11 +99,12 @@ export const actions = {
 
                     // Check if the wallet is on the chain
                     wallet.onChain = networkHandler.walletIsLive(options)
-                    if(options.hasOwnProperty('main')) {
+                    if (options.hasOwnProperty('main')) {
                         wallet.main = true
                         context.commit('setContext', wallet)
                     }
-                    context.commit('setWallet', wallet)
+
+                    context.commit('addWallet', wallet)
                     resolve(wallet)
                     break
                 case 'eth':
@@ -98,19 +113,19 @@ export const actions = {
         })
     },
     new(context, options) {
-        console.debug('Wallet Service:New '+options.type)
-        // var vm = this
+        console.debug('Wallet Service:New ' + options.type)
 
         return new Promise((resolve) => {
             let wallet = {
                 onChain: false,
-                name: options.name
+                name: options.name,
+                balance: 0
             }
 
             let account, networkHandler, walletObject
             switch (options.type) {
                 case 'aen':
-                    networkHandler = new Aen
+                    networkHandler = new Aen(context.state.internal.activeApiEndpoint)
                     // Do behind the scenes work
                     account = networkHandler.accountNew(options)
                     options.accountPrivateKey = account.privateKey
@@ -126,24 +141,32 @@ export const actions = {
                     wallet.network = options.network
 
                     // Check if the wallet is on the chain
-                    if(options.hasOwnProperty('main')) {
+                    if (options.hasOwnProperty('main')) {
                         wallet.main = true
                         context.commit('setContext', wallet)
                     }
-                    context.commit('setWallet', wallet)
+                    context.commit('addWallet', wallet)
                     resolve(wallet)
                     break
                 case 'eth':
-                    break;
+                    networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
+                    walletObject = networkHandler.walletNew(options)
+                    wallet.type = 'eth'
+                    wallet.password = options.password
+                    wallet.address = walletObject.address
+                    wallet.privateKey = walletObject.privateKey
+                    context.commit('addWallet', wallet)
+                    resolve(wallet)
+                    break
             }
         })
     },
     transfer(context, options) {
         return new Promise((resolve) => {
             let networkHandler, transfer
-            switch (options.type) {
+            switch (options.source.type) {
                 case 'aen':
-                    networkHandler = new Aen(context.internal.activeApiEndpoint)
+                    networkHandler = new Aen(context.state.internal.activeApiEndpoint)
                     transfer = networkHandler.transfer(options)
                     resolve(transfer)
                     break
@@ -162,7 +185,7 @@ export const actions = {
         var stateContext = context
 
         // Test function encapsulate for variable scoping and asynchronous calling
-        var check = function(currentRound) {
+        var check = function (currentRound) {
             var position = currentRound
             var thisAddress = apiEndpoints[position].address + Vue.prototype.$g('aen.api_endpoint_test_uri')
             apiEndpoints[position].scanStart = new Date()
@@ -170,25 +193,25 @@ export const actions = {
 
             // Perform the actual call
             this.$axios.$get(thisAddress)
-              .then((response) => {
+                .then((response) => {
 
-                  // Calculate ping time, output the response when in debug mode to satisfy linter
-                  console.debug(response)
-                  apiEndpoints[position].scanEnd = new Date()
-                  apiEndpoints[position].scanTime = apiEndpoints[position].scanEnd - apiEndpoints[position].scanStart
+                    // Calculate ping time, output the response when in debug mode to satisfy linter
+                    console.debug(response)
+                    apiEndpoints[position].scanEnd = new Date()
+                    apiEndpoints[position].scanTime = apiEndpoints[position].scanEnd - apiEndpoints[position].scanStart
 
-                  // If the test beats current score, set as endpoint to use
-                  if (apiEndpoints[position].scanTime < lowestPing) {
-                      console.debug('Updating AEN API endpoint to: ' + apiEndpoints[position].address)
-                      lowestPing = apiEndpoints[position].scanTime
-                      stateContext.commit('setApiEndpoint', apiEndpoints[position].address)
-                      stateContext.commit('setPingTime', lowestPing)
-                  }
-              })
-              .catch((error) => {
-                  console.log('Node offline: ' + thisAddress)
-                  console.debug(error)
-              })
+                    // If the test beats current score, set as endpoint to use
+                    if (apiEndpoints[position].scanTime < lowestPing) {
+                        console.debug('Updating AEN API endpoint to: ' + apiEndpoints[position].address)
+                        lowestPing = apiEndpoints[position].scanTime
+                        stateContext.commit('setApiEndpoint', apiEndpoints[position].address)
+                        stateContext.commit('setPingTime', lowestPing)
+                    }
+                })
+                .catch((error) => {
+                    console.log('Node offline: ' + thisAddress)
+                    console.debug(error)
+                })
         }.bind(this)
 
         // Start performing the checks asynchronously
@@ -202,8 +225,14 @@ export const mutations = {
     setAccountStatus(state, status) {
         state.meta.wallet_present = status
     },
-    setWallet(state, wallet) {
+    addWallet(state, wallet) {
         state.wallets[wallet.address] = wallet
+    },
+    setEthereumProperty(state, options) {
+        state.ethereum[options.key] = options.value
+    },
+    addWalletProperty(state, options) {
+        state.wallets[options.wallet.address][options.key] = options.value
     },
     setProperty(state, options) {
         console.log('fine up to here')

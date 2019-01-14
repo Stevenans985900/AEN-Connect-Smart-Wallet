@@ -11,7 +11,7 @@ export default {
       beforeCreate() {
         this.$walletService.$store = options.store
         this.$walletService.Aen = new AenPlugin()
-        this.$walletService.Eth = new EthereumPlugin(this.$g('eth.api_endpoint'))
+        this.$walletService.Eth = new EthereumPlugin()
       }
     })
     Vue.prototype.$walletService = {

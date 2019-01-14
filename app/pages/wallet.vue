@@ -42,55 +42,68 @@
           <!-- AEN -->
           <v-tab-item value="aen">
             <v-card flat>
-              <v-form ref="aen-form" v-model="valid" class="full-width" @submit.prevent="onSubmit">
-                <v-select
-                  v-if="multipleNetworks"
-                  :items="availableNetworks"
-                  v-model="network"
-                  return-object
-                  item-text="name"
-                  label="Network"
-                />
-                <v-text-field
-                  v-model="walletName"
-                  :rules="[walletRules.required, walletRules.min]"
-                  label="Wallet Name"
-                  required
-                  placeholder="AEN Wallet"
-                />
-                <v-text-field
-                  v-model="walletPassword"
-                  :append-icon="showPassword ? 'visibility_off' : 'visibility'"
-                  :type="showPassword ? 'text' : 'password'"
-                  :rules="[passwordRules.required, passwordRules.min]"
-                  label="Wallet Password"
-                  required
-                  counter
-                  @click:append="showPassword = !showPassword"
-                />
-                <vue-recaptcha
-                  v-if="environment === 'Production'"
-                  ref="recaptcha"
-                  :sitekey="googleCaptchaKey"
-                  @verify="createAccount"
-                />
-              </v-form>
+              <v-card-text>
+                <v-form ref="aen-form" v-model="valid" class="full-width" @submit.prevent="onSubmit">
+                  <v-select
+                    v-if="multipleNetworks"
+                    :items="availableNetworks"
+                    v-model="network"
+                    return-object
+                    item-text="name"
+                    label="Network"
+                  />
+                  <v-text-field
+                    v-model="walletName"
+                    :rules="[walletRules.required, walletRules.min]"
+                    label="Wallet Name"
+                    required
+                    placeholder="AEN Wallet"
+                  />
+                  <v-text-field
+                    v-model="walletPassword"
+                    :append-icon="showPassword ? 'visibility_off' : 'visibility'"
+                    :type="showPassword ? 'text' : 'password'"
+                    :rules="[passwordRules.required, passwordRules.min]"
+                    label="Wallet Password"
+                    required
+                    counter
+                    @click:append="showPassword = !showPassword"
+                  />
+                  <vue-recaptcha
+                    v-if="environment === 'Production'"
+                    ref="recaptcha"
+                    :sitekey="googleCaptchaKey"
+                    @verify="createAccount"
+                  />
+                </v-form>
+              </v-card-text>
             </v-card>
           </v-tab-item>
 
           <!-- ETH -->
           <v-tab-item value="eth">
             <v-card flat>
-              <v-form ref="eth-form" v-model="valid" class="full-width" @submit.prevent="onSubmit">
-                <v-text-field
-                  v-model="walletName"
-                  :rules="[walletRules.required, walletRules.min]"
-                  label="Wallet Name"
-                  required
-                  placeholder="AEN Wallet"
-                />
-                <h1>Have a means of generating extra entropy here</h1>
-              </v-form>
+              <v-card-text>
+                <v-form ref="eth-form" v-model="valid" class="full-width" @submit.prevent="onSubmit">
+                  <v-text-field
+                    v-model="walletName"
+                    :rules="[walletRules.required, walletRules.min]"
+                    label="Wallet Name"
+                    required
+                    placeholder="ETH Wallet"
+                  />
+                  <v-text-field
+                    v-model="walletPassword"
+                    :append-icon="showPassword ? 'visibility_off' : 'visibility'"
+                    :type="showPassword ? 'text' : 'password'"
+                    :rules="[passwordRules.required, passwordRules.min]"
+                    label="Wallet Password"
+                    required
+                    counter
+                    @click:append="showPassword = !showPassword"
+                  />
+                </v-form>
+              </v-card-text>
             </v-card>
           </v-tab-item>
         </v-tabs>
@@ -114,10 +127,11 @@
             <v-btn flat @click="dialogShowAddress = true">Show Business Card</v-btn>
             <v-btn flat @click="dialogMakeTransfer = true">Make Transfer</v-btn>
             <v-btn flat @click="dialogReceiveTransfer = true">Receive Transfer</v-btn>
+            <v-btn v-if="contextWallet.network.name == 'TestNet'" :href="faucet.address + '?address=' + contextWallet.address" target="_blank" flat>Visit Faucet</v-btn>
           </v-toolbar-items>
         </v-toolbar>
         <v-card-text>
-          <h1 class="text-xs-center">{{ contextWallet.address }}</h1>
+          <address-render :address="contextWallet.address"/>
           <wallet-history v-if="contextWallet.onChain === true" :wallet="contextWallet" />
           <activation v-else :wallet="contextWallet" />
         </v-card-text>
@@ -203,6 +217,9 @@ export default {
     environment() {
       return this.$store.state.meta.environment;
     },
+    faucet() {
+      return this.$g('aen.faucets')[0]
+    },
     wallets() {
       return this.$store.state.wallet.wallets;
     },
@@ -257,7 +274,8 @@ export default {
       }
       switch (this.walletType) {
         case "eth":
-
+          options.type = 'eth'
+          options.password = this.walletPassword
           break
         case "aen":
         default:

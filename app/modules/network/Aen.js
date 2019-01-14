@@ -185,18 +185,16 @@ export default class Aen extends Generic {
   transfer(options) {
     Generic.prototype.transfer.call(this, options)
 
-    var transferInformation = {}
-
-    const recipientAddress = Address.createFromRawAddress(transferInformation.address)
+    const recipientAddress = Address.createFromRawAddress(options.destination.address)
     const account = Account.createFromPrivateKey(options.source.accountPrivateKey, options.source.network.byte)
     const transactionHttp = new TransactionHttp(this.apiEndpoint)
 
     const transferTransaction = TransferTransaction.create(
       Deadline.create(23),
       recipientAddress,
-      [XEM.createRelative(parseInt(transferInformation.amount))],
-      PlainMessage.create(transferInformation.message),
-      this.$store.state.wallet.network)
+      [XEM.createRelative(parseInt(options.destination.amount))],
+      PlainMessage.create(options.destination.message),
+      options.source.network.byte)
 
     const signedTransaction = account.sign(transferTransaction)
     transactionHttp
