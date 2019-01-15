@@ -188,12 +188,13 @@ export default class Aen extends Generic {
     const recipientAddress = Address.createFromRawAddress(options.destination.address)
     const account = Account.createFromPrivateKey(options.source.accountPrivateKey, options.source.network.byte)
     const transactionHttp = new TransactionHttp(this.apiEndpoint)
+    let message = options.destination.message || ''
 
     const transferTransaction = TransferTransaction.create(
       Deadline.create(23),
       recipientAddress,
       [XEM.createRelative(parseInt(options.destination.amount))],
-      PlainMessage.create(options.destination.message),
+      PlainMessage.create(message),
       options.source.network.byte)
 
     const signedTransaction = account.sign(transferTransaction)

@@ -94,16 +94,32 @@
                         </template>
                       </upload-btn>
                       <v-select
+                        v-if="multipleNetworks"
                         :items="availableNetworks"
                         v-model="network"
                         return-object
                         item-text="name"
                         label="Network"
                       />
-                      <v-text-field v-model="walletName" label="Wallet Name" required/>
+                      <v-text-field
+                        v-model="walletName"
+                        :rules="[walletRules.required, walletRules.min]"
+                        label="Wallet Name"
+                        required
+                        placeholder="AEN Wallet"
+                      />
                       <v-text-field v-model="privateKey" label="Private Key" required/>
-                      <v-text-field v-model="walletPassword" label="Wallet Password" required/>
-                      <v-btn @click="loadWallet">Create</v-btn>
+                      <v-text-field
+                        v-model="walletPassword"
+                        :append-icon="showPassword ? 'visibility_off' : 'visibility'"
+                        :type="showPassword ? 'text' : 'password'"
+                        :rules="[passwordRules.required, passwordRules.min]"
+                        label="Wallet Password"
+                        required
+                        counter
+                        @click:append="showPassword = !showPassword"
+                      />
+                      <v-btn @click="loadWallet">Load</v-btn>
                     </v-form>
                   </v-layout>
                 </v-card-text>
@@ -136,7 +152,7 @@
                       </span>
                     </v-checkbox>
                     
-                    <backup-wallet/>
+                    <backup-wallet :wallet="contextWallet"/>
                     <v-btn :disabled="!proceedValid" to="/dashboard">Continue</v-btn>
                   </v-form>
                 </v-card-text>
@@ -175,7 +191,7 @@ import EventEmitter from "events";
 import qrCodeGenerator from "qrcode-generator";
 import VueRecaptcha from "vue-recaptcha";
 import isElectron from "is-electron";
-// import zxcvbn from "zxcvbn";
+import CryptoJS from "crypto-js"
 
 export default {
   components: {
@@ -366,12 +382,70 @@ export default {
           type: "success",
           message: "Your wallet has been successfully setup!"
         })
+
+        let walletCheckInterval = setInterval(
+          function() {
+            this.$store.dispatch('wallet/checkWalletLive', this.$store.state.wallet.context).then(response => {
+              this.$store.commit('wallet/setProperty', {
+                address: this.$store.state.wallet.context.address,
+                key: 'onChain',
+                value: response
+              });
+              if (response === true) {
+                clearInterval(walletCheckInterval)
+              }
+            })
+          }.bind(this),
+          this.$store.state.wallet.internal.walletCheckInterval
+        );
       })
     },
     /**
      *
      */
     loadWallet() {
+
+      if (!this.$refs.existingWalletForm.validate()) {
+        console.log("form is invalid");
+        return false;
+      }
+
+      this.$store.dispatch('wallet/load',{
+          type: 'aen',
+          accountPrivateKey: this.$store.state.wallet.context.accountPrivateKey,
+          network: this.$store.state.wallet.context.network,
+          name: this.$store.state.wallet.context.name,
+          password: this.$store.state.wallet.context.password,
+          main: true
+        }
+      ).then((wallet) => {
+        console.debug(wallet)
+        this.$store.commit("showNotification", {
+          type: "success",
+          message: "Your wallet has been successfully setup!"
+        })
+
+        let walletCheckInterval = setInterval(
+          function() {
+            this.$store.dispatch('wallet/checkWalletLive', this.$store.state.wallet.context).then(response => {
+              this.$store.commit('wallet/setProperty', {
+                address: this.$store.state.wallet.context.address,
+                key: 'onChain',
+                value: response
+              });
+              if (response === true) {
+                clearInterval(walletCheckInterval)
+              }
+            })
+          }.bind(this),
+          this.$store.state.wallet.internal.walletCheckInterval
+        );
+
+        this.$nuxt.$router.replace({ path: "/dashboard" });
+
+      })
+
+
       console.debug("F:LW:Load Wallet");
       this.$account.regenerate_account(
         this.$store.state.activeWallet.private_key,
@@ -418,7 +492,6 @@ export default {
       }
     },
     backupUploaded(file) {
-      console.debug("F:BU:Backup Uploaded");
 
       // Create the construct to handle both app / browser situations
       const fileUploadedEmitter = new EventEmitter();
@@ -428,32 +501,23 @@ export default {
           var message =
             "The file you uploaded appears invalid, please make sure it is a wallet backup";
           try {
-            const walletInformation = JSON.parse(walletData);
-            console.debug("BU:Result");
-            console.debug(walletInformation);
-            this.$store.commit("setContextProperty", {
-              key: "name",
-              value: walletInformation.name
-            });
-            this.$store.commit("setContextProperty", {
-              key: "privateKey",
-              value: walletInformation.accountPrivateKey
-            });
 
-            // Get the proper network definition based on the identifier byte
-            const network = this.availableNetworks.filter(obj => {
-              return obj.byte === walletInformation.networkIdentifierByte;
-            })[0];
-            this.$store.commit("setContextProperty", {
-              key: "network",
-              value: network
-            });
+            console.debug(walletData.fileName)
+            let extension = walletData.fileName.split('.').pop();
+            let walletInformation
 
-            message =
-              "Backup loaded, please enter your password in the provided field";
+            if(extension === 'enc') {
+              var bytes  = CryptoJS.AES.decrypt(walletData.data, this.$g('salt'));
+              walletInformation = JSON.parse(bytes.toString(CryptoJS.enc.Utf8))
+            } else {
+              walletInformation = JSON.parse(walletData.data);
+            }
+
+            this.$store.commit("wallet/setContext", walletInformation)
+
             this.$store.commit("showNotification", {
               type: "info",
-              message: message
+              message: "Backup loaded"
             });
           } catch (e) {
             this.$store.commit("showNotification", {
@@ -471,14 +535,14 @@ export default {
         const fs = require("fs");
         fs.readFile(file.path, "utf8", (err, data) => {
           if (err) throw err;
-          fileUploadedEmitter.emit("ready", data);
+          fileUploadedEmitter.emit("ready", {data: data, fileName: file.name});
         });
       } else {
         console.log("BU:Using HTML file API");
         var reader = new FileReader();
         reader.readAsText(file);
         reader.onload = function(event) {
-          fileUploadedEmitter.emit("ready", event.target.result);
+          fileUploadedEmitter.emit("ready", {data: event.target.result, fileName: file.name});
         };
       }
     }

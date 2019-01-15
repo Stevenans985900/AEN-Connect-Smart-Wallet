@@ -5,7 +5,17 @@
 </template>
 
 <script>
+import CryptoJS from "crypto-js"
+
 export default {
+  props: {
+    wallet: {
+      type: Object,
+      default: function () {
+        return {}
+      }
+    }
+  },
   computed: {
     version() {
       return this.$g("aen.network_version");
@@ -14,33 +24,39 @@ export default {
   methods: {
     backupWallet() {
       console.debug("F:BW:Backup Wallet");
-      // Encode the current state data
-      var exportData = {
-        // Include software version in case there are any wallet updates needed to do later
-        publisherVersion: this.version,
-        name: this.$account.$store.state.wallet.name,
-        address: this.$account.$store.state.wallet.address.address,
-        networkIdentifierByte: this.$account.$store.state.wallet.network,
-        accountPublicKey: this.$account.$store.state.account.publicKey,
-        accountPrivateKey: this.$account.$store.state.account.privateKey,
-        walletEncryptedPrivateKey: this.$account.$store.state.wallet
-          .encryptedPrivateKey.encryptedKey
-      };
+
       var exportName =
-        exportData.name + "-backup-" + new Date().toISOString().slice(0, 10);
+        this.wallet.name + "-backup-" + new Date().toISOString().slice(0, 10);
+
       console.debug("BW:Data to be backed up");
-      console.debug(exportData);
+      console.debug(this.wallet);
 
       // Create hidden download anchor and handle for the user
       var dataStr =
         "data:text/json;charset=utf-8," +
-        encodeURIComponent(JSON.stringify(exportData));
+        encodeURIComponent(JSON.stringify(this.wallet));
       var downloadAnchorNode = document.createElement("a");
       downloadAnchorNode.setAttribute("href", dataStr);
       downloadAnchorNode.setAttribute("download", exportName + ".json");
       document.body.appendChild(downloadAnchorNode);
       downloadAnchorNode.click();
       downloadAnchorNode.remove();
+
+      // Create an encrypted version of the backup
+      let encrypted = "data:application/octet-stream,"+CryptoJS.AES.encrypt(JSON.stringify(this.wallet), this.$g('salt')).toString()
+      console.log(encrypted)
+      var downloadEncryptedAnchorNode = document.createElement("a");
+      downloadEncryptedAnchorNode.setAttribute("href", encrypted);
+      downloadEncryptedAnchorNode.setAttribute("download", exportName + ".enc");
+      document.body.appendChild(downloadEncryptedAnchorNode);
+      downloadEncryptedAnchorNode.click();
+      downloadEncryptedAnchorNode.remove();
+
+      this.$store.commit("showNotification", {
+        type: "info",
+        message: 'A plain JSON version and an encrypted version (which can only be read from this program) have requested download'
+      })
+
     }
   }
 };

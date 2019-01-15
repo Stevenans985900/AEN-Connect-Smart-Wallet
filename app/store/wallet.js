@@ -20,6 +20,7 @@ export const initialState = {
         network: ''
     },
     internal: {
+        walletCheckInterval: 10000,
         apiEndpointPingInterval: 30000,
         networkInformationInterval: 30000,
         // Array used for storing ping ranking for external api nodes

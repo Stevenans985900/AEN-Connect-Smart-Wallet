@@ -78,6 +78,9 @@ export default {
     }
   },
   watch: {
+    wallets: function() {
+      this.processWallets()
+    },
     processedWallets: function(value) {
       if (value === this.walletCount) {
         this.loading = false;
@@ -87,42 +90,47 @@ export default {
     }
   },
   mounted() {
-    let color, wallet;
-    
-    let vm = this;
-    this.walletCount = Object.keys(this.wallets).length;
-    for (wallet in this.wallets) {
-      if (this.wallets[wallet].onChain === true) {
-        this.haveLiveWallet = true
-        this.$store
-          .dispatch("wallet/balance", this.wallets[wallet])
-          .then(walletProcessed => {
-            switch (walletProcessed.type) {
-              case "aen":
-                color = this.colorSchema.aen;
-                break;
-              case "eth":
-                color = this.colorSchema.eth;
-                break;
-              case "btc":
-                color = this.colorSchema.btc;
-                break;
-            }
+    this.processWallets()
+  },
+  methods: {
+    processWallets() {
+      let color, wallet;
+      this.processedWallets = 0
+      let vm = this;
+      this.walletCount = Object.keys(this.wallets).length;
+      for (wallet in this.wallets) {
+        if (this.wallets[wallet].onChain === true) {
+          this.haveLiveWallet = true
+          this.$store
+            .dispatch("wallet/balance", this.wallets[wallet])
+            .then(walletProcessed => {
+              switch (walletProcessed.type) {
+                case "aen":
+                  color = this.colorSchema.aen;
+                  break;
+                case "eth":
+                  color = this.colorSchema.eth;
+                  break;
+                case "btc":
+                  color = this.colorSchema.btc;
+                  break;
+              }
 
-            if (walletProcessed.hasOwnProperty("balance")) {
-              vm.chartdata.datasets[0].backgroundColor.push(color);
-              vm.chartdata.datasets[0].data.push(walletProcessed.balance);
-              vm.chartdata.labels.push(walletProcessed.name);
-            }
-            vm.processedWallets++;
-          })
-          .catch(err => {
-            console.log('catching "error"');
-            console.error(err);
-            return err;
-          });
-      } else {
-        this.processedWallets++;
+              if (walletProcessed.hasOwnProperty("balance")) {
+                vm.chartdata.datasets[0].backgroundColor.push(color);
+                vm.chartdata.datasets[0].data.push(walletProcessed.balance);
+                vm.chartdata.labels.push(walletProcessed.name);
+              }
+              vm.processedWallets++;
+            })
+            .catch(err => {
+              console.log('catching "error"');
+              console.error(err);
+              return err;
+            });
+        } else {
+          this.processedWallets++;
+        }
       }
     }
   }

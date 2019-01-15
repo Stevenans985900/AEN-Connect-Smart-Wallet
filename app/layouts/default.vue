@@ -39,7 +39,7 @@
       <network-diagnostics/>
 
       <!-- USER DROPDOWN -->
-      <v-menu v-if="activeWallet.address !== ''" v-model="menu" :close-on-content-click="false">
+      <v-menu v-if="contextWallet.address !== ''" v-model="menu" :close-on-content-click="false">
         <v-btn slot="activator" flat>
           <v-avatar size="24">
             <v-icon>account_circle</v-icon>
@@ -48,9 +48,9 @@
         <v-card>
           <v-card-title>
             <div>
-              <span class="grey--text">{{ activeWallet.name }}</span>
+              <span class="grey--text">{{ contextWallet.name }}</span>
               <br>
-              <address-render :address="activeWallet.address"/>
+              <address-render :address="contextWallet.address"/>
               <v-list>
                 <v-list-tile v-if="mode === 'app'">
                   <v-list-tile-action>
@@ -62,7 +62,7 @@
             </div>
           </v-card-title>
           <v-card-actions>
-            <backup-wallet/>
+            <backup-wallet :wallet="contextWallet"/>
             <v-btn flat nuxt to="/dashboard">Dashboard</v-btn>
             <v-spacer/>
             <v-btn v-if="mode === 'app'" flat @click="exit">Exit</v-btn>
@@ -121,7 +121,7 @@ export default {
           icon: "apps",
           title: "Dashboard",
           to: "/dashboard",
-          requireActiveWallet: true
+          requireContext: true
         },
         {
           icon: "settings_system_daydream",
@@ -132,9 +132,9 @@ export default {
           icon: "contacts",
           title: "Address Book",
           to: "/address-book",
-          requireActiveWallet: true
+          requireContext: true
         }
-        // { icon: 'extension', title: 'Create Namespace', to: '/tokens', requireActiveWallet: true }
+        // { icon: 'extension', title: 'Create Namespace', to: '/tokens', requireContext: true }
       ],
       title: "AENChain Wallet",
       menu: false
@@ -153,8 +153,13 @@ export default {
     version() {
       return this.$g("version");
     },
-    activeWallet() {
-      return this.$store.state.activeWallet;
+    contextWallet() {
+      return this.$store.state.wallet.context;
+    },
+    haveWallets() {
+      if(Object.keys(this.$store.state.wallet.context).length > 0) {
+        return true
+      }
     },
     appRunTime() {
       return this.$store.state.meta.mode;
@@ -167,7 +172,7 @@ export default {
         return this.items;
       }
       let map = this.items.filter(a => {
-        if (!a.hasOwnProperty("requireActiveWallet")) {
+        if (!a.hasOwnProperty("requireContext")) {
           return a;
         }
       });
@@ -262,6 +267,32 @@ export default {
       this.$store.commit('wallet/setEthereumProperty', {key: 'activeApiEndpoint', value: ethereumNetwork.api_endpoint })
     }
 
+    // Check if the wallet is on the network
+    let walletCheckInterval = this.$g(
+      "internal.walletCheckInterval"
+    )
+    if (walletCheckInterval !== false) {
+      this.$store.commit("wallet/setInternalProperty", {
+        key: "walletCheckInterval",
+        value: walletCheckInterval
+      });
+    }
+    walletCheckInterval = setInterval(
+      function() {
+        this.$store.dispatch('wallet/checkWalletLive', this.$store.state.wallet.context).then(response => {
+          this.$store.commit('wallet/setProperty', {
+            address: this.$store.state.wallet.context.address,
+            key: 'onChain',
+            value: response
+          });
+          if (response === true) {
+            clearInterval(walletCheckInterval)
+          }
+        })
+      }.bind(this),
+      this.$store.state.wallet.internal.walletCheckInterval
+    );
+
     // API Node ping test / ranking
     let apiEndpointPingInterval = this.$g("internal.apiEndpointPingInterval");
     if (apiEndpointPingInterval !== false) {
@@ -304,7 +335,7 @@ export default {
       function() {
         // Hydrate local state from cold storage
         if (this.$store.state.wallet.context.accountPrivateKey === "") {
-          if (this.$nuxt.$route.name !== "index") {
+          if (this.$nuxt.$route.name !== "index" && this.haveWallets) {
             console.log("No wallet so redirecting to launch");
             this.$nuxt.$router.replace({ path: "/" });
           }
