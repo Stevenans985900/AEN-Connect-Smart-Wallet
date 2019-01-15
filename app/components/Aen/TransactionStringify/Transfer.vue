@@ -12,12 +12,18 @@
 <script>
 export default {
 	props: {
-		data: {
-            type: Object,
-            default: function () {
-                return {}
-            }
-        }
+    data: {
+      type: Object,
+      default: function () {
+        return {}
+      }
+    },
+    wallet: {
+      type: Object,
+      default: function () {
+        return {}
+      }
+    }
 	},
 	computed: {
 		address () {
@@ -27,7 +33,10 @@ export default {
 		direction () {
 			if (!this.data.hasOwnProperty('recipient')) return ''
       // Check whether the recipient is in the users wallet list
-      if(this.data.recipient.address in this.$store.state.wallet.wallets) {
+      console.debug('checking address direction')
+      console.debug('recipient: '+this.data.recipient.address)
+      console.debug('this address: '+this.wallet.address)
+      if(this.data.recipient.address === this.wallet.address) {
         return 'incoming'
 			} else {
 				return 'outgoing'

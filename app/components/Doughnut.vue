@@ -33,17 +33,6 @@ export default {
       this.renderChart(this.chartdata, this.options);
     }
   },
-  //       console.log("Triggered process wallets watcher");
-  //       console.log(value);
-  //       console.log(this.walletCount);
-  //       if (value === this.walletCount) {
-  //         this.loading = false;
-  //         this.renderChart(this.chartdata, this.options);
-  //       } else {
-  //         this.loading = true;
-  //       }
-  //     }
-  //   },
   mounted() {
     this.renderChart(this.chartdata, this.options);
   }

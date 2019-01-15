@@ -8,9 +8,13 @@ export default class Aen extends Generic{
         this.web3 = new Web3(apiEndpoint)
     }
 
+    walletLoad(options) {
+        Generic.prototype.walletLoad.call(this, options)
+    }
+
     walletNew(options) {
         Generic.prototype.walletNew.call(this, options)
         // TODO Once have process working, switch the create account to use the API version
-        return this.web3.eth.accounts.create()
+        return this.web3.eth.personal.newAccount(options.password)
     }
 }

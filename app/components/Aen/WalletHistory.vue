@@ -10,7 +10,7 @@
               :key="index"
             >
               <div slot="header">
-                <transaction-stringify :transaction="transaction"/>
+                <transaction-stringify :wallet="wallet" :transaction="transaction"/>
               </div>
               <v-card>
                 <v-card-text>

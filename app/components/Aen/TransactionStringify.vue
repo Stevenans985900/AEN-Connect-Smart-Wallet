@@ -1,5 +1,5 @@
 <template>
-  <component v-if="component" :is="component" :data="transaction"/>
+  <component v-if="component" :is="component" :data="transaction" :wallet="wallet"/>
 </template>
 
 <script>
@@ -7,12 +7,18 @@
 
 	export default {
 		props: {
-			transaction: {
-				type: Object,
-				default: function () {
-					return {}
-				}
-			}
+      transaction: {
+        type: Object,
+        default: function () {
+          return {}
+        }
+      },
+      wallet: {
+        type: Object,
+        default: function () {
+          return {}
+        }
+      }
 		},
 		data() {
 			return {

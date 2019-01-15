@@ -7,9 +7,12 @@
           <v-list>
             <template v-for="(wallet, address) in wallets">
               <v-list-tile v-if="wallet.onChain == true" :key="address">
+                <v-list-tile-avatar>
+                  <img :src="'/network/' + wallet.type + '.png'">
+                </v-list-tile-avatar>
                 <v-list-tile-content>
-                  <v-list-tile-title v-html="wallet.balance"/>
-                  <v-list-tile-sub-title v-html="wallet.name"/>
+                  <v-list-tile-title v-html="wallet.name"/>
+                  <v-list-tile-sub-title v-html="wallet.balance"/>
                 </v-list-tile-content>
               </v-list-tile>
             </template>
