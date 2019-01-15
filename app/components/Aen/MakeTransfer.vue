@@ -6,7 +6,7 @@
         <v-layout wrap>
           <v-flex xs12 sm6>
             <v-combobox
-              v-model="payee.address"
+              v-model="destination.address"
               :items="contacts"
               item-text="displayText"
               label="To"
@@ -15,13 +15,13 @@
           </v-flex>
           <v-flex xs12 sm6>
             <v-text-field
-              v-model="payee.amount"
+              v-model="destination.amount"
               label="Amount"
               suffix="XEM"/>
           </v-flex>
           <v-flex xs12 sm6>
             <v-text-field
-              v-model="payee.message"
+              v-model="destination.message"
               label="Optional Message"/>
           </v-flex>
         </v-layout>
@@ -46,7 +46,7 @@
     },
     data() {
       return {
-        payee: {
+        destination: {
           address: '',
           amount: 0,
           message: ''
@@ -64,13 +64,14 @@
         console.log('initiating transfer')
         this.$store.dispatch('wallet/transfer', {
           source: this.wallet,
-          destination: this.payee
+          destination: this.destination
         }).then((transfer) => {
           console.debug(transfer)
           this.$store.commit("showNotification", {
             type: "success",
             message: "Your transfer has been successfully dispatched to the network"
           })
+          this.$emit('closewindow')
         })
       }
     }

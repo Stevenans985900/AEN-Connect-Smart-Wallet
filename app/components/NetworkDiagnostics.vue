@@ -34,13 +34,13 @@ export default {
   computed: {
     connectionStrengthIcon() {
       let icon = 'signal_cellular_off'
-      if (this.currentPing < 200) {
+      if (this.currentPing < 2000) {
         icon = 'signal_cellular_4_bar';
-      } else if (this.currentPing < 500) {
+      } else if (this.currentPing < 4500) {
         icon = 'signal_cellular_3_bar';
-      } else if (this.currentPing < 1500) {
+      } else if (this.currentPing < 8500) {
         icon = 'signal_cellular_2_bar';
-      } else if (this.currentPing < 5000) {
+      } else if (this.currentPing < 12000) {
         icon = 'signal_cellular_1_bar';
       }
       console.log('computed strength and going to use: '+icon)

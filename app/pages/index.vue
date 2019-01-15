@@ -1,6 +1,6 @@
 <template>
-  <v-layout column justify-center align-center>
-    <v-flex xs12 sm8 md6>
+  <v-layout row justify-center align-center>
+    <v-flex xs12>
       <!-- Initial setup -->
       <v-card>
         <v-card-title class="headline">Welcome to AEN Smart Wallet ({{ network.name }})</v-card-title>
@@ -27,7 +27,7 @@
                 slot="activator"
                 color="info"
                 @click="existingAccount = !existingAccount"
-              >Access My Wallet</v-btn>
+              >Access an Existing Wallet</v-btn>
               <span>To send tokens and swap coins.</span>
             </v-tooltip>
           </p>
@@ -35,7 +35,7 @@
 
           <v-layout>
             <!-- control -->
-            <v-flex xs12 md6>
+            <v-flex v-if="walletSetup === false" xs12 md6>
               <!-- Setup wallet for new account -->
               <v-card v-if="newAccount" class="text-xs-center">
                 <v-card-text>
@@ -71,7 +71,6 @@
                         counter
                         @click:append="showPassword = !showPassword"
                       />
-                      <v-checkbox v-model="rememberMe" label="Remember Me"/>
                       <vue-recaptcha
                         v-if="environment === 'Production'"
                         ref="recaptcha"
@@ -104,7 +103,6 @@
                       <v-text-field v-model="walletName" label="Wallet Name" required/>
                       <v-text-field v-model="privateKey" label="Private Key" required/>
                       <v-text-field v-model="walletPassword" label="Wallet Password" required/>
-                      <v-checkbox v-model="rememberMe" label="Remember Me"/>
                       <v-btn @click="loadWallet">Create</v-btn>
                     </v-form>
                   </v-layout>
@@ -112,25 +110,32 @@
               </v-card>
             </v-flex>
 
+            <v-flex v-if="walletSetup" xs12 md6>
+              <v-card class="text-xs-center">
+                <v-card-text>
+                  <business-card :wallet="contextWallet" />
+                </v-card-text>
+              </v-card>
+            </v-flex>
+
             <!-- summary information column -->
-            <v-flex v-if="walletCreated" xs12 md6 class="text-xs-center">
+            <v-flex v-if="walletSetup" xs12 md6 class="text-xs-center">
               <v-card>
                 <v-card-text>
-
-
                   <v-form ref="form" v-model="proceedValid">
-                    <v-checkbox v-model="eulaAgree" :rules="[rules.required]" required>
-                      <span slot="label">
-                        I agree to the
-                        <a href="http://aencoin.com/eula">AEN EULA</a>
-                      </span>
-                    </v-checkbox>
                     <v-checkbox
                       v-model="backupAgree"
                       :rules="[rules.required]"
                       required
                       label="I have backed up my wallet and understand that keeping it safe is my duty"
                     />
+                    <v-checkbox v-model="eulaAgree" :rules="[rules.required]" required>
+                      <span slot="label">
+                        I agree to the
+                        <a href="http://aencoin.com/eula">AEN EULA</a>
+                      </span>
+                    </v-checkbox>
+                    
                     <backup-wallet/>
                     <v-btn :disabled="!proceedValid" to="/dashboard">Continue</v-btn>
                   </v-form>
@@ -138,12 +143,16 @@
               </v-card>
             </v-flex>
             <v-flex v-else xs12 md6 class="text-xs-center">
-              <v-card
-                v-if="newAccount"
-              >When you create a new wallet, you aren't part of the network until a transaction involving your address has been completed and becoming part of the ledger</v-card>
-              <v-card
-                v-if="existingAccount"
-              >To restore a wallet, you'll need to know both your private key and the password.</v-card>
+              <v-card>
+                <v-card-text v-if="newAccount">
+                  <p>When you create a new wallet, you aren't part of the network until a transaction involving your address has been completed and becoming part of the ledger</p>
+                  <img src="/new.png" alt="new wallet" >
+                </v-card-text>
+                <v-card-text v-if="existingAccount">
+                  <p>To restore a wallet, you'll need to know both your private key and the password.</p>
+                  <img src="/restore.png" alt="restore wallet" >
+                </v-card-text>
+              </v-card>
             </v-flex>
           </v-layout>
         </v-card-text>
@@ -159,6 +168,7 @@
 </style>
 <script>
 import BackupWallet from "../components/BackupWallet";
+import BusinessCard from "../components/BusinessCard";
 import { SimpleWallet } from "chain-js-sdk";
 import UploadButton from "vuetify-upload-button";
 import EventEmitter from "events";
@@ -170,6 +180,7 @@ import isElectron from "is-electron";
 export default {
   components: {
     BackupWallet,
+    BusinessCard,
     "upload-btn": UploadButton,
     VueRecaptcha
   },
@@ -180,7 +191,7 @@ export default {
       proceedValid: false,
       newAccount: false,
       existingAccount: false,
-      walletCreated: false,
+      walletSetup: false,
       showPassword: false,
       rules: {
         required: value => !!value || "Required."
@@ -197,6 +208,9 @@ export default {
     };
   },
   computed: {
+    contextWallet() {
+      return this.$store.state.wallet.context
+    },
     eulaAgree: {
       get: function() { return this.$store.state.meta.eulaAgree },
       set: function(val) { this.$store.commit('setMeta', {key: 'eulaAgree', value: val}) }
@@ -346,9 +360,8 @@ export default {
         main: true
         }
       ).then((wallet) => {
-        console.debug("Index Page: Wallet successfully generated")
         console.debug(wallet)
-        this.walletCreated = true
+        this.walletSetup = true
         this.$store.commit("showNotification", {
           type: "success",
           message: "Your wallet has been successfully setup!"
@@ -390,7 +403,7 @@ export default {
         } else {
           this.$store.commit("setAccountStatus", true);
         }
-        this.walletCreated = true;
+        this.walletSetup = true;
         message = "Your wallet has been successfully regenerated!";
         this.$store.commit("showNotification", {
           type: "success",

@@ -2,7 +2,7 @@
   <v-layout column justify-center align-center>
     <v-flex xs12 sm8 md6 class="text-xs-center">
       <h1>This wallet is not yet active</h1>
-      <img src="/nothing.png" alt="nothing">
+      <img src="/nothing.png" alt="nothing"><br>
       <v-btn @click="checkWalletLive(wallet)">If you have already made a transfer, it is possible the network has not yet detected it. To manually check click here</v-btn>
       <p>If you are still getting the message even after being sure a transfer has taken place, please get in contact with us at <a href="mailto:support@aencoin.io">support@aencoin.io</a>!</p>
 

@@ -25,7 +25,7 @@
 
     <!-- TOP BAR -->
     <v-toolbar fixed app>
-      <v-toolbar-side-icon @click="drawer = !drawer"/>
+      <v-toolbar-side-icon v-if="eulaAgree" @click="navDrawer = !navDrawer"/>
       <v-avatar size="24">
         <img src="/logo.png" alt="avatar">
       </v-avatar>
@@ -114,7 +114,7 @@ export default {
   },
   data() {
     return {
-      drawer: true,
+      navDrawer: true,
       hydrated: false,
       items: [
         {
@@ -141,6 +141,15 @@ export default {
     };
   },
   computed: {
+    drawer: {
+      get: function() {
+        if (this.navDrawer === true && this.$store.state.meta.eulaAgree === true) {
+          return true
+        }
+      },
+      set: function() {}
+    },
+    eulaAgree() { return this.$store.state.meta.eulaAgree },
     version() {
       return this.$g("version");
     },

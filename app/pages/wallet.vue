@@ -117,7 +117,7 @@
 
     <!-- View Wallet Dialog -->
     <v-dialog v-model="dialogViewWallet" fullscreen="">
-      <v-card width="600px">
+      <v-card vwidth="600px">
         <v-toolbar dark color="primary">
           <v-btn icon dark @click="dialogViewWallet = false">
             <v-icon>close</v-icon>
@@ -126,7 +126,6 @@
           <v-toolbar-items v-if="contextWallet.onChain === true">
             <v-btn flat @click="dialogShowAddress = true">Show Business Card</v-btn>
             <v-btn flat @click="dialogMakeTransfer = true">Make Transfer</v-btn>
-            <v-btn flat @click="dialogReceiveTransfer = true">Receive Transfer</v-btn>
             <v-btn v-if="contextWallet.network.name == 'TestNet'" :href="faucet.address + '?address=' + contextWallet.address" target="_blank" flat>Visit Faucet</v-btn>
           </v-toolbar-items>
         </v-toolbar>
@@ -138,9 +137,10 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="dialogShowAddress" max-width="400px">
+    <v-dialog v-model="dialogShowAddress" max-width="500px">
       <business-card :wallet="contextWallet" />
     </v-dialog>
+
     <!-- Make Transfer Dialog -->
     <v-dialog v-model="dialogMakeTransfer" persistent max-width="600px">
       <v-toolbar dark color="primary">
@@ -221,6 +221,7 @@ export default {
       return this.$g('aen.faucets')[0]
     },
     wallets() {
+      console.log(this.$store.state.wallet.wallets)
       return this.$store.state.wallet.wallets;
     },
     multipleNetworks() {
@@ -287,6 +288,7 @@ export default {
       }
       this.$store.dispatch('wallet/new', options).then((wallet) => {
         console.debug(wallet)
+        this.dialogWalletAdd  = false
         this.$store.commit("showNotification", {
           type: "success",
           message: "Your wallet has been successfully setup!"

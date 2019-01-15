@@ -41,7 +41,7 @@ export const actions = {
                 case 'aen':
                     networkHandler = new Aen(context.state.internal.activeApiEndpoint)
                     networkHandler.balance(wallet).then(response => {
-                        context.commit('addWalletProperty', {
+                        context.commit('setWalletProperty', {
                             wallet: wallet,
                             key: 'balance',
                             value: response
@@ -227,15 +227,20 @@ export const mutations = {
     },
     addWallet(state, wallet) {
         state.wallets[wallet.address] = wallet
+        if(wallet.main === true && wallet.type === 'aen') {
+            state.context = wallet
+        }
     },
     setEthereumProperty(state, options) {
         state.ethereum[options.key] = options.value
     },
-    addWalletProperty(state, options) {
+    setWalletProperty(state, options) {
         state.wallets[options.wallet.address][options.key] = options.value
+        if(options.wallet.main === true && options.wallet.type === 'aen') {
+            state.context = options.wallet
+        }
     },
     setProperty(state, options) {
-        console.log('fine up to here')
         state.wallets[options.address][options.key] = options.value
     },
     setContext(state, wallet) {
