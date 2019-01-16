@@ -43,6 +43,7 @@
     "available_networks": [
       {
         "name": "Ropsten",
+        "network_id": 3,
         "api_endpoint": "https://ropsten.infura.io/0HIuuP4qCjvv8DMGjvPm"
       }
     ]

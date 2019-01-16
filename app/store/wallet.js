@@ -151,7 +151,12 @@ export const actions = {
                     break
                 case 'eth':
                     networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
-                    wallet.address = networkHandler.walletNew(options)
+                    walletObject = networkHandler.walletNew(options)
+                    console.log(walletObject)
+                    wallet.address = walletObject.address
+                    wallet.privateKey = walletObject.privateKey
+                    wallet.keystore = walletObject.encrypt(options.password)
+                    wallet.network = options.wallet
                     wallet.type = 'eth'
                     wallet.password = options.password
                     context.commit('addWallet', wallet)
