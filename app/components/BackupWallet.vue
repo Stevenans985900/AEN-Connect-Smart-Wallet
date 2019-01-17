@@ -26,7 +26,7 @@ export default {
       console.debug("F:BW:Backup Wallet");
 
       var exportName =
-        this.wallet.name + "-backup-" + new Date().toISOString().slice(0, 10);
+        this.wallet.name + "-"+this.wallet.type+"-" + new Date().toISOString().slice(0, 10);
 
       console.debug("BW:Data to be backed up");
       console.debug(this.wallet);

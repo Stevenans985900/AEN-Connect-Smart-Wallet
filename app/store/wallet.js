@@ -17,7 +17,7 @@ export const initialState = {
     ethereum: {
         activeApiEndpoint: '',
         activeApiPing: 9999,
-        network: ''
+        network: {}
     },
     internal: {
         walletCheckInterval: 10000,
@@ -50,6 +50,17 @@ export const actions = {
                         resolve(wallet)
                     })
                     break
+                case 'eth':
+                    networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
+                    networkHandler.balance(wallet).then(response => {
+                        console.debug(response)
+                        context.commit('setWalletProperty', {
+                            wallet: wallet,
+                            key: 'balance',
+                            value: response
+                        })
+                        resolve(wallet)
+                    })
             }
 
         })
@@ -65,6 +76,10 @@ export const actions = {
                     })
                     break
                 case 'eth':
+                    networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
+                    networkHandler.walletIsLive(wallet).then(response => {
+                        resolve(response)
+                    })
                     break;
             }
         })
@@ -109,6 +124,37 @@ export const actions = {
                     resolve(wallet)
                     break
                 case 'eth':
+                    networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
+                    networkHandler.walletLoad(options).then(walletObject => {
+                        wallet.type = 'eth'
+                        wallet.password = options.password
+                        wallet.privateKey = walletObject.privateKey
+                        wallet.address = walletObject.address
+                        wallet.keystore = walletObject.encrypt(options.password)
+                        wallet.network = options.network
+                        context.commit('addWallet', wallet)
+
+                        networkHandler.balance(wallet).then(response => {
+                            console.debug(response)
+                            context.commit('setWalletProperty', {
+                                wallet: wallet,
+                                key: 'balance',
+                                value: response
+                            })
+                            resolve(wallet)
+                        })
+
+                        networkHandler.walletIsLive(wallet).then(response => {
+                            context.commit('setWalletProperty', {
+                                wallet: wallet,
+                                key: 'balance',
+                                value: response
+                            })
+                            resolve(wallet)
+                        })
+
+                        resolve(wallet)
+                    })
                     break;
             }
         })
@@ -142,7 +188,7 @@ export const actions = {
                     wallet.network = options.network
 
                     // Check if the wallet is on the chain
-                    if (options.hasOwnProperty('main')) {
+                    if (options.hasOwnProperty('main') && options.main === true) {
                         wallet.main = true
                         context.commit('setContext', wallet)
                     }
@@ -152,7 +198,6 @@ export const actions = {
                 case 'eth':
                     networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
                     walletObject = networkHandler.walletNew(options)
-                    console.log(walletObject)
                     wallet.address = walletObject.address
                     wallet.privateKey = walletObject.privateKey
                     wallet.keystore = walletObject.encrypt(options.password)
@@ -226,6 +271,15 @@ export const actions = {
 }
 
 export const mutations = {
+    removeWallet(state, wallet) {
+        console.log('removing wallet')
+        console.log(wallet)
+        console.log('before')
+        console.log(state.wallets)
+        Vue.delete(state.wallets, wallet.address)
+        console.log('after')
+        console.log(state.wallets)
+    },
     setAccountStatus(state, status) {
         state.meta.wallet_present = status
     },

@@ -116,6 +116,7 @@ export default {
     return {
       navDrawer: true,
       hydrated: false,
+      walletCheckIntervals: [],
       items: [
         {
           icon: "apps",
@@ -261,13 +262,15 @@ export default {
     if (Object.keys(this.$store.state.wallet.context.network).length === 0) {
       this.network = this.$g("aen.available_networks")[0];
     }
-    if (Object.keys(this.$store.state.wallet.ethereum.network).length === 0) {
+    if (Object.keys(this.$store.state.wallet.ethereum.activeApiEndpoint).length === 0) {
+      console.log('setting ethereum network to first available')
+      console.log(this.$g('eth.available_networks')[0])
       let ethereumNetwork = this.$g('eth.available_networks')[0]
-      this.$store.commit('wallet/setEthereumProperty', {key: 'network', value: ethereumNetwork.name })
-      this.$store.commit('wallet/setEthereumProperty', {key: 'activeApiEndpoint', value: ethereumNetwork.api_endpoint })
+      this.$store.commit('wallet/setEthereumProperty', {key: 'network', value: ethereumNetwork })
+      this.$store.commit('wallet/setEthereumProperty', {key: 'activeApiEndpoint', value: ethereumNetwork.infura_api_endpoint })
     }
 
-    // Check if the wallet is on the network
+    // Check if wallets are on network and activate listeners
     let walletCheckInterval = this.$g(
       "internal.walletCheckInterval"
     )
@@ -277,21 +280,25 @@ export default {
         value: walletCheckInterval
       });
     }
-    walletCheckInterval = setInterval(
-      function() {
-        this.$store.dispatch('wallet/checkWalletLive', this.$store.state.wallet.context).then(response => {
-          this.$store.commit('wallet/setProperty', {
-            address: this.$store.state.wallet.context.address,
-            key: 'onChain',
-            value: response
-          });
-          if (response === true) {
-            clearInterval(walletCheckInterval)
-          }
-        })
-      }.bind(this),
-      this.$store.state.wallet.internal.walletCheckInterval
-    );
+
+    if(this.$store.state.wallet.context.address !== '' && this.$store.state.wallet.context.onChain === false) {
+      walletCheckInterval = setInterval(
+        function() {
+          this.$store.dispatch('wallet/checkWalletLive', this.$store.state.wallet.context).then(response => {
+            this.$store.commit('wallet/setProperty', {
+              type: 'aen',
+              address: this.$store.state.wallet.context.address,
+              key: 'onChain',
+              value: response
+            });
+            if (response === true) {
+              clearInterval(walletCheckInterval)
+            }
+          })
+        }.bind(this),
+        this.$store.state.wallet.internal.walletCheckInterval
+      );
+    }
 
     // API Node ping test / ranking
     let apiEndpointPingInterval = this.$g("internal.apiEndpointPingInterval");

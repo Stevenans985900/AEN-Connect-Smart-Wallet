@@ -24,6 +24,8 @@
     methods: {
       checkWalletLive(wallet) {
         this.$store.dispatch('wallet/checkWalletLive', wallet).then(response => {
+          console.log('response from checking whether the wallet is live or not')
+          console.log(response)
           this.$store.commit('wallet/setProperty', {
             address: wallet.address,
             key: 'onChain',

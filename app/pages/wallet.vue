@@ -43,39 +43,7 @@
           <v-tab-item value="aen">
             <v-card flat>
               <v-card-text>
-                <v-form ref="aen-form" v-model="valid" class="full-width" @submit.prevent="onSubmit">
-                  <v-select
-                    v-if="multipleNetworks"
-                    :items="availableNetworks"
-                    v-model="network"
-                    return-object
-                    item-text="name"
-                    label="Network"
-                  />
-                  <v-text-field
-                    v-model="walletName"
-                    :rules="[walletRules.required, walletRules.min]"
-                    label="Wallet Name"
-                    required
-                    placeholder="AEN Wallet"
-                  />
-                  <v-text-field
-                    v-model="walletPassword"
-                    :append-icon="showPassword ? 'visibility_off' : 'visibility'"
-                    :type="showPassword ? 'text' : 'password'"
-                    :rules="[passwordRules.required, passwordRules.min]"
-                    label="Wallet Password"
-                    required
-                    counter
-                    @click:append="showPassword = !showPassword"
-                  />
-                  <vue-recaptcha
-                    v-if="environment === 'Production'"
-                    ref="recaptcha"
-                    :sitekey="googleCaptchaKey"
-                    @verify="createAccount"
-                  />
-                </v-form>
+                <wallet-add type="aen" @complete="walletAdded()"/>
               </v-card-text>
             </v-card>
           </v-tab-item>
@@ -84,25 +52,7 @@
           <v-tab-item value="eth">
             <v-card flat>
               <v-card-text>
-                <v-form ref="eth-form" v-model="valid" class="full-width" @submit.prevent="onSubmit">
-                  <v-text-field
-                    v-model="walletName"
-                    :rules="[walletRules.required, walletRules.min]"
-                    label="Wallet Name"
-                    required
-                    placeholder="ETH Wallet"
-                  />
-                  <v-text-field
-                    v-model="walletPassword"
-                    :append-icon="showPassword ? 'visibility_off' : 'visibility'"
-                    :type="showPassword ? 'text' : 'password'"
-                    :rules="[passwordRules.required, passwordRules.min]"
-                    label="Wallet Password"
-                    required
-                    counter
-                    @click:append="showPassword = !showPassword"
-                  />
-                </v-form>
+                <wallet-add type="eth" @complete="walletAdded()"/>
               </v-card-text>
             </v-card>
           </v-tab-item>
@@ -110,7 +60,6 @@
         <v-card-actions>
           <v-spacer/>
           <v-btn color="blue darken-1" flat @click.native="dialogWalletAdd = false">Close</v-btn>
-          <v-btn color="blue darken-1" flat @click="generateWallet">Save</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -123,13 +72,16 @@
             <v-icon>close</v-icon>
           </v-btn>
           <v-toolbar-title class="white--text">{{ contextWallet.name }}</v-toolbar-title>
-          <v-toolbar-items v-if="contextWallet.onChain === true">
-            <v-btn flat @click="dialogShowAddress = true">Show Business Card</v-btn>
-            <v-btn flat @click="dialogMakeTransfer = true">Make Transfer</v-btn>
-            <v-btn v-if="contextWallet.network.name == 'TestNet'" :href="faucet.address + '?address=' + contextWallet.address" target="_blank" flat>Visit Faucet</v-btn>
+          <v-toolbar-items>
+            <v-btn v-if="contextWallet.onChain === true" flat @click="dialogShowAddress = true">Show Business Card</v-btn>
+            <v-btn v-if="contextWallet.onChain === true" flat @click="dialogMakeTransfer = true">Make Transfer</v-btn>
+
+            <v-btn flat @click="dialogRemoveWallet = true">Remove Wallet</v-btn>
           </v-toolbar-items>
+
         </v-toolbar>
         <v-card-text>
+          <testnet-buttons :wallet="contextWallet" />
           <address-render :address="contextWallet.address"/>
           <wallet-history v-if="contextWallet.onChain === true" :wallet="contextWallet" />
           <activation v-else :wallet="contextWallet" />
@@ -149,7 +101,7 @@
         </v-btn>
         <v-toolbar-title class="white--text">Make a Transfer from {{ contextWallet.name }}</v-toolbar-title>
       </v-toolbar>
-      <make-transfer :wallet="contextWallet" />
+      <make-transfer :wallet="contextWallet" @complete="transferComplete()" />
     </v-dialog>
 
     <!-- View Wallet Dialog -->
@@ -158,17 +110,43 @@
       <!-- show addres -->
       <!-- show QR code -->
     </v-dialog>
+
+    <!-- Remove Wallet Dialog -->
+    <v-dialog v-model="dialogRemoveWallet" persistent max-width="600px">
+      <v-toolbar dark color="primary">
+        <v-btn icon dark @click="dialogRemoveWallet = false">
+          <v-icon>close</v-icon>
+        </v-btn>
+        <v-toolbar-title class="white--text">Are you sure you want to remove the wallet?</v-toolbar-title>
+      </v-toolbar>
+      <v-card>
+        <v-card-title class="headline">{{ contextWallet.name }}</v-card-title>
+        <v-card-text>
+          <p>If you remove the wallet, there will be no way to access it unless you have made a backup. Click the button below to remove </p>
+          <p>If you would like to make a backup, you can do so now by clicking the button below</p>
+          <backup-wallet :wallet="contextWallet" />
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer/>
+          <v-btn color="blue darken-1" flat @click="dialogRemoveWallet = false">Cancel</v-btn>
+          <v-btn color="blue darken-1" flat @click="removeWallet">Remove Wallet</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-layout>
 </template>
 
 <script>
-import Activation from "../components/Activation"
-import Balance from "../components/Balance"
-import BackupWallet from "../components/BackupWallet";
+import Activation from "~/components/Activation"
+import Balance from "~/components/Balance"
+import BackupWallet from "~/components/BackupWallet";
 import VueRecaptcha from "vue-recaptcha";
-import WalletHistory from '../components/WalletHistory';
-import BusinessCard from '../components/BusinessCard';
-import MakeTransfer from "../components/MakeTransfer";
+import WalletHistory from '~/components/WalletHistory';
+import BusinessCard from '~/components/BusinessCard';
+import MakeTransfer from "~/components/MakeTransfer";
+import TestnetButtons from "~/components/TestnetButtons";
+import WalletAdd from "~/components/WalletAdd";
 
 export default {
   components: {
@@ -177,7 +155,9 @@ export default {
     Balance,
     BackupWallet,
     BusinessCard,
+    TestnetButtons,
     VueRecaptcha,
+    WalletAdd,
     WalletHistory
   },
   data() {
@@ -186,6 +166,7 @@ export default {
       dialogViewWallet: false,
       dialogMakeTransfer: false,
       dialogReceiveTransfer: false,
+      dialogRemoveWallet: false,
       dialogShowAddress: false,
       activeWatchers: [],
       walletType: "aen",
@@ -216,9 +197,6 @@ export default {
   computed: {
     environment() {
       return this.$store.state.meta.environment;
-    },
-    faucet() {
-      return this.$g('aen.faucets')[0]
     },
     wallets() {
       console.log(this.$store.state.wallet.wallets)
@@ -257,44 +235,36 @@ export default {
     },
     dialogWallet (wallet) {
       this.contextWallet = wallet
-      this.dialogViewWallet = true
-    },
-    /**
-     * Create a new wallet on one of the various networks
-     */
-    generateWallet() {
-      // Make sure that the form being submitted is valid
-
-      let formRef = this.walletType+'-form'
-      if (!this.$refs[formRef].validate()) {
-        return;
-      }
-
-      let options = {
-        name: this.walletName
-      }
-      switch (this.walletType) {
-        case "eth":
-          options.type = 'eth'
-          options.password = this.walletPassword
-          break
-        case "aen":
-        default:
-          options.type = 'aen'
-          options.network = this.$store.state.wallet.context.network
-          options.password = this.walletPassword
-          break;
-
-      }
-      this.$store.dispatch('wallet/new', options).then((wallet) => {
-        console.debug(wallet)
-        this.dialogWalletAdd  = false
-        this.$store.commit("showNotification", {
-          type: "success",
-          message: "Your wallet has been successfully setup!"
+      // Perform a quick test to see whether the wallet is available online or not
+      this.$store.dispatch('wallet/checkWalletLive', this.contextWallet).then(response => {
+        this.$store.commit('wallet/setProperty', {
+          type: 'aen',
+          address: this.contextWallet.address,
+          key: 'onChain',
+          value: response
         })
       })
-
+      this.dialogViewWallet = true
+    },
+    removeWallet() {
+      this.dialogRemoveWallet = false
+      this.dialogViewWallet = false
+      this.$store.commit('wallet/removeWallet', this.contextWallet)
+      this.contextWallet = {}
+      this.$store.commit("showNotification", {
+        type: "success",
+        message: "Your wallet has been removed"
+      })
+    },
+    walletAdded() {
+      this.dialogWalletAdd  = false
+      this.$store.commit("showNotification", {
+        type: "success",
+        message: "Your wallet has been successfully setup!"
+      })
+    },
+    transferComplete() {
+      this.dialogMakeTransfer = false
     }
   }
 };

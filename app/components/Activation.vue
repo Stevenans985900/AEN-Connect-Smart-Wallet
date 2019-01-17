@@ -33,13 +33,14 @@ export default {
         if (Object.keys(this.wallet).length !== 0) {
           this.type = this.wallet.type[0].toUpperCase() + this.wallet.type.slice(1)
           if (this.type) {
-            try {
-              this.component = () => import("./" + this.type + "/Activation");
-            } catch (err) {
-              console.debug(err);
-            }
+            this.component = () => import("~/components/" + this.type + "/Activation").then(response => {
+              console.debug(response)
+            })
+              .catch(function() {
+                this.component = () => import("~/components/Default/Activation");
+              }.bind(this))
           } else {
-            this.component = () => import("./Fallback");
+            this.component = () => import("~/components/Default/Activation");
           }
         }
       }

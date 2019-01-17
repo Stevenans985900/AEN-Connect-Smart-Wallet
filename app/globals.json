@@ -25,7 +25,8 @@
     "available_networks": [{
       "name": "TestNet",
       "identifier": "PUBLIC_TEST",
-      "byte": 152
+      "byte": 152,
+      "testing": true
     }],
     "faucets": [{
       "name": "TestNet Faucet",
@@ -40,13 +41,17 @@
     }
   },
   "eth": {
+    "etherscan": {
+      "api_key": "IJQ88ERU7QH9HQNV2NX46G2XJAIEZ6EBPB"
+    },
     "available_networks": [
       {
         "name": "Ropsten",
         "network_id": 3,
-        "api_endpoint": "https://ropsten.infura.io/0HIuuP4qCjvv8DMGjvPm"
+        "etherscan_api_endpoint": "http://api-ropsten.etherscan.io/api",
+        "infura_api_endpoint": "https://ropsten.infura.io/0HIuuP4qCjvv8DMGjvPm",
+        "testing": true
       }
     ]
-
   }
 }

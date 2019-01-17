@@ -31,13 +31,14 @@
         if (Object.keys(this.wallet).length !== 0) {
           this.type = this.wallet.type[0].toUpperCase() + this.wallet.type.slice(1)
           if (this.type) {
-            try {
-              this.component = () => import("./" + this.type + "/BusinessCard");
-            } catch (err) {
-              console.debug(err);
-            }
+            this.component = () => import("~/components/" + this.type + "/BusinessCard").then(response => {
+              console.debug(response)
+            })
+            .catch(function() {
+              this.component = () => import("~/components/Default/BusinessCard");
+            }.bind(this))
           } else {
-            this.component = () => import("./BusinessCard");
+            this.component = () => import("~/components/Default/BusinessCard");
           }
         }
       }

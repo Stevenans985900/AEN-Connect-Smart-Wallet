@@ -1,5 +1,5 @@
 <template>
-  <component v-if="component" :is="component" :wallet="wallet" />
+  <component v-if="component" :is="component" :wallet="wallet" @complete="complete()"/>
 </template>
 
 <script>
@@ -33,6 +33,11 @@
                     }
                 }
             }
-        }
+        },
+      methods: {
+          complete() {
+            this.$emit('complete')
+          }
+      }
     };
 </script>

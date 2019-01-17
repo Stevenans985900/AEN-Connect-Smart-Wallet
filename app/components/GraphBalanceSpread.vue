@@ -75,9 +75,16 @@ export default {
     },
     wallets() {
       return this.$store.state.wallet.wallets;
-    }
+    },
+
   },
   watch: {
+    contextWallet: {
+      handler: function() {
+        this.processWallets()
+      },
+      deep: true
+    },
     wallets: function() {
       this.processWallets()
     },

@@ -13,164 +13,7 @@
             >AENChain network</a>
           </p>
           <p>Before proceeding, you need to have an AEN wallet setup on this device. Please choose one of the options below</p>
-          <p>
-            <v-tooltip bottom>
-              <v-btn
-                slot="activator"
-                color="success"
-                @click="newAccount = !newAccount"
-              >Create a New Wallet</v-btn>
-              <span>To obtain an address and generate a private key.</span>
-            </v-tooltip>
-            <v-tooltip bottom>
-              <v-btn
-                slot="activator"
-                color="info"
-                @click="existingAccount = !existingAccount"
-              >Access an Existing Wallet</v-btn>
-              <span>To send tokens and swap coins.</span>
-            </v-tooltip>
-          </p>
-          <hr>
-
-          <v-layout>
-            <!-- control -->
-            <v-flex v-if="walletSetup === false" xs12 md6>
-              <!-- Setup wallet for new account -->
-              <v-card v-if="newAccount" class="text-xs-center">
-                <v-card-text>
-                  <v-layout row wrap>
-                    <v-form
-                      ref="newWalletForm"
-                      v-model="valid"
-                      class="full-width"
-                      @submit.prevent="onSubmit"
-                    >
-                      <v-select
-                        v-if="multipleNetworks"
-                        :items="availableNetworks"
-                        v-model="network"
-                        return-object
-                        item-text="name"
-                        label="Network"
-                      />
-                      <v-text-field
-                        v-model="walletName"
-                        :rules="[walletRules.required, walletRules.min]"
-                        label="Wallet Name"
-                        required
-                        placeholder="AEN Wallet"
-                      />
-                      <v-text-field
-                        v-model="walletPassword"
-                        :append-icon="showPassword ? 'visibility_off' : 'visibility'"
-                        :type="showPassword ? 'text' : 'password'"
-                        :rules="[passwordRules.required, passwordRules.min]"
-                        label="Wallet Password"
-                        required
-                        counter
-                        @click:append="showPassword = !showPassword"
-                      />
-                      <vue-recaptcha
-                        v-if="environment === 'Production'"
-                        ref="recaptcha"
-                        :sitekey="googleCaptchaKey"
-                        @verify="createWallet"
-                      />
-                      <v-btn v-else @click="createWallet">Create Account</v-btn>
-                    </v-form>
-                  </v-layout>
-                </v-card-text>
-              </v-card>
-
-              <!-- Setup wallet from existing account -->
-              <v-card v-if="existingAccount" class="text-xs-center">
-                <v-card-text>
-                  <v-layout row wrap>
-                    <v-form ref="existingWalletForm" v-model="valid" class="full-width">
-                      <upload-btn :file-changed-callback="backupUploaded" title="Restore from file">
-                        <template slot="icon">
-                          <v-icon>attach_file</v-icon>
-                        </template>
-                      </upload-btn>
-                      <v-select
-                        v-if="multipleNetworks"
-                        :items="availableNetworks"
-                        v-model="network"
-                        return-object
-                        item-text="name"
-                        label="Network"
-                      />
-                      <v-text-field
-                        v-model="walletName"
-                        :rules="[walletRules.required, walletRules.min]"
-                        label="Wallet Name"
-                        required
-                        placeholder="AEN Wallet"
-                      />
-                      <v-text-field v-model="privateKey" label="Private Key" required/>
-                      <v-text-field
-                        v-model="walletPassword"
-                        :append-icon="showPassword ? 'visibility_off' : 'visibility'"
-                        :type="showPassword ? 'text' : 'password'"
-                        :rules="[passwordRules.required, passwordRules.min]"
-                        label="Wallet Password"
-                        required
-                        counter
-                        @click:append="showPassword = !showPassword"
-                      />
-                      <v-btn @click="loadWallet">Load</v-btn>
-                    </v-form>
-                  </v-layout>
-                </v-card-text>
-              </v-card>
-            </v-flex>
-
-            <v-flex v-if="walletSetup" xs12 md6>
-              <v-card class="text-xs-center">
-                <v-card-text>
-                  <business-card :wallet="contextWallet" />
-                </v-card-text>
-              </v-card>
-            </v-flex>
-
-            <!-- summary information column -->
-            <v-flex v-if="walletSetup" xs12 md6 class="text-xs-center">
-              <v-card>
-                <v-card-text>
-                  <v-form ref="form" v-model="proceedValid">
-                    <v-checkbox
-                      v-model="backupAgree"
-                      :rules="[rules.required]"
-                      required
-                      label="I have backed up my wallet and understand that keeping it safe is my duty"
-                    />
-                    <v-checkbox v-model="eulaAgree" :rules="[rules.required]" required>
-                      <span slot="label">
-                        I agree to the
-                        <a href="http://aencoin.com/eula">AEN EULA</a>
-                      </span>
-                    </v-checkbox>
-                    
-                    <backup-wallet :wallet="contextWallet"/>
-                    <v-btn :disabled="!proceedValid" to="/dashboard">Continue</v-btn>
-                  </v-form>
-                </v-card-text>
-              </v-card>
-            </v-flex>
-            <v-flex v-else xs12 md6 class="text-xs-center">
-              <v-card>
-                <v-card-text v-if="newAccount">
-                  <p>When you create a new wallet, you aren't part of the network until a transaction involving your address has been completed and becoming part of the ledger</p>
-                  <img src="/new.png" alt="new wallet" >
-                </v-card-text>
-                <v-card-text v-if="existingAccount">
-                  <p>To restore a wallet, you'll need to know both your private key and the password.</p>
-                  <img src="/restore.png" alt="restore wallet" >
-                </v-card-text>
-              </v-card>
-            </v-flex>
-          </v-layout>
+          <wallet-add :main="true" type="aen" @complete="complete()"/>
         </v-card-text>
       </v-card>
     </v-flex>
@@ -183,22 +26,18 @@
 }
 </style>
 <script>
-import BackupWallet from "../components/BackupWallet";
-import BusinessCard from "../components/BusinessCard";
+import WalletAdd from "~/components/WalletAdd";
+
 import { SimpleWallet } from "chain-js-sdk";
-import UploadButton from "vuetify-upload-button";
-import EventEmitter from "events";
 import qrCodeGenerator from "qrcode-generator";
-import VueRecaptcha from "vue-recaptcha";
-import isElectron from "is-electron";
-import CryptoJS from "crypto-js"
+// import VueRecaptcha from "vue-recaptcha";
+
 
 export default {
   components: {
-    BackupWallet,
-    BusinessCard,
-    "upload-btn": UploadButton,
-    VueRecaptcha
+
+    // VueRecaptcha,
+    WalletAdd
   },
   data() {
     return {
@@ -208,18 +47,6 @@ export default {
       newAccount: false,
       existingAccount: false,
       walletSetup: false,
-      showPassword: false,
-      rules: {
-        required: value => !!value || "Required."
-      },
-      walletRules: {
-        required: value => !!value || "Required.",
-        min: v => v.length >= 6 || "Min 6 Characters"
-      },
-      passwordRules: {
-        required: value => !!value || "Required.",
-        min: v => v.length >= 8 || "Min 8 characters"
-      },
       validity: {}
     };
   },
@@ -227,10 +54,7 @@ export default {
     contextWallet() {
       return this.$store.state.wallet.context
     },
-    eulaAgree: {
-      get: function() { return this.$store.state.meta.eulaAgree },
-      set: function(val) { this.$store.commit('setMeta', {key: 'eulaAgree', value: val}) }
-    },
+
     googleCaptchaKey() {
       return this.$g("google_recaptcha_key");
     },
@@ -354,6 +178,9 @@ export default {
     );
   },
   methods: {
+    complete: function() {
+      this.$nuxt.$router.replace({ path: "/dashboard" })
+    },
     onSubmit: function() {
       this.$refs.invisibleRecaptcha.execute();
     },
@@ -361,45 +188,7 @@ export default {
      * CREATE ACCOUNT
      * Set up account in initial state to be used on the blockchain
      */
-    createWallet() {
 
-      if (!this.$refs.newWalletForm.validate()) {
-        console.log("form is invalid");
-        return false;
-      }
-
-      this.$store.dispatch('wallet/new',{
-        type: 'aen',
-        network: this.$store.state.wallet.context.network,
-        name: this.$store.state.wallet.context.name,
-        password: this.$store.state.wallet.context.password,
-        main: true
-        }
-      ).then((wallet) => {
-        console.debug(wallet)
-        this.walletSetup = true
-        this.$store.commit("showNotification", {
-          type: "success",
-          message: "Your wallet has been successfully setup!"
-        })
-
-        let walletCheckInterval = setInterval(
-          function() {
-            this.$store.dispatch('wallet/checkWalletLive', this.$store.state.wallet.context).then(response => {
-              this.$store.commit('wallet/setProperty', {
-                address: this.$store.state.wallet.context.address,
-                key: 'onChain',
-                value: response
-              });
-              if (response === true) {
-                clearInterval(walletCheckInterval)
-              }
-            })
-          }.bind(this),
-          this.$store.state.wallet.internal.walletCheckInterval
-        );
-      })
-    },
     /**
      *
      */
@@ -491,61 +280,7 @@ export default {
         });
       }
     },
-    backupUploaded(file) {
 
-      // Create the construct to handle both app / browser situations
-      const fileUploadedEmitter = new EventEmitter();
-      fileUploadedEmitter.on(
-        "ready",
-        function(walletData) {
-          var message =
-            "The file you uploaded appears invalid, please make sure it is a wallet backup";
-          try {
-
-            console.debug(walletData.fileName)
-            let extension = walletData.fileName.split('.').pop();
-            let walletInformation
-
-            if(extension === 'enc') {
-              var bytes  = CryptoJS.AES.decrypt(walletData.data, this.$g('salt'));
-              walletInformation = JSON.parse(bytes.toString(CryptoJS.enc.Utf8))
-            } else {
-              walletInformation = JSON.parse(walletData.data);
-            }
-
-            this.$store.commit("wallet/setContext", walletInformation)
-
-            this.$store.commit("showNotification", {
-              type: "info",
-              message: "Backup loaded"
-            });
-          } catch (e) {
-            this.$store.commit("showNotification", {
-              type: "error",
-              message: message
-            });
-          }
-        }.bind(this)
-      );
-
-      // Fork condition depending on the environment
-      // TODO If come across more of these conditions, put them in to facade
-      if (isElectron()) {
-        console.debug("BU:Using local file mode");
-        const fs = require("fs");
-        fs.readFile(file.path, "utf8", (err, data) => {
-          if (err) throw err;
-          fileUploadedEmitter.emit("ready", {data: data, fileName: file.name});
-        });
-      } else {
-        console.log("BU:Using HTML file API");
-        var reader = new FileReader();
-        reader.readAsText(file);
-        reader.onload = function(event) {
-          fileUploadedEmitter.emit("ready", {data: event.target.result, fileName: file.name});
-        };
-      }
-    }
   }
 };
 </script>

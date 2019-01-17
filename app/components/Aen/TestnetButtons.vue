@@ -1,13 +1,17 @@
 <template>
-  <v-layout column justify-center align-center>
-    <v-flex xs12 sm8 md6 class="text-xs-center">
-      <h1>This wallet is not yet active</h1>
-      <img src="/nothing.png" alt="nothing"><br>
-      <v-btn @click="checkWalletLive(wallet)">If you have already made a transfer, it is possible the network has not yet detected it. To manually check click here</v-btn>
-      <p>If you are still getting the message even after being sure a transfer has taken place, please get in contact with us at <a href="mailto:support@aencoin.io">support@aencoin.io</a>!</p>
-
-    </v-flex>
-  </v-layout>
+  <v-menu v-if="testnet" offset-y>
+    <v-btn
+      slot="activator"
+    >TestNet Functions</v-btn>
+    <v-list>
+      <v-list-tile
+        :href="faucet.address + '?address=' + wallet.address"
+        target="_blank"
+      >
+        <v-list-tile-title>Visit Faucet</v-list-tile-title>
+      </v-list-tile>
+    </v-list>
+  </v-menu>
 </template>
 
 <script>
@@ -21,8 +25,15 @@ export default {
         }
       }
     },
-    created: function() {
-      console.log('created the AEN activation instructions')
+    computed: {
+      faucet() {
+        return this.$g('aen.faucets')[0]
+      },
+      testnet() {
+        if(this.wallet.network.hasOwnProperty('testing')) {
+          return true
+        }
+      }
     },
     methods: {
       checkWalletLive(wallet) {
