@@ -201,7 +201,7 @@ export const actions = {
                     wallet.address = walletObject.address
                     wallet.privateKey = walletObject.privateKey
                     wallet.keystore = walletObject.encrypt(options.password)
-                    wallet.network = options.wallet
+                    wallet.network = options.network
                     wallet.type = 'eth'
                     wallet.password = options.password
                     context.commit('addWallet', wallet)
@@ -216,10 +216,12 @@ export const actions = {
             switch (options.source.type) {
                 case 'aen':
                     networkHandler = new Aen(context.state.internal.activeApiEndpoint)
-                    transfer = networkHandler.transfer(options)
-                    resolve(transfer)
                     break
+                case 'eth':
+                    networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
             }
+            transfer = networkHandler.transfer(options)
+            resolve(transfer)
         })
     },
     /**

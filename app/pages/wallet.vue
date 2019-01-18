@@ -75,7 +75,6 @@
           <v-toolbar-items>
             <v-btn v-if="contextWallet.onChain === true" flat @click="dialogShowAddress = true">Show Business Card</v-btn>
             <v-btn v-if="contextWallet.onChain === true" flat @click="dialogMakeTransfer = true">Make Transfer</v-btn>
-
             <v-btn flat @click="dialogRemoveWallet = true">Remove Wallet</v-btn>
           </v-toolbar-items>
 
@@ -249,8 +248,9 @@ export default {
     removeWallet() {
       this.dialogRemoveWallet = false
       this.dialogViewWallet = false
-      this.$store.commit('wallet/removeWallet', this.contextWallet)
+      let removeWallet = this.contextWallet
       this.contextWallet = {}
+      this.$store.commit('wallet/removeWallet', removeWallet)
       this.$store.commit("showNotification", {
         type: "success",
         message: "Your wallet has been removed"

@@ -216,7 +216,7 @@ export default {
   },
   computed: {
     availableNetworks() {
-      return this.$g("aen.available_networks");
+      return this.$g("eth.available_networks");
     },
     stepTwoLabel() {
       if(this.addType === 'fileImport') {
@@ -238,6 +238,7 @@ export default {
       if (this.$g("eth.available_networks").length > 1) {
         return true;
       }
+      return false
     }
   },
   mounted() {
@@ -259,14 +260,15 @@ export default {
         return false;
       }
 
-      this.$store.dispatch('wallet/new',{
-          type: 'eth',
-          network: this.network,
-          name: this.walletName,
-          password: this.walletPassword,
-          main: this.main
-        }
-      ).then((wallet) => {
+      let walletOptions = {
+        type: 'eth',
+        network: this.network,
+        name: this.walletName,
+        password: this.walletPassword,
+        main: this.main
+      }
+      this.$store.dispatch('wallet/new', walletOptions)
+      .then((wallet) => {
         console.debug(wallet)
         this.wallet = wallet
         this.currentStep++
@@ -285,7 +287,7 @@ export default {
               }
             })
           }.bind(this),
-          this.$store.state.wallet.internal.walletCheckInterval
+          this.$g('internal.walletCheckInterval')
         );
       })
     },
@@ -320,7 +322,7 @@ export default {
               }
             })
           }.bind(this),
-          this.$store.state.wallet.internal.walletCheckInterval
+          this.$g('internal.walletCheckInterval')
         );
       })
     },

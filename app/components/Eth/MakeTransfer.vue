@@ -4,9 +4,12 @@
     <v-card-text>
       <v-container grid-list-md>
         <v-layout wrap>
-          <v-flex xs12 sm6>
+          <v-flex xs12>
+            <p>Current gas price: {{ gasPrice }}</p>
+          </v-flex>
+          <v-flex xs12>
             <v-combobox
-              v-model="destination.address"
+              v-model="address"
               :items="contacts"
               item-text="displayText"
               label="To"
@@ -15,14 +18,15 @@
           </v-flex>
           <v-flex xs12 sm6>
             <v-text-field
-              v-model="destination.amount"
+              v-model="amount"
               label="Amount"
-              suffix="XEM"/>
+              suffix="ETH"/>
           </v-flex>
           <v-flex xs12 sm6>
             <v-text-field
-              v-model="destination.message"
-              label="Optional Message"/>
+              v-model="gas"
+              label="Gas"
+              suffix="wei"/>
           </v-flex>
         </v-layout>
       </v-container>
@@ -35,6 +39,8 @@
 </template>
 
 <script>
+  import Web3 from "web3"
+
   export default {
     props: {
       wallet: {
@@ -46,26 +52,41 @@
     },
     data() {
       return {
-        destination: {
-          address: '',
-          amount: 0,
-          message: ''
-        }
+        web3: {},
+        gasPrice: 0,
+        gas: 0,
+        address: '',
+        amount: 0,
+        message: ''
       }
     },
+    // watch
     computed: {
       contacts() {
         return this.$store.state.wallet.contacts
       }
     },
+    created() {
+      this.web3 = new Web3(this.$store.state.wallet.ethereum.activeApiEndpoint)
+      this.web3.eth.getGasPrice().then(gasPrice => {
+        this.gasPrice = gasPrice
+      })
+    },
     methods: {
       initiateTransfer() {
-
-        console.log('initiating transfer')
-        this.$store.dispatch('wallet/transfer', {
+        this.$store.commit("setLoading", { t: "page", v: true })
+        let transactionOptions = {
           source: this.wallet,
-          destination: this.destination
-        }).then((transfer) => {
+          destination: {
+            address: this.address,
+            amount: this.amount,
+            gas: this.gas
+          }
+        }
+        console.log('initiating transfer')
+        this.$store.dispatch('wallet/transfer', transactionOptions)
+        .then((transfer) => {
+          this.$store.commit("setLoading", { t: "page", v: false })
           console.debug(transfer)
           this.$store.commit("showNotification", {
             type: "success",

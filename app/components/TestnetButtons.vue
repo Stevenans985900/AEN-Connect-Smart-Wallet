@@ -33,9 +33,7 @@ export default {
         if (Object.keys(this.wallet).length !== 0) {
           this.type = this.wallet.type[0].toUpperCase() + this.wallet.type.slice(1)
           if (this.type) {
-            this.component = () => import("~/components/" + this.type + "/TestnetButtons").then(response => {
-              console.debug(response)
-            })
+            this.component = () => import("~/components/" + this.type + "/TestnetButtons")
               .catch(function() {
                 this.component = () => import("~/components/Default/TestnetButtons");
               }.bind(this))

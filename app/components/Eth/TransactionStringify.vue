@@ -25,16 +25,16 @@
       }
     },
     mounted() {
-      console.debug(this.transaction)
-      if (this.type) {
-        this.component = () => import("~/components/Eth/TransactionStringify/" + this.type).then(response => {
+      // If the contract address is blank, then it's a plain transfer
+      if (this.transaction.contractAddress !== '') {
+        this.component = () => import("~/components/Eth/TransactionStringify/" + this.transaction.contractAddress).then(response => {
           console.debug(response)
         })
           .catch(function() {
             this.component = () => import("~/components/Default/TransactionStringify");
           }.bind(this))
       } else {
-        this.component = () => import('~/components/Default/TransactionStringify')
+        this.component = () => import('~/components/Eth/TransactionStringify/Transfer')
       }
     }
   }

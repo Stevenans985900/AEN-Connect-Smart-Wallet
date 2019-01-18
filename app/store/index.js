@@ -58,11 +58,13 @@ export const getters = {
     environment: state => {
         return state.meta.environment
     },
+    busy: state => {
+       return state.internal.busy.page
+    },
     loading: state => {
         if (
             state.internal.busy.global === true ||
-            state.internal.busy.router === true ||
-            state.internal.busy.page === true) {
+            state.internal.busy.router === true) {
             return true
         }
     }
@@ -83,7 +85,7 @@ export const actions = {
      * @param {*} context 
      */
     updateGenericNetworkInformation(context) {
-        console.debug('Vuex: Update Generic Network Information using ' + context.state.internal.activeApiEndpoint)
+        console.debug('Index Store: Update Generic Network Information')
 
         // Prepare basic services for use
         let apiEndpoint = context.state.internal.activeApiEndpoint

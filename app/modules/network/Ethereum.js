@@ -25,7 +25,7 @@ export default class Aen extends Generic{
         super.transactionsHistorical(options)
 
         return new Promise((resolve) => {
-            axios.get(options.etherscan.api_endpoint, {
+            axios.get(options.wallet.network.etherscan_api_endpoint, {
                 params: {
                     module: "account",
                     action: "txlist",
@@ -38,7 +38,7 @@ export default class Aen extends Generic{
             })
               .then(function (response) {
                   console.log(response)
-                  resolve(response)
+                  resolve(response.data.result)
               })
               .catch(function (error) {
                   console.log(error)
@@ -49,16 +49,32 @@ export default class Aen extends Generic{
 
     transfer(options) {
         Generic.prototype.transfer.call(this, options)
+        return new Promise((resolve) => {
 
-        var rawTransaction = {
-            "from": options.source.keystore.id,
-            "to": options.destination.address,
-            "value": this.web3.utils.toHex(this.web3.utils.toWei(options.destination.amount, "ether")),
-            "gas": options.destination.gas,
-            "chainId": options.source.network.networkId
-        }
-        console.debug(rawTransaction)
-        // TODO - you are currently working here
+            // Open up the account
+            // let account = this.web3.eth.accounts.decrypt(options.source.keystore, options.source.password)
+
+            var rawTransaction = {
+                "from": options.source.address,
+                "to": options.destination.address,
+                "value": this.web3.utils.toHex(this.web3.utils.toWei(options.destination.amount, "ether")),
+                "gas": options.destination.gas,
+                "chainId": options.source.network.network_id
+            }
+            this.web3.eth.accounts.signTransaction(rawTransaction, options.source.privateKey)
+              .then(signedTx => this.web3.eth.sendSignedTransaction(signedTx.rawTransaction))
+              .then(receipt => {
+                  console.log(receipt)
+                  console.log("Transaction receipt: ", receipt)
+                  resolve(receipt)
+              })
+              .catch(err => {
+                  console.log('something went wrong when sending a transaction')
+                  console.error(err)
+              })
+            console.debug(rawTransaction)
+            // TODO - you are currently working here
+        })
     }
 
     /**

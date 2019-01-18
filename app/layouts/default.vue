@@ -77,6 +77,9 @@
         <no-ssr>
           <loading/>
         </no-ssr>
+        <no-ssr>
+          <busy />
+        </no-ssr>
         <v-snackbar v-model="showNotification" :timeout="timeout" :top="true" :vertical="true">
           {{ notification_message }}
           <v-btn flat @click="showNotification = false">Close</v-btn>
@@ -96,9 +99,10 @@
 </template>
 
 <script>
-import BackupWallet from "../components/BackupWallet";
-import NetworkDiagnostics from "../components/NetworkDiagnostics";
-import Loading from "../components/Loading";
+import BackupWallet from "~/components/BackupWallet";
+import Busy from "~/components/Busy";
+import NetworkDiagnostics from "~/components/NetworkDiagnostics";
+import Loading from "~/components/Loading";
 import isElectron from "is-electron";
 // import childProcess from 'child_process'
 if (isElectron()) {
@@ -109,6 +113,7 @@ if (isElectron()) {
 export default {
   components: {
     BackupWallet,
+    Busy,
     Loading,
     NetworkDiagnostics
   },
@@ -219,11 +224,6 @@ export default {
       return this.$store.state.notification.message;
     }
   },
-  provide: function() {
-    return {
-      walletService: this.$walletService
-    };
-  },
   /**
    *
    */
@@ -262,6 +262,7 @@ export default {
     if (Object.keys(this.$store.state.wallet.context.network).length === 0) {
       this.network = this.$g("aen.available_networks")[0];
     }
+
     if (Object.keys(this.$store.state.wallet.ethereum.activeApiEndpoint).length === 0) {
       console.log('setting ethereum network to first available')
       console.log(this.$g('eth.available_networks')[0])
@@ -270,19 +271,8 @@ export default {
       this.$store.commit('wallet/setEthereumProperty', {key: 'activeApiEndpoint', value: ethereumNetwork.infura_api_endpoint })
     }
 
-    // Check if wallets are on network and activate listeners
-    let walletCheckInterval = this.$g(
-      "internal.walletCheckInterval"
-    )
-    if (walletCheckInterval !== false) {
-      this.$store.commit("wallet/setInternalProperty", {
-        key: "walletCheckInterval",
-        value: walletCheckInterval
-      });
-    }
-
     if(this.$store.state.wallet.context.address !== '' && this.$store.state.wallet.context.onChain === false) {
-      walletCheckInterval = setInterval(
+      let walletCheckInterval = setInterval(
         function() {
           this.$store.dispatch('wallet/checkWalletLive', this.$store.state.wallet.context).then(response => {
             this.$store.commit('wallet/setProperty', {
@@ -296,18 +286,10 @@ export default {
             }
           })
         }.bind(this),
-        this.$store.state.wallet.internal.walletCheckInterval
+        this.$g('internal.walletCheckInterval')
       );
     }
 
-    // API Node ping test / ranking
-    let apiEndpointPingInterval = this.$g("internal.apiEndpointPingInterval");
-    if (apiEndpointPingInterval !== false) {
-      this.$store.commit("wallet/setInternalProperty", {
-        key: "apiEndpointPingInterval",
-        value: apiEndpointPingInterval
-      });
-    }
     this.$store.dispatch("wallet/rankApiNodes");
     setInterval(
       function() {
@@ -316,25 +298,15 @@ export default {
           address: this.$store.state.internal.activeApiEndpoint
         });
       }.bind(this),
-      this.$store.state.wallet.internal.apiEndpointPingInterval
+      this.$g('internal.apiEndpointPingInterval')
     );
 
-    // Generic network information that can be had without an account
-    let networkInformationInterval = this.$g(
-      "internal.apiEndpointPingInterval"
-    );
-    if (networkInformationInterval !== false) {
-      this.$store.commit("wallet/setInternalProperty", {
-        key: "networkInformationInterval",
-        value: networkInformationInterval
-      });
-    }
     this.$store.dispatch("updateGenericNetworkInformation");
     setInterval(
       function() {
         this.$store.dispatch("updateGenericNetworkInformation");
       }.bind(this),
-      this.$store.state.wallet.internal.networkInformationInterval
+      this.$g('internal.commonTasksInterval')
     );
 
     // Short timeout to give API ranking a chance to get some accurate results

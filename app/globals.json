@@ -4,7 +4,9 @@
   "build_number": "",
   "google_recaptcha_key": "NA",
   "internal": {
-    "apiEndpointPingInterval": 300000
+    "commonTasksInterval": 20000,
+    "apiEndpointPingInterval": 450000,
+    "walletCheckInterval": 300000
   },
   "aen": {
     "network_version": "0.1",
@@ -32,6 +34,14 @@
       "name": "TestNet Faucet",
       "address": "http://faucet.aencoin.io/"
     }]
+  },
+  "binance": {
+    "api_endpoint": "https://api.binance.com/api/",
+    "price_to_use_route": "ticker/price",
+    "symbol": {
+      "eth": "BTCUSDC",
+      "btc": "ETHUSDC"
+    }
   },
   "bitcoin": {
     "api_endpoint_test_uri": "",
