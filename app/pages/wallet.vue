@@ -4,6 +4,8 @@
       <!-- Wallet Management -->
       <v-card>
 
+        <v-btn color="success" absolute fab bottom right @click="testContract">test</v-btn>
+
         <v-btn color="success" absolute fab bottom left @click="dialogWalletAdd = true">
           <v-icon>add</v-icon>
         </v-btn>
@@ -22,7 +24,7 @@
               </v-list-tile-content>
 
               <v-list-tile-action>
-                <balance v-if="wallet.onChain" :wallet="wallet" />
+                <balance v-if="wallet.onChain" :wallet="wallet"/>
                 <span v-else>NA</span>
               </v-list-tile-action>
             </v-list-tile>
@@ -73,23 +75,24 @@
           </v-btn>
           <v-toolbar-title class="white--text">{{ contextWallet.name }}</v-toolbar-title>
           <v-toolbar-items>
-            <v-btn v-if="contextWallet.onChain === true" flat @click="dialogShowAddress = true">Show Business Card</v-btn>
+            <v-btn v-if="contextWallet.onChain === true" flat @click="dialogShowAddress = true">Show Business Card
+            </v-btn>
             <v-btn v-if="contextWallet.onChain === true" flat @click="dialogMakeTransfer = true">Make Transfer</v-btn>
             <v-btn flat @click="dialogRemoveWallet = true">Remove Wallet</v-btn>
           </v-toolbar-items>
 
         </v-toolbar>
         <v-card-text>
-          <testnet-buttons :wallet="contextWallet" />
+          <testnet-buttons :wallet="contextWallet"/>
           <address-render :address="contextWallet.address"/>
-          <wallet-history v-if="contextWallet.onChain === true" :wallet="contextWallet" />
-          <activation v-else :wallet="contextWallet" />
+          <wallet-history v-if="contextWallet.onChain === true" :wallet="contextWallet"/>
+          <activation v-else :wallet="contextWallet"/>
         </v-card-text>
       </v-card>
     </v-dialog>
 
     <v-dialog v-model="dialogShowAddress" max-width="500px">
-      <business-card :wallet="contextWallet" />
+      <business-card :wallet="contextWallet"/>
     </v-dialog>
 
     <!-- Make Transfer Dialog -->
@@ -100,7 +103,7 @@
         </v-btn>
         <v-toolbar-title class="white--text">Make a Transfer from {{ contextWallet.name }}</v-toolbar-title>
       </v-toolbar>
-      <make-transfer :wallet="contextWallet" @complete="transferComplete()" />
+      <make-transfer :wallet="contextWallet" @complete="transferComplete()"/>
     </v-dialog>
 
     <!-- View Wallet Dialog -->
@@ -123,7 +126,7 @@
         <v-card-text>
           <p>If you remove the wallet, there will be no way to access it unless you have made a backup. Click the button below to remove </p>
           <p>If you would like to make a backup, you can do so now by clicking the button below</p>
-          <backup-wallet :wallet="contextWallet" />
+          <backup-wallet :wallet="contextWallet"/>
         </v-card-text>
         <v-card-actions>
           <v-spacer/>
@@ -137,135 +140,188 @@
 </template>
 
 <script>
-import Activation from "~/components/Activation"
-import Balance from "~/components/Balance"
-import BackupWallet from "~/components/BackupWallet";
-import VueRecaptcha from "vue-recaptcha";
-import WalletHistory from '~/components/WalletHistory';
-import BusinessCard from '~/components/BusinessCard';
-import MakeTransfer from "~/components/MakeTransfer";
-import TestnetButtons from "~/components/TestnetButtons";
-import WalletAdd from "~/components/WalletAdd";
+  import Activation from "~/components/Activation";
+  import Balance from "~/components/Balance";
+  import BackupWallet from "~/components/BackupWallet";
+  import VueRecaptcha from "vue-recaptcha";
+  import WalletHistory from "~/components/WalletHistory";
+  import BusinessCard from "~/components/BusinessCard";
+  import MakeTransfer from "~/components/MakeTransfer";
+  import TestnetButtons from "~/components/TestnetButtons";
+  import WalletAdd from "~/components/WalletAdd";
 
-export default {
-  components: {
-    MakeTransfer,
-    Activation,
-    Balance,
-    BackupWallet,
-    BusinessCard,
-    TestnetButtons,
-    VueRecaptcha,
-    WalletAdd,
-    WalletHistory
-  },
-  data() {
-    return {
-      dialogWalletAdd: false,
-      dialogViewWallet: false,
-      dialogMakeTransfer: false,
-      dialogReceiveTransfer: false,
-      dialogRemoveWallet: false,
-      dialogShowAddress: false,
-      activeWatchers: [],
-      walletType: "aen",
-      valid: false,
-      eulaAgree: false,
-      backupAgree: false,
-      newAccount: false,
-      existingAccount: false,
-      walletCreated: false,
-      showPassword: false,
-      walletName: "",
-      walletPassword: "",
-      contextWallet: {},
-      rules: {
-        required: value => !!value || "Required."
-      },
-      walletRules: {
-        required: value => !!value || "Required.",
-        min: v => v.length >= 6 || "Min 6 Characters"
-      },
-      passwordRules: {
-        required: value => !!value || "Required.",
-        min: v => v.length >= 8 || "Min 8 characters"
-      },
-      validity: {}
-    };
-  },
-  computed: {
-    environment() {
-      return this.$store.state.meta.environment;
+  export default {
+    components: {
+      MakeTransfer,
+      Activation,
+      Balance,
+      BackupWallet,
+      BusinessCard,
+      TestnetButtons,
+      VueRecaptcha,
+      WalletAdd,
+      WalletHistory
     },
-    wallets() {
-      console.log(this.$store.state.wallet.wallets)
-      return this.$store.state.wallet.wallets;
+    data() {
+      return {
+        dialogWalletAdd: false,
+        dialogViewWallet: false,
+        dialogMakeTransfer: false,
+        dialogReceiveTransfer: false,
+        dialogRemoveWallet: false,
+        dialogShowAddress: false,
+        activeWatchers: [],
+        walletType: "aen",
+        valid: false,
+        eulaAgree: false,
+        backupAgree: false,
+        newAccount: false,
+        existingAccount: false,
+        walletCreated: false,
+        showPassword: false,
+        walletName: "",
+        walletPassword: "",
+        contextWallet: {},
+        rules: {
+          required: value => !!value || "Required."
+        },
+        walletRules: {
+          required: value => !!value || "Required.",
+          min: v => v.length >= 6 || "Min 6 Characters"
+        },
+        passwordRules: {
+          required: value => !!value || "Required.",
+          min: v => v.length >= 8 || "Min 8 characters"
+        },
+        validity: {}
+      };
     },
-    multipleNetworks() {
-      if (this.$g("aen.available_networks").length > 1) {
-        return true;
+    computed: {
+      environment() {
+        return this.$store.state.meta.environment;
+      },
+      wallets() {
+        console.log(this.$store.state.wallet.wallets);
+        return this.$store.state.wallet.wallets;
+      },
+      multipleNetworks() {
+        if (this.$g("aen.available_networks").length > 1) {
+          return true;
+        }
       }
-    }
-  },
-  mounted: function() {
-    console.debug("P:W:Wallets Page Started");
-    // Only start once global loading finished
-    var preperationInterval = setInterval(
-      function() {
-        clearInterval(preperationInterval);
-        this.$store.commit("setLoading", { t: "router", v: false });
-      }.bind(this),
-      2000
-    );
-  },
-  methods: {
-    setActiveWallet(wallet) {
-      switch (wallet.type) {
-        case 'aen':
-          this.$walletService.walletLoad('aen', wallet)
-          this.$store.commit("setAccountProperty", {
-            key: "accountPrivateKey",
-            value: this.$walletService.$store.state.account.privateKey
+    },
+    mounted: function() {
+      console.debug("P:W:Wallets Page Started");
+      // Only start once global loading finished
+      var preperationInterval = setInterval(
+        function() {
+          clearInterval(preperationInterval);
+          this.$store.commit("setLoading", { t: "router", v: false });
+        }.bind(this),
+        2000
+      );
+    },
+    methods: {
+      testContract() {
+
+        let options = {
+          source: {
+            "onChain": true,
+            "name": "ethereum",
+            "balance": "2.988916",
+            "type": "eth",
+            "password": "password",
+            "privateKey": "0x3B8F360134100561DC0255C5148A6FA722D7D95A1B117016A9C730E551A6D047",
+            "address": "0xB19a964EA53979A27c24143909d9e1b05BC0AE04",
+            "keystore": {
+              "version": 3,
+              "id": "aa148e8c-3c41-4002-b3ec-5f25e7dbffe4",
+              "address": "b19a964ea53979a27c24143909d9e1b05bc0ae04",
+              "crypto": {
+                "ciphertext": "7a2a6e5bed5dc75bd8b60793b7953802c7088b4102124e04b60b03714b98c3ea",
+                "cipherparams": { "iv": "be77db2a75c304a633dc85f32c5c5f12" },
+                "cipher": "aes-128-ctr",
+                "kdf": "scrypt",
+                "kdfparams": {
+                  "dklen": 32,
+                  "salt": "853ec44004225e63551b200d358acaca4afae96ac1131ebafdf0de98e68b519b",
+                  "n": 8192,
+                  "r": 8,
+                  "p": 1
+                },
+                "mac": "201c2db931eb5031c8e8e9c2081dd9d49f9559ba143131a2e3aa807243b5a80f"
+              }
+            },
+            "network": {
+              "name": "Ropsten",
+              "network_id": 3,
+              "etherscan_api_endpoint": "http://api-ropsten.etherscan.io/api",
+              "infura_api_endpoint": "https://ropsten.infura.io/0HIuuP4qCjvv8DMGjvPm",
+              "testing": true
+            }
+          },
+          contract: {
+            address: '0x44d13367acd36c9afa8c9ccd7eaad8cbee35c240',
+            method: "transfer",
+            parameters: {
+              to: "0x23760871f8A01902AaA2cEA90eEBE2Ab845A293f",
+              value: 2000000
+            }
+          }
+        }
+
+        this.$store.dispatch('wallet/transfer', options)
+          .then((transfer) => {
+            console.log(transfer)
+          })
+      },
+      setActiveWallet(wallet) {
+        switch (wallet.type) {
+          case "aen":
+            this.$walletService.walletLoad("aen", wallet);
+            this.$store.commit("setAccountProperty", {
+              key: "accountPrivateKey",
+              value: this.$walletService.$store.state.account.privateKey
+            });
+            this.$store.commit("setAccount", this.$walletService.$store.state.account);
+            this.$store.commit("setActiveWallet", wallet);
+            break;
+        }
+      },
+      dialogWallet(wallet) {
+        this.contextWallet = wallet;
+        // Perform a quick test to see whether the wallet is available online or not
+        this.$store.dispatch("wallet/checkWalletLive", this.contextWallet).then(response => {
+          this.$store.commit("wallet/setProperty", {
+            type: "aen",
+            address: this.contextWallet.address,
+            key: "onChain",
+            value: response
           });
-          this.$store.commit("setAccount", this.$walletService.$store.state.account);
-          this.$store.commit("setActiveWallet", wallet);
-          break;
+        });
+        this.dialogViewWallet = true;
+      },
+      removeWallet() {
+        this.dialogRemoveWallet = false;
+        this.dialogViewWallet = false;
+        let removeWallet = this.contextWallet;
+        this.contextWallet = {};
+        this.$store.commit("wallet/removeWallet", removeWallet);
+        this.$store.commit("showNotification", {
+          type: "success",
+          message: "Your wallet has been removed"
+        });
+      },
+      walletAdded() {
+        this.dialogWalletAdd = false;
+        this.$store.commit("showNotification", {
+          type: "success",
+          message: "Your wallet has been successfully setup!"
+        });
+      },
+      transferComplete() {
+        this.dialogMakeTransfer = false;
       }
-    },
-    dialogWallet (wallet) {
-      this.contextWallet = wallet
-      // Perform a quick test to see whether the wallet is available online or not
-      this.$store.dispatch('wallet/checkWalletLive', this.contextWallet).then(response => {
-        this.$store.commit('wallet/setProperty', {
-          type: 'aen',
-          address: this.contextWallet.address,
-          key: 'onChain',
-          value: response
-        })
-      })
-      this.dialogViewWallet = true
-    },
-    removeWallet() {
-      this.dialogRemoveWallet = false
-      this.dialogViewWallet = false
-      let removeWallet = this.contextWallet
-      this.contextWallet = {}
-      this.$store.commit('wallet/removeWallet', removeWallet)
-      this.$store.commit("showNotification", {
-        type: "success",
-        message: "Your wallet has been removed"
-      })
-    },
-    walletAdded() {
-      this.dialogWalletAdd  = false
-      this.$store.commit("showNotification", {
-        type: "success",
-        message: "Your wallet has been successfully setup!"
-      })
-    },
-    transferComplete() {
-      this.dialogMakeTransfer = false
     }
-  }
-};
+  };
 </script>

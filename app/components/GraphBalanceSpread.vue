@@ -89,7 +89,7 @@ export default {
       this.processWallets()
     },
     processedWallets: function(value) {
-      if (value === this.walletCount) {
+      if (value >= this.walletCount) {
         this.loading = false;
       } else {
         this.loading = true;

@@ -77,10 +77,13 @@
         this.$store.commit("setLoading", { t: "page", v: true })
         let transactionOptions = {
           source: this.wallet,
+          transfer: {
+            gas: this.gas,
+            gasLimit: (this.gas + 10000)
+          },
           destination: {
             address: this.address,
-            amount: this.amount,
-            gas: this.gas
+            amount: this.amount
           }
         }
         console.log('initiating transfer')

@@ -26,14 +26,15 @@
     },
     mounted() {
       // If the contract address is blank, then it's a plain transfer
-      if (this.transaction.contractAddress !== '') {
-        this.component = () => import("~/components/Eth/TransactionStringify/" + this.transaction.contractAddress).then(response => {
-          console.debug(response)
-        })
+      console.debug(this.transaction)
+      if (this.transaction.value === '0') {
+        console.log('transaction has no value, this is a contract')
+        this.component = () => import("~/components/Eth/TransactionStringify/Contract")
           .catch(function() {
             this.component = () => import("~/components/Default/TransactionStringify");
           }.bind(this))
       } else {
+        console.log('showing plain transaction')
         this.component = () => import('~/components/Eth/TransactionStringify/Transfer')
       }
     }
