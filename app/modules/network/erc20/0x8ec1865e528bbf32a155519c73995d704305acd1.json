@@ -2,6 +2,7 @@
   "title" : "AEN Coin Token on Test Net",
   "address": "0x8ec1865e528bbf32a155519c73995d704305acd1",
   "decimal": 8,
+  "symbol": "AENC",
   "type" : "token",
   "availableMethods": {
     "transfer": {

@@ -46,15 +46,16 @@
       },
       updateComponent() {
         this.componentName = this.type[0].toUpperCase() + this.type.slice(1)
+        console.log(this.componentName)
         if (this.componentName) {
           try {
             this.component = () => import("~/components/" + this.componentName + "/WalletAdd");
           } catch (err) {
             console.debug(err)
-            this.component = () => import("./Fallback")
+            this.component = () => import("~/components/Fallback")
           }
         } else {
-          this.component = () => import("./Fallback");
+          this.component = () => import("~/components/Fallback");
         }
       }
     }

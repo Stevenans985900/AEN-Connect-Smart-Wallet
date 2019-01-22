@@ -1,17 +1,18 @@
 <template>
   <v-expansion-panel>
     <v-expansion-panel-content>
-      <div slot="header">
+      <div slot="header" class="text-truncate">>
         {{ date }} - {{ totalGas }} - {{ title }}
+        <hr>
       </div>
       <v-card>
         <v-card-text>
           <p>You currently control {{ controlledTokens }} tokens</p>
-          {{ transactionGas }} TX Gas - {{ operationGas }} Operation Gas<br >
+          <p>{{ transactionGas }} TX Gas - {{ operationGas }} Operation Gas</p>
 
         </v-card-text>
       </v-card>
-      <hr>
+
     </v-expansion-panel-content>
   </v-expansion-panel>
 </template>

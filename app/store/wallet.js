@@ -123,6 +123,8 @@ export const actions = {
                     context.commit('addWallet', wallet)
                     resolve(wallet)
                     break
+                case 'erc20':
+
                 case 'eth':
                     networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
                     networkHandler.walletLoad(options).then(walletObject => {
@@ -274,13 +276,7 @@ export const actions = {
 
 export const mutations = {
     removeWallet(state, wallet) {
-        console.log('removing wallet')
-        console.log(wallet)
-        console.log('before')
-        console.log(state.wallets)
         Vue.delete(state.wallets, wallet.address)
-        console.log('after')
-        console.log(state.wallets)
     },
     setAccountStatus(state, status) {
         state.meta.wallet_present = status

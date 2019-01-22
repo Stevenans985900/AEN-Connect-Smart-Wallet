@@ -4,7 +4,7 @@
       <!-- Wallet Management -->
       <v-card>
 
-        <v-btn color="success" absolute fab bottom right @click="testContract">test</v-btn>
+        <v-btn color="success" absolute fab bottom right >{{ haveEthereumWallet }}</v-btn>
 
         <v-btn color="success" absolute fab bottom left @click="dialogWalletAdd = true">
           <v-icon>add</v-icon>
@@ -40,6 +40,7 @@
           <v-tabs-slider color="yellow"/>
           <v-tab href="#aen" @click="walletType = 'aen'">AEN</v-tab>
           <v-tab href="#eth" @click="walletType = 'eth'">ETH</v-tab>
+          <v-tab v-if="haveEthereumWallet" href="#erc20" @click="walletType = 'erc20'">ERC20</v-tab>
 
           <!-- AEN -->
           <v-tab-item value="aen">
@@ -49,7 +50,6 @@
               </v-card-text>
             </v-card>
           </v-tab-item>
-
           <!-- ETH -->
           <v-tab-item value="eth">
             <v-card flat>
@@ -58,6 +58,15 @@
               </v-card-text>
             </v-card>
           </v-tab-item>
+          <!-- ERC20 -->
+          <v-tab-item value="erc20">
+            <v-card flat>
+              <v-card-text>
+                <wallet-add type="erc20" @complete="walletAdded()"/>
+              </v-card-text>
+            </v-card>
+          </v-tab-item>
+
         </v-tabs>
         <v-card-actions>
           <v-spacer/>
@@ -200,8 +209,15 @@
       environment() {
         return this.$store.state.meta.environment;
       },
+      haveEthereumWallet() {
+        for (let wallet in this.$store.state.wallet.wallets) {
+          if (this.$store.state.wallet.wallets[wallet].type === 'eth') {
+            return true
+          }
+        }
+        return false
+      },
       wallets() {
-        console.log(this.$store.state.wallet.wallets);
         return this.$store.state.wallet.wallets;
       },
       multipleNetworks() {
@@ -222,59 +238,6 @@
       );
     },
     methods: {
-      testContract() {
-
-        let options = {
-          source: {
-            "onChain": true,
-            "name": "ethereum",
-            "balance": "2.988916",
-            "type": "eth",
-            "password": "password",
-            "privateKey": "0x3B8F360134100561DC0255C5148A6FA722D7D95A1B117016A9C730E551A6D047",
-            "address": "0xB19a964EA53979A27c24143909d9e1b05BC0AE04",
-            "keystore": {
-              "version": 3,
-              "id": "aa148e8c-3c41-4002-b3ec-5f25e7dbffe4",
-              "address": "b19a964ea53979a27c24143909d9e1b05bc0ae04",
-              "crypto": {
-                "ciphertext": "7a2a6e5bed5dc75bd8b60793b7953802c7088b4102124e04b60b03714b98c3ea",
-                "cipherparams": { "iv": "be77db2a75c304a633dc85f32c5c5f12" },
-                "cipher": "aes-128-ctr",
-                "kdf": "scrypt",
-                "kdfparams": {
-                  "dklen": 32,
-                  "salt": "853ec44004225e63551b200d358acaca4afae96ac1131ebafdf0de98e68b519b",
-                  "n": 8192,
-                  "r": 8,
-                  "p": 1
-                },
-                "mac": "201c2db931eb5031c8e8e9c2081dd9d49f9559ba143131a2e3aa807243b5a80f"
-              }
-            },
-            "network": {
-              "name": "Ropsten",
-              "network_id": 3,
-              "etherscan_api_endpoint": "http://api-ropsten.etherscan.io/api",
-              "infura_api_endpoint": "https://ropsten.infura.io/0HIuuP4qCjvv8DMGjvPm",
-              "testing": true
-            }
-          },
-          contract: {
-            address: '0x44d13367acd36c9afa8c9ccd7eaad8cbee35c240',
-            method: "transfer",
-            parameters: {
-              to: "0x23760871f8A01902AaA2cEA90eEBE2Ab845A293f",
-              value: 2000000
-            }
-          }
-        }
-
-        this.$store.dispatch('wallet/transfer', options)
-          .then((transfer) => {
-            console.log(transfer)
-          })
-      },
       setActiveWallet(wallet) {
         switch (wallet.type) {
           case "aen":

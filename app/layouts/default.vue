@@ -237,6 +237,10 @@ export default {
       v: true,
       m: "Page Startup"
     });
+    this.$store.commit("setLoading", {
+      t: "page",
+      v: false
+    });
 
     // Desktop app setup
     if (isElectron()) {

@@ -5,13 +5,14 @@
         <v-icon v-if="direction === 'incoming'"> call_received </v-icon>
         <v-icon v-else>call_made</v-icon>
         - {{ date }} - {{ value }}ETH - <address-render :address="address" show-add />
+        <hr>
       </div>
       <v-card>
         <v-card-text>
           here be the details of the transaction
         </v-card-text>
       </v-card>
-      <hr>
+
     </v-expansion-panel-content>
   </v-expansion-panel>
 </template>

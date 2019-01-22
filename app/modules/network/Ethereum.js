@@ -52,77 +52,27 @@ export default class Aen extends Generic {
         return new Promise((resolve, reject) => {
 
             let transaction
-            // Determine whether it is a contract
-            if(options.hasOwnProperty('contract')) {
-                import("~/modules/network/erc20/"+options.destination.contractAddress).then(erc20Interface => {
-                    console.log(erc20Interface)
-                    let contract = new this.web3.eth.Contract(erc20Interface.abi, options.destination.contractAddress)
-                    console.log(contract)
 
-                    // Prepare the function arguments
-                    let functionArguments = []
-                    let parameterKey, parameterOptions, parameterType, parameterValue
-                    for (parameterKey in erc20Interface.availableMethods[options.contract.method].parameters) {
-                        parameterOptions = erc20Interface.availableMethods[options.contract.method].parameters[parameterKey]
-
-                        if (options.contract.parameters.hasOwnProperty(parameterKey)) {
-                            parameterValue = options.contract.parameters.parameterKey
-                            console.log(parameterValue)
-                            parameterType = typeof parameterValue
-
-                            if (parameterType !== parameterOptions.type) {
-                                reject(parameterKey + " is supposed to be a " + parameterOptions.type + "." + parameterType + " detected")
-                            }
-                            functionArguments.push(parameterValue)
-
-                        } else {
-                            if (parameterOptions.required === true) {
-                                reject(parameterKey + " is a required parameter and not set")
-                            }
-                        }
-                    }
-
-                    transaction = contract.methods[options.contract.method].apply(this, functionArguments)
-                    transaction.chainId = options.source.network.network_id
-                    transaction.gas = options.transfer.gas
-                    transaction.gasLimit = options.transfer.gasLimit,
-
-                    this.web3.eth.accounts.signTransaction(transaction, options.source.privateKey)
-                      .then(signedTx => this.web3.eth.sendSignedTransaction(signedTx.rawTransaction))
-                      .then(receipt => {
-                          console.log(receipt)
-                          console.log("Transaction receipt: ", receipt)
-                          resolve(receipt)
-                      })
-                      .catch(err => {
-                          console.log('something went wrong when sending a transaction')
-                          console.error(err)
-                      })
-                })
+            transaction = {
+                "from": options.source.address,
+                "to": options.destination.address,
+                "value": this.web3.utils.toHex(this.web3.utils.toWei(options.destination.amount, "ether")),
+                "gas": options.transfer.gas,
+                "gasLimit": options.transfer.gasLimit,
+                "chainId": options.source.network.network_id
             }
 
-            if(options.hasOwnProperty('destination')) {
-                transaction = {
-                    "from": options.source.address,
-                    "to": options.destination.address,
-                    "value": this.web3.utils.toHex(this.web3.utils.toWei(options.destination.amount, "ether")),
-                    "gas": options.transfer.gas,
-                    "gasLimit": options.transfer.gasLimit,
-                    "chainId": options.source.network.network_id
-                }
-
-                this.web3.eth.accounts.signTransaction(transaction, options.source.privateKey)
-                  .then(signedTx => this.web3.eth.sendSignedTransaction(signedTx.rawTransaction))
-                  .then(receipt => {
-                      console.log(receipt)
-                      console.log("Transaction receipt: ", receipt)
-                      resolve(receipt)
-                  })
-                  .catch(err => {
-                      console.log('something went wrong when sending a transaction')
-                      console.error(err)
-                  })
-            }
+            this.web3.eth.accounts.signTransaction(transaction, options.source.privateKey)
+              .then(signedTx => this.web3.eth.sendSignedTransaction(signedTx.rawTransaction))
+              .then(receipt => {
+                  console.log(receipt)
+                  console.log("Transaction receipt: ", receipt)
+                  resolve(receipt)
+              })
+              .catch(err => {
+                  console.log('something went wrong when sending a transaction')
+                  reject(err)
+              })
         })
     }
 
