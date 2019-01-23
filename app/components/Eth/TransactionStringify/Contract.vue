@@ -74,7 +74,7 @@
     },
     methods: {
       fetchContractInfo() {
-        import("~/modules/network/erc20/" + this.transaction.contractAddress).then(erc20Interface => {
+        import("~/modules/network/contract/" + this.transaction.contractAddress).then(erc20Interface => {
           this.title = erc20Interface.title
 
           let contract = new this.web3.eth.Contract(erc20Interface.abi, this.transaction.contractAddress)

@@ -99,7 +99,15 @@ export default class Aen extends Generic {
         super.walletLoad(options)
         return new Promise((resolve) => {
             let wallet = this.web3.eth.accounts.privateKeyToAccount(options.privateKey)
-            resolve(wallet)
+            let walletObject = {
+                type: 'eth',
+                password: options.password,
+                privateKey: wallet.privateKey,
+                address: wallet.address,
+                keystore: wallet.encrypt(options.password),
+                network: options.network
+            }
+            resolve(walletObject)
         })
     }
 

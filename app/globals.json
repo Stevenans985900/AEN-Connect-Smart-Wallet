@@ -4,6 +4,7 @@
   "build_number": "",
   "google_recaptcha_key": "NA",
   "internal": {
+    "baseImagePath": "/",
     "commonTasksInterval": 20000,
     "apiEndpointPingInterval": 450000,
     "walletCheckInterval": 300000

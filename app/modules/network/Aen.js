@@ -33,7 +33,10 @@ export default class Aen extends Generic {
     accountLoad(options) {
       console.debug(this.pluginName+' Plugin: Account Load')
       console.debug(options)
-      return Account.createFromPrivateKey(options.accountPrivateKey, options.network.byte)
+      return new Promise((resolve) => {
+        let account = Account.createFromPrivateKey(options.accountPrivateKey, options.network.byte)
+        resolve(account)
+      })
     }
     /**
      * @param options
@@ -111,12 +114,24 @@ export default class Aen extends Generic {
      * @returns {SimpleWallet}
      */
     walletLoad(options) {
-      Generic.prototype.walletLoad.call(this, options)
-        return SimpleWallet.createFromPrivateKey(
-            options.name,
-            new Password(options.password),
-            options.accountPrivateKey,
-            options.network.byte)
+      super.walletLoad(options)
+      return new Promise((resolve) => {
+        let wallet = SimpleWallet.createFromPrivateKey(
+          options.name,
+          new Password(options.password),
+          options.account.privateKey,
+          options.network.byte)
+
+        let walletObject = {
+          password: options.password,
+          accountPrivateKey: options.account.accountPrivateKey,
+          privateKey: wallet.encryptedPrivateKey.encryptedKey,
+          publicKey: options.account.publicKey,
+          address: wallet.address.address,
+          network: options.network
+        }
+        resolve(walletObject)
+      })
     }
     /**
      *

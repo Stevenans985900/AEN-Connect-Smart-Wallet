@@ -4,8 +4,6 @@
       <!-- Wallet Management -->
       <v-card>
 
-        <v-btn color="success" absolute fab bottom right >{{ haveEthereumWallet }}</v-btn>
-
         <v-btn color="success" absolute fab bottom left @click="dialogWalletAdd = true">
           <v-icon>add</v-icon>
         </v-btn>
@@ -15,7 +13,7 @@
           <v-list two-line subheader>
             <v-list-tile v-for="(wallet, address) in wallets" :key="address" avatar @click="dialogWallet(wallet)">
               <v-list-tile-avatar>
-                <img :src="'/network/' + wallet.type + '.png'">
+                <wallet-image :wallet="wallet" />
               </v-list-tile-avatar>
 
               <v-list-tile-content>
@@ -40,7 +38,7 @@
           <v-tabs-slider color="yellow"/>
           <v-tab href="#aen" @click="walletType = 'aen'">AEN</v-tab>
           <v-tab href="#eth" @click="walletType = 'eth'">ETH</v-tab>
-          <v-tab v-if="haveEthereumWallet" href="#erc20" @click="walletType = 'erc20'">ERC20</v-tab>
+          <v-tab v-if="haveEthereumWallet" href="#contract" @click="walletType = 'contract'">Custom Token</v-tab>
 
           <!-- AEN -->
           <v-tab-item value="aen">
@@ -58,11 +56,11 @@
               </v-card-text>
             </v-card>
           </v-tab-item>
-          <!-- ERC20 -->
-          <v-tab-item value="erc20">
+          <!-- contract -->
+          <v-tab-item value="contract">
             <v-card flat>
               <v-card-text>
-                <wallet-add type="erc20" @complete="walletAdded()"/>
+                <wallet-add type="contract" @complete="walletAdded()"/>
               </v-card-text>
             </v-card>
           </v-tab-item>
@@ -158,6 +156,7 @@
   import MakeTransfer from "~/components/MakeTransfer";
   import TestnetButtons from "~/components/TestnetButtons";
   import WalletAdd from "~/components/WalletAdd";
+  import WalletImage from "~/components/WalletImage";
 
   export default {
     components: {
@@ -169,7 +168,8 @@
       TestnetButtons,
       VueRecaptcha,
       WalletAdd,
-      WalletHistory
+      WalletHistory,
+      WalletImage
     },
     data() {
       return {
