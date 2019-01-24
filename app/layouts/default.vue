@@ -62,7 +62,7 @@
             </div>
           </v-card-title>
           <v-card-actions>
-            <backup-wallet :wallet="contextWallet"/>
+            <backup-wallet />
             <v-btn flat nuxt to="/dashboard">Dashboard</v-btn>
             <v-spacer/>
             <v-btn v-if="mode === 'app'" flat @click="exit">Exit</v-btn>
@@ -276,15 +276,12 @@ export default {
     }
 
     if(this.$store.state.wallet.context.address !== '' && this.$store.state.wallet.context.onChain === false) {
+      console.debug('Checking whether the main wallet is active on the blockchain')
+      this.$store.dispatch('wallet/checkWalletLive', this.$store.state.wallet.context)
       let walletCheckInterval = setInterval(
         function() {
+
           this.$store.dispatch('wallet/checkWalletLive', this.$store.state.wallet.context).then(response => {
-            this.$store.commit('wallet/setProperty', {
-              type: 'aen',
-              address: this.$store.state.wallet.context.address,
-              key: 'onChain',
-              value: response
-            });
             if (response === true) {
               clearInterval(walletCheckInterval)
             }

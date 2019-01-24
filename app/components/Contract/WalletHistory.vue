@@ -19,7 +19,7 @@
 
 <script>
   import TransactionStringify from '~/components/Eth/TransactionStringify'
-  import Eth from '~/modules/network/Ethereum'
+  import Contract from '~/modules/network/Contract'
 
   export default {
     components: {
@@ -45,7 +45,7 @@
         wallet: this.wallet,
         etherscan: this.$g('eth.etherscan')
       }
-      let networkHelper = new Eth(this.$store.state.wallet.ethereum.activeApiEndpoint)
+      let networkHelper = new Contract(this.$store.state.wallet.ethereum.activeApiEndpoint)
       networkHelper.transactionsHistorical(this.options).then(transactions => {
         this.transactions = transactions
         this.loading = false

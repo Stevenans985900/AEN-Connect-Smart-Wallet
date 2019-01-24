@@ -1,12 +1,8 @@
 <template>
-  <v-layout column justify-center align-center>
-    <v-container fluid grid-list-md>
-      <v-layout row wrap>
-        <v-flex>
-          <graph-balance-spread/>
-        </v-flex>
-      </v-layout>
-    </v-container>
+  <v-layout row justify-center align-center>
+    <v-flex xs-12>
+      <graph-balance-spread/>
+    </v-flex>
 
     <v-dialog v-model="dialogEulaAgree" persistent max-width="600px">
       <v-card>
@@ -18,7 +14,6 @@
         </v-checkbox>
       </v-card>
     </v-dialog>
-
   </v-layout>
 </template>
 

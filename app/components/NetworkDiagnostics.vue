@@ -43,7 +43,6 @@ export default {
       } else if (this.currentPing < 12000) {
         icon = 'signal_cellular_1_bar';
       }
-      console.log('computed strength and going to use: '+icon)
       return icon
     },
     blockHeight() {
@@ -60,11 +59,7 @@ export default {
         return this.$store.state.wallet.internal.activeApiEndpoint;
       },
       set: function(value) {
-        this.$store.commit("setApiEndpoint", value);
-        this.$walletService.Aen.updateActiveApiEndpoint({
-                  address: this.$store.state.wallet.internal.activeApiEndpoint
-                }
-        );
+        this.$store.commit("setApiEndpoint", value)
       }
     },
     apiEndpoints() {

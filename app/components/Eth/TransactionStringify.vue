@@ -28,7 +28,6 @@
       // If the contract address is blank, then it's a plain transfer
       console.debug(this.transaction)
       if (this.transaction.value === '0') {
-        console.log('transaction has no value, this is a contract')
         this.component = () => import("~/components/Eth/TransactionStringify/Contract")
           .catch(function() {
             this.component = () => import("~/components/Default/TransactionStringify");

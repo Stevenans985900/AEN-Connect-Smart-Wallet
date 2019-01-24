@@ -1,6 +1,6 @@
 <template>
   <span>
-    <component v-if="component" :is="component" :show-eula="showEula" :main="main" @complete="complete()"/>
+    <component v-if="component" :is="component" :show-eula="showEula" :main="main" @complete="complete(wallet)"/>
   </span>
 </template>
 
@@ -41,8 +41,8 @@
       this.updateComponent()
     },
     methods: {
-      complete() {
-        this.$emit('complete')
+      complete(wallet) {
+        this.$emit('complete', wallet)
       },
       updateComponent() {
         this.componentName = this.type[0].toUpperCase() + this.type.slice(1)

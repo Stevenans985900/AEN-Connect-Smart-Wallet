@@ -1,9 +1,8 @@
-import Ethereum from './Ethereum.js'
-import Generic from './Generic.js'
+import Generic from '~/modules/network/Generic'
 import axios from "axios"
-import Web3 from "web3";
+import Web3 from "web3"
 
-export default class EthereumContract extends Ethereum {
+export default class Contract extends Generic {
 
     constructor(apiEndpoint) {
         super()
@@ -12,16 +11,14 @@ export default class EthereumContract extends Ethereum {
     }
 
     balance(options) {
-        Generic.prototype.balance.call(this, options)
+        super.balance(options)
 
         return new Promise((resolve, reject) => {
             import("~/modules/network/contract/erc20").then(erc20Interface => {
 
-                let contract = new this.web3.eth.Contract(erc20Interface.abi, options.contractAddress)
+                let contract = new this.web3.eth.Contract(erc20Interface.abi, options.address)
 
                 contract.methods.balanceOf(options.managerWalletAddress).call().then(response => {
-                    console.log("response from public method call")
-                    console.log(response)
                     resolve(response)
                 })
                   .catch(err => {
@@ -83,43 +80,18 @@ export default class EthereumContract extends Ethereum {
 
     transfer(options) {
         Generic.prototype.transfer.call(this, options)
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
 
             let transaction
-            import("~/modules/network/contract/"+options.destination.contractAddress).then(erc20Interface => {
-                console.log(erc20Interface)
-                let contract = new this.web3.eth.Contract(erc20Interface.abi, options.destination.contractAddress)
-                console.log(contract)
-
-                // Prepare the function arguments
-                let functionArguments = []
-                let parameterKey, parameterOptions, parameterType, parameterValue
-                for (parameterKey in erc20Interface.availableMethods[options.contract.method].parameters) {
-                    parameterOptions = erc20Interface.availableMethods[options.contract.method].parameters[parameterKey]
-
-                    if (options.contract.parameters.hasOwnProperty(parameterKey)) {
-                        parameterValue = options.contract.parameters.parameterKey
-                        console.log(parameterValue)
-                        parameterType = typeof parameterValue
-
-                        if (parameterType !== parameterOptions.type) {
-                            reject(parameterKey + " is supposed to be a " + parameterOptions.type + "." + parameterType + " detected")
-                        }
-                        functionArguments.push(parameterValue)
-
-                    } else {
-                        if (parameterOptions.required === true) {
-                            reject(parameterKey + " is a required parameter and not set")
-                        }
-                    }
-                }
-
-                transaction = contract.methods[options.contract.method].apply(this, functionArguments)
+            // TODO Add in the flexibility to handle meta contracts if there is a proxy transfer method
+            import("~/modules/network/contract/erc20").then(erc20Interface => {
+                let contract = new this.web3.eth.Contract(erc20Interface.abi, options.source.address)
+                transaction = contract.methods.transfer(options.destination.address, options.destination.amount)
                 transaction.chainId = options.source.network.network_id
-                transaction.gas = options.transfer.gas
+                transaction.gas = options.transfer.gasPrice
                 transaction.gasLimit = options.transfer.gasLimit,
 
-                this.web3.eth.accounts.signTransaction(transaction, options.source.privateKey)
+                this.web3.eth.accounts.signTransaction(transaction, options.transfer.managerWallet.privateKey)
                   .then(signedTx => this.web3.eth.sendSignedTransaction(signedTx.rawTransaction))
                   .then(receipt => {
                       console.log(receipt)
@@ -134,6 +106,23 @@ export default class EthereumContract extends Ethereum {
         })
     }
 
+    /**
+     * For Ethereum, check the balance of the account to determine whether or not it is live
+     * @param options
+     */
+    walletIsLive(options) {
+        console.log('checking if CONTRACT has some wonga')
+        super.walletIsLive(options)
+        return new Promise((resolve) => {
+            this.balance(options).then(balance => {
+                if(balance.toString() !== '0') {
+                    resolve(true)
+                } else {
+                    resolve(false)
+                }
+            })
+        })
+    }
     /**
      * Adoption of ERC20 contracts doesn't involve any initial processing so,
      * just use the opportunity to return properties from the original options

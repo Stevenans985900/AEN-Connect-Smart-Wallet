@@ -74,12 +74,34 @@ export const actions = {
         case 'aen':
           networkHandler = new Aen(context.state.internal.activeApiEndpoint)
           networkHandler.walletIsLive(wallet).then(response => {
+            context.commit('setWalletProperty', {
+              wallet: wallet,
+              key: 'onChain',
+              value: response
+            })
             resolve(response)
           })
           break
+        case 'contract':
+          networkHandler = new Contract(context.state.ethereum.activeApiEndpoint)
+          console.log(networkHandler)
+          networkHandler.walletIsLive(wallet).then(response => {
+            context.commit('setWalletProperty', {
+              wallet: wallet,
+              key: 'onChain',
+              value: response
+            })
+            resolve(response)
+          })
+          break;
         case 'eth':
           networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
           networkHandler.walletIsLive(wallet).then(response => {
+            context.commit('setWalletProperty', {
+              wallet: wallet,
+              key: 'onChain',
+              value: response
+            })
             resolve(response)
           })
           break;
@@ -88,6 +110,7 @@ export const actions = {
   },
   load(context, options) {
     console.debug('Wallet Service:Load ' + options.type)
+    console.log(context)
     // var vm = this
 
     return new Promise((resolve) => {
@@ -107,7 +130,8 @@ export const actions = {
             networkHandler.walletLoad(options).then(walletObject => {
               Object.assign(wallet, walletObject)
               // Check if the wallet is on the chain
-              wallet.onChain = networkHandler.walletIsLive(options)
+              context.dispatch('checkWalletLive', wallet)
+              // wallet.onChain = networkHandler.walletIsLive(options)
               if (options.hasOwnProperty('main')) {
                 wallet.main = true
                 context.commit('setContext', wallet)
@@ -142,16 +166,7 @@ export const actions = {
               })
               resolve(wallet)
             })
-
-            networkHandler.walletIsLive(wallet).then(response => {
-              context.commit('setWalletProperty', {
-                wallet: wallet,
-                key: 'balance',
-                value: response
-              })
-              resolve(wallet)
-            })
-
+            context.dispatch('checkWalletLive', wallet)
             resolve(wallet)
           })
           break;
@@ -162,55 +177,52 @@ export const actions = {
     console.debug('Wallet Service:New ' + options.type)
 
     return new Promise((resolve) => {
-      let wallet = {
-        onChain: false,
-        name: options.name,
-        balance: 0
-      }
-
-        let networkHandler, walletObject
-        switch (options.type) {
-          case 'aen':
-            networkHandler = new Aen(context.state.internal.activeApiEndpoint)
-            // Do behind the scenes work
-            options.account = networkHandler.accountNew(options)
-            walletObject = networkHandler.walletLoad(options)
-
-            // Check if the wallet is on the chain
-            if (options.hasOwnProperty('main') && options.main === true) {
-              wallet.main = true
-              context.commit('setContext', wallet)
-            }
-            context.commit('addWallet', wallet)
-            resolve(wallet)
-            break
-        case 'eth':
-          networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
-          walletObject = networkHandler.walletNew(options)
-          wallet.address = walletObject.address
-          wallet.privateKey = walletObject.privateKey
-          wallet.keystore = walletObject.encrypt(options.password)
-          wallet.network = options.network
-          wallet.type = 'eth'
-          wallet.password = options.password
+      let networkHandler
+      switch (options.type) {
+        case 'aen':
+          networkHandler = new Aen(context.state.internal.activeApiEndpoint)
+          // Do behind the scenes work
+          networkHandler.accountNew(options).then(account => {
+            options.account = account
+            networkHandler.walletLoad(options).then(wallet => {
+              console.log('wallet after initial load')
+              console.log(wallet)
+              if (options.hasOwnProperty('main') && options.main === true) {
+                wallet.main = true
+                context.commit('setContext', wallet)
+              }
+              context.commit('addWallet', wallet)
+              resolve(wallet)
+            })
+          })
+          break
+      case 'eth':
+        networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
+        networkHandler.walletNew(options).then(wallet => {
           context.commit('addWallet', wallet)
           resolve(wallet)
-          break
+        })
+        break
       }
     })
   },
   transfer(context, options) {
     return new Promise((resolve) => {
-      let networkHandler, transfer
+      let networkHandler
       switch (options.source.type) {
         case 'aen':
           networkHandler = new Aen(context.state.internal.activeApiEndpoint)
           break
+        case 'contract':
+          networkHandler = new Contract(context.state.ethereum.activeApiEndpoint)
+          break
         case 'eth':
           networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
+          break
       }
-      transfer = networkHandler.transfer(options)
-      resolve(transfer)
+      networkHandler.transfer(options).then(transfer => {
+        resolve(transfer)
+      })
     })
   },
   /**

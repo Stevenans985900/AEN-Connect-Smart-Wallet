@@ -43,9 +43,10 @@ export default class Aen extends Generic {
      * @returns {Account}
      */
     accountNew(options) {
-      console.debug(this.pluginName+' Plugin: Account New')
-      console.debug(options)
-      return Account.generateNewAccount(options.network.identifier)
+      return new Promise((resolve) => {
+        let account = Account.generateNewAccount(options.network.identifier)
+        resolve(account)
+      })
     }
     /**
      * @param options
@@ -93,8 +94,7 @@ export default class Aen extends Generic {
                 resolve(true)
                 },
                error => {
-                 console.debug('Wallet not yet recognised on the chain')
-                    console.debug(error)
+                  console.debug(error)
                   resolve(false)
                   // Don't do anything, we are expecting 404 as possible response
                 })
@@ -123,12 +123,16 @@ export default class Aen extends Generic {
           options.network.byte)
 
         let walletObject = {
+          onChain: false,
+          name: options.name,
+          balance: 0,
           password: options.password,
-          accountPrivateKey: options.account.accountPrivateKey,
+          accountPrivateKey: options.account.privateKey,
           privateKey: wallet.encryptedPrivateKey.encryptedKey,
           publicKey: options.account.publicKey,
           address: wallet.address.address,
-          network: options.network
+          network: options.network,
+          type: 'aen'
         }
         resolve(walletObject)
       })

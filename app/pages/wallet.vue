@@ -113,13 +113,6 @@
       <make-transfer :wallet="contextWallet" @complete="transferComplete()"/>
     </v-dialog>
 
-    <!-- View Wallet Dialog -->
-    <v-dialog v-model="dialogReceiveTransfer" persistent max-width="600px">
-      <!-- Use receive transfer component here -->
-      <!-- show addres -->
-      <!-- show QR code -->
-    </v-dialog>
-
     <!-- Remove Wallet Dialog -->
     <v-dialog v-model="dialogRemoveWallet" persistent max-width="600px">
       <v-toolbar dark color="primary">
@@ -152,11 +145,9 @@
   import BackupWallet from "~/components/BackupWallet";
   import VueRecaptcha from "vue-recaptcha";
   import WalletHistory from "~/components/WalletHistory";
-  import BusinessCard from "~/components/BusinessCard";
   import MakeTransfer from "~/components/MakeTransfer";
   import TestnetButtons from "~/components/TestnetButtons";
   import WalletAdd from "~/components/WalletAdd";
-  import WalletImage from "~/components/WalletImage";
 
   export default {
     components: {
@@ -164,12 +155,10 @@
       Activation,
       Balance,
       BackupWallet,
-      BusinessCard,
       TestnetButtons,
       VueRecaptcha,
       WalletAdd,
-      WalletHistory,
-      WalletImage
+      WalletHistory
     },
     data() {
       return {
@@ -267,9 +256,7 @@
       removeWallet() {
         this.dialogRemoveWallet = false;
         this.dialogViewWallet = false;
-        let removeWallet = this.contextWallet;
-        this.contextWallet = {};
-        this.$store.commit("wallet/removeWallet", removeWallet);
+        this.$store.commit("wallet/removeWallet", this.contextWallet);
         this.$store.commit("showNotification", {
           type: "success",
           message: "Your wallet has been removed"

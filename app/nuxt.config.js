@@ -116,13 +116,15 @@ module.exports = {
     plugins: [
         '~/plugins/globals.js',
         '~/plugins/addressRender.js',
+        '~/plugins/businessCard.js',
         '~/plugins/clipboard.js',
         {
             src: '~/plugins/localStorage.js',
             ssr: false
         },
         '~/plugins/vuetify',
-        '~/plugins/wallet'
+        '~/plugins/wallet',
+        '~/plugins/walletImage'
     ],
     build: {
         extractCSS: true,

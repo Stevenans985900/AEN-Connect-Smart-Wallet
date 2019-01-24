@@ -82,17 +82,15 @@ export default class Aen extends Generic {
      */
     walletIsLive(options) {
         super.walletIsLive(options)
-        console.debug('checking whether the wallet is live or not')
         return new Promise((resolve) => {
             this.balance(options).then(balance => {
-                if(balance !== 0) {
+                if(balance.toString() !== '0') {
                     resolve(true)
                 } else {
                     resolve(false)
                 }
             })
         })
-
     }
 
     walletLoad(options) {
@@ -101,11 +99,13 @@ export default class Aen extends Generic {
             let wallet = this.web3.eth.accounts.privateKeyToAccount(options.privateKey)
             let walletObject = {
                 type: 'eth',
+                name: options.name,
                 password: options.password,
                 privateKey: wallet.privateKey,
                 address: wallet.address,
                 keystore: wallet.encrypt(options.password),
-                network: options.network
+                network: options.network,
+                onChain: false
             }
             resolve(walletObject)
         })
@@ -113,6 +113,19 @@ export default class Aen extends Generic {
 
     walletNew(options) {
         Generic.prototype.walletNew.call(this, options)
-        return this.web3.eth.accounts.create(options.password)
+        return new Promise((resolve) => {
+            let wallet = this.web3.eth.accounts.create(options.password)
+            let walletObject = {
+                name: options.name,
+                address: wallet.address,
+                privateKey: wallet.privateKey,
+                keystore: wallet.encrypt(options.password),
+                network: options.network,
+                type: 'eth',
+                password: options.password,
+                onChain: false
+            }
+            resolve(walletObject)
+        })
     }
 }

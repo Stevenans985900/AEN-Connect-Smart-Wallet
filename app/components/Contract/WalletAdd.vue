@@ -164,7 +164,7 @@
   // import EventEmitter from "events"
   import UploadButton from "vuetify-upload-button"
   import BackupWallet from "~/components/BackupWallet"
-  import networkHandler from "~/modules/network/Contract"
+  import Contract from "~/modules/network/Contract"
   import Debounce from "lodash.debounce"
 
   export default {
@@ -235,7 +235,7 @@
       }
     },
     mounted() {
-      this.networkHandler = new networkHandler(this.$store.state.wallet.ethereum.activeApiEndpoint)
+      this.networkHandler = new Contract(this.$store.state.wallet.ethereum.activeApiEndpoint)
     },
     methods: {
       back() {
@@ -257,7 +257,7 @@
         import("~/modules/network/contract/" + this.contractAddress).then(erc20Interface => {
           this.contractFound = true
           this.contractName = erc20Interface.title
-          this.decimal = erc20Interface.decimal
+          this.decimals = erc20Interface.decimals
           this.symbol = erc20Interface.symbol
         })
           .catch(err => {
@@ -303,9 +303,10 @@
         this.$store.dispatch('wallet/load',{
             type: 'contract',
             name: this.contractName,
-            decimal: this.decimal,
+            decimals: this.decimals,
             symbol: this.symbol,
             address: this.contractAddress,
+            network: this.wallet.network,
             managerWalletAddress: this.wallet.address
           }
         ).then((wallet) => {

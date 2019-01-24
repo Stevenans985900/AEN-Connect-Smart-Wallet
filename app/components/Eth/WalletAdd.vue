@@ -67,11 +67,7 @@
         <v-card v-if="addType == 'fileImport'">
           <v-card-text>
             <v-layout row wrap>
-              <upload-button :file-changed-callback="backupUploaded" title="Choose file">
-                <template slot="icon">
-                  <v-icon>attach_file</v-icon>
-                </template>
-              </upload-button>
+              <restore-from-file @complete="walletRestoredFromFile" />
             </v-layout>
           </v-card-text>
         </v-card>
@@ -132,7 +128,9 @@
       <v-stepper-content step="3">
         <v-card>
           <v-card-text>
+            <h2>bus card here</h2>
             <business-card :wallet="wallet" />
+            <h2>bus card above</h2>
             <v-form ref="eulaForm" v-model="proceedValid">
               <v-checkbox
                 v-model="backupAgree"
@@ -160,18 +158,46 @@
 </template>
 
 <script>
-import BusinessCard from "~/components/BusinessCard"
-import EventEmitter from "events"
-import isElectron from "is-electron"
-import CryptoJS from "crypto-js"
-import UploadButton from "vuetify-upload-button"
 import BackupWallet from "~/components/BackupWallet"
+import RestoreFromFile from "~/components/RestoreFromFile"
 
+function initialDataState () {
+  return {
+    addType: 'new',
+    backupAgree: false,
+    currentStep: 1,
+    newValid: false,
+    recoverValid: false,
+    transactions: {},
+    loading: true,
+    network: {},
+    walletName: '',
+    walletPassword: '',
+    privateKey: '',
+    proceedValid: false,
+    showPassword: false,
+    showEula: false,
+    wallet: {},
+    rules: {
+      basic: {
+        required: value => !!value || "Required."
+      },
+      walletName: {
+        minLength: v => v.length >= 4 || "Min 4 Characters"
+      },
+      password: {
+        minLength: v => v.length >= 8 || "Min 8 characters"
+      },
+      privateKey: {
+        length: v => v.length == 66 || "Length is 66 Characters"
+      }
+    },
+  }
+}
 export default {
   components: {
     BackupWallet,
-    BusinessCard,
-    UploadButton
+    RestoreFromFile
   },
   props: {
     main: {
@@ -181,39 +207,7 @@ export default {
       }
     }
   },
-  data() {
-    return {
-      addType: 'new',
-      backupAgree: false,
-      currentStep: 1,
-      newValid: false,
-      recoverValid: false,
-      transactions: {},
-      loading: true,
-      network: {},
-      walletName: '',
-      walletPassword: '',
-      privateKey: '',
-      proceedValid: false,
-      showPassword: false,
-      showEula: false,
-      wallet: {},
-      rules: {
-        basic: {
-          required: value => !!value || "Required."
-        },
-        walletName: {
-          minLength: v => v.length >= 4 || "Min 4 Characters"
-        },
-        password: {
-          minLength: v => v.length >= 8 || "Min 8 characters"
-        },
-        privateKey: {
-          length: v => v.length == 66 || "Length is 66 Characters"
-        }
-      },
-    }
-  },
+  data: function () { return initialDataState() },
   computed: {
     availableNetworks() {
       return this.$g("eth.available_networks");
@@ -250,8 +244,12 @@ export default {
     back() {
       this.currentStep--
     },
+    beforeMount() {
+      this.reset()
+    },
     complete() {
       this.$emit('complete', true)
+      this.reset()
     },
     createWallet() {
 
@@ -269,31 +267,13 @@ export default {
       }
       this.$store.dispatch('wallet/new', walletOptions)
       .then((wallet) => {
-        console.debug(wallet)
         this.wallet = wallet
         this.currentStep++
-
-        // Activate a listener on the wallet to check when it is live on the network
-        let walletCheckInterval = setInterval(
-          function() {
-            this.$store.dispatch('wallet/checkWalletLive', this.wallet).then(response => {
-              this.$store.commit('wallet/setProperty', {
-                address: this.wallet.address,
-                key: 'onChain',
-                value: response
-              });
-              if (response === true) {
-                clearInterval(walletCheckInterval)
-              }
-            })
-          }.bind(this),
-          this.$g('internal.walletCheckInterval')
-        );
+        this.startLiveListener(wallet)
       })
     },
     loadWallet() {
       if (!this.$refs.existingWalletForm.validate()) {
-        console.log("form is invalid");
         return false;
       }
       this.$store.dispatch('wallet/load',{
@@ -305,80 +285,37 @@ export default {
         }
       ).then((wallet) => {
         this.wallet = wallet
-        console.debug(wallet)
         this.currentStep++
-
-        // Activate a listener on the wallet to check when it is live on the network
-        let walletCheckInterval = setInterval(
-          function() {
-            this.$store.dispatch('wallet/checkWalletLive', this.wallet).then(response => {
-              this.$store.commit('wallet/setProperty', {
-                address: this.wallet.address,
-                key: 'onChain',
-                value: response
-              });
-              if (response === true) {
-                clearInterval(walletCheckInterval)
-              }
-            })
-          }.bind(this),
-          this.$g('internal.walletCheckInterval')
-        );
+        this.startLiveListener(wallet)
       })
     },
-    /**
-     *
-     * @param file
-     */
-    backupUploaded(file) {
-
-      // Create the construct to handle both app / browser situations
-      const fileUploadedEmitter = new EventEmitter();
-      fileUploadedEmitter.on(
-        "ready",
-        function(walletData) {
-          try {
-            console.debug(walletData.fileName)
-            let extension = walletData.fileName.split('.').pop();
-            let walletInformation
-
-            if(extension === 'enc') {
-              var bytes  = CryptoJS.AES.decrypt(walletData.data, this.$g('salt'));
-              walletInformation = JSON.parse(bytes.toString(CryptoJS.enc.Utf8))
-            } else {
-              walletInformation = JSON.parse(walletData.data);
+    reset() {
+      Object.assign(this.$data, initialDataState())
+    },
+    startLiveListener(wallet) {
+      // Activate a listener on the wallet to check when it is live on the network
+      let walletCheckInterval = setInterval(
+        function() {
+          this.$store.dispatch('wallet/checkWalletLive', wallet).then(response => {
+            if (response === true) {
+              clearInterval(walletCheckInterval)
             }
-            console.log(walletInformation)
-
-            this.$store.dispatch('wallet/load', walletInformation).then((wallet) => {
-              this.wallet = wallet
-              this.currentStep++
-            })
-          } catch (e) {
-            this.$store.commit("showNotification", {
-              type: "error",
-              message: 'The file you uploaded appears invalid, please make sure it is a wallet backup'
-            })
-          }
-        }.bind(this)
-      );
-
-      // Fork condition depending on the environment
-      // TODO If come across more of these conditions, put them in to facade
-      if (isElectron()) {
-        console.debug("BU:Using local file mode");
-        const fs = require("fs");
-        fs.readFile(file.path, "utf8", (err, data) => {
-          if (err) throw err;
-          fileUploadedEmitter.emit("ready", {data: data, fileName: file.name});
-        });
-      } else {
-        console.log("BU:Using HTML file API");
-        var reader = new FileReader();
-        reader.readAsText(file);
-        reader.onload = function(event) {
-          fileUploadedEmitter.emit("ready", {data: event.target.result, fileName: file.name});
-        };
+          })
+        }.bind(this),
+        this.$store.state.wallet.internal.walletCheckInterval
+      )
+    },
+    /**
+     * Event listener for the
+     * @param wallet
+     */
+    walletRestoredFromFile(wallet) {
+      this.wallet = wallet
+      this.currentStep++
+      if(wallet.hasOwnProperty('onChain')) {
+        if(wallet.onChain === false) {
+          this.startLiveListener(wallet)
+        }
       }
     }
   }

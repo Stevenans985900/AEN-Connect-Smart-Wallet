@@ -18,7 +18,8 @@
       }
     }
   },
-  "decimal": 8,
+  "decimals": 8,
+  "symbol": "AEN",
   "abi": [
     {
       "constant": true,

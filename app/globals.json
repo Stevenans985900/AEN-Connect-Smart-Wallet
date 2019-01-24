@@ -61,8 +61,17 @@
         "network_id": 3,
         "etherscan_api_endpoint": "http://api-ropsten.etherscan.io/api",
         "infura_api_endpoint": "https://ropsten.infura.io/0HIuuP4qCjvv8DMGjvPm",
-        "testing": true
+        "testing": true,
+        "gasPrices": {
+          "normal": 25000000,
+          "priority": 45000000,
+          "maximum": 1000000000
+        }
       }
-    ]
+    ],
+    "faucets": [{
+      "name": "Ropsten Ethereum Faucet",
+      "address": "https://faucet.ropsten.be"
+    }]
   }
 }

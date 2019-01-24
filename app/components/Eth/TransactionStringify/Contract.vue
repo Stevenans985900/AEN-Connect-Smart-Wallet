@@ -7,6 +7,7 @@
       </div>
       <v-card>
         <v-card-text>
+          <p>Contract Address: {{ transaction.contractAddress }}</p>
           <p>You currently control {{ controlledTokens }} tokens</p>
           <p>{{ transactionGas }} TX Gas - {{ operationGas }} Operation Gas</p>
 
@@ -20,6 +21,8 @@
 <script>
   import { format } from 'date-fns'
   import Web3 from "web3"
+  import Contract from "~/modules/network/Contract"
+
   export default {
     props: {
       transaction: {
@@ -39,7 +42,7 @@
       return {
         web3: {},
         contractDetails: {},
-        title: '',
+        title: 'Unrecognised Contract',
         controlledTokens: 0
       }
     },
@@ -69,36 +72,38 @@
       this.web3 = new Web3(this.$store.state.wallet.ethereum.activeApiEndpoint)
     },
     mounted() {
-      this.title = this.transaction.hash
       this.fetchContractInfo()
     },
     methods: {
       fetchContractInfo() {
+
+        let networkHandler = new Contract(this.$store.state.wallet.ethereum.activeApiEndpoint)
+        networkHandler.balance({
+          managerWalletAddress: this.wallet.address,
+          address: this.transaction.contractAddress
+        })
+          .then(response => {
+            this.controlledTokens = response
+          })
+          .catch(function() {})
+
         import("~/modules/network/contract/" + this.transaction.contractAddress).then(erc20Interface => {
           this.title = erc20Interface.title
-
-          let contract = new this.web3.eth.Contract(erc20Interface.abi, this.transaction.contractAddress)
-
-          console.log('here')
-          console.log(erc20Interface.type)
-          if (erc20Interface.type === 'token') {
-            contract.methods.balanceOf(this.wallet.address).call().then(response => {
-              console.log('From balanceOf public function: ' +  response)
-              this.controlledTokens = response
-            })
-          }
-
-          // contract.getPastEvents('allEvents').then(eventDetails => {
-          //   console.log('HERE!')
-          //   console.log(eventDetails)
-          //   this.contractDetails = eventDetails
-          // })
-          //   .catch(function() {
-          //     this.title = 'unrecognised contract'
-          //     console.log('unrecognised contract. no problem')
-          //   })
         })
+          .catch(function() {
+            networkHandler.erc20PublicMethod({
+              contractAddress: this.transaction.contractAddress,
+              method: 'name'
+            }).then(contractName => {
+              this.title = contractName
+            })
+            .catch(function() {
+              console.debug('This contract does not really exist...')
+            })
+
+          }.bind(this))
       }
     }
+
   }
 </script>

@@ -1,6 +1,6 @@
 <template>
   <v-layout row justify-center align-center>
-    <v-flex xs12 md6>
+    <v-flex xs12>
       <v-progress-circular v-if="loading === true" indeterminate/>
       <v-card v-else>
         <v-card-text v-if="haveLiveWallet == true">
@@ -8,7 +8,7 @@
             <template v-for="(wallet, address) in wallets">
               <v-list-tile v-if="wallet.onChain == true" :key="address">
                 <v-list-tile-avatar>
-                  <img :src="'/network/' + wallet.type + '.png'">
+                  <wallet-image :wallet="wallet" />
                 </v-list-tile-avatar>
                 <v-list-tile-content>
                   <v-list-tile-title v-html="wallet.name"/>
@@ -19,7 +19,7 @@
           </v-list>
         </v-card-text>
         <v-card-text v-else>
-          <p>You do not currently have any wallets with tokens present.</p>
+          <h1>No Active wallets found</h1>
           <p v-if="contextWallet.network.name === 'TestNet'">
             You are on TestNet so, it is possible to use a faucet to receive some free tokens. Please click <a :href="faucet.address + '?address=' + contextWallet.address" target="_blank">here</a> to retrieve
           </p>

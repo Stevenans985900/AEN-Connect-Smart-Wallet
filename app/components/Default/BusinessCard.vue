@@ -5,7 +5,7 @@
         <address-render :address="wallet.address"/>
       </v-card-title>
       <v-card-text>
-        <v-img :src="qrData" aspect-ratio="1"/>
+        <v-img :src="imageData" aspect-ratio="1"/>
       </v-card-text>
     </v-card>
   </v-layout>
@@ -22,12 +22,29 @@
         }
       }
     },
-    computed: {
-      qrData() {
-        var qr = qrCodeGenerator(0, "M");
-        qr.addData(this.wallet.address);
-        qr.make();
-        return qr.createDataURL(5);
+    data() {
+      return {
+        imageData: ''
+      }
+    },
+    watch: {
+      wallet: function() {
+        this.processWallet()
+      }
+    },
+    mounted: function() {
+      this.processWallet()
+    },
+    methods: {
+      processWallet() {
+        console.log('processing the wallet from business card')
+        console.log(this.wallet)
+        if(this.wallet.hasOwnProperty('address')) {
+          var qr = qrCodeGenerator(0, "M");
+          qr.addData(this.wallet.address);
+          qr.make();
+          this.imageData = qr.createDataURL(5);
+        }
       }
     }
   }

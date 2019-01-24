@@ -16,17 +16,23 @@
               prepend-icon="contacts"
             />
           </v-flex>
-          <v-flex xs12 sm6>
+          <v-flex xs12>
             <v-text-field
               v-model="amount"
               label="Amount"
               suffix="ETH"/>
           </v-flex>
-          <v-flex xs12 sm6>
-            <v-text-field
-              v-model="gas"
-              label="Gas"
-              suffix="wei"/>
+          <v-flex xs-12>
+            <v-checkbox v-model="priorityTransfer" label="Priority Transfer" />
+            <v-slider
+              :color="color"
+              :max="maximumGas"
+              v-model="gasPrice"
+              label="Gas Price"
+              step="500000"
+              min="100000"
+              thumb-label
+              ticks />
           </v-flex>
         </v-layout>
       </v-container>
@@ -39,8 +45,6 @@
 </template>
 
 <script>
-  import Web3 from "web3"
-
   export default {
     props: {
       wallet: {
@@ -57,20 +61,38 @@
         gas: 0,
         address: '',
         amount: 0,
-        message: ''
+        message: '',
+        priorityTransfer: false,
+        maximumGas: 0,
+        normalGas: 0,
+        priorityGas: 0
       }
     },
-    // watch
     computed: {
+      color () {
+        if(this.gasPrice < (this.normalGas / 2)) return 'red'
+        if(this.gasPrice < (this.normalGas)) return 'amber'
+        if(this.gasPrice < (this.normalGas + (this.priorityGas - this.normalGas))) return 'light-green'
+        if(this.gasPrice < (this.priorityGas)) return 'green'
+        if(this.gasPrice > (this.priorityGas)) return 'amber'
+      },
       contacts() {
         return this.$store.state.wallet.contacts
       }
     },
+    watch: {
+      priorityTransfer: function(val) {
+        if(val === true) {
+          this.gasPrice = this.wallet.network.gasPrices.priority
+        } else {
+          this.gasPrice = this.wallet.network.gasPrices.normal
+        }
+      }
+    },
     created() {
-      this.web3 = new Web3(this.$store.state.wallet.ethereum.activeApiEndpoint)
-      this.web3.eth.getGasPrice().then(gasPrice => {
-        this.gasPrice = gasPrice
-      })
+      this.normalGas = this.wallet.network.gasPrices.normal
+      this.priorityGas = this.wallet.network.gasPrices.priority
+      this.maximumGas = this.wallet.network.gasPrices.maximum
     },
     methods: {
       initiateTransfer() {
