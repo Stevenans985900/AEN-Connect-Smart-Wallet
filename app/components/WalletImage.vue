@@ -1,5 +1,5 @@
 <template>
-  <img :src="imagePath" :alt="wallet.name">
+  <img :src="imagePath" :alt="wallet.name" onError="console.log('image error');this.onerror=null;this.src='/question.png';">
 </template>
 
 <script>
@@ -17,10 +17,11 @@
     },
     data() {
       return {
+        fallbackImage: 'unknown.png',
         imagePath: ''
       };
     },
-    mounted: function() {
+    beforeMount: function() {
       // If the image is a contract type, load by address otherwise use the plain network image
       if(this.wallet.type === 'contract') {
         this.imagePath = $g.internal.baseImagePath + 'wallet/' + this.wallet.address + '.png'
