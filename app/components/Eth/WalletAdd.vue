@@ -218,16 +218,6 @@ export default {
       }
       return 'Enter Details'
     },
-    environment() {
-      return this.$store.state.meta.environment;
-    },
-    eulaAgree: {
-      get: function() { return this.$store.state.meta.eulaAgree },
-      set: function(val) { this.$store.commit('setMeta', {key: 'eulaAgree', value: val}) }
-    },
-    googleCaptchaKey() {
-      return this.$g("google_recaptcha_key");
-    },
     multipleNetworks() {
       if (this.$g("eth.available_networks").length > 1) {
         return true;
@@ -235,7 +225,7 @@ export default {
       return false
     }
   },
-  mounted() {
+  beforeMount() {
     if(this.multipleNetworks === false) {
       this.network = this.$g("eth.available_networks")[0]
     }

@@ -20,31 +20,18 @@ export default {
             type: ""
         };
     },
-    watch: {
-      wallet: function() {
-        this.updateComponent()
-      }
-    },
-  created: function() {
-    this.updateComponent()
-  },
-    methods: {
-      updateComponent() {
+    beforeMount() {
         if (Object.keys(this.wallet).length !== 0) {
           this.type = this.wallet.type[0].toUpperCase() + this.wallet.type.slice(1)
           if (this.type) {
-            this.component = () => import("~/components/" + this.type + "/Activation").then(response => {
-              console.debug(response)
-            })
+            this.component = () => import("~/components/" + this.type + "/Activation")
               .catch(function() {
                 this.component = () => import("~/components/Default/Activation");
               }.bind(this))
           } else {
-            this.component = () => import("~/components/Default/Activation");
+            this.component = () => import("~/components/Fallback");
           }
         }
-      }
     }
-
 };
 </script>

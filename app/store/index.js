@@ -4,45 +4,38 @@ import {
 import generator from 'generate-password'
 
 export const initialState = {
-    contacts: [],
-    wallets: {},
-    activeWallet: {
-        network: {},
-        address: '',
-        name: '',
-        accountPrivateKey: '',
-        privateKey: '',
-        password: '',
-        onChain: false
-    },
+    // Snackbar Controls
     notification: {
         show: false,
         type: 'success',
         message: 'message_placeholder',
         timeout: 6000
     },
-    settings: {
-        local_node: true
-    },
-    meta: {
+    // High level app properties
+    runtime: {
         mode: 'web',
-        environment: 'prod',
-        rememberUser: false,
-        wallet_present: false,
-        eulaAgree: false
+        environment: 'production'
     },
-    // Electron specific properties
+    // When running as a desktop app
     electron: {
-        docker_present: false
+        dockerPresent: false,
+        runningLocalNode: false
     },
-    // Internal app state properties
-    internal: {
-        busy: {
-            global: true,
-            router: true,
-            page: false,
-            message: ''
-        }
+    // State and stages of app status
+    busy: {
+        global: true,
+        router: true,
+        page: false,
+        message: ''
+    },
+    // User options for security
+    security: {
+
+    },
+    // Shared user preferences
+    user: {
+        rememberUser: false,
+        eulaAgree: false
     }
 }
 
@@ -53,18 +46,18 @@ export const getters = {
         return state.notification.show
     },
     booting: state => {
-        return state.internal.busy.global
+        return state.busy.global
     },
     environment: state => {
-        return state.meta.environment
+        return state.runtime.environment
     },
     busy: state => {
-       return state.internal.busy.page
+       return state.busy.page
     },
     loading: state => {
         if (
-            state.internal.busy.global === true ||
-            state.internal.busy.router === true) {
+            state.busy.global === true ||
+            state.busy.router === true) {
             return true
         }
     }
@@ -88,13 +81,11 @@ export const actions = {
         console.debug('Index Store: Update Generic Network Information')
 
         // Prepare basic services for use
-        let apiEndpoint = context.state.internal.activeApiEndpoint
+        let apiEndpoint = context.state.wallet.aen.activeApiEndpoint
         if (!apiEndpoint) {
             return
         }
-
         let blockchainHttp = new BlockchainHttp(apiEndpoint)
-
         // Get the network height
         blockchainHttp.getBlockchainHeight()
             .subscribe(height => {
@@ -103,7 +94,6 @@ export const actions = {
                     context.commit('setBlockHeight', height.lower)
                 }
             })
-
         // Get current blockchain score
         blockchainHttp.getBlockchainScore()
             .subscribe(score => {
@@ -127,8 +117,17 @@ export const mutations = {
     setEnvironment(state, environmentName) {
         state.meta.environment = environmentName
     },
+    setElectronProperty(state, options) {
+        state.electron[options.key] = options.value
+    },
     setInternalProperty(state, options) {
-      state.internal[options.key] = options.value
+        state.internal[options.key] = options.value
+    },
+    setRuntimeProperty(state, options) {
+        state.runtime[options.key] = options.value
+    },
+    setUserProperty(state, options) {
+        state.user[options.key] = options.value
     },
     setMeta(state, options) {
         state.meta[options.key] = options.value
@@ -168,9 +167,9 @@ export const mutations = {
      * @param {*} loadingObject
      */
     setLoading(state, loadingObject) {
-        state.internal.busy[loadingObject.t] = loadingObject.v
+        state.busy[loadingObject.t] = loadingObject.v
         if (loadingObject.hasOwnProperty('m')) {
-            state.internal.busy.message = loadingObject.m
+            state.busy.message = loadingObject.m
         }
     },
     setRouterLoading(state, value) {
@@ -234,9 +233,6 @@ export const mutations = {
     setDeviceSetting(state, input) {
         state.settings[input.key] = input.value
     },
-    setElectronProperty(state, input) {
-        state.electron[input.key] = input.value
-    },
     setAccountProperty(state, input) {
         state.activeWallet[input.key] = input.value
     },
@@ -244,6 +240,6 @@ export const mutations = {
         state.mosaics = input
     },
     setAppMode(state, mode) {
-        state.meta.mode = mode
+        state.runtime.mode = mode
     }
 }

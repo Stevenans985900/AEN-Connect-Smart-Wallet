@@ -13,7 +13,6 @@ export default class Aen extends Generic {
         Generic.prototype.balance.call(this, options)
         return new Promise((resolve) => {
             this.web3.eth.getBalance(options.address).then(wei => {
-                console.debug('balance in wei is: '+wei)
                 let eth = this.web3.utils.fromWei(wei, 'ether')
                 resolve(eth)
             })
@@ -24,7 +23,7 @@ export default class Aen extends Generic {
     transactionsHistorical(options) {
         super.transactionsHistorical(options)
 
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             axios.get(options.wallet.network.etherscan_api_endpoint, {
                 params: {
                     module: "account",
@@ -37,11 +36,10 @@ export default class Aen extends Generic {
                 }
             })
               .then(function (response) {
-                  console.log(response)
                   resolve(response.data.result)
               })
               .catch(function (error) {
-                  console.log(error)
+                  reject(error)
               })
         })
 

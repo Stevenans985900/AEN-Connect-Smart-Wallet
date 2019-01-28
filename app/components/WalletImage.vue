@@ -1,5 +1,5 @@
 <template>
-  <img :src="imagePath" :alt="wallet.name" onError="console.log('image error');this.onerror=null;this.src='/question.png';">
+  <img :src="imagePath" :alt="wallet.name" onError="this.onerror=null;this.src='/question.png';">
 </template>
 
 <script>

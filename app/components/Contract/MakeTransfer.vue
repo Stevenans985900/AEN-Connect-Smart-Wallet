@@ -18,12 +18,17 @@
           </v-flex>
           <v-flex xs12>
             <v-text-field
+              :suffix="wallet.symbol"
               v-model="amount"
-              label="Amount"
-              suffix="ETH"/>
+              label="Amount" />
           </v-flex>
-          <v-flex xs-12>
+          <v-flex xs12 md6>
             <v-checkbox v-model="priorityTransfer" label="Priority Transfer" />
+            <v-text-field
+              v-model="gasPrice"
+              suffix="Wei"/>
+          </v-flex>
+          <v-flex xs12 md6>
             <v-slider
               :color="color"
               :max="maximumGas"

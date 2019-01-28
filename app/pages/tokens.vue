@@ -88,10 +88,10 @@ export default {
   },
   created: function() {
     // Only start once global loading finished
-    var preperationInterval = setInterval(
+    var preparationInterval = setInterval(
       function() {
         if (this.$store.getters.booting === false) {
-          clearInterval(preperationInterval);
+          clearInterval(preparationInterval);
 
           this.debounceName = debounce(this.checkAvailability, 500);
 

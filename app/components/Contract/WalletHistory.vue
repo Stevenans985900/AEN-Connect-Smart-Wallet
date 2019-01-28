@@ -19,7 +19,7 @@
 
 <script>
   import TransactionStringify from '~/components/Eth/TransactionStringify'
-  import Contract from '~/modules/network/Contract'
+  import Contract from '~/class/network/Contract'
 
   export default {
     components: {

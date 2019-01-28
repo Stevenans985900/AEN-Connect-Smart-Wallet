@@ -1,19 +1,24 @@
 import Vue from 'vue'
-import Aen from '~/modules/network/Aen'
-import Contract from '~/modules/network/Contract'
-import Ethereum from "../modules/network/Ethereum"
+import Aen from '~/class/network/Aen'
+import Bitcoin from '~/class/network/Bitcoin'
+import Contract from '~/class/network/Contract'
+import Ethereum from "../class/network/Ethereum"
 
 export const initialState = {
   contacts: [],
   wallets: {},
-  context: {
-    network: {},
-    address: '',
-    name: '',
-    accountPrivateKey: '',
-    privateKey: '',
-    password: '',
-    onChain: false
+  aen: {
+    haveWallet: false,
+    activeApiEndpoint: '',
+    activeApiPing: 9999,
+    blockHeight: 0,
+    blockScore: 0,
+    network: {}
+  },
+  bitcoin: {
+    activeApiEndpoint: '',
+    activeApiPing: 9999,
+    network: {}
   },
   ethereum: {
     activeApiEndpoint: '',
@@ -23,21 +28,34 @@ export const initialState = {
   internal: {
     walletCheckInterval: 10000,
     apiEndpointPingInterval: 30000,
-    networkInformationInterval: 30000,
-    // Array used for storing ping ranking for external api nodes
-    activeApiEndpoint: '',
-    activeApiPing: 9999,
-    blockHeight: 0,
-    blockScore: 0
+    networkInformationInterval: 30000
   }
 }
 
 export const state = () => (initialState)
 
+export const getters = {
+  haveAenWallet: state => {
+    for (let wallet in state.wallets) {
+      if (state.wallets[wallet].type === 'aen') {
+        return true
+      }
+    }
+    return false
+  },
+  haveEthereumWallet: state => {
+    for (let wallet in state.wallets) {
+      if (state.wallets[wallet].type === 'eth') {
+        return true
+      }
+    }
+    return false
+  },
+}
+
 export const actions = {
   balance: (context, wallet) => {
     let networkHandler
-    // wallet.balance = 0
     return new Promise((resolve, reject) => {
       switch (wallet.type) {
         case 'aen':
@@ -53,8 +71,6 @@ export const actions = {
           break
       }
       networkHandler.balance(wallet).then(response => {
-        console.log('response back from balance fetch for '+wallet.name)
-        console.log(response)
         context.commit('setWalletProperty', {
           wallet: wallet,
           key: 'balance',
@@ -80,6 +96,17 @@ export const actions = {
               value: response
             })
             resolve(response)
+          })
+          break
+        case 'btc':
+          networkHandler = new Bitcoin(context.state.bitcoin)
+          networkHandler.walletIsLive(wallet).then(response => {
+            context.commit('setWalletProperty', {
+              wallet: wallet,
+              key: 'onChain',
+              value: response
+            })
+            resolve(wallet)
           })
           break
         case 'contract':
@@ -136,7 +163,7 @@ export const actions = {
                 wallet.main = true
                 context.commit('setContext', wallet)
               }
-              context.commit('addWallet', wallet)
+              context.commit('setWallet', wallet)
               resolve(wallet)
             })
           })
@@ -146,7 +173,7 @@ export const actions = {
           networkHandler = new Contract(context.state.ethereum.activeApiEndpoint)
           networkHandler.walletLoad(options).then(walletObject => {
             Object.assign(wallet, walletObject)
-            context.commit('addWallet', wallet)
+            context.commit('setWallet', wallet)
             resolve(wallet)
           })
           break
@@ -155,7 +182,7 @@ export const actions = {
           networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
           networkHandler.walletLoad(options).then(walletObject => {
             Object.assign(wallet, walletObject)
-            context.commit('addWallet', wallet)
+            context.commit('setWallet', wallet)
 
             networkHandler.balance(wallet).then(response => {
               console.debug(response)
@@ -185,21 +212,27 @@ export const actions = {
           networkHandler.accountNew(options).then(account => {
             options.account = account
             networkHandler.walletLoad(options).then(wallet => {
-              console.log('wallet after initial load')
-              console.log(wallet)
-              if (options.hasOwnProperty('main') && options.main === true) {
-                wallet.main = true
-                context.commit('setContext', wallet)
-              }
-              context.commit('addWallet', wallet)
+              context.commit('setAenProperty', {
+                key: "haveWallet",
+                value: true
+              })
+              context.commit('setWallet', wallet)
               resolve(wallet)
             })
           })
           break
+        case 'btc':
+          networkHandler = new Bitcoin(context.state.bitcoin.activeApiEndpoint)
+          networkHandler.walletNew(options).then(wallet => {
+            context.commit('setWallet', wallet)
+            resolve(wallet)
+          })
+          break
+
       case 'eth':
         networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
         networkHandler.walletNew(options).then(wallet => {
-          context.commit('addWallet', wallet)
+          context.commit('setWallet', wallet)
           resolve(wallet)
         })
         break
@@ -245,10 +278,9 @@ export const actions = {
 
       // Perform the actual call
       this.$axios.$get(thisAddress)
-        .then((response) => {
+        .then(() => {
 
           // Calculate ping time, output the response when in debug mode to satisfy linter
-          console.debug(response)
           apiEndpoints[position].scanEnd = new Date()
           apiEndpoints[position].scanTime = apiEndpoints[position].scanEnd - apiEndpoints[position].scanStart
 
@@ -260,9 +292,8 @@ export const actions = {
             stateContext.commit('setPingTime', lowestPing)
           }
         })
-        .catch((error) => {
+        .catch(() => {
           console.log('Node offline: ' + thisAddress)
-          console.debug(error)
         })
     }.bind(this)
 
@@ -280,49 +311,35 @@ export const mutations = {
   setAccountStatus(state, status) {
     state.meta.wallet_present = status
   },
-  addWallet(state, wallet) {
-    console.log('going to try adding the follwign wallet to context')
-    console.log(wallet)
+  setWallet(state, wallet) {
     state.wallets[wallet.address] = wallet
-    if(wallet.main === true && wallet.type === 'aen') {
-      state.context = wallet
+    if(wallet.type === 'aen') {
+      state.aen.haveWallet = true
     }
+  },
+  setAenProperty(state, options) {
+    state.aen[options.key] = options.value
+  },
+  setBitcoinProperty(state, options) {
+    state.bitcoin[options.key] = options.value
   },
   setEthereumProperty(state, options) {
     state.ethereum[options.key] = options.value
   },
   setWalletProperty(state, options) {
     state.wallets[options.wallet.address][options.key] = options.value
-    if(options.wallet.main === true && options.wallet.type === 'aen') {
-      state.context = options.wallet
-    }
   },
   setProperty(state, options) {
     state.wallets[options.address][options.key] = options.value
   },
-  setContext(state, wallet) {
-    state.context = wallet
-  },
-  setPassword(state, password) {
-    state.activeWallet.password = password
-  },
-  setRememberUser(state, value) {
-    state.meta.remember_user = value
-  },
   /**
    * Address Book related information
    */
-  addContact(state, contact) {
-    state.contacts.push(contact)
-  },
   deleteContact(state, contact) {
-    const indexPosition = state.contacts.findIndex(i => i === contact)
-    state.contacts.splice(indexPosition, 1)
+    Vue.delete(state.contacts, contact.address)
   },
-  editContact(state, changeObjects) {
-    const indexPosition = state.contacts.findIndex(i => i === changeObjects.original)
-    state.contacts.splice(indexPosition, 1)
-    state.contacts.push(changeObjects.updated)
+  setContact(state, contact) {
+    state.contacts[contact.address] = contact
   },
   setApiEndpoint(state, value) {
     state.internal.activeApiEndpoint = value

@@ -1,69 +1,30 @@
 <template>
   <span>
+
     <v-btn v-clipboard:copy="address" v-clipboard:success="onCopy" flat>
-      <v-icon
-        small
-      >
-        file_copy
-      </v-icon>&nbsp;&nbsp;{{ displayText }}
+      <v-icon small>file_copy</v-icon>&nbsp;&nbsp;{{ displayText }}
     </v-btn>
 
     <!-- New transfer -->
-    <v-dialog v-if="missing === true && showAdd === true" v-model="dialog" persistent max-width="600px">
+    <v-dialog v-if="haveContact === false && showAdd === true" v-model="dialog" persistent max-width="600px">
       <v-btn slot="activator" icon outline>
         <v-icon>add</v-icon>
       </v-btn>
-      <v-card>
-        <v-card-title>
-          <span class="headline">
-            Add Contact
-          </span>
-        </v-card-title>
-        <v-card-text>
-          <v-container grid-list-md>
-            <v-layout wrap>
-              <v-flex xs12 sm6>
-                <v-text-field
-                  v-model="displayText"
-                  label="Name"
-                />
-              </v-flex>
-              <v-flex xs12 sm6>
-                <v-text-field
-                  v-model="address"
-                  label="Blockchain Address"
-                />
-              </v-flex>
-            </v-layout>
-          </v-container>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer/>
-          <v-btn class="smaller" color="blue darken-1" flat @click.native="dialog = false">
-            Close
-          </v-btn>
-          <v-btn class="smaller" color="blue darken-1" flat @click="addContact">
-            Add
-          </v-btn>
-        </v-card-actions>
-      </v-card>
+      <v-toolbar color="primary">
+        <v-btn icon @click="dialog = false">
+          <v-icon>close</v-icon>
+        </v-btn>
+        <v-toolbar-title>Add Contact</v-toolbar-title>
+      </v-toolbar>
+      <contact-edit :display-text="displayText" :address="address" @complete="contactAdded"/>
     </v-dialog>
   </span>
 </template>
 
-<style scoped>
-  button.smaller {
-    height: 18px;
-    width: 18px;
-  }
-
-  .v-icon.smaller {
-    font-size: 16px;
-  }
-</style>
-
 <script>
+  import ContactEdit from "~/components/ContactEdit"
   export default {
+    components: { ContactEdit },
     props: {
       address: {
         type: String,
@@ -71,50 +32,43 @@
       },
       showAdd: {
         type: Boolean,
-        default: false,
-        required: false
+        default: false
       }
     },
     data() {
       return {
-        displayText: "",
-        missing: true,
         dialog: false
       };
     },
-    watch: {
-      address: function() {
-        this.renderAddress();
-      }
-    },
-    created: function() {
-      this.renderAddress()
-    },
-    methods: {
-      renderAddress() {
-        var result = this.$store.state.wallet.contacts.find(contact => {
-          return contact.address === this.address;
-        });
-
-        if (result) {
-          this.missing = false;
-          this.displayText = result.displayText;
+    computed: {
+      haveContact() {
+        if(this.$store.state.wallet.contacts.hasOwnProperty(this.address)) {
+          return true
         } else {
-          this.displayText = this.address;
+          return false
         }
       },
+      displayText() {
+        if(this.haveContact) {
+          return this.$store.state.wallet.contacts[this.address].displayText
+        } else {
+          return this.address
+        }
+      }
+    },
+    methods: {
       onCopy() {
-        var message = "Copied to clipboard";
-        this.$store.commit("showNotification", { "type": "error", "message": message });
+        this.$store.commit("showNotification", {
+          type: "success",
+          message: "Copied"
+        })
       },
-      addContact() {
-        this.$store.commit("wallet/addContact", {
-          'displayText': this.displayText,
-          'address': this.address
-        });
-        var message = "Contact added to address book";
-        this.$store.commit("showNotification", { "type": "success", "message": message });
-        this.dialog = false;
+      contactAdded() {
+        this.$store.commit("showNotification", {
+          type: "success",
+          message: "Contact added to address book"
+        })
+        this.dialog = false
       }
     }
   };

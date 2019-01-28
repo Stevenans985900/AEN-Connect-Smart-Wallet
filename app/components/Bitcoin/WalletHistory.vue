@@ -18,8 +18,8 @@
 </template>
 
 <script>
-  import TransactionStringify from '~/components/Eth/TransactionStringify'
-  import Eth from '~/class/network/Ethereum'
+  import TransactionStringify from '~/components/Bitcoin/TransactionStringify'
+  import Bitcoin from '~/class/network/Bitcoin'
 
   export default {
     components: {
@@ -41,19 +41,15 @@
       }
     },
     mounted() {
-      this.options = {
-        wallet: this.wallet,
-        etherscan: this.$g('eth.etherscan')
-      }
-      let networkHelper = new Eth(this.$store.state.wallet.ethereum.activeApiEndpoint)
-      networkHelper.transactionsHistorical(this.options).then(transactions => {
+      let networkHelper = new Bitcoin(this.$store.state.wallet.bitcoin.activeApiEndpoint)
+      networkHelper.transactionsHistorical(this.wallet).then(transactions => {
         this.transactions = transactions
         this.loading = false
       })
 
       setInterval(
         function() {
-          networkHelper.transactionsHistorical(this.options).then(transactions => {
+          networkHelper.transactionsHistorical(this.wallet).then(transactions => {
             this.transactions = transactions
           })
         }.bind(this), this.$g('internal.commonTasksInterval')

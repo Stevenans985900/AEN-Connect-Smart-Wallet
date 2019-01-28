@@ -20,11 +20,6 @@
         </v-card-text>
         <v-card-text v-else>
           <h1>No Active wallets found</h1>
-          <p v-if="contextWallet.network.name === 'TestNet'">
-            You are on TestNet so, it is possible to use a faucet to receive some free tokens. Please click <a :href="faucet.address + '?address=' + contextWallet.address" target="_blank">here</a> to retrieve
-          </p>
-          <p>Please send some tokens to your wallet using the address shown below</p>
-          <business-card :wallet="contextWallet" />
         </v-card-text>
       </v-card>
     </v-flex>

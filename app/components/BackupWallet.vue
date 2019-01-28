@@ -4,11 +4,11 @@
       Backup Wallet
     </v-btn>
     <v-dialog v-model="dialogBackup" max-width="600px">
-      <v-toolbar dark color="primary">
-        <v-btn icon dark @click="dialogBackup = false">
+      <v-toolbar color="primary">
+        <v-btn icon @click="dialogBackup = false">
           <v-icon>close</v-icon>
         </v-btn>
-        <v-toolbar-title class="white--text">Click a wallet to create backup</v-toolbar-title>
+        <v-toolbar-title>Click a wallet to create backup</v-toolbar-title>
       </v-toolbar>
       <v-card>
         <v-card-text>

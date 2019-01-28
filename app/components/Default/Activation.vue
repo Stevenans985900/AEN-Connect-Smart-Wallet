@@ -26,11 +26,6 @@
         this.$store.dispatch('wallet/checkWalletLive', wallet).then(response => {
           console.log('response from checking whether the wallet is live or not')
           console.log(response)
-          this.$store.commit('wallet/setProperty', {
-            address: wallet.address,
-            key: 'onChain',
-            value: response
-          })
           if (response === true) {
             this.$store.commit("showNotification", {
               type: "success",

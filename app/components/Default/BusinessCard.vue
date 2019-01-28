@@ -1,14 +1,10 @@
 <template>
-  <v-layout >
-    <v-card flat>
-      <v-card-title>
-        <address-render :address="wallet.address"/>
-      </v-card-title>
-      <v-card-text>
-        <v-img :src="imageData" aspect-ratio="1"/>
-      </v-card-text>
-    </v-card>
-  </v-layout>
+  <v-card flat>
+    <v-card-text class="text-xs-center">
+      <address-render :address="wallet.address"/>
+      <v-img :src="imageData" aspect-ratio="1"/>
+    </v-card-text>
+  </v-card>
 </template>
 
 <script>

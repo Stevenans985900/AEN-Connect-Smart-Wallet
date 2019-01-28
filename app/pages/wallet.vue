@@ -8,6 +8,10 @@
           <v-icon>add</v-icon>
         </v-btn>
 
+        <v-btn color="success" absolute fab bottom right @click="tester">
+          test
+        </v-btn>
+
         <v-card-title class="headline">Wallet Management</v-card-title>
         <v-card-text>
           <v-list two-line subheader>
@@ -33,11 +37,18 @@
 
     <!-- New Wallet Dialog -->
     <v-dialog v-model="dialogWalletAdd" persistent max-width="600px">
+      <v-toolbar color="primary">
+        <v-btn icon @click="dialogWalletAdd = false">
+          <v-icon>close</v-icon>
+        </v-btn>
+        <v-toolbar-title>Choose a wallet type to add from the list below</v-toolbar-title>
+      </v-toolbar>
       <v-card>
-        <v-tabs centered color="cyan" dark icons-and-text>
+        <v-tabs centered grow>
           <v-tabs-slider color="yellow"/>
           <v-tab href="#aen" @click="walletType = 'aen'">AEN</v-tab>
-          <v-tab href="#eth" @click="walletType = 'eth'">ETH</v-tab>
+          <v-tab href="#eth" @click="walletType = 'eth'">Ethereum</v-tab>
+          <v-tab href="#btc" @click="walletType = 'btc'">Bitcoin</v-tab>
           <v-tab v-if="haveEthereumWallet" href="#contract" @click="walletType = 'contract'">Custom Token</v-tab>
 
           <!-- AEN -->
@@ -56,6 +67,14 @@
               </v-card-text>
             </v-card>
           </v-tab-item>
+          <!-- BTC -->
+          <v-tab-item value="btc">
+            <v-card flat>
+              <v-card-text>
+                <wallet-add type="bitcoin" @complete="walletAdded()"/>
+              </v-card-text>
+            </v-card>
+          </v-tab-item>
           <!-- contract -->
           <v-tab-item value="contract">
             <v-card flat>
@@ -66,29 +85,25 @@
           </v-tab-item>
 
         </v-tabs>
-        <v-card-actions>
-          <v-spacer/>
-          <v-btn color="blue darken-1" flat @click.native="dialogWalletAdd = false">Close</v-btn>
-        </v-card-actions>
       </v-card>
     </v-dialog>
 
     <!-- View Wallet Dialog -->
     <v-dialog v-model="dialogViewWallet" fullscreen="">
-      <v-card vwidth="600px">
-        <v-toolbar dark color="primary">
-          <v-btn icon dark @click="dialogViewWallet = false">
-            <v-icon>close</v-icon>
+      <v-toolbar class="primary">
+        <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
+        <v-toolbar-items>
+          <v-btn v-if="contextWallet.onChain === true" flat @click="dialogShowAddress = true">Show Business Card
           </v-btn>
-          <v-toolbar-title class="white--text">{{ contextWallet.name }}</v-toolbar-title>
-          <v-toolbar-items>
-            <v-btn v-if="contextWallet.onChain === true" flat @click="dialogShowAddress = true">Show Business Card
-            </v-btn>
-            <v-btn v-if="contextWallet.onChain === true" flat @click="dialogMakeTransfer = true">Make Transfer</v-btn>
-            <v-btn flat @click="dialogRemoveWallet = true">Remove Wallet</v-btn>
-          </v-toolbar-items>
-
-        </v-toolbar>
+          <v-btn v-if="contextWallet.onChain === true" flat @click="dialogMakeTransfer = true">Make Transfer</v-btn>
+          <v-btn flat @click="dialogRemoveWallet = true">Remove Wallet</v-btn>
+        </v-toolbar-items>
+        <v-spacer />
+        <v-btn icon @click="dialogViewWallet = false">
+          <v-icon>close</v-icon>
+        </v-btn>
+      </v-toolbar>
+      <v-card width="600px">
         <v-card-text>
           <testnet-buttons :wallet="contextWallet"/>
           <address-render :address="contextWallet.address"/>
@@ -99,27 +114,34 @@
     </v-dialog>
 
     <v-dialog v-model="dialogShowAddress" max-width="500px">
+      <v-toolbar class="primary">
+        <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
+        <v-spacer />
+        <v-btn icon @click="dialogShowAddress = false">
+          <v-icon>close</v-icon>
+        </v-btn>
+      </v-toolbar>
       <business-card :wallet="contextWallet"/>
     </v-dialog>
 
     <!-- Make Transfer Dialog -->
     <v-dialog v-model="dialogMakeTransfer" persistent max-width="600px">
-      <v-toolbar dark color="primary">
-        <v-btn icon dark @click="dialogMakeTransfer = false">
+      <v-toolbar color="primary">
+        <v-btn icon @click="dialogMakeTransfer = false">
           <v-icon>close</v-icon>
         </v-btn>
-        <v-toolbar-title class="white--text">Make a Transfer from {{ contextWallet.name }}</v-toolbar-title>
+        <v-toolbar-title>Make a Transfer from {{ contextWallet.name }}</v-toolbar-title>
       </v-toolbar>
       <make-transfer :wallet="contextWallet" @complete="transferComplete()"/>
     </v-dialog>
 
     <!-- Remove Wallet Dialog -->
     <v-dialog v-model="dialogRemoveWallet" persistent max-width="600px">
-      <v-toolbar dark color="primary">
-        <v-btn icon dark @click="dialogRemoveWallet = false">
+      <v-toolbar color="primary">
+        <v-btn icon @click="dialogRemoveWallet = false">
           <v-icon>close</v-icon>
         </v-btn>
-        <v-toolbar-title class="white--text">Are you sure you want to remove the wallet?</v-toolbar-title>
+        <v-toolbar-title>Are you sure you want to remove the wallet?</v-toolbar-title>
       </v-toolbar>
       <v-card>
         <v-card-title class="headline">{{ contextWallet.name }}</v-card-title>
@@ -196,15 +218,10 @@
     },
     computed: {
       environment() {
-        return this.$store.state.meta.environment;
+        return this.$store.state.runtime.environment;
       },
       haveEthereumWallet() {
-        for (let wallet in this.$store.state.wallet.wallets) {
-          if (this.$store.state.wallet.wallets[wallet].type === 'eth') {
-            return true
-          }
-        }
-        return false
+        return this.$store.state.wallet.haveEthereumWallet
       },
       wallets() {
         return this.$store.state.wallet.wallets;
@@ -218,15 +235,29 @@
     mounted: function() {
       console.debug("P:W:Wallets Page Started");
       // Only start once global loading finished
-      var preperationInterval = setInterval(
+      var preparationInterval = setInterval(
         function() {
-          clearInterval(preperationInterval);
+          clearInterval(preparationInterval);
           this.$store.commit("setLoading", { t: "router", v: false });
         }.bind(this),
         2000
       );
     },
     methods: {
+      tester() {
+        let walletOptions = {
+          type: "btc",
+          name: "Bitcoin",
+          network: this.$g("bitcoin.available_networks")[0]
+        }
+        console.log('going to create wallet')
+        this.$store.dispatch('wallet/new', walletOptions)
+          .then((wallet) => {
+            console.log('wallet result')
+            console.log(wallet)
+          })
+
+      },
       setActiveWallet(wallet) {
         switch (wallet.type) {
           case "aen":

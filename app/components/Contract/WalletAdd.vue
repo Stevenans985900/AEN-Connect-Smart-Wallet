@@ -164,7 +164,7 @@
   // import EventEmitter from "events"
   import UploadButton from "vuetify-upload-button"
   import BackupWallet from "~/components/BackupWallet"
-  import Contract from "~/modules/network/Contract"
+  import Contract from "~/class/network/Contract"
   import Debounce from "lodash.debounce"
 
   export default {
@@ -254,7 +254,7 @@
         }
 
         this.contractFound = false
-        import("~/modules/network/contract/" + this.contractAddress).then(erc20Interface => {
+        import("~/class/network/contract/" + this.contractAddress).then(erc20Interface => {
           this.contractFound = true
           this.contractName = erc20Interface.title
           this.decimals = erc20Interface.decimals

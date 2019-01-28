@@ -5,12 +5,16 @@
   "google_recaptcha_key": "NA",
   "internal": {
     "baseImagePath": "/",
+    "controllerPollReadyInterval": 1000,
     "commonTasksInterval": 20000,
     "apiEndpointPingInterval": 450000,
     "walletCheckInterval": 300000
   },
+  "userExperience": {
+    "notificationTimeout": 6000
+  },
   "aen": {
-    "network_version": "0.1",
+    "networkVersion": "0.1",
     "api_endpoint_test_uri": "/block/1",
     "api_endpoints": [{
         "alias": "API-2",
@@ -46,10 +50,28 @@
   },
   "bitcoin": {
     "api_endpoint_test_uri": "",
-    "api_endpoints": {
-      "name": "TestNet",
-      "identifier": "TESTNET"
-    }
+    "block_cypher": {
+      "api_endpoint": "https://api.blockcypher.com/v1/btc/"
+    },
+    "bitaps": {
+      "api_endpoint": "https://bitaps.com/api/"
+    },
+    "available_networks": [
+      {
+        "name": "TestNet3",
+        "identifier": "testnet",
+        "block_cypher_id": "test3"
+      }
+    ],
+    "faucets": [
+      {
+        "name": "Bitcoin Testnet3 Faucet",
+        "address": "https://coinfaucet.eu/en/btc-testnet/"
+      },
+      {
+        "name": "UO1 Testnet Faucet",
+        "address": "https://bitcoinfaucet.uo1.net/"
+      }]
   },
   "eth": {
     "etherscan": {
@@ -63,9 +85,9 @@
         "infura_api_endpoint": "https://ropsten.infura.io/0HIuuP4qCjvv8DMGjvPm",
         "testing": true,
         "gasPrices": {
-          "normal": 25000000,
-          "priority": 45000000,
-          "maximum": 1000000000
+          "normal": 250000,
+          "priority": 450000,
+          "maximum": 10000000
         }
       }
     ],

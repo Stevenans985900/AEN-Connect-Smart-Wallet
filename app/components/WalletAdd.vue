@@ -1,18 +1,12 @@
 <template>
   <span>
-    <component v-if="component" :is="component" :show-eula="showEula" :main="main" @complete="complete(wallet)"/>
+    <component v-if="component" :is="component" :show-eula="showEula" @complete="complete(wallet)"/>
   </span>
 </template>
 
 <script>
   export default {
     props: {
-      main: {
-        type: Boolean,
-        default: function() {
-          return false
-        }
-      },
       showEula: {
         type: Boolean,
         default: function() {
@@ -46,7 +40,6 @@
       },
       updateComponent() {
         this.componentName = this.type[0].toUpperCase() + this.type.slice(1)
-        console.log(this.componentName)
         if (this.componentName) {
           try {
             this.component = () => import("~/components/" + this.componentName + "/WalletAdd");

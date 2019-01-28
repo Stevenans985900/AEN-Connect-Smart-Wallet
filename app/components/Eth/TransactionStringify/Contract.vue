@@ -21,7 +21,7 @@
 <script>
   import { format } from 'date-fns'
   import Web3 from "web3"
-  import Contract from "~/modules/network/Contract"
+  import Contract from "~/class/network/Contract"
 
   export default {
     props: {
@@ -87,7 +87,7 @@
           })
           .catch(function() {})
 
-        import("~/modules/network/contract/" + this.transaction.contractAddress).then(erc20Interface => {
+        import("~/class/network/contract/" + this.transaction.contractAddress).then(erc20Interface => {
           this.title = erc20Interface.title
         })
           .catch(function() {

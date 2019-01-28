@@ -1,4 +1,4 @@
-import Generic from '~/modules/network/Generic'
+import Generic from '~/class/network/Generic'
 import axios from "axios"
 import Web3 from "web3"
 
@@ -14,7 +14,7 @@ export default class Contract extends Generic {
         super.balance(options)
 
         return new Promise((resolve, reject) => {
-            import("~/modules/network/contract/erc20").then(erc20Interface => {
+            import("~/class/network/contract/erc20").then(erc20Interface => {
 
                 let contract = new this.web3.eth.Contract(erc20Interface.abi, options.address)
 
@@ -33,7 +33,7 @@ export default class Contract extends Generic {
         console.debug(this.pluginName+': Load contract')
         console.debug(options)
         return new Promise((resolve, reject) => {
-            import("~/modules/network/contract/erc20").then(erc20Interface => {
+            import("~/class/network/contract/erc20").then(erc20Interface => {
 
                 let contract = new this.web3.eth.Contract(erc20Interface.abi, options.contractAddress)
 
@@ -84,7 +84,7 @@ export default class Contract extends Generic {
 
             let transaction
             // TODO Add in the flexibility to handle meta contracts if there is a proxy transfer method
-            import("~/modules/network/contract/erc20").then(erc20Interface => {
+            import("~/class/network/contract/erc20").then(erc20Interface => {
                 let contract = new this.web3.eth.Contract(erc20Interface.abi, options.source.address)
                 transaction = contract.methods.transfer(options.destination.address, options.destination.amount)
                 transaction.chainId = options.source.network.network_id

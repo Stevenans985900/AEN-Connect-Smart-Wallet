@@ -1,41 +1,9 @@
 <template>
   <v-layout row justify-center align-center>
+
     <!-- Contacts table -->
     <v-flex xs12>
       <v-card>
-        <!-- New contact -->
-        <v-dialog v-model="dialog" persistent max-width="600px">
-          <v-btn slot="activator" color="success" absolute fab bottom left>
-            <v-icon>add</v-icon>
-          </v-btn>
-          <v-card>
-            <v-card-title>
-              <span class="headline">Contact</span>
-            </v-card-title>
-            <v-card-text>
-              <v-container grid-list-md>
-                <v-layout wrap>
-                  <v-flex xs12 sm6>
-                    <v-text-field v-model="contact.displayText" label="Name" required/>
-                  </v-flex>
-                  <v-flex xs12 sm6>
-                    <v-text-field
-                      v-model="contact.address"
-                      label="Blockchain Address"
-                      hint="example: TCQS4NLATONNFT2SEY6Y3SZNQTMXF7O5K7TU7L7F"
-                    />
-                  </v-flex>
-                </v-layout>
-              </v-container>
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer/>
-              <v-btn color="blue darken-1" flat @click.native="dialog = false">Close</v-btn>
-              <v-btn color="blue darken-1" flat @click="save">Save</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-
         <v-card-title>
           <v-text-field
             v-model="search"
@@ -63,24 +31,34 @@
         </v-data-table>
       </v-card>
     </v-flex>
+
+    <!-- New contact -->
+    <v-dialog v-model="dialog" persistent max-width="600px">
+      <v-btn slot="activator" color="success" absolute fab bottom left>
+        <v-icon>add</v-icon>
+      </v-btn>
+      <v-toolbar color="primary">
+        <v-btn icon @click="dialog = false">
+          <v-icon>close</v-icon>
+        </v-btn>
+        <v-toolbar-title>Add Contact</v-toolbar-title>
+      </v-toolbar>
+      <contact-edit @complete="contactAdded"/>
+    </v-dialog>
+
   </v-layout>
 </template>
 
 <script>
 export default {
+  /**
+   * DATA
+   * @returns {{dialog: boolean, headers: *[], search: string}}
+   */
   data() {
     return {
-      // Used to determine the outcome action after clicking the save button
-      contact: {
-        mode: "new",
-        name: "",
-        address: ""
-      },
-      outcome: false,
       dialog: false,
       search: "",
-      // This variable is used as a reference when editing a contact
-      contextObject: {},
       headers: [
         {
           text: "Name",
@@ -97,94 +75,39 @@ export default {
       ]
     };
   },
+  /**
+   * COMPUTED
+   */
   computed: {
     contacts() {
       return this.$store.state.wallet.contacts;
     }
   },
-  created: function() {
+  /**
+   * MOUNTED
+   */
+  mounted: function() {
     // Only start once global loading finished
-    var preperationInterval = setInterval(
+    let preparationInterval = setInterval(
       function() {
         if (this.$store.getters.booting === false) {
-          clearInterval(preperationInterval);
+          clearInterval(preparationInterval);
           this.$store.commit("setLoading", { t: "router", v: false });
         }
       }.bind(this),
-      2000
+      this.$g('internal.controllerPollReadyInterval')
     );
   },
+  /**
+   * METHODS
+   */
   methods: {
-    save() {
-      var message;
-      if (this.contact.mode === "new") {
-        // Check whether the object already exists
-        if (
-          this.$store.state.wallet.contacts.find(
-            item => item.displayText === this.contact.displayText
-          ) === undefined
-        ) {
-          message = "Contact Added";
-          this.$store.commit("showNotification", {
-            type: "success",
-            message: message
-          });
-          this.addContact();
-          this.dialog = false;
-          this.contact.displayText = "";
-          this.contact.address = "";
-        } else {
-          message = "That name is already in use, please choose another";
-          this.$store.commit("showNotification", {
-            type: "error",
-            message: message
-          });
-        }
-      } else {
-        this.editCommit();
-        this.dialog = false;
-        this.contact.displayText = "";
-        this.contact.address = "";
-        this.contact.mode = "new";
-
-        message = "Contact Edited";
-        this.$store.commit("showNotification", {
-          type: "success",
-          message: message
-        });
-      }
-    },
-    addContact() {
-      let contact = {
-        displayText: this.contact.displayText,
-        address: this.contact.address
-      };
-      this.$store.commit("wallet/addContact", contact);
-      this.outcome = true;
-    },
-    deleteContact(contact) {
-      this.$store.commit("wallet/deleteContact", contact);
-    },
-    editContact(contact) {
-      // Put the contact in to scope for simple editing
-      this.contextObject = contact;
-      this.contact.displayText = contact.displayText;
-      this.contact.address = contact.address;
-      this.contact.mode = "edit";
-      // Show the modal
-      this.dialog = true;
-    },
-    editCommit() {
-      let contact = {
-        displayText: this.contact.displayText,
-        address: this.contact.address
-      };
-      // Push to state management
-      this.outcome = this.$store.commit("wallet/editContact", {
-        original: this.contextObject,
-        updated: contact
-      });
-      console.log(this.outcome);
+    contactAdded() {
+      this.$store.commit("showNotification", {
+        type: "success",
+        message: "Contact added to address book"
+      })
+      this.dialog = false
     }
   }
 };

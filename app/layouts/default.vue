@@ -3,7 +3,7 @@
     <!-- NAV DRAWER -->
     <v-navigation-drawer v-model="drawer" fixed stateless app>
       <v-list>
-        <v-list-tile v-for="(item, i) in visibleLinks" :to="item.to" :key="i" router exact>
+        <v-list-tile v-for="(item, i) in navigationItems" :to="item.to" :key="i" router exact>
           <v-list-tile-action>
             <v-icon v-html="item.icon"/>
           </v-list-tile-action>
@@ -12,7 +12,7 @@
           </v-list-tile-content>
         </v-list-tile>
 
-        <v-list-tile v-if="appRunTime === 'app'" exact @click="exit">
+        <v-list-tile v-if="appMode === 'app'" exact @click="exit">
           <v-list-tile-action>
             <v-icon>exit_to_app</v-icon>
           </v-list-tile-action>
@@ -30,7 +30,6 @@
         <img src="/logo.png" alt="avatar">
       </v-avatar>
       <v-toolbar-title class="hidden-sm-and-down" v-text="title"/>
-
       <v-spacer/>
 
       <!-- Environment -->
@@ -39,7 +38,7 @@
       <network-diagnostics/>
 
       <!-- USER DROPDOWN -->
-      <v-menu v-if="contextWallet.address !== ''" v-model="menu" :close-on-content-click="false">
+      <v-menu v-if="haveWallet" v-model="userMenu" :close-on-content-click="false">
         <v-btn slot="activator" flat>
           <v-avatar size="24">
             <v-icon>account_circle</v-icon>
@@ -48,13 +47,10 @@
         <v-card>
           <v-card-title>
             <div>
-              <span class="grey--text">{{ contextWallet.name }}</span>
-              <br>
-              <address-render :address="contextWallet.address"/>
               <v-list>
-                <v-list-tile v-if="mode === 'app'">
+                <v-list-tile v-if="appMode === 'app'">
                   <v-list-tile-action>
-                    <v-switch v-model="local_node"/>
+                    <v-switch v-model="runningLocalNode"/>
                   </v-list-tile-action>
                   <v-list-tile-title>Local Node</v-list-tile-title>
                 </v-list-tile>
@@ -65,7 +61,7 @@
             <backup-wallet />
             <v-btn flat nuxt to="/dashboard">Dashboard</v-btn>
             <v-spacer/>
-            <v-btn v-if="mode === 'app'" flat @click="exit">Exit</v-btn>
+            <v-btn v-if="appMode === 'app'" flat @click="exit">Exit</v-btn>
           </v-card-actions>
         </v-card>
       </v-menu>
@@ -111,23 +107,27 @@ if (isElectron()) {
 }
 
 export default {
+  /**
+   * COMPONENTS
+   */
   components: {
     BackupWallet,
     Busy,
     Loading,
     NetworkDiagnostics
   },
+  /**
+   * DATA
+   */
   data() {
     return {
       navDrawer: true,
       hydrated: false,
-      walletCheckIntervals: [],
-      items: [
+      navigationItems: [
         {
           icon: "apps",
           title: "Dashboard",
-          to: "/dashboard",
-          requireContext: true
+          to: "/dashboard"
         },
         {
           icon: "settings_system_daydream",
@@ -137,70 +137,37 @@ export default {
         {
           icon: "contacts",
           title: "Address Book",
-          to: "/address-book",
-          requireContext: true
+          to: "/address-book"
         }
         // { icon: 'extension', title: 'Create Namespace', to: '/tokens', requireContext: true }
       ],
       title: "AENChain Wallet",
-      menu: false
+      userMenu: false
     };
   },
+  /**
+   * COMPUTED
+   */
   computed: {
     drawer: {
       get: function() {
-        if (this.navDrawer === true && this.$store.state.meta.eulaAgree === true) {
+        if (this.navDrawer === true && this.eulaAgree === true) {
           return true
         }
       },
       set: function() {}
     },
-    eulaAgree() { return this.$store.state.meta.eulaAgree },
-    version() {
-      return this.$g("version");
-    },
-    contextWallet() {
-      return this.$store.state.wallet.context;
-    },
-    haveWallets() {
-      if(Object.keys(this.$store.state.wallet.context).length > 0) {
-        return true
-      }
-    },
-    appRunTime() {
-      return this.$store.state.meta.mode;
-    },
-    /**
-     * Determine what links should be shown in the main bar
-     */
-    visibleLinks() {
-      if (this.$store.state.wallet.context.address !== "") {
-        return this.items;
-      }
-      let map = this.items.filter(a => {
-        if (!a.hasOwnProperty("requireContext")) {
-          return a;
-        }
-      });
-      return map;
-    },
-    environment() {
-      return this.$store.state.meta.environment;
-    },
-    mode: {
-      get: function() {
-        return this.$store.state.meta.mode;
-      },
-      set: function() {}
-    },
+    eulaAgree() { return this.$store.state.user.eulaAgree },
+    version() { return this.$g("version") },
+    appMode() { return this.$store.state.runtime.mode },
+    environment() { return this.$store.state.runtime.environment },
+    haveWallet() { return this.$store.state.wallet.aen.haveWallet },
     // Functionality enabled / disabled
-    local_node: {
-      get: function() {
-        return this.$store.state.settings.local_node;
-      },
+    runningLocalNode: {
+      get: function() { return this.$store.state.electron.runningLocalNode },
       set: function(value) {
-        this.$store.commit("setDeviceSetting", {
-          key: "local_node",
+        this.$store.commit("setElectronProperty", {
+          key: "runningLocalNode",
           value: value
         });
       }
@@ -227,28 +194,28 @@ export default {
   /**
    *
    */
-  mounted() {
+  beforeMount() {
     this.$store.commit("setAppMode", "web");
     let env = process.env.NODE_ENV || "dev";
-    this.$store.commit("setEnvironment", env);
-
+    this.$store.commit("setRuntimeProperty", {
+      key: "environment",
+      value: env
+    })
     this.$store.commit("setLoading", {
       t: "global",
       v: true,
       m: "Page Startup"
-    });
+    })
     this.$store.commit("setLoading", {
       t: "page",
       v: false
-    });
+    })
 
     // Desktop app setup
     if (isElectron()) {
-      this.$store.commit("setAppMode", "app");
+      this.$store.commit("setAppMode", "app")
       // Electron specific code
-      console.log(
-        "P:Running from within Electron, checking if system services installed for running Chain Node"
-      );
+      console.log("P:Running from within Electron, checking if system services installed for running Chain Node")
       const child = execFile("docker", ["-v"], (error, stdout, stderr) => {
         if (error) {
           console.error("stderr", stderr);
@@ -262,50 +229,37 @@ export default {
       console.log(child);
     }
 
-    // Check if there is a network set and use the first available
-    if (Object.keys(this.$store.state.wallet.context.network).length === 0) {
-      this.network = this.$g("aen.available_networks")[0];
+    // Check network settings and create a set of defaults based from first available
+    // TODO Abstract this defaulting to a component of it's own which can pickup a "wallets available" setting
+    if (Object.keys(this.$store.state.wallet.aen.network).length === 0) {
+      this.$store.commit('wallet/setAenProperty', {key: 'network', value: this.$g("aen.available_networks")[0] })
     }
-
     if (Object.keys(this.$store.state.wallet.ethereum.activeApiEndpoint).length === 0) {
-      console.log('setting ethereum network to first available')
-      console.log(this.$g('eth.available_networks')[0])
       let ethereumNetwork = this.$g('eth.available_networks')[0]
       this.$store.commit('wallet/setEthereumProperty', {key: 'network', value: ethereumNetwork })
       this.$store.commit('wallet/setEthereumProperty', {key: 'activeApiEndpoint', value: ethereumNetwork.infura_api_endpoint })
     }
-
-    if(this.$store.state.wallet.context.address !== '' && this.$store.state.wallet.context.onChain === false) {
-      console.debug('Checking whether the main wallet is active on the blockchain')
-      this.$store.dispatch('wallet/checkWalletLive', this.$store.state.wallet.context)
-      let walletCheckInterval = setInterval(
-        function() {
-
-          this.$store.dispatch('wallet/checkWalletLive', this.$store.state.wallet.context).then(response => {
-            if (response === true) {
-              clearInterval(walletCheckInterval)
-            }
-          })
-        }.bind(this),
-        this.$g('internal.walletCheckInterval')
-      );
+    if (Object.keys(this.$store.state.wallet.bitcoin.activeApiEndpoint).length === 0) {
+      this.$store.commit("wallet/setBitcoinProperty", {
+        key: "network",
+        value: this.$g("bitcoin.available_networks")[0]
+      })
     }
+    this.$store.commit("wallet/setBitcoinProperty", {key: "blockCypherEndpoint", value: this.$g("bitcoin.block_cypher.api_endpoint")})
+    this.$store.commit("wallet/setBitcoinProperty", {key: "bitapsEndpoint", value: this.$g("bitcoin.bitaps.api_endpoint")})
 
-    this.$store.dispatch("wallet/rankApiNodes");
+    this.$store.dispatch("wallet/rankApiNodes")
     setInterval(
       function() {
-        this.$store.dispatch("wallet/rankApiNodes");
-        this.$walletService.updateApiEndpoint("aen", {
-          address: this.$store.state.internal.activeApiEndpoint
-        });
+        this.$store.dispatch("wallet/rankApiNodes")
       }.bind(this),
       this.$g('internal.apiEndpointPingInterval')
     );
 
-    this.$store.dispatch("updateGenericNetworkInformation");
+    this.$store.dispatch("updateGenericNetworkInformation")
     setInterval(
       function() {
-        this.$store.dispatch("updateGenericNetworkInformation");
+        this.$store.dispatch("updateGenericNetworkInformation")
       }.bind(this),
       this.$g('internal.commonTasksInterval')
     );
@@ -314,15 +268,12 @@ export default {
     setTimeout(
       function() {
         // Hydrate local state from cold storage
-        if (this.$store.state.wallet.context.accountPrivateKey === "") {
-          if (this.$nuxt.$route.name !== "index" && this.haveWallets) {
-            console.log("No wallet so redirecting to launch");
-            this.$nuxt.$router.replace({ path: "/" });
-          }
+        if (this.$store.state.wallet.aen.haveWallet === false && this.$nuxt.$route.name !== "index") {
+            console.log("No wallet so redirecting to launch")
+            this.$nuxt.$router.replace({ path: "/" })
         }
-
         // Finished the global loading procedure
-        this.$store.commit("setLoading", { t: "global", v: false });
+        this.$store.commit("setLoading", { t: "global", v: false })
       }.bind(this),
       2000
     );

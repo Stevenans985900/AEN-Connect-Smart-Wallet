@@ -5,7 +5,7 @@
 
         <v-stepper-step :complete="currentStep > 1" step="1">
           Add Method
-          <small>Determine if you want a new AEN wallet or to add an existing wallet</small>
+          <small>Determine if you want a new Bitcoin wallet or to add an existing wallet</small>
         </v-stepper-step>
         <v-stepper-content step="1">
           <v-card>
@@ -50,16 +50,6 @@
                     required
                     placeholder="AEN Wallet"
                   />
-                  <v-text-field
-                    v-model="walletPassword"
-                    :append-icon="showPassword ? 'visibility_off' : 'visibility'"
-                    :type="showPassword ? 'text' : 'password'"
-                    :rules="[rules.basic.required, rules.password.minLength]"
-                    label="Wallet Password"
-                    required
-                    counter
-                    @click:append="showPassword = !showPassword"
-                  />
                   <!--<vue-recaptcha-->
                   <!--v-if="environment === 'Production'"-->
                   <!--ref="recaptcha"-->
@@ -74,7 +64,7 @@
           <v-card v-if="addType == 'fileImport'">
             <v-card-text>
               <v-layout row wrap>
-                <restore-from-file @complete="walletRestoredFromFile" />
+                <restore-from-file :main="true" @complete="walletRestoredFromFile" />
               </v-layout>
             </v-card-text>
           </v-card>
@@ -143,7 +133,7 @@
                   required
                   label="I have backed up my wallet and understand that keeping it safe is my duty"
                 />
-                <v-checkbox v-if="!eulaAgree" v-model="eulaAgree" :rules="[rules.basic.required]" required>
+                <v-checkbox v-if="main == true" v-model="eulaAgree" :rules="[rules.basic.required]" required>
                   <span slot="label">
                     I agree to the
                     <a href="http://aencoin.com/eula">AEN EULA</a>
@@ -175,12 +165,9 @@ function initialDataState () {
     currentStep: 1,
     newValid: false,
     recoverValid: false,
+    loading: true,
     walletName: '',
-    walletPassword: '',
-    network: {},
-    accountPrivateKey: '',
     proceedValid: false,
-    showPassword: false,
     showEula: false,
     wallet: {},
     rules: {
@@ -190,9 +177,6 @@ function initialDataState () {
       walletName: {
         minLength: v => v.length >= 4 || "Min 4 Characters"
       },
-      password: {
-        minLength: v => v.length >= 8 || "Min 8 characters"
-      },
       privateKey: {
         length: v => v.length === 64 || "Length is 64 Characters"
       }
@@ -201,40 +185,41 @@ function initialDataState () {
 }
 
 export default {
-  /**
-   * COMPONENTS
-   */
   components: {
     BackupWallet,
     BusinessCard,
     RestoreFromFile
   },
-  /**
-   * DATA
-   */
+  props: {
+    main: {
+      type: Boolean,
+      default: function() {
+        return false
+      }
+    }
+  },
   data: function () { return initialDataState() },
-  /**
-   * COMPUTED
-   */
   computed: {
-    networks() { return this.$g("aen.available_networks") },
+    availableNetworks() {
+      return this.$g("bitcoin.available_networks");
+    },
     stepTwoLabel() {
       if(this.addType === 'fileImport') {
         return 'File Import'
       }
       return 'Enter Details'
     },
-    environment() { return this.$store.state.runtime.environment },
-    eulaAgree: {
-      get: function() { return this.$store.state.user.eulaAgree },
-      set: function(val) { this.$store.commit('setUserProperty', {key: 'eulaAgree', value: val}) }
-    },
-    googleCaptchaKey() { return this.$g("google_recaptcha_key") },
     multipleNetworks() {
-      if (this.$g("aen.available_networks").length > 1) {
+      if (this.$g("bitcoin.available_networks").length > 1) {
         return true;
       }
       return false
+    }
+  },
+  beforeMount() {
+    this.reset()
+    if(this.multipleNetworks === false) {
+      this.network = this.$g("bitcoin.available_networks")[0]
     }
   },
   methods: {
@@ -245,20 +230,6 @@ export default {
      * Make sure the data is clean for adding a new wallet before trying to render the HTML.
      * @param file
      */
-    beforeMount() {
-      this.reset()
-      this.network = this.$store.state.wallet.aen.network
-
-      if (this.$store.state.runtime.environment === "production") {
-        console.debug("Pulling in Google Recaptcha for production");
-        let recaptchaScript = document.createElement("script");
-        recaptchaScript.setAttribute(
-          "src",
-          "https://www.google.com/recaptcha/api.js?onload=vueRecaptchaApiLoaded&render=explicit"
-        );
-        document.head.appendChild(recaptchaScript);
-      }
-    },
     complete() {
       this.$emit('complete', this.wallet)
       this.reset()
@@ -268,17 +239,22 @@ export default {
         return false
       }
       let walletOptions = {
-        type: 'aen',
-        network: this.$store.state.wallet.aen.network,
+        type: 'btc',
+        network: this.network,
         name: this.walletName,
-        password: this.walletPassword
+        main: this.main
       }
+      console.log('going to add from controller')
+      console.log(walletOptions)
       this.$store.dispatch('wallet/new', walletOptions)
       .then((wallet) => {
+        console.log('wallet new response in controller')
+        console.log(wallet)
         this.wallet = wallet
         this.currentStep++
         this.startLiveListener(wallet)
       })
+      console.log('at end of btc add controller')
     },
     loadWallet() {
       if (!this.$refs.existingWalletForm.validate()) {
@@ -286,11 +262,12 @@ export default {
         return false;
       }
       this.$store.dispatch('wallet/load',{
-          type: 'aen',
-          network: this.$store.state.wallet.aen.network,
+          type: 'btc',
+          network: this.$store.state.wallet.context.network,
           name: this.walletName,
           password: this.walletPassword,
-          accountPrivateKey: this.accountPrivateKey
+          accountPrivateKey: this.accountPrivateKey,
+          main: this.main
         }
       ).then((wallet) => {
         this.wallet = wallet

@@ -31,7 +31,7 @@
 
 <script>
 import TransactionStringify from '~/components/Aen/TransactionStringify'
-import Aen from '~/modules/network/Aen'
+import Aen from '~/class/network/Aen'
 
 export default {
     components: {
