@@ -43,7 +43,7 @@
         readOnly: false
       };
     },
-    beforeMount() {
+    mounted() {
       if(this.address !== '') {
         this.inputAddress = this.address
         this.readOnly = true

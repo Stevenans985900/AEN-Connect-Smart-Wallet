@@ -34,10 +34,11 @@
     <!-- New Wallet Dialog -->
     <v-dialog v-model="dialogWalletAdd" persistent max-width="600px">
       <v-toolbar color="primary">
+        <v-toolbar-title>Choose a wallet type to add from the list below</v-toolbar-title>
+        <v-spacer />
         <v-btn icon @click="dialogWalletAdd = false">
           <v-icon>close</v-icon>
         </v-btn>
-        <v-toolbar-title>Choose a wallet type to add from the list below</v-toolbar-title>
       </v-toolbar>
       <v-card>
         <v-tabs centered grow>
@@ -123,10 +124,11 @@
     <!-- Make Transfer Dialog -->
     <v-dialog v-model="dialogMakeTransfer" persistent max-width="600px">
       <v-toolbar color="primary">
+        <v-toolbar-title>Make a Transfer from {{ contextWallet.name }}</v-toolbar-title>
+        <v-spacer />
         <v-btn icon @click="dialogMakeTransfer = false">
           <v-icon>close</v-icon>
         </v-btn>
-        <v-toolbar-title>Make a Transfer from {{ contextWallet.name }}</v-toolbar-title>
       </v-toolbar>
       <make-transfer :wallet="contextWallet" @complete="transferComplete()"/>
     </v-dialog>
@@ -134,10 +136,11 @@
     <!-- Remove Wallet Dialog -->
     <v-dialog v-model="dialogRemoveWallet" persistent max-width="600px">
       <v-toolbar color="primary">
+        <v-toolbar-title>Are you sure you want to remove the wallet?</v-toolbar-title>
+        <v-spacer />
         <v-btn icon @click="dialogRemoveWallet = false">
           <v-icon>close</v-icon>
         </v-btn>
-        <v-toolbar-title>Are you sure you want to remove the wallet?</v-toolbar-title>
       </v-toolbar>
       <v-card>
         <v-card-title class="headline">{{ contextWallet.name }}</v-card-title>

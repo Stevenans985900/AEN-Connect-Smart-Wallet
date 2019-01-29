@@ -4,6 +4,9 @@
     <!-- Contacts table -->
     <v-flex xs12>
       <v-card>
+        <v-btn color="success" absolute fab bottom left @click="dialogNewContact = true">
+          <v-icon>add</v-icon>
+        </v-btn>
         <v-card-title>
           <v-text-field
             v-model="search"
@@ -33,12 +36,9 @@
     </v-flex>
 
     <!-- New contact -->
-    <v-dialog v-model="dialog" persistent max-width="600px">
-      <v-btn slot="activator" color="success" absolute fab bottom left>
-        <v-icon>add</v-icon>
-      </v-btn>
+    <v-dialog v-model="dialogNewContact" persistent max-width="600px">
       <v-toolbar color="primary">
-        <v-btn icon @click="dialog = false">
+        <v-btn icon @click="dialogNewContact = false">
           <v-icon>close</v-icon>
         </v-btn>
         <v-toolbar-title>Add Contact</v-toolbar-title>
@@ -46,18 +46,34 @@
       <contact-edit @complete="contactAdded"/>
     </v-dialog>
 
+    <!-- Edit contact -->
+    <v-dialog v-model="dialogEditContact" persistent max-width="600px">
+      <v-toolbar color="primary">
+        <v-btn icon @click="dialogEditContact = false">
+          <v-icon>close</v-icon>
+        </v-btn>
+        <v-toolbar-title>Edit Contact</v-toolbar-title>
+      </v-toolbar>
+      <contact-edit :display-text="displayText" :address="address" @complete="contactEdited"/>
+    </v-dialog>
+
   </v-layout>
 </template>
 
 <script>
+  import ContactEdit from "~/components/ContactEdit"
 export default {
+  components: { ContactEdit },
   /**
    * DATA
    * @returns {{dialog: boolean, headers: *[], search: string}}
    */
   data() {
     return {
-      dialog: false,
+      displayText: '',
+      address: '',
+      dialogNewContact: false,
+      dialogEditContact: false,
       search: "",
       headers: [
         {
@@ -80,7 +96,7 @@ export default {
    */
   computed: {
     contacts() {
-      return this.$store.state.wallet.contacts;
+      return Object.values(this.$store.state.wallet.contacts)
     }
   },
   /**
@@ -107,7 +123,20 @@ export default {
         type: "success",
         message: "Contact added to address book"
       })
-      this.dialog = false
+      this.dialogNewContact = false
+    },
+    contactEdited() {
+      this.$store.commit("showNotification", {
+        type: "success",
+        message: "Changes Saved"
+      })
+      this.dialogEditContact = false
+    },
+    editContact(contact) {
+      console.log(contact)
+      this.displayText = contact.displayText
+      this.address = contact.address
+      this.dialogEditContact = true
     }
   }
 };
