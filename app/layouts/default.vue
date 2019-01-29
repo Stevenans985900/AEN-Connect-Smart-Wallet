@@ -36,35 +36,7 @@
       <v-btn v-if="environment !== 'production'" disabled>{{ environment }}</v-btn>
 
       <network-diagnostics/>
-
-      <!-- USER DROPDOWN -->
-      <v-menu v-if="haveWallet" v-model="userMenu" :close-on-content-click="false">
-        <v-btn slot="activator" flat>
-          <v-avatar size="24">
-            <v-icon>account_circle</v-icon>
-          </v-avatar>
-        </v-btn>
-        <v-card>
-          <v-card-title>
-            <div>
-              <v-list>
-                <v-list-tile v-if="appMode === 'app'">
-                  <v-list-tile-action>
-                    <v-switch v-model="runningLocalNode"/>
-                  </v-list-tile-action>
-                  <v-list-tile-title>Local Node</v-list-tile-title>
-                </v-list-tile>
-              </v-list>
-            </div>
-          </v-card-title>
-          <v-card-actions>
-            <backup-wallet />
-            <v-btn flat nuxt to="/dashboard">Dashboard</v-btn>
-            <v-spacer/>
-            <v-btn v-if="appMode === 'app'" flat @click="exit">Exit</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-menu>
+      <backup-wallet v-if="haveWallet" />
     </v-toolbar>
 
     <!-- MAIN CONTENT AREA -->
@@ -82,14 +54,28 @@
         </v-snackbar>
         <!-- NUXT BEGINNING -->
         <nuxt/>
+
+        <!-- Force the user to agree to the End User license agreement before being able to use the wallet -->
+        <v-dialog v-model="dialogEulaAgree" persistent max-width="600px">
+          <v-card>
+            <v-checkbox v-model="eulaAgree">
+              <span slot="label">
+                I agree to the
+                <a href="http://aencoin.com/eula">AEN EULA</a>
+              </span>
+            </v-checkbox>
+          </v-card>
+        </v-dialog>
       </v-container>
     </v-content>
 
     <!-- FOOTER AREA -->
     <v-footer app height="auto" color="primary">
-      &copy; {{ new Date().getFullYear() }} Aenco Solutions Ltd - Global Health Blockchain Financial Solutions
-      <v-spacer/>
-      {{ version }}
+      <v-toolbar dense>
+        <v-toolbar-title>&copy; {{ new Date().getFullYear() }} Aenco Solutions Ltd - Global Health Blockchain Financial Solutions</v-toolbar-title>
+        <v-spacer/>
+        {{ version }}
+      </v-toolbar>
     </v-footer>
   </v-app>
 </template>
@@ -157,7 +143,19 @@ export default {
       },
       set: function() {}
     },
-    eulaAgree() { return this.$store.state.user.eulaAgree },
+    dialogEulaAgree() {
+      if(this.eulaAgree === false && this.$nuxt.$route.name !== "index") {
+        return true
+      }
+      return false
+    },
+    eulaAgree: {
+      get: function() { return this.$store.state.user.eulaAgree },
+      set: function(val) { this.$store.commit('setUserProperty', {
+        key: 'eulaAgree',
+        value: val
+      }) }
+    },
     version() { return this.$g("version") },
     appMode() { return this.$store.state.runtime.mode },
     environment() { return this.$store.state.runtime.environment },

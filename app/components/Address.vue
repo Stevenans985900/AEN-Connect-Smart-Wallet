@@ -64,7 +64,7 @@
       onCopy() {
         this.$store.commit("showNotification", {
           type: "success",
-          message: "Copied"
+          message: "Address copied to clipboard"
         })
       },
       contactAdded() {

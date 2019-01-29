@@ -38,7 +38,7 @@
     <!-- New contact -->
     <v-dialog v-model="dialogNewContact" persistent max-width="600px">
       <v-toolbar color="primary">
-        <v-btn icon @click="dialogNewContact = false">
+        <v-btn small fab outline @click="dialogNewContact = false">
           <v-icon>close</v-icon>
         </v-btn>
         <v-toolbar-title>Add Contact</v-toolbar-title>
@@ -49,7 +49,7 @@
     <!-- Edit contact -->
     <v-dialog v-model="dialogEditContact" persistent max-width="600px">
       <v-toolbar color="primary">
-        <v-btn icon @click="dialogEditContact = false">
+        <v-btn small fab outline @click="dialogEditContact = false">
           <v-icon>close</v-icon>
         </v-btn>
         <v-toolbar-title>Edit Contact</v-toolbar-title>

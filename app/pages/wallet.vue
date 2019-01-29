@@ -23,7 +23,7 @@
 
               <v-list-tile-action>
                 <balance v-if="wallet.onChain" :wallet="wallet"/>
-                <span v-else>NA</span>
+                <span v-else>0</span>
               </v-list-tile-action>
             </v-list-tile>
           </v-list>
@@ -88,22 +88,23 @@
     <!-- View Wallet Dialog -->
     <v-dialog v-model="dialogViewWallet" fullscreen="">
       <v-toolbar class="primary">
+        <v-btn small fab outline @click="dialogViewWallet = false">
+          <v-icon>arrow_back</v-icon>
+        </v-btn>
         <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
         <v-toolbar-items>
-          <v-btn v-if="contextWallet.onChain === true" flat @click="dialogShowAddress = true">Show Business Card
+          <v-btn flat @click="dialogShowAddress = true">Show Business Card
           </v-btn>
           <v-btn v-if="contextWallet.onChain === true" flat @click="dialogMakeTransfer = true">Make Transfer</v-btn>
           <v-btn flat @click="dialogRemoveWallet = true">Remove Wallet</v-btn>
         </v-toolbar-items>
         <v-spacer />
-        <v-btn icon @click="dialogViewWallet = false">
-          <v-icon>close</v-icon>
-        </v-btn>
+
       </v-toolbar>
       <v-card width="600px">
         <v-card-text>
           <testnet-buttons :wallet="contextWallet"/>
-          <address-render :address="contextWallet.address"/>
+          <address-render :address="contextWallet.address" :use-address-book="false"/>
           <wallet-history v-if="contextWallet.onChain === true" :wallet="contextWallet"/>
           <activation v-else :wallet="contextWallet"/>
         </v-card-text>
@@ -114,7 +115,7 @@
       <v-toolbar class="primary">
         <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
         <v-spacer />
-        <v-btn icon @click="dialogShowAddress = false">
+        <v-btn small fab outline @click="dialogShowAddress = false">
           <v-icon>close</v-icon>
         </v-btn>
       </v-toolbar>
@@ -122,11 +123,11 @@
     </v-dialog>
 
     <!-- Make Transfer Dialog -->
-    <v-dialog v-model="dialogMakeTransfer" persistent max-width="600px">
+    <v-dialog v-if="contextWallet.onChain" v-model="dialogMakeTransfer" persistent max-width="600px">
       <v-toolbar color="primary">
         <v-toolbar-title>Make a Transfer from {{ contextWallet.name }}</v-toolbar-title>
         <v-spacer />
-        <v-btn icon @click="dialogMakeTransfer = false">
+        <v-btn small fab outline @click="dialogMakeTransfer = false">
           <v-icon>close</v-icon>
         </v-btn>
       </v-toolbar>
@@ -138,7 +139,7 @@
       <v-toolbar color="primary">
         <v-toolbar-title>Are you sure you want to remove the wallet?</v-toolbar-title>
         <v-spacer />
-        <v-btn icon @click="dialogRemoveWallet = false">
+        <v-btn small fab outline @click="dialogRemoveWallet = false">
           <v-icon>close</v-icon>
         </v-btn>
       </v-toolbar>

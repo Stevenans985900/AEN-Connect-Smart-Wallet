@@ -4,7 +4,7 @@
       call_received
     </v-icon>
     <v-icon v-else>call_made</v-icon>
-    - {{ value }}
+    - {{ value }}XEM
     - <address-render :address="address" show-add />
   </span>
 </template>
@@ -27,16 +27,15 @@ export default {
 	},
 	computed: {
 		address () {
-			if (!this.data.hasOwnProperty('signer')) return 'Unknown'
-			return this.data.signer.address.address
+			if(this.direction === 'incoming') {
+        return this.data.signer.address.address
+      } else {
+        return this.data.recipient.address
+      }
+
 		},
 		direction () {
-			if (!this.data.hasOwnProperty('recipient')) return ''
-      // Check whether the recipient is in the users wallet list
-      console.debug('checking address direction')
-      console.debug('recipient: '+this.data.recipient.address)
-      console.debug('this address: '+this.wallet.address)
-      if(this.data.recipient.address === this.wallet.address) {
+			if(this.data.recipient.address === this.wallet.address) {
         return 'incoming'
 			} else {
 				return 'outgoing'

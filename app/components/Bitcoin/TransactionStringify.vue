@@ -1,5 +1,5 @@
 <template>
-  <span>NA</span>
+  <span>0BTC</span>
 </template>
 
 <script>

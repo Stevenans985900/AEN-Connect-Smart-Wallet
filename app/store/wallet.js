@@ -217,6 +217,10 @@ export const actions = {
                 value: true
               })
               context.commit('setWallet', wallet)
+              context.commit('setContact', {
+                address: wallet.address,
+                displayText: wallet.name
+              })
               resolve(wallet)
             })
           })
@@ -225,6 +229,10 @@ export const actions = {
           networkHandler = new Bitcoin(context.state.bitcoin.activeApiEndpoint)
           networkHandler.walletNew(options).then(wallet => {
             context.commit('setWallet', wallet)
+            context.commit('setContact', {
+              address: wallet.address,
+              displayText: wallet.name
+            })
             resolve(wallet)
           })
           break
@@ -233,6 +241,10 @@ export const actions = {
         networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
         networkHandler.walletNew(options).then(wallet => {
           context.commit('setWallet', wallet)
+          context.commit('setContact', {
+            address: wallet.address,
+            displayText: wallet.name
+          })
           resolve(wallet)
         })
         break
@@ -295,8 +307,14 @@ export const actions = {
           if (apiEndpoints[position].scanTime < lowestPing) {
             console.debug('Updating AEN API endpoint to: ' + apiEndpoints[position].address)
             lowestPing = apiEndpoints[position].scanTime
-            stateContext.commit('setApiEndpoint', apiEndpoints[position].address)
-            stateContext.commit('setPingTime', lowestPing)
+            stateContext.commit('setAenProperty', {
+              key: "activeApiEndpoint",
+              value: apiEndpoints[position].address
+            })
+            stateContext.commit('setAenProperty', {
+              key: "activeApiPing",
+              value: lowestPing
+            })
           }
         })
         .catch(() => {
@@ -348,12 +366,6 @@ export const mutations = {
   setContact(state, contact) {
     state.contacts[contact.address] = contact
   },
-  setApiEndpoint(state, value) {
-    state.internal.activeApiEndpoint = value
-  },
-  setPingTime(state, value) {
-    state.internal.activeApiPing = value
-  },
   setPreferredNode(state, address) {
     state.internal.preferredNode = address
   },
@@ -362,12 +374,6 @@ export const mutations = {
   },
   setNetwork(state, network) {
     state.context.network = network
-  },
-  setBlockHeight(state, blockHeight) {
-    state.internal.block_height = blockHeight
-  },
-  setBlockScore(state, blockScore) {
-    state.internal.block_score = blockScore
   },
   setIncomingTransactions(state, transactions) {
     state.transactions.incoming = transactions

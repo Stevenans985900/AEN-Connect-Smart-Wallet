@@ -2,6 +2,15 @@
   <v-card flat>
     <v-card-text class="text-xs-center">
       <address-render :address="wallet.address" :use-address-book="useAddressBook"/>
+      <v-text-field
+        v-if="includePrivateKey"
+        v-model="wallet.privateKey"
+        :append-icon="showPrivateKey ? 'visibility_off' : 'visibility'"
+        :type="showPrivateKey ? 'text' : 'password'"
+        label="Private Key, click the eye to reveal"
+        readonly
+        @click:append="showPrivateKey = !showPrivateKey"
+      />
       <v-img :src="imageData" aspect-ratio="1"/>
     </v-card-text>
   </v-card>
@@ -20,11 +29,16 @@
       useAddressBook: {
         type: Boolean,
         default: true
+      },
+      includePrivateKey: {
+        type: Boolean,
+        default: false
       }
     },
     data() {
       return {
-        imageData: ''
+        imageData: '',
+        showPrivateKey: false
       }
     },
     watch: {
@@ -37,8 +51,6 @@
     },
     methods: {
       processWallet() {
-        console.log('processing the wallet from business card')
-        console.log(this.wallet)
         if(this.wallet.hasOwnProperty('address')) {
           var qr = qrCodeGenerator(0, "M");
           qr.addData(this.wallet.address);

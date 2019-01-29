@@ -1,5 +1,5 @@
 <template>
-  <component v-if="component" :is="component" :wallet="wallet" :use-address-book="useAddressBook"/>
+  <component v-if="component" :is="component" :wallet="wallet" :use-address-book="useAddressBook" :include-private-key="includePrivateKey"/>
 </template>
 
 <script>
@@ -14,6 +14,10 @@
       useAddressBook: {
         type: Boolean,
         default: true
+      },
+      includePrivateKey: {
+        type: Boolean,
+        default: false
       }
     },
     data() {
