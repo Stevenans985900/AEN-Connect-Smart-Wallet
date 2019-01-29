@@ -2,10 +2,10 @@ import Vue from 'vue'
 import Aen from '~/class/network/Aen'
 import Bitcoin from '~/class/network/Bitcoin'
 import Contract from '~/class/network/Contract'
-import Ethereum from "../class/network/Ethereum"
+import Ethereum from "~/class/network/Ethereum"
 
 export const initialState = {
-  contacts: [],
+  contacts: {},
   wallets: {},
   aen: {
     haveWallet: false,
@@ -245,17 +245,24 @@ export const actions = {
       switch (options.source.type) {
         case 'aen':
           networkHandler = new Aen(context.state.internal.activeApiEndpoint)
+          networkHandler.transfer(options).then(transfer => {
+            resolve(transfer)
+          })
           break
         case 'contract':
           networkHandler = new Contract(context.state.ethereum.activeApiEndpoint)
+          networkHandler.transfer(options).then(transfer => {
+            resolve(transfer)
+          })
           break
         case 'eth':
           networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
+          networkHandler.transfer(options).then(transfer => {
+            resolve(transfer)
+          })
           break
       }
-      networkHandler.transfer(options).then(transfer => {
-        resolve(transfer)
-      })
+
     })
   },
   /**

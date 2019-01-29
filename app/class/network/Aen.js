@@ -105,6 +105,11 @@ export default class Aen extends Generic {
         }
     })
     }
+  /**
+   *
+   * @param options
+   * @returns {SimpleWallet}
+   */
     walletNew(options) {
       console.debug('For AEN: Wallet new = Wallet Load')
       return this.walletLoad(options)
@@ -201,49 +206,36 @@ export default class Aen extends Generic {
         context.$store.state.userTransactions.unconfirmed = transactions
       })
   }
+  /**
+   *
+   * @param options
+   */
   transfer(options) {
-    Generic.prototype.transfer.call(this, options)
+    super.transfer(options)
+    return new Promise((resolve) => {
 
-    const recipientAddress = Address.createFromRawAddress(options.destination.address)
-    const account = Account.createFromPrivateKey(options.source.accountPrivateKey, options.source.network.byte)
-    const transactionHttp = new TransactionHttp(this.apiEndpoint)
-    let message = options.destination.message || ''
+      // Transaction data preparation
+      const recipientAddress = Address.createFromRawAddress(options.destination.address)
+      const account = Account.createFromPrivateKey(options.source.accountPrivateKey, options.source.network.byte)
+      const transactionHttp = new TransactionHttp(this.apiEndpoint)
+      let message = options.destination.message || ''
 
-    const transferTransaction = TransferTransaction.create(
-      Deadline.create(23),
-      recipientAddress,
-      [XEM.createRelative(parseInt(options.destination.amount))],
-      PlainMessage.create(message),
-      options.source.network.byte)
+      // Prepare base transaction object
+      const transferTransaction = TransferTransaction.create(
+        Deadline.create(23),
+        recipientAddress,
+        [XEM.createRelative(parseInt(options.destination.amount))],
+        PlainMessage.create(message),
+        options.source.network.byte)
 
-    const signedTransaction = account.sign(transferTransaction)
-    transactionHttp
-      .announce(signedTransaction)
-      .subscribe(x => console.log(x), err => console.error(err))
+      // Sign and send
+      const signedTransaction = account.sign(transferTransaction)
+      transactionHttp
+        .announce(signedTransaction)
+        .subscribe(x => resolve(x), err => console.error(err))
+
+    })
   }
-
-    /**
-     * @param endpointAddress
-     */
-    updateApiEndpoint(options) {
-      Generic.prototype.updateApiEndpoint.call(this, options)
-
-        if (options.address !== this.apiEndpoint) {
-          console.debug('Refreshing HTTP services')
-            this.apiEndpoint = options.address
-            // this.services.accountHttp = new AccountHttp(options.address)
-            // this.services.mosaicHttp = new MosaicHttp(options.address)
-            // this.services.namespaceHttp = new NamespaceHttp(options.address)
-            // this.services.mosaicService = new MosaicService(
-            //   this.services.accountHttp,
-            //   this.services.mosaicHttp,
-            //   this.services.namespaceHttp
-            // )
-            // this.services.transactionHttp = new TransactionHttp(options.address)
-        }
-        console.log(this.services)
-    }
-
   /**
    *
    * @param {*} namespaceDefinition

@@ -33,6 +33,10 @@
       showAdd: {
         type: Boolean,
         default: false
+      },
+      useAddressBook: {
+        type: Boolean,
+        default: true
       }
     },
     data() {
@@ -49,7 +53,7 @@
         }
       },
       displayText() {
-        if(this.haveContact) {
+        if(this.haveContact && this.useAddressBook === true) {
           return this.$store.state.wallet.contacts[this.address].displayText
         } else {
           return this.address

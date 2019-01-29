@@ -1,7 +1,7 @@
 <template>
   <v-card flat>
     <v-card-text class="text-xs-center">
-      <address-render :address="wallet.address"/>
+      <address-render :address="wallet.address" :use-address-book="useAddressBook"/>
       <v-img :src="imageData" aspect-ratio="1"/>
     </v-card-text>
   </v-card>
@@ -16,6 +16,10 @@
         default: function () {
           return {}
         }
+      },
+      useAddressBook: {
+        type: Boolean,
+        default: true
       }
     },
     data() {

@@ -8,10 +8,6 @@
           <v-icon>add</v-icon>
         </v-btn>
 
-        <v-btn color="success" absolute fab bottom right @click="tester">
-          test
-        </v-btn>
-
         <v-card-title class="headline">Wallet Management</v-card-title>
         <v-card-text>
           <v-list two-line subheader>
@@ -121,7 +117,7 @@
           <v-icon>close</v-icon>
         </v-btn>
       </v-toolbar>
-      <business-card :wallet="contextWallet"/>
+      <business-card :wallet="contextWallet" :use-address-book="false"/>
     </v-dialog>
 
     <!-- Make Transfer Dialog -->
@@ -244,20 +240,6 @@
       );
     },
     methods: {
-      tester() {
-        let walletOptions = {
-          type: "btc",
-          name: "Bitcoin",
-          network: this.$g("bitcoin.available_networks")[0]
-        }
-        console.log('going to create wallet')
-        this.$store.dispatch('wallet/new', walletOptions)
-          .then((wallet) => {
-            console.log('wallet result')
-            console.log(wallet)
-          })
-
-      },
       setActiveWallet(wallet) {
         switch (wallet.type) {
           case "aen":
