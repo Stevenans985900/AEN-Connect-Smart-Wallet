@@ -52,7 +52,7 @@ export default {
       }
     },
     mounted() {
-      let networkHelper = new Aen(this.$store.state.wallet.internal.activeApiEndpoint)
+      let networkHelper = new Aen(this.$store.state.wallet.aen.activeApiEndpoint)
       networkHelper.transactionsHistorical(this.wallet).then(transactions => {
         this.transactions = transactions
         this.loading = false
