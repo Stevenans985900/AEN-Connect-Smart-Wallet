@@ -18,8 +18,16 @@
                 type: ""
             };
         },
-        watch: {
-            wallet: function() {
+      watch: {
+        wallet: function() {
+          this.updateComponent()
+        }
+      },
+      mounted: function() {
+        this.updateComponent()
+      },
+      methods: {
+        updateComponent() {
                 if (Object.keys(this.wallet).length !== 0) {
                     this.type = this.wallet.type[0].toUpperCase() + this.wallet.type.slice(1)
                     if (this.type) {
@@ -32,9 +40,7 @@
                         this.component = () => import("./Fallback");
                     }
                 }
-            }
-        },
-      methods: {
+            },
           complete() {
             this.$emit('complete')
           }

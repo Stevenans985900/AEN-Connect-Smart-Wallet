@@ -1,9 +1,10 @@
 const webpack = require('webpack')
 
+
 module.exports = {
     mode: 'spa',
     head: {
-        title: 'AENChain Wallet',
+        title: 'AEN Smart Wallet',
         meta: [{
                 charset: 'utf-8'
             },
@@ -112,6 +113,11 @@ module.exports = {
     modules: [
         '@nuxtjs/dotenv',
         '@nuxtjs/axios'
+        // ['nuxt-matomo', {
+        //     debug: true,
+        //     verbose: true,
+        //     matomoUrl: '//stats.aencoin.com/',
+        //     siteId: 6 }]
     ],
     plugins: [
         '~/plugins/globals.js',
@@ -128,7 +134,6 @@ module.exports = {
     ],
     build: {
         extractCSS: true,
-        transpile: [/^vuetify/],
         plugins: [
             new webpack.DefinePlugin({
                 "global.GENTLY": false
@@ -141,6 +146,11 @@ module.exports = {
             isDev,
             isClient
         }) {
+            // config.module.rules.push({
+            //     test: /\.js$/,
+            //     loader: 'babel-loader',
+            //     include: /node_modules\/nuxt-matomo/
+            // })
             if (isClient) {
                 config.node = {
                     electron: 'empty',
@@ -155,8 +165,9 @@ module.exports = {
                     enforce: 'pre',
                     test: /\.(js|vue)$/,
                     loader: 'eslint-loader',
-                    exclude: /(node_modules)/
-                })
+                    exclude: /(node_modules)/,
+                }
+             )
             }
 
             // Check if we're in Electron and change the renderer if so

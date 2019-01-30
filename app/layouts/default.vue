@@ -26,9 +26,10 @@
     <!-- TOP BAR -->
     <v-toolbar fixed app>
       <v-toolbar-side-icon v-if="eulaAgree" @click="navDrawer = !navDrawer"/>
-      <v-avatar size="24">
-        <img src="/logo.png" alt="avatar">
-      </v-avatar>
+      <!--size="24"-->
+      <!--<v-avatar >-->
+      <v-img src="/logo.png" height="20" contain />
+      <!--</v-avatar>-->
       <v-toolbar-title class="hidden-sm-and-down" v-text="title"/>
       <v-spacer/>
 
@@ -129,7 +130,7 @@ export default {
         }
         // { icon: 'extension', title: 'Create Namespace', to: '/tokens', requireContext: true }
       ],
-      title: "AENChain Wallet",
+      title: "Smart Wallet",
       userMenu: false
     };
   },

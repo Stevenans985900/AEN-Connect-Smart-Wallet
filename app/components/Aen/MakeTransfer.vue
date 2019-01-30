@@ -55,13 +55,11 @@
     },
     computed: {
       contacts() {
-        return this.$store.state.wallet.contacts
+        return Object.values(this.$store.state.wallet.contacts)
       }
     },
     methods: {
       initiateTransfer() {
-
-        console.log('initiating transfer')
         this.$store.dispatch('wallet/transfer', {
           source: this.wallet,
           destination: this.destination

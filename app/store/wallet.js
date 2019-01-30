@@ -254,6 +254,10 @@ export const actions = {
   transfer(context, options) {
     return new Promise((resolve) => {
       let networkHandler
+
+      // Check whether the destination is using a contact from the address book
+      // TODO Inserting check for whether address coming from contact list here
+
       switch (options.source.type) {
         case 'aen':
           networkHandler = new Aen(context.state.aen.activeApiEndpoint)

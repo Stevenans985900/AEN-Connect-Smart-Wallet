@@ -319,8 +319,6 @@ export default {
      * @param wallet
      */
     walletRestoredFromFile(wallet) {
-      console.log('picked up event after wallet creation')
-      console.log(wallet)
       this.wallet = wallet
       this.currentStep++
       if(wallet.hasOwnProperty('onChain')) {
