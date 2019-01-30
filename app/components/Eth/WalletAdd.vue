@@ -1,7 +1,6 @@
 <template>
   <v-layout row wrap>
     <v-stepper v-model="currentStep" vertical>
-
       <v-stepper-step :complete="currentStep > 1" step="1">
         Add Method
         <small>Determine if you want a new Ethereum wallet or to add an existing wallet</small>
@@ -10,20 +9,17 @@
         <v-card>
           <v-card-text>
             <v-radio-group v-model="addType">
-              <v-radio label="New Wallet" value="new" />
-              <v-radio label="Import from File" value="fileImport" />
-              <v-radio label="Manually enter wallet details" value="manualRecover" />
+              <v-radio label="New Wallet" value="new"/>
+              <v-radio label="Import from File" value="fileImport"/>
+              <v-radio label="Manually enter wallet details" value="manualRecover"/>
             </v-radio-group>
           </v-card-text>
         </v-card>
         <v-btn color="primary" @click="currentStep = 2">Continue</v-btn>
       </v-stepper-content>
 
-      <v-stepper-step :complete="currentStep > 2" step="2" >
-        {{ stepTwoLabel }}
-      </v-stepper-step>
+      <v-stepper-step :complete="currentStep > 2" step="2">{{ stepTwoLabel }}</v-stepper-step>
       <v-stepper-content step="2">
-
         <!-- ADD NEW WALLET -->
         <v-card v-if="addType == 'new'">
           <v-card-text>
@@ -67,7 +63,7 @@
         <v-card v-if="addType == 'fileImport'">
           <v-card-text>
             <v-layout row wrap>
-              <restore-from-file @complete="walletRestoredFromFile" />
+              <restore-from-file @complete="walletRestoredFromFile"/>
             </v-layout>
           </v-card-text>
         </v-card>
@@ -97,7 +93,6 @@
                   label="Private Key"
                   required
                   counter
-
                 />
                 <v-text-field
                   v-model="walletPassword"
@@ -114,23 +109,20 @@
           </v-card-text>
         </v-card>
 
-
         <v-btn v-if="addType == 'new'" color="primary" @click="createWallet">Create</v-btn>
         <v-btn v-if="addType == 'manualRecover'" color="primary" @click="loadWallet">Recover</v-btn>
-
 
         <v-btn flat @click="back">Back</v-btn>
       </v-stepper-content>
 
-      <v-stepper-step :complete="currentStep > 3" step="3">Summary
+      <v-stepper-step :complete="currentStep > 3" step="3">
+        Summary
         <small>Review your wallet</small>
       </v-stepper-step>
       <v-stepper-content step="3">
         <v-card>
           <v-card-text>
-            <h2>bus card here</h2>
-            <business-card :wallet="wallet" />
-            <h2>bus card above</h2>
+            <business-card :wallet="wallet"/>
             <v-form ref="eulaForm" v-model="proceedValid">
               <v-checkbox
                 v-model="backupAgree"
@@ -138,7 +130,12 @@
                 required
                 label="I have backed up my wallet and understand that keeping it safe is my duty"
               />
-              <v-checkbox v-if="main == true" v-model="eulaAgree" :rules="[rules.basic.required]" required>
+              <v-checkbox
+                v-if="main == true"
+                v-model="eulaAgree"
+                :rules="[rules.basic.required]"
+                required
+              >
                 <span slot="label">
                   I agree to the
                   <a href="http://aencoin.com/eula">AEN EULA</a>
@@ -151,19 +148,17 @@
         </v-card>
         <v-btn :disabled="!proceedValid" color="primary" @click="complete">Complete</v-btn>
       </v-stepper-content>
-
     </v-stepper>
-
   </v-layout>
 </template>
 
 <script>
-import BackupWallet from "~/components/BackupWallet"
-import RestoreFromFile from "~/components/RestoreFromFile"
+import BackupWallet from "~/components/BackupWallet";
+import RestoreFromFile from "~/components/RestoreFromFile";
 
-function initialDataState () {
+function initialDataState() {
   return {
-    addType: 'new',
+    addType: "new",
     backupAgree: false,
     currentStep: 1,
     newValid: false,
@@ -171,9 +166,9 @@ function initialDataState () {
     transactions: {},
     loading: true,
     network: {},
-    walletName: '',
-    walletPassword: '',
-    privateKey: '',
+    walletName: "",
+    walletPassword: "",
+    privateKey: "",
     proceedValid: false,
     showPassword: false,
     showEula: false,
@@ -191,8 +186,8 @@ function initialDataState () {
       privateKey: {
         length: v => v.length == 66 || "Length is 66 Characters"
       }
-    },
-  }
+    }
+  };
 }
 export default {
   components: {
@@ -203,111 +198,114 @@ export default {
     main: {
       type: Boolean,
       default: function() {
-        return false
+        return false;
       }
     }
   },
-  data: function () { return initialDataState() },
+  data: function() {
+    return initialDataState();
+  },
   computed: {
     availableNetworks() {
       return this.$g("eth.available_networks");
     },
     stepTwoLabel() {
-      if(this.addType === 'fileImport') {
-        return 'File Import'
+      if (this.addType === "fileImport") {
+        return "File Import";
       }
-      return 'Enter Details'
+      return "Enter Details";
     },
     multipleNetworks() {
       if (this.$g("eth.available_networks").length > 1) {
         return true;
       }
-      return false
+      return false;
     }
   },
   beforeMount() {
-    if(this.multipleNetworks === false) {
-      this.network = this.$g("eth.available_networks")[0]
+    if (this.multipleNetworks === false) {
+      this.network = this.$g("eth.available_networks")[0];
     }
   },
   methods: {
     back() {
-      this.currentStep--
+      this.currentStep--;
     },
     beforeMount() {
-      this.reset()
+      this.reset();
     },
     complete() {
-      this.$emit('complete', true)
-      this.reset()
+      this.$emit("complete", true);
+      this.reset();
     },
     createWallet() {
-
       if (!this.$refs.newWalletForm.validate()) {
         console.log("form is invalid");
         return false;
       }
 
       let walletOptions = {
-        type: 'eth',
+        type: "eth",
         network: this.network,
         name: this.walletName,
         password: this.walletPassword,
         main: this.main
-      }
-      this.$store.dispatch('wallet/new', walletOptions)
-      .then((wallet) => {
-        this.wallet = wallet
-        this.currentStep++
-        this.startLiveListener(wallet)
-      })
+      };
+      this.$store.dispatch("wallet/new", walletOptions).then(wallet => {
+        this.wallet = wallet;
+        this.currentStep++;
+        this.startLiveListener(wallet);
+      });
     },
     loadWallet() {
       if (!this.$refs.existingWalletForm.validate()) {
         return false;
       }
-      this.$store.dispatch('wallet/load',{
-          type: 'eth',
+      this.$store
+        .dispatch("wallet/load", {
+          type: "eth",
           network: this.network,
           name: this.walletName,
           password: this.walletPassword,
           privateKey: this.privateKey
-        }
-      ).then((wallet) => {
-        this.wallet = wallet
-        this.currentStep++
-        this.startLiveListener(wallet)
-      })
+        })
+        .then(wallet => {
+          this.wallet = wallet;
+          this.currentStep++;
+          this.startLiveListener(wallet);
+        });
     },
     reset() {
-      Object.assign(this.$data, initialDataState())
+      Object.assign(this.$data, initialDataState());
     },
     startLiveListener(wallet) {
       // Activate a listener on the wallet to check when it is live on the network
       let walletCheckInterval = setInterval(
         function() {
-          this.$store.dispatch('wallet/checkWalletLive', wallet).then(response => {
-            if (response === true) {
-              clearInterval(walletCheckInterval)
-            }
-          })
+          this.$store
+            .dispatch("wallet/checkWalletLive", wallet)
+            .then(response => {
+              if (response === true) {
+                clearInterval(walletCheckInterval);
+              }
+            });
         }.bind(this),
         this.$store.state.wallet.internal.walletCheckInterval
-      )
+      );
     },
     /**
      * Event listener for the
      * @param wallet
      */
     walletRestoredFromFile(wallet) {
-      this.wallet = wallet
-      this.currentStep++
-      if(wallet.hasOwnProperty('onChain')) {
-        if(wallet.onChain === false) {
-          this.startLiveListener(wallet)
+      this.wallet = wallet;
+      this.currentStep++;
+      if (wallet.hasOwnProperty("onChain")) {
+        if (wallet.onChain === false) {
+          this.startLiveListener(wallet);
         }
       }
     }
   }
-}
+};
 </script>

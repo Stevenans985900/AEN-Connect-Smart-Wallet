@@ -4,6 +4,7 @@
     :is="component"
     :data="transaction"
     :wallet="wallet"
+    :display="display"
   />
 </template>
 
@@ -12,6 +13,10 @@ import { TransactionType } from "chain-js-sdk";
 
 export default {
   props: {
+    display: {
+      type: String,
+      default: 'all'
+    },
     transaction: {
       type: Object,
       default: function() {

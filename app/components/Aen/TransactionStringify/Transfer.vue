@@ -1,17 +1,31 @@
 <template>
   <span>
-    <v-icon v-if="direction === 'incoming'">
-      call_received
-    </v-icon>
-    <v-icon v-else>call_made</v-icon>
-    - {{ value }}XEM
-    - <address-render :address="address" show-add />
+    <span v-if="display === 'all' || display === 'direction'">
+      <v-icon v-if="direction === 'incoming'">
+        call_received
+      </v-icon>
+      <v-icon v-else>call_made</v-icon>
+    </span>
+    <span v-if="display === 'all' || display === 'date'">
+      {{ date }}
+    </span>
+    <span v-if="display === 'all' || display === 'value'">
+      {{ value }}XEM
+    </span>
+    <span v-if="display === 'all' || display === 'address'">
+      <address-render :address="address" show-add />
+    </span>
   </span>
 </template>
 
 <script>
+import { format } from 'date-fns'
 export default {
 	props: {
+    display: {
+      type: String,
+      default: 'all'
+    },
     data: {
       type: Object,
       default: function () {
@@ -33,7 +47,10 @@ export default {
         return this.data.recipient.address
       }
 
-		},
+    },
+    date() {
+      return format((this.data.deadline.value), 'YYYY-MM-DD HH:mm')
+    },
 		direction () {
 			if(this.data.recipient.address === this.wallet.address) {
         return 'incoming'

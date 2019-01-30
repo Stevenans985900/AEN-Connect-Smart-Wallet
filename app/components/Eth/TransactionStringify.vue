@@ -1,10 +1,20 @@
 <template>
-  <component v-if="component" :is="component" :transaction="transaction" :wallet="wallet"/>
+  <component
+    v-if="component"
+    :is="component"
+    :data="transaction"
+    :wallet="wallet"
+    :display="display"
+  />
 </template>
 
 <script>
   export default {
     props: {
+      display: {
+        type: String,
+        default: 'all'
+      },
       transaction: {
         type: Object,
         default: function () {

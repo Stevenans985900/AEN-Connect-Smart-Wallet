@@ -112,7 +112,7 @@ export default {
       this.dialogEulaAgree = true
     },
     goToFaucet: function() {
-      window.open(this.$g('aen.faucets')[0].address + '/?address=' + this.wallet.address)
+      window.open(this.$g('aen.faucets')[0].address + '?address=' + this.wallet.address)
     },
     acceptAndProceed: function() {
       this.$store.commit('setUserProperty', {key: 'eulaAgree', value: true})
