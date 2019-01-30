@@ -8,7 +8,6 @@
       </v-btn>
 
       <v-card>
-        <v-card-title>Settings</v-card-title>
         <v-card-text>
           <v-select
             :items="apiEndpoints"
@@ -33,30 +32,24 @@ export default {
   },
   computed: {
     connectionStrengthIcon() {
-      let icon = 'signal_cellular_off'
-      if (this.currentPing < 2000) {
-        icon = 'signal_cellular_4_bar';
-      } else if (this.currentPing < 4500) {
-        icon = 'signal_cellular_3_bar';
-      } else if (this.currentPing < 8500) {
-        icon = 'signal_cellular_2_bar';
-      } else if (this.currentPing < 12000) {
-        icon = 'signal_cellular_1_bar';
+      let icon = 'signal_wifi_off'
+      if (this.currentPing < 9999) {
+        icon = 'signal_wifi_4_bar'
       }
       return icon
     },
     blockHeight() {
-      return this.$store.state.wallet.internal.blockHeight;
+      return this.$store.state.wallet.aen.blockHeight;
     },
     blockScore() {
-      return this.$store.state.wallet.internal.blockScore;
+      return this.$store.state.wallet.aen.blockScore;
     },
     currentPing() {
-      return this.$store.state.wallet.internal.activeApiPing;
+      return this.$store.state.wallet.aen.activeApiPing;
     },
     currentApi: {
       get: function() {
-        return this.$store.state.wallet.internal.activeApiEndpoint;
+        return this.$store.state.wallet.aen.activeApiEndpoint;
       },
       set: function(value) {
         this.$store.commit("setApiEndpoint", value)

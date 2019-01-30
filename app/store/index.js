@@ -79,8 +79,6 @@ export const actions = {
      */
     updateGenericNetworkInformation(context) {
         console.debug('Index Store: Update Generic Network Information')
-
-        // Prepare basic services for use
         let apiEndpoint = context.state.wallet.aen.activeApiEndpoint
         if (!apiEndpoint) {
             return
@@ -89,17 +87,21 @@ export const actions = {
         // Get the network height
         blockchainHttp.getBlockchainHeight()
             .subscribe(height => {
-                if (height.lower !== context.state.internal.block_height) {
-                    console.debug('UNI:Blockchain Height is ' + height.lower + '/' + height.higher + ' (lower/higher)')
-                    context.commit('setBlockHeight', height.lower)
+                if (height.lower !== context.state.wallet.aen.blockHeight) {
+                    context.commit('wallet/setAenProperty', {
+                        key: "blockHeight",
+                        value: height.lower
+                    })
                 }
             })
         // Get current blockchain score
         blockchainHttp.getBlockchainScore()
             .subscribe(score => {
-                if (score.scoreLow.lower !== context.state.internal.block_score) {
-                    console.debug('UNI:Blochain Score is ' + score.scoreLow.lower + '/' + score.scoreHigh.higher + ' (lower/higher)')
-                    context.commit('setBlockScore', score.scoreLow.lower)
+                if (score.scoreLow.lower !== context.state.wallet.aen.blockScore) {
+                    context.commit('wallet/setAenProperty', {
+                        key: "blockScore",
+                        value: score.scoreLow.lower
+                    })
                 }
             })
     }

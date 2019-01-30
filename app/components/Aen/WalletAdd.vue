@@ -4,16 +4,15 @@
       <v-stepper v-model="currentStep" vertical>
 
         <v-stepper-step :complete="currentStep > 1" step="1">
-          Add Method
-          <small>Determine if you want a new AEN wallet or to add an existing wallet</small>
+          How do you want to add your wallet?
         </v-stepper-step>
         <v-stepper-content step="1">
           <v-card>
             <v-card-text>
               <v-radio-group v-model="addType">
-                <v-radio label="New Wallet" value="new" />
-                <v-radio label="Import from File" value="fileImport" />
-                <v-radio label="Manually enter wallet details" value="manualRecover" />
+                <v-radio label="Create a New Wallet right now" value="new" />
+                <v-radio label="Import an existing wallet from file" value="fileImport" />
+                <v-radio label="Manually enter wallet private key and password" value="manualRecover" />
               </v-radio-group>
             </v-card-text>
           </v-card>
@@ -129,32 +128,35 @@
           <v-btn flat @click="back">Back</v-btn>
         </v-stepper-content>
 
-        <v-stepper-step :complete="currentStep > 3" step="3">Summary
-          <small>Review your wallet</small>
-        </v-stepper-step>
+        <v-stepper-step :complete="currentStep > 3" step="3">Review your wallet</v-stepper-step>
         <v-stepper-content step="3">
-          <v-card>
-            <v-card-text>
-              <business-card :wallet="wallet" />
+
+          <v-layout row wrap>
+            <v-flex xs12 md6>
+              <h1>Wallet Created: {{ wallet.name }}</h1>
+              <p>
+                With this wallet, you can now receive and transfer tokens using the AENChain network. Before proceeding,
+                we strongly recommend you create a backup of your wallet using the button below.
+              </p>
+              <backup-wallet :wallet="wallet"/>
               <v-form ref="eulaForm" v-model="proceedValid">
                 <v-checkbox
                   v-model="backupAgree"
                   :rules="[rules.basic.required]"
                   required
-                  label="I have backed up my wallet and understand that keeping it safe is my duty"
+                  label="I have backed up my wallet / understand that keeping it safe is my duty"
                 />
-                <v-checkbox v-if="!eulaAgree" v-model="eulaAgree" :rules="[rules.basic.required]" required>
-                  <span slot="label">
-                    I agree to the
-                    <a href="http://aencoin.com/eula">AEN EULA</a>
-                  </span>
-                </v-checkbox>
-
-                <backup-wallet :wallet="wallet"/>
+                <p>
+                  At the moment, your wallet is not live on the network. It is necessary to perform a transaction using
+                  this address before it has any presence.
+                </p>
+                <v-btn :disabled="!proceedValid" color="primary" @click="complete">Complete</v-btn>
               </v-form>
-            </v-card-text>
-          </v-card>
-          <v-btn :disabled="!proceedValid" color="primary" @click="complete">Complete</v-btn>
+            </v-flex>
+            <v-flex xs12 md6>
+              <business-card :wallet="wallet" :include-private-key="true" />
+            </v-flex>
+          </v-layout>
         </v-stepper-content>
 
       </v-stepper>
@@ -189,6 +191,8 @@ function initialDataState () {
       },
       walletName: {
         minLength: v => v.length >= 4 || "Min 4 Characters"
+        // TODO Add the unique rule back in here
+        // unique: (v, vm) => !vm.$store.wallet.wallets.hasOwnProperty(v) || "Wallet name must be unique"
       },
       password: {
         minLength: v => v.length >= 8 || "Min 8 characters"
@@ -220,15 +224,11 @@ export default {
     networks() { return this.$g("aen.available_networks") },
     stepTwoLabel() {
       if(this.addType === 'fileImport') {
-        return 'File Import'
+        return 'Select file for import'
       }
-      return 'Enter Details'
+      return 'Fill in form information'
     },
     environment() { return this.$store.state.runtime.environment },
-    eulaAgree: {
-      get: function() { return this.$store.state.user.eulaAgree },
-      set: function(val) { this.$store.commit('setUserProperty', {key: 'eulaAgree', value: val}) }
-    },
     googleCaptchaKey() { return this.$g("google_recaptcha_key") },
     multipleNetworks() {
       if (this.$g("aen.available_networks").length > 1) {

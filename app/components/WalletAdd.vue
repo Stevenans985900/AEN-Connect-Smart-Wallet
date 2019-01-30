@@ -1,6 +1,6 @@
 <template>
   <span>
-    <component v-if="component" :is="component" :show-eula="showEula" @complete="complete(wallet)"/>
+    <component v-if="component" :is="component" :show-eula="showEula" @complete="complete"/>
   </span>
 </template>
 

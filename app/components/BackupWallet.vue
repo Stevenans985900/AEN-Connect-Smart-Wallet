@@ -1,14 +1,15 @@
 <template>
-  <v-layout>
+  <span>
     <v-btn class="success" @click="clickBackupWallet">
       Backup Wallet
     </v-btn>
     <v-dialog v-model="dialogBackup" max-width="600px">
       <v-toolbar color="primary">
-        <v-btn icon @click="dialogBackup = false">
+        <v-toolbar-title>Click a wallet to create backup</v-toolbar-title>
+        <v-spacer />
+        <v-btn small fab outline @click="dialogBackup = false">
           <v-icon>close</v-icon>
         </v-btn>
-        <v-toolbar-title>Click a wallet to create backup</v-toolbar-title>
       </v-toolbar>
       <v-card>
         <v-card-text>
@@ -31,7 +32,7 @@
         </v-card-text>
       </v-card>
     </v-dialog>
-  </v-layout>
+  </span>
 </template>
 
 <script>

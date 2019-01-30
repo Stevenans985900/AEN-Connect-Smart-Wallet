@@ -13,20 +13,32 @@
             >AENChain network</a>
           </p>
           <p>Before proceeding, you need to have an AEN wallet setup on this device. Please choose one of the options below</p>
-          <wallet-add type="aen" @complete="complete()"/>
+          <wallet-add v-if="!wallet" type="aen" @complete="complete"/>
         </v-card-text>
       </v-card>
     </v-flex>
 
     <!-- New Wallet Dialog -->
-    <v-dialog v-model="dialogFaucetInstructions" persistent max-width="600px">
+    <v-dialog v-model="dialogEulaAgree" persistent max-width="600px">
+      <v-toolbar color="primary">
+        <v-toolbar-title>Accept End User License Agreement</v-toolbar-title>
+      </v-toolbar>
       <v-card>
-        <v-card-title class="headline">Get free coins?</v-card-title>
-        <v-card-text>Being on the testnet, you can receive some free coins to get started by visiting our faucet. Would you like to do that now?</v-card-text>
+        <v-card-text>
+          <p>
+            At the moment, your wallet is not live on the network. It is necessary to perform a transaction using
+            this address before it has any presence.
+          </p>
+          <p v-if="testnet">
+            This wallet is on a testing network which means, you can receive some free coins to get started by visiting our faucet.
+            Click the button below to visit the Faucet now or, click the accept button to agree to the <a href="http://aencoin.com/eula">
+            End User License Agreement</a> and go to your wallet management screen.
+          </p>
+        </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn flat="flat" @click="faucetDecline">No</v-btn>
-          <v-btn flat="flat" @click="faucetAccept">Yes</v-btn>
+          <v-btn v-if="testnet" flat="flat" @click="goToFaucet">Go to Faucet</v-btn>
+          <v-btn flat="flat" @click="acceptAndProceed">Accept EULA and proceed</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -48,7 +60,8 @@ export default {
    */
   data() {
     return {
-      dialogFaucetInstructions: false
+      dialogEulaAgree: false,
+      wallet: null
     }
   },
   /**
@@ -57,6 +70,13 @@ export default {
   computed: {
     network() {
       return this.$store.state.wallet.aen.network.name
+    },
+    testnet() {
+      try {
+        return this.wallet.network.testing
+      } catch(e) {
+        return false
+      }
     }
   },
   /**
@@ -88,18 +108,14 @@ export default {
      * Method to send user on to dashboard once wallet has been created
      */
     complete: function(wallet) {
-      // If the wallet is on the testnet, show user a dialog to go to faucet to get some test coins otherwise, go to
-      // wallet management
-      if(wallet.network.hasOwnProperty('testing')) {
-        this.showFaucetiDialog = true
-      } else {
-        this.$nuxt.$router.replace({ path: "/wallet" })
-      }
+      this.wallet = wallet
+      this.dialogEulaAgree = true
     },
-    faucetAccept: function() {
-      window.open(this.$g('aen.faucets')[0].address)
+    goToFaucet: function() {
+      window.open(this.$g('aen.faucets')[0].address + '/?address=' + this.wallet.address)
     },
-    faucetDecline: function() {
+    acceptAndProceed: function() {
+      this.$store.commit('setUserProperty', {key: 'eulaAgree', value: true})
       this.$nuxt.$router.replace({ path: "/wallet" })
     }
   }
