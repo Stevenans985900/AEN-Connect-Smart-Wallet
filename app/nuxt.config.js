@@ -14,7 +14,7 @@ module.exports = {
             {
                 hid: 'description',
                 name: 'description',
-                content: '{{ description }}'
+                content: 'The AEN Smart Wallet, your multi-network blockchain manager and window in to AEN'
             },
             {
                 name: 'msapplication-TileColor',
@@ -161,7 +161,6 @@ module.exports = {
 
             // Check if we're in Electron and change the renderer if so
             if (process.env.hasOwnProperty('CHROME_DESKTOP') && process.env.CHROME_DESKTOP === 'Electron.desktop') {
-                console.log('Building for Electron')
                 config.target = 'electron-renderer'
             }
         }

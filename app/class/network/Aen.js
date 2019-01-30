@@ -89,18 +89,13 @@ export default class Aen extends Generic {
         let addressObject = Address.createFromRawAddress(options.address)
           let accountHttp = new AccountHttp(this.apiEndpoint)
             return accountHttp.getAccountInfo(addressObject)
-              .subscribe((AccountInfo) => {
-                console.debug(AccountInfo)
+              .subscribe(() => {
                 resolve(true)
                 },
-               error => {
-                  console.debug(error)
+               () => {
                   resolve(false)
-                  // Don't do anything, we are expecting 404 as possible response
                 })
         } catch (e) {
-          console.debug('Wallet not yet recognised on the chain')
-          console.debug(e)
           resolve(false)
         }
     })

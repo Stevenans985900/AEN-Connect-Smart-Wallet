@@ -33,7 +33,7 @@
       <v-spacer/>
 
       <!-- Environment -->
-      <v-btn v-if="environment !== 'production'" disabled>{{ environment }}</v-btn>
+      <development v-if="environment === 'development'" />
 
       <network-diagnostics/>
       <backup-wallet v-if="haveWallet" />
@@ -83,6 +83,7 @@
 <script>
 import BackupWallet from "~/components/BackupWallet";
 import Busy from "~/components/Busy";
+import Development from "~/components/Development";
 import NetworkDiagnostics from "~/components/NetworkDiagnostics";
 import Loading from "~/components/Loading";
 import isElectron from "is-electron";
@@ -99,6 +100,7 @@ export default {
   components: {
     BackupWallet,
     Busy,
+    Development,
     Loading,
     NetworkDiagnostics
   },

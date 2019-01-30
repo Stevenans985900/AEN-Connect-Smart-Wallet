@@ -20,7 +20,16 @@ export default {
             type: ""
         };
     },
-    mounted() {
+    watch: {
+      wallet: function() {
+        this.updateComponent()
+      }
+    },
+    mounted: function() {
+      this.updateComponent()
+    },
+    methods: {
+      updateComponent() {
         if (Object.keys(this.wallet).length !== 0) {
           this.type = this.wallet.type[0].toUpperCase() + this.wallet.type.slice(1)
           if (this.type) {
@@ -32,6 +41,7 @@ export default {
             this.component = () => import("~/components/Fallback");
           }
         }
+      }
     }
 };
 </script>

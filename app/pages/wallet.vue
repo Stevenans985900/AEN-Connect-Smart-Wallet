@@ -22,8 +22,7 @@
               </v-list-tile-content>
 
               <v-list-tile-action>
-                <balance v-if="wallet.onChain" :wallet="wallet"/>
-                <span v-else>0</span>
+                <balance :wallet="wallet"/>
               </v-list-tile-action>
             </v-list-tile>
           </v-list>
@@ -32,7 +31,7 @@
     </v-flex>
 
     <!-- New Wallet Dialog -->
-    <v-dialog v-model="dialogWalletAdd" persistent max-width="600px">
+    <v-dialog v-model="dialogWalletAdd" persistent max-width="800px">
       <v-toolbar color="primary">
         <v-toolbar-title>Choose a wallet type to add from the list below</v-toolbar-title>
         <v-spacer />
@@ -266,7 +265,7 @@
             address: this.contextWallet.address,
             key: "onChain",
             value: response
-          });
+          })
         });
         this.dialogViewWallet = true;
       },

@@ -59,7 +59,7 @@ export const actions = {
     return new Promise((resolve, reject) => {
       switch (wallet.type) {
         case 'aen':
-          networkHandler = new Aen(context.state.internal.activeApiEndpoint)
+          networkHandler = new Aen(context.state.aen.activeApiEndpoint)
           break
         case 'contract':
           // TODO For this active API endpoint, mixin network selection
@@ -88,7 +88,7 @@ export const actions = {
     return new Promise((resolve) => {
       switch (wallet.type) {
         case 'aen':
-          networkHandler = new Aen(context.state.internal.activeApiEndpoint)
+          networkHandler = new Aen(context.state.aen.activeApiEndpoint)
           networkHandler.walletIsLive(wallet).then(response => {
             context.commit('setWalletProperty', {
               wallet: wallet,
@@ -207,7 +207,7 @@ export const actions = {
       let networkHandler
       switch (options.type) {
         case 'aen':
-          networkHandler = new Aen(context.state.internal.activeApiEndpoint)
+          networkHandler = new Aen(context.state.aen.activeApiEndpoint)
           // Do behind the scenes work
           networkHandler.accountNew(options).then(account => {
             options.account = account
@@ -256,7 +256,7 @@ export const actions = {
       let networkHandler
       switch (options.source.type) {
         case 'aen':
-          networkHandler = new Aen(context.state.internal.activeApiEndpoint)
+          networkHandler = new Aen(context.state.aen.activeApiEndpoint)
           networkHandler.transfer(options).then(transfer => {
             resolve(transfer)
           })

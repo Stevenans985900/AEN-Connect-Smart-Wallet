@@ -23,9 +23,13 @@
     },
     methods: {
       getBalance() {
-        this.$store.dispatch('wallet/balance', this.wallet).then(response => {
-          this.balance = response.balance
-        })
+        if(this.wallet.onChain === true) {
+          this.$store.dispatch('wallet/balance', this.wallet).then(response => {
+            this.balance = response.balance
+          })
+        } else {
+          this.balance = '0'
+        }
       }
     }
   }
