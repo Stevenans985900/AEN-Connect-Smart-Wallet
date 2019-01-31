@@ -84,10 +84,13 @@
         "etherscan_api_endpoint": "http://api-ropsten.etherscan.io/api",
         "infura_api_endpoint": "https://ropsten.infura.io/0HIuuP4qCjvv8DMGjvPm",
         "testing": true,
-        "gasPrices": {
-          "normal": 250000,
-          "priority": 450000,
-          "maximum": 10000000
+        "gasPrice": {
+          "normal": 5000000000,
+          "priority": 35000000000,
+          "maximum": 50000000000
+        },
+        "gas": {
+          "transfer": 21000
         }
       }
     ],

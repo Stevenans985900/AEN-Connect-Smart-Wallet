@@ -43,17 +43,21 @@ export default class Aen extends Generic {
     })
   }
 
-  transfer(options) {
-    Generic.prototype.transfer.call(this, options)
-    return new Promise((resolve, reject) => {
-      const transaction = {
-        'from': options.source.address,
-        'to': options.destination.address,
-        'value': this.web3.utils.toHex(this.web3.utils.toWei(options.destination.amount, 'ether')),
-        'gas': options.transfer.gas,
-        'gasLimit': options.transfer.gasLimit,
-        'chainId': options.source.network.network_id
-      }
+    transfer(options) {
+        Generic.prototype.transfer.call(this, options)
+        return new Promise((resolve, reject) => {
+
+            let transaction
+
+            transaction = {
+                "from": options.source.address,
+                "to": options.destination.address,
+                "value": this.web3.utils.toHex(this.web3.utils.toWei(options.destination.amount, "ether")),
+                "gasPrice": this.web3.utils.toHex(options.transfer.gasPrice),
+                "gas": this.web3.utils.toHex(options.transfer.gas),
+                "gasLimit": this.web3.utils.toHex(options.transfer.gasLimit),
+                "chainId": options.source.network.network_id
+            }
 
       this.web3.eth.accounts.signTransaction(transaction, options.source.privateKey)
         .then(signedTx => this.web3.eth.sendSignedTransaction(signedTx.rawTransaction))
