@@ -241,7 +241,8 @@ export const actions = {
               context.commit('setWallet', wallet)
               context.commit('setContact', {
                 address: wallet.address,
-                displayText: wallet.name
+                displayText: wallet.name,
+                network: 'aen'
               })
               resolve(wallet)
             })
@@ -255,7 +256,8 @@ export const actions = {
             context.commit('setWallet', wallet)
             context.commit('setContact', {
               address: wallet.address,
-              displayText: wallet.name
+              displayText: wallet.name,
+              network: 'btc'
             })
             resolve(wallet)
           })
@@ -269,7 +271,8 @@ export const actions = {
             context.commit('setWallet', wallet)
             context.commit('setContact', {
               address: wallet.address,
-              displayText: wallet.name
+              displayText: wallet.name,
+              network: 'eth'
             })
             resolve(wallet)
           })
@@ -391,6 +394,11 @@ export const mutations = {
     state.wallets[wallet.address] = wallet
     if (wallet.type === 'aen') {
       state.aen.haveWallet = true
+    }
+    state.contacts[wallet.address] = {
+      displayText: wallet.name,
+      network: wallet.type,
+      address: wallet.address
     }
   },
   setAenProperty(state, options) {

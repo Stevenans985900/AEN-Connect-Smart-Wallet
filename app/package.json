@@ -1,8 +1,8 @@
 {
-  "name": "tmp",
+  "name": "aen-connect-smart-wallet",
   "version": "1.0.0",
-  "description": "My astounding Nuxt.js project",
-  "author": "Simon",
+  "description": "A multi-chain wallet capable of working with AENC, Ethereum, and Bitcoin networks",
+  "author": "Simon Ball",
   "private": true,
   "scripts": {
     "dev": "nuxt",

@@ -1,6 +1,6 @@
 import {
   BlockchainHttp
-} from 'nem2-sdk'
+} from 'chain-js-sdk'
 
 export const initialState = {
   // Snackbar Controls

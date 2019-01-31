@@ -139,25 +139,33 @@
             <v-flex xs12 md6>
               <h1>Wallet Created: {{ wallet.name }}</h1>
               <p>
-                With this wallet, you can now receive and transfer tokens using the AENChain network. Before proceeding,
-                we strongly recommend you create a backup of your wallet using the button below.
+                With this wallet, you can now receive and transfer tokens using the AENChain network.
               </p>
-              <backup-wallet :wallet="wallet" />
-              <v-form ref="backupForm" v-model="proceedValid">
-                <v-checkbox
-                  v-model="backupAgree"
-                  :rules="[rules.basic.required]"
-                  required
-                  label="I have backed up my wallet / understand that keeping it safe is my duty"
-                />
+
+              <span v-if="addType === 'new'">
                 <p>
-                  At the moment, your wallet is not live on the network. It is necessary to perform a transaction using
-                  this address before it has any presence.
+                  Before proceeding, we strongly recommend you create a backup of your wallet using the button below.
                 </p>
-                <v-btn :disabled="!proceedValid" color="primary" @click="complete">
-                  Complete
-                </v-btn>
-              </v-form>
+                <backup-wallet :wallet="wallet" />
+                <v-form ref="backupForm" v-model="proceedValid">
+                  <v-checkbox
+                    v-model="backupAgree"
+                    :rules="[rules.basic.required]"
+                    required
+                    label="I have backed up my wallet / understand that keeping it safe is my duty"
+                  />
+                  <p>
+                    At the moment, your wallet is not live on the network. It is necessary to perform a transaction using
+                    this address before it has any presence.
+                  </p>
+                  <v-btn :disabled="!proceedValid" color="primary" @click="complete">
+                    Complete
+                  </v-btn>
+                </v-form>
+              </span>
+              <v-btn v-else color="primary" @click="complete">
+                Complete
+              </v-btn>
             </v-flex>
             <v-flex xs12 md6>
               <business-card :wallet="wallet" :include-private-key="true" :use-addrress-book="false" />

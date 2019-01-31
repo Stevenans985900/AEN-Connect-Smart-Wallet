@@ -3,6 +3,16 @@
     <v-card-text>
       <v-container grid-list-md>
         <v-layout wrap>
+          <v-flex xs12>
+            <v-select
+              v-model="inputNetwork"
+              :items="networks"
+              item-text="display"
+              item-value="internalValue"
+              label="Network"
+              required
+            />
+          </v-flex>
           <v-flex xs12 sm6>
             <v-text-field v-model="inputDisplayText" label="Name" required />
           </v-flex>
@@ -36,29 +46,55 @@ export default {
     address: {
       type: String,
       default: ''
+    },
+    network: {
+      type: String,
+      default: ''
+    },
+    showNetwork: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
     return {
       inputDisplayText: '',
       inputAddress: '',
-      readOnly: false
+      inputNetwork: '',
+      readOnly: false,
+      networks: [
+        {
+          display: 'AENChain',
+          internalValue: 'aen'
+        },
+        {
+          display: 'Ethereum',
+          internalValue: 'eth'
+        },
+        {
+          display: 'Bitcoin',
+          internalValue: 'btc'
+        },
+      ]
     }
   },
-  mounted() {
-    if (this.address !== '') {
-      this.inputAddress = this.address
-      this.readOnly = true
-    }
-    if (this.displayText !== '') {
-      this.inputDisplayText = this.displayText
+  watch: {
+    address: function(val) {
+      this.inputAddress = val
+    },
+    displayText: function(val) {
+      this.inputDisplayText = val
+    },
+    network: function(val) {
+      this.inputNetwork = val
     }
   },
   methods: {
     save() {
       this.$store.commit('wallet/setContact', {
         'displayText': this.inputDisplayText,
-        'address': this.inputAddress
+        'address': this.inputAddress,
+        'network': this.inputNetwork
       })
       this.$emit('complete')
     }

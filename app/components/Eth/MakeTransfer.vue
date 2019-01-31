@@ -5,9 +5,6 @@
       <v-container grid-list-md>
         <v-layout wrap>
           <v-flex xs12>
-            <p>Current Gas Price: {{ gasPriceGwei }} Gwei</p>
-          </v-flex>
-          <v-flex xs12>
             <v-combobox
               v-model="address"
               :items="contacts"
@@ -20,17 +17,25 @@
             <v-text-field v-model="amount" label="Amount" suffix="ETH" />
           </v-flex>
           <v-flex xs-12>
-            <v-checkbox v-model="priorityTransfer" label="Priority Transfer" />
-            <v-slider
-              v-model="gasPrice"
-              :color="color"
-              :max="50000000000"
-              label="Gas Price"
-              step="1000000000"
-              min="5000000000"
-              thumb-label
-              ticks
-            />
+            <v-layout>
+              <v-flex xs4>
+                <v-text-field v-model="gasPriceGwei" label="Gas Price" suffix="Gwei" />
+              </v-flex>
+              <v-flex xs8>
+                <v-slider
+                  v-model="gasPrice"
+                  :color="color"
+                  :max="50000000000"
+                  step="2500000000"
+                  min="5000000000"
+                  thumb-label
+                  ticks
+                />
+              </v-flex>
+              <v-flex>
+                <v-checkbox v-model="priorityTransfer" label="Priority Transfer" />
+              </v-flex>
+            </v-layout>
           </v-flex>
         </v-layout>
       </v-container>
@@ -45,7 +50,6 @@
 </template>
 
 <script>
-    // import Web3 from "web3"
   export default {
     props: {
       wallet: {
@@ -59,7 +63,6 @@
       return {
         web3: {},
         gasPrice: 0,
-        gasPriceGwei: 0,
         gas: 0,
         address: '',
         amount: 0,
@@ -81,6 +84,11 @@
       },
       contacts() {
         return Object.values(this.$store.state.wallet.contacts)
+      },
+      // Used to convert nice number for frontend use
+      gasPriceGwei: {
+        get: function () { return this.gasPrice / 1000000000 },
+        set: function (val) { this.gasPrice = val * 1000000000 }
       }
     },
     watch: {
@@ -90,10 +98,6 @@
         } else {
           this.gasPrice = this.$g("eth.available_networks")[0].gasPrice.normal
         }
-      },
-
-      gasPrice: function() {
-        this.gasPriceGwei = this.gasPrice / 1000000000
       }
     },
     created() {

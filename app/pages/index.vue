@@ -29,15 +29,14 @@
       </v-toolbar>
       <v-card>
         <v-card-text>
-          <p>
-            At the moment, your wallet is not live on the network. It is necessary to perform a transaction using
-            this address before it has any presence.
-          </p>
           <p v-if="testnet">
             This wallet is on a testing network which means, you can receive some free coins to get started by visiting our faucet.
-            Click the button below to visit the Faucet now or, click the accept button to agree to the <a href="http://aencoin.com/eula">
+            Click the button below to visit the Faucet
+          </p>
+          <p>
+            By proceeding, you agree to the AENChain <a href="http://aencoin.com/eula">
               End User License Agreement
-            </a> and go to your wallet management screen.
+            </a>.
           </p>
         </v-card-text>
         <v-card-actions>
