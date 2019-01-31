@@ -12,12 +12,12 @@
 
 <script>
 export default {
-	computed: {
-		busy: {
-			get: function () { return this.$store.getters.busy },
-			set: function () {}
-		}
-	}
+  computed: {
+    busy: {
+      get: function () { return this.$store.getters.busy },
+      set: function () {}
+    }
+  }
 }
 </script>
 
