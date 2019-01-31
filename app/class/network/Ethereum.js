@@ -55,8 +55,9 @@ export default class Aen extends Generic {
                 "from": options.source.address,
                 "to": options.destination.address,
                 "value": this.web3.utils.toHex(this.web3.utils.toWei(options.destination.amount, "ether")),
-                "gas": options.transfer.gas,
-                "gasLimit": options.transfer.gasLimit,
+                "gasPrice": this.web3.utils.toHex(options.transfer.gasPrice),
+                "gas": this.web3.utils.toHex(options.transfer.gas),
+                "gasLimit": this.web3.utils.toHex(options.transfer.gasLimit),
                 "chainId": options.source.network.network_id
             }
 

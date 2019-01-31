@@ -5,7 +5,7 @@
       <v-container grid-list-md>
         <v-layout wrap>
           <v-flex xs12>
-            <p>Current gas price: {{ gasPrice }}</p>
+            <p>Current Gas Price: {{ this.gasPrice / 1000000000 }} Gwei</p>
           </v-flex>
           <v-flex xs12>
             <v-combobox
@@ -29,8 +29,8 @@
               :max="maximumGas"
               v-model="gasPrice"
               label="Gas Price"
-              step="500000"
-              min="100000"
+              step="50"
+              min="1"
               thumb-label
               ticks />
           </v-flex>
@@ -45,6 +45,7 @@
 </template>
 
 <script>
+    // import Web3 from "web3"
   export default {
     props: {
       wallet: {
@@ -58,6 +59,7 @@
       return {
         web3: {},
         gasPrice: 0,
+        gasPriceGwei: 0,
         gas: 0,
         address: '',
         amount: 0,
@@ -68,6 +70,13 @@
         priorityGas: 0
       }
     },
+      // watch: {
+      //   gasPrice() {
+      //       // this.gasPriceGwei = Web3.utils.fromWei(this.gasPrice, "Gwei")
+      //       this.gasPriceGwei = this.gasPrice / 1000000000
+      //       console.log('Hello Something is happening.......')
+      //   }
+      // },
     computed: {
       color () {
         if(this.gasPrice < (this.normalGas / 2)) return 'red'
@@ -83,14 +92,15 @@
     watch: {
       priorityTransfer: function(val) {
         if(val === true) {
-          this.gasPrice = this.wallet.network.gasPrices.priority
+          this.gasPrice = this.$g("eth.available_networks")[0].gasPrice.priority
         } else {
-          this.gasPrice = this.wallet.network.gasPrices.normal
+          this.gasPrice = this.$g("eth.available_networks")[0].gasPrice.normal
         }
       }
     },
     created() {
-      this.normalGas = this.wallet.network.gasPrices.normal
+      this.normalGas = this.$g("eth.available_networks")[0].gasPrice.normal
+      // this.normalGas = this.wallet.network.gasPrices.normal
       this.priorityGas = this.wallet.network.gasPrices.priority
       this.maximumGas = this.wallet.network.gasPrices.maximum
     },
@@ -100,8 +110,9 @@
         let transactionOptions = {
           source: this.wallet,
           transfer: {
-            gas: this.gas,
-            gasLimit: (this.gas + 10000)
+            gasPrice: this.gasPrice, // Cost per litre of gas (1 GWei = 1,000,000,000 Wei)
+            gas: this.$g("eth.available_networks")[0].gas.normal, // litre of gas, mileage
+            gasLimit: this.$g("eth.available_networks")[0].gas.normal + 4000 // full tank
           },
           destination: {
             address: this.address,
