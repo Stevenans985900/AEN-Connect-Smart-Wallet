@@ -1,5 +1,5 @@
 <template>
-  <span>NA</span>
+  <span>0BTC</span>
 </template>
 
 <script>
@@ -13,8 +13,8 @@ export default {
     }
   },
   mounted() {
-   console.debug('Unrecognised transaction type')
-   console.debug(this.transaction)
+    console.debug('Unrecognised transaction type')
+    console.debug(this.transaction)
   }
 }
 </script>

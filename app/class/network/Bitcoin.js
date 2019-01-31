@@ -1,6 +1,6 @@
 import bitcoin from 'bitcoinjs-lib'
+import axios from 'axios'
 import Generic from './Generic.js'
-import axios from "axios"
 
 export default class Bitcoin extends Generic {
   constructor(apiEndpoints) {
@@ -16,7 +16,7 @@ export default class Bitcoin extends Generic {
   balance(options) {
     super.balance(options)
     return new Promise((resolve, reject) => {
-      let address = this.blockCypherEndpoint + "v1/btc/" + options.wallet.network.block_cypher_id + "/addrs/" + options.wallet.address
+      const address = this.blockCypherEndpoint + 'v1/btc/' + options.wallet.network.block_cypher_id + '/addrs/' + options.wallet.address
       axios.get(address)
         .then(function (response) {
           console.log('Result from running balance check on blockchain')
@@ -37,20 +37,20 @@ export default class Bitcoin extends Generic {
       this.balance(options).then(() => {
         resolve(true)
       })
-      .catch(() => {
-        resolve(false)
-      })
+        .catch(() => {
+          resolve(false)
+        })
     })
   }
   walletNew(options) {
     super.walletNew(options)
     return new Promise((resolve) => {
-      let keyPair = bitcoin.ECPair.makeRandom({network: bitcoin.networks[options.network.identifier]})
+      const keyPair = bitcoin.ECPair.makeRandom({ network: bitcoin.networks[options.network.identifier] })
       console.log(keyPair)
       console.log(bitcoin.networks[options.network.identifier])
-      let wallet = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey, network: bitcoin.networks[options.network.identifier] })
+      const wallet = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey, network: bitcoin.networks[options.network.identifier] })
       console.log(wallet)
-      let walletObject = {
+      const walletObject = {
         name: options.name,
         network: options.network,
         type: options.type,
@@ -61,7 +61,6 @@ export default class Bitcoin extends Generic {
       }
       resolve(walletObject)
     })
-
   }
   /**
    * @param options

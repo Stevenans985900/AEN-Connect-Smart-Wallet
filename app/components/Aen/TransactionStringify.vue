@@ -1,59 +1,64 @@
 <template>
   <component
-    v-if="component"
     :is="component"
+    v-if="component"
     :data="transaction"
     :wallet="wallet"
+    :display="display"
   />
 </template>
 
 <script>
-import { TransactionType } from "chain-js-sdk";
+import { TransactionType } from 'chain-js-sdk'
 
 export default {
   props: {
+    display: {
+      type: String,
+      default: 'all'
+    },
     transaction: {
       type: Object,
-      default: function() {
-        return {};
+      default: function () {
+        return {}
       }
     },
     wallet: {
       type: Object,
-      default: function() {
-        return {};
+      default: function () {
+        return {}
       }
     }
   },
   data() {
     return {
       component: null,
-      type: ""
-    };
+      type: ''
+    }
   },
   mounted() {
-    if (this.transaction.hasOwnProperty("type")) {
+    if (this.transaction.hasOwnProperty('type')) {
       switch (this.transaction.type) {
         case TransactionType.REGISTER_NAMESPACE:
-          this.type = "Namespace";
-          break;
+          this.type = 'Namespace'
+          break
         case TransactionType.TRANSFER:
-          this.type = "Transfer";
-          break;
+          this.type = 'Transfer'
+          break
         default:
-          console.debug("TS:M:Unrecognised transfer type");
+          console.debug('TS:M:Unrecognised transfer type')
       }
     }
     if (this.type) {
       try {
         this.component = () =>
-          import("./TransactionStringify/" + this.type);
+          import('./TransactionStringify/' + this.type)
       } catch (err) {
-        console.debug(err);
+        console.debug(err)
       }
     } else {
-      this.component = () => import("~/components/Fallback");
+      this.component = () => import('~/components/Fallback')
     }
   }
-};
+}
 </script>

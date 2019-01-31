@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Aen from '~/class/network/Aen'
 import Bitcoin from '~/class/network/Bitcoin'
 import Contract from '~/class/network/Contract'
-import Ethereum from "~/class/network/Ethereum"
+import Ethereum from '~/class/network/Ethereum'
 
 export const initialState = {
   contacts: {},
@@ -32,25 +32,25 @@ export const initialState = {
   }
 }
 
-export const state = () => (initialState)
+export const state = () => initialState
 
 export const getters = {
-  haveAenWallet: state => {
-    for (let wallet in state.wallets) {
+  haveAenWallet: (state) => {
+    for (const wallet in state.wallets) {
       if (state.wallets[wallet].type === 'aen') {
         return true
       }
     }
     return false
   },
-  haveEthereumWallet: state => {
-    for (let wallet in state.wallets) {
+  haveEthereumWallet: (state) => {
+    for (const wallet in state.wallets) {
       if (state.wallets[wallet].type === 'eth') {
         return true
       }
     }
     return false
-  },
+  }
 }
 
 export const actions = {
@@ -59,26 +59,34 @@ export const actions = {
     return new Promise((resolve, reject) => {
       switch (wallet.type) {
         case 'aen':
-          networkHandler = new Aen(context.state.internal.activeApiEndpoint)
+          networkHandler = new Aen(
+            context.state.aen.activeApiEndpoint
+          )
           break
         case 'contract':
           // TODO For this active API endpoint, mixin network selection
-          networkHandler = new Contract(context.state.ethereum.activeApiEndpoint)
+          networkHandler = new Contract(
+            context.state.ethereum.activeApiEndpoint
+          )
           break
         case 'eth':
           // TODO For this active API endpoint, mixin network selection
-          networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
+          networkHandler = new Ethereum(
+            context.state.ethereum.activeApiEndpoint
+          )
           break
       }
-      networkHandler.balance(wallet).then(response => {
-        context.commit('setWalletProperty', {
-          wallet: wallet,
-          key: 'balance',
-          value: response
+      networkHandler
+        .balance(wallet)
+        .then((response) => {
+          context.commit('setWalletProperty', {
+            wallet: wallet,
+            key: 'balance',
+            value: response
+          })
+          resolve(wallet)
         })
-        resolve(wallet)
-      })
-        .catch(err => {
+        .catch((err) => {
           reject(err)
         })
     })
@@ -88,8 +96,10 @@ export const actions = {
     return new Promise((resolve) => {
       switch (wallet.type) {
         case 'aen':
-          networkHandler = new Aen(context.state.internal.activeApiEndpoint)
-          networkHandler.walletIsLive(wallet).then(response => {
+          networkHandler = new Aen(
+            context.state.aen.activeApiEndpoint
+          )
+          networkHandler.walletIsLive(wallet).then((response) => {
             context.commit('setWalletProperty', {
               wallet: wallet,
               key: 'onChain',
@@ -100,7 +110,7 @@ export const actions = {
           break
         case 'btc':
           networkHandler = new Bitcoin(context.state.bitcoin)
-          networkHandler.walletIsLive(wallet).then(response => {
+          networkHandler.walletIsLive(wallet).then((response) => {
             context.commit('setWalletProperty', {
               wallet: wallet,
               key: 'onChain',
@@ -110,9 +120,11 @@ export const actions = {
           })
           break
         case 'contract':
-          networkHandler = new Contract(context.state.ethereum.activeApiEndpoint)
+          networkHandler = new Contract(
+            context.state.ethereum.activeApiEndpoint
+          )
           console.log(networkHandler)
-          networkHandler.walletIsLive(wallet).then(response => {
+          networkHandler.walletIsLive(wallet).then((response) => {
             context.commit('setWalletProperty', {
               wallet: wallet,
               key: 'onChain',
@@ -120,10 +132,12 @@ export const actions = {
             })
             resolve(response)
           })
-          break;
+          break
         case 'eth':
-          networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
-          networkHandler.walletIsLive(wallet).then(response => {
+          networkHandler = new Ethereum(
+            context.state.ethereum.activeApiEndpoint
+          )
+          networkHandler.walletIsLive(wallet).then((response) => {
             context.commit('setWalletProperty', {
               wallet: wallet,
               key: 'onChain',
@@ -131,7 +145,7 @@ export const actions = {
             })
             resolve(response)
           })
-          break;
+          break
       }
     })
   },
@@ -141,7 +155,7 @@ export const actions = {
     // var vm = this
 
     return new Promise((resolve) => {
-      let wallet = {
+      const wallet = {
         onChain: false,
         name: options.name,
         balance: 0
@@ -150,28 +164,32 @@ export const actions = {
       let networkHandler
       switch (options.type) {
         case 'aen':
-          networkHandler = new Aen
+          networkHandler = new Aen()
           // Do behind the scenes work
-          networkHandler.accountLoad(options).then(accountObject => {
+          networkHandler.accountLoad(options).then((accountObject) => {
             options.account = accountObject
-            networkHandler.walletLoad(options).then(walletObject => {
-              Object.assign(wallet, walletObject)
-              // Check if the wallet is on the chain
-              context.dispatch('checkWalletLive', wallet)
-              // wallet.onChain = networkHandler.walletIsLive(options)
-              if (options.hasOwnProperty('main')) {
-                wallet.main = true
-                context.commit('setContext', wallet)
-              }
-              context.commit('setWallet', wallet)
-              resolve(wallet)
-            })
+            networkHandler
+              .walletLoad(options)
+              .then((walletObject) => {
+                Object.assign(wallet, walletObject)
+                // Check if the wallet is on the chain
+                context.dispatch('checkWalletLive', wallet)
+                // wallet.onChain = networkHandler.walletIsLive(options)
+                if (options.hasOwnProperty('main')) {
+                  wallet.main = true
+                  context.commit('setContext', wallet)
+                }
+                context.commit('setWallet', wallet)
+                resolve(wallet)
+              })
           })
           break
 
         case 'contract':
-          networkHandler = new Contract(context.state.ethereum.activeApiEndpoint)
-          networkHandler.walletLoad(options).then(walletObject => {
+          networkHandler = new Contract(
+            context.state.ethereum.activeApiEndpoint
+          )
+          networkHandler.walletLoad(options).then((walletObject) => {
             Object.assign(wallet, walletObject)
             context.commit('setWallet', wallet)
             resolve(wallet)
@@ -179,12 +197,14 @@ export const actions = {
           break
 
         case 'eth':
-          networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
-          networkHandler.walletLoad(options).then(walletObject => {
+          networkHandler = new Ethereum(
+            context.state.ethereum.activeApiEndpoint
+          )
+          networkHandler.walletLoad(options).then((walletObject) => {
             Object.assign(wallet, walletObject)
             context.commit('setWallet', wallet)
 
-            networkHandler.balance(wallet).then(response => {
+            networkHandler.balance(wallet).then((response) => {
               console.debug(response)
               context.commit('setWalletProperty', {
                 wallet: wallet,
@@ -196,7 +216,7 @@ export const actions = {
             context.dispatch('checkWalletLive', wallet)
             resolve(wallet)
           })
-          break;
+          break
       }
     })
   },
@@ -207,96 +227,141 @@ export const actions = {
       let networkHandler
       switch (options.type) {
         case 'aen':
-          networkHandler = new Aen(context.state.internal.activeApiEndpoint)
+          networkHandler = new Aen(
+            context.state.aen.activeApiEndpoint
+          )
           // Do behind the scenes work
-          networkHandler.accountNew(options).then(account => {
+          networkHandler.accountNew(options).then((account) => {
             options.account = account
-            networkHandler.walletLoad(options).then(wallet => {
+            networkHandler.walletLoad(options).then((wallet) => {
               context.commit('setAenProperty', {
-                key: "haveWallet",
+                key: 'haveWallet',
                 value: true
               })
               context.commit('setWallet', wallet)
+              context.commit('setContact', {
+                address: wallet.address,
+                displayText: wallet.name
+              })
               resolve(wallet)
             })
           })
           break
         case 'btc':
-          networkHandler = new Bitcoin(context.state.bitcoin.activeApiEndpoint)
-          networkHandler.walletNew(options).then(wallet => {
+          networkHandler = new Bitcoin(
+            context.state.bitcoin.activeApiEndpoint
+          )
+          networkHandler.walletNew(options).then((wallet) => {
             context.commit('setWallet', wallet)
+            context.commit('setContact', {
+              address: wallet.address,
+              displayText: wallet.name
+            })
             resolve(wallet)
           })
           break
 
-      case 'eth':
-        networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
-        networkHandler.walletNew(options).then(wallet => {
-          context.commit('setWallet', wallet)
-          resolve(wallet)
-        })
-        break
+        case 'eth':
+          networkHandler = new Ethereum(
+            context.state.ethereum.activeApiEndpoint
+          )
+          networkHandler.walletNew(options).then((wallet) => {
+            context.commit('setWallet', wallet)
+            context.commit('setContact', {
+              address: wallet.address,
+              displayText: wallet.name
+            })
+            resolve(wallet)
+          })
+          break
       }
     })
   },
   transfer(context, options) {
     return new Promise((resolve) => {
       let networkHandler
+
+      // Check whether the destination is using a contact from the address book
+      if (
+        typeof options.destination.address === 'object' &&
+                options.destination.address !== null
+      ) {
+        options.destination.address =
+                    options.destination.address.address
+      }
       switch (options.source.type) {
         case 'aen':
-          networkHandler = new Aen(context.state.internal.activeApiEndpoint)
-          networkHandler.transfer(options).then(transfer => {
+          networkHandler = new Aen(
+            context.state.aen.activeApiEndpoint
+          )
+          networkHandler.transfer(options).then((transfer) => {
             resolve(transfer)
           })
           break
         case 'contract':
-          networkHandler = new Contract(context.state.ethereum.activeApiEndpoint)
-          networkHandler.transfer(options).then(transfer => {
+          networkHandler = new Contract(
+            context.state.ethereum.activeApiEndpoint
+          )
+          networkHandler.transfer(options).then((transfer) => {
             resolve(transfer)
           })
           break
         case 'eth':
-          networkHandler = new Ethereum(context.state.ethereum.activeApiEndpoint)
-          networkHandler.transfer(options).then(transfer => {
+          networkHandler = new Ethereum(
+            context.state.ethereum.activeApiEndpoint
+          )
+          networkHandler.transfer(options).then((transfer) => {
             resolve(transfer)
           })
           break
       }
-
     })
   },
   /**
-   * Cycle through all available API nodes, testing how long it takes to get information on
-   * the first block. Choose node with lowest ping
-   *
-   * @param {*} context
-   */
+     * Cycle through all available API nodes, testing how long it takes to get information on
+     * the first block. Choose node with lowest ping
+     *
+     * @param {*} context
+     */
   rankApiNodes(context) {
     console.debug('Vuex: Rank API Nodes')
-    var apiEndpoints = Vue.prototype.$g('aen.api_endpoints')
-    var stateContext = context
+    const apiEndpoints = Vue.prototype.$g('aen.api_endpoints')
+    const stateContext = context
 
     // Test function encapsulate for variable scoping and asynchronous calling
-    var check = function (currentRound) {
-      var position = currentRound
-      var thisAddress = apiEndpoints[position].address + Vue.prototype.$g('aen.api_endpoint_test_uri')
+    const check = function (currentRound) {
+      const position = currentRound
+      const thisAddress =
+                apiEndpoints[position].address +
+                Vue.prototype.$g('aen.api_endpoint_test_uri')
       apiEndpoints[position].scanStart = new Date()
-      var lowestPing = 9999
+      let lowestPing = 9999
 
       // Perform the actual call
-      this.$axios.$get(thisAddress)
+      this.$axios
+        .$get(thisAddress)
         .then(() => {
-
           // Calculate ping time, output the response when in debug mode to satisfy linter
           apiEndpoints[position].scanEnd = new Date()
-          apiEndpoints[position].scanTime = apiEndpoints[position].scanEnd - apiEndpoints[position].scanStart
+          apiEndpoints[position].scanTime =
+                        apiEndpoints[position].scanEnd -
+                        apiEndpoints[position].scanStart
 
           // If the test beats current score, set as endpoint to use
           if (apiEndpoints[position].scanTime < lowestPing) {
-            console.debug('Updating AEN API endpoint to: ' + apiEndpoints[position].address)
+            console.debug(
+              'Updating AEN API endpoint to: ' +
+                                apiEndpoints[position].address
+            )
             lowestPing = apiEndpoints[position].scanTime
-            stateContext.commit('setApiEndpoint', apiEndpoints[position].address)
-            stateContext.commit('setPingTime', lowestPing)
+            stateContext.commit('setAenProperty', {
+              key: 'activeApiEndpoint',
+              value: apiEndpoints[position].address
+            })
+            stateContext.commit('setAenProperty', {
+              key: 'activeApiPing',
+              value: lowestPing
+            })
           }
         })
         .catch(() => {
@@ -305,7 +370,11 @@ export const actions = {
     }.bind(this)
 
     // Start performing the checks asynchronously
-    for (var currentRound = 0; apiEndpoints.length > currentRound; currentRound++) {
+    for (
+      let currentRound = 0;
+      apiEndpoints.length > currentRound;
+      currentRound++
+    ) {
       check(currentRound)
     }
   }
@@ -320,7 +389,7 @@ export const mutations = {
   },
   setWallet(state, wallet) {
     state.wallets[wallet.address] = wallet
-    if(wallet.type === 'aen') {
+    if (wallet.type === 'aen') {
       state.aen.haveWallet = true
     }
   },
@@ -340,19 +409,13 @@ export const mutations = {
     state.wallets[options.address][options.key] = options.value
   },
   /**
-   * Address Book related information
-   */
+     * Address Book related information
+     */
   deleteContact(state, contact) {
     Vue.delete(state.contacts, contact.address)
   },
   setContact(state, contact) {
     state.contacts[contact.address] = contact
-  },
-  setApiEndpoint(state, value) {
-    state.internal.activeApiEndpoint = value
-  },
-  setPingTime(state, value) {
-    state.internal.activeApiPing = value
   },
   setPreferredNode(state, address) {
     state.internal.preferredNode = address
@@ -362,12 +425,6 @@ export const mutations = {
   },
   setNetwork(state, network) {
     state.context.network = network
-  },
-  setBlockHeight(state, blockHeight) {
-    state.internal.block_height = blockHeight
-  },
-  setBlockScore(state, blockScore) {
-    state.internal.block_score = blockScore
   },
   setIncomingTransactions(state, transactions) {
     state.transactions.incoming = transactions

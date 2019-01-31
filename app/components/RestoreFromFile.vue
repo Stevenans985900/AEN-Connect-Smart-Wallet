@@ -7,78 +7,78 @@
 </template>
 
 <script>
-  // TODO - Add in logic for handling multiple wallets being present in the same file upload
-  import CryptoJS from "crypto-js"
-  import EventEmitter from "events"
-  import isElectron from "is-electron"
-  import UploadButton from "vuetify-upload-button"
+// TODO - Add in logic for handling multiple wallets being present in the same file upload
+import EventEmitter from 'events'
+import CryptoJS from 'crypto-js'
+// import isElectron from 'is-electron'
+import UploadButton from 'vuetify-upload-button'
 
-  export default {
-    components: {
-      UploadButton
-    },
-    props: {
-      main: {
-        type: Boolean,
-        default: function() {
-          return false
-        }
-      }
-    },
-    data() {
-      return {
-        wallet: {}
-      }
-    },
-    methods: {
-      fileUploaded(file) {
-        // Create the construct to handle both app / browser situations
-        const fileUploadedEmitter = new EventEmitter();
-        fileUploadedEmitter.on(
-          "ready",
-          function(walletData) {
-            try {
-              let extension = walletData.fileName.split('.').pop();
-              let walletInformation
-              if(extension === 'enc') {
-                var bytes  = CryptoJS.AES.decrypt(walletData.data, this.$g('salt'));
-                walletInformation = JSON.parse(bytes.toString(CryptoJS.enc.Utf8))
-              } else {
-                walletInformation = JSON.parse(walletData.data);
-              }
-
-              // If prop states wallet is a main, force property in wallet
-              if(this.main === true) {
-                walletInformation.main = true
-              }
-
-              this.$store.dispatch('wallet/load', walletInformation).then((wallet) => {
-                this.$emit('complete', wallet)
-              })
-            } catch (e) {
-              this.$store.commit("showNotification", {
-                type: "error",
-                message: 'The file you uploaded appears invalid, please make sure it is a wallet backup'
-              })
-            }
-          }.bind(this)
-        );
-
-        // Fork condition depending on the environment
-        if (isElectron()) {
-          const fs = require("fs");
-          fs.readFile(file.path, "utf8", (err, data) => {
-            if (err) throw err;
-            fileUploadedEmitter.emit("ready", {data: data, fileName: file.name});
-          });
-        } else {
-          let reader = new FileReader();
-          reader.readAsText(file);
-          reader.onload = function(event) {
-            fileUploadedEmitter.emit("ready", {data: event.target.result, fileName: file.name});
-          };
-        }
+export default {
+  components: {
+    UploadButton
+  },
+  props: {
+    main: {
+      type: Boolean,
+      default: function () {
+        return false
       }
     }
+  },
+  data() {
+    return {
+      wallet: {}
+    }
+  },
+  methods: {
+    fileUploaded(file) {
+      // Create the construct to handle both app / browser situations
+      const fileUploadedEmitter = new EventEmitter()
+      fileUploadedEmitter.on(
+        'ready',
+        function (walletData) {
+          try {
+            const extension = walletData.fileName.split('.').pop()
+            let walletInformation
+            if (extension === 'enc') {
+              const bytes = CryptoJS.AES.decrypt(walletData.data, this.$g('salt'))
+              walletInformation = JSON.parse(bytes.toString(CryptoJS.enc.Utf8))
+            } else {
+              walletInformation = JSON.parse(walletData.data)
+            }
+
+            // If prop states wallet is a main, force property in wallet
+            if (this.main === true) {
+              walletInformation.main = true
+            }
+
+            this.$store.dispatch('wallet/load', walletInformation).then((wallet) => {
+              this.$emit('complete', wallet)
+            })
+          } catch (e) {
+            this.$store.commit('showNotification', {
+              type: 'error',
+              message: 'The file you uploaded appears invalid, please make sure it is a wallet backup'
+            })
+          }
+        }.bind(this)
+      )
+
+      // Fork condition depending on the environment
+      // if (isElectron()) {
+      //   const fs = require('fs')
+      //   fs.readFile(file.path, 'utf8', (err, data) => {
+      //     if (err) throw err
+      //     fileUploadedEmitter.emit('ready', { data: data, fileName: file.name })
+      //   })
+      // } else {
+      const reader = new FileReader()
+      reader.readAsText(file)
+      reader.onload = function (event) {
+        fileUploadedEmitter.emit('ready', { data: event.target.result, fileName: file.name })
+      }
+      // }
+    }
   }
+}
 </script>

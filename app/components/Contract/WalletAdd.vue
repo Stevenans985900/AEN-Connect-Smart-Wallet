@@ -1,7 +1,6 @@
 <template>
   <v-layout row wrap>
     <v-stepper v-model="currentStep" vertical>
-
       <v-stepper-step :complete="currentStep > 1" step="1">
         Add Method
         <small>Determine how you want to start managing the smart contract</small>
@@ -16,14 +15,15 @@
             </v-radio-group>
           </v-card-text>
         </v-card>
-        <v-btn color="primary" @click="currentStep = 2">Continue</v-btn>
+        <v-btn color="primary" @click="currentStep = 2">
+          Continue
+        </v-btn>
       </v-stepper-content>
 
-      <v-stepper-step :complete="currentStep > 2" step="2" >
+      <v-stepper-step :complete="currentStep > 2" step="2">
         {{ stepTwoLabel }}
       </v-stepper-step>
       <v-stepper-content step="2">
-
         <!-- MANUAL INPUT -->
         <v-card v-if="addType == 'manualInput'">
           <v-card-text>
@@ -35,8 +35,8 @@
                 @submit.prevent="onSubmit"
               >
                 <v-select
-                  :items="ethereumWallets"
                   v-model="wallet"
+                  :items="ethereumWallets"
                   return-object
                   item-text="name"
                   label="Managing Ethereum Wallet"
@@ -53,27 +53,36 @@
                   v-if="loading === true"
                   :value="true"
                   color="info"
-                ><v-progress-circular indeterminate/> Checking contract</v-alert>
+                >
+                  <v-progress-circular indeterminate /> Checking contract
+                </v-alert>
                 <v-alert
                   v-if="contractSpidered === true && contractFound === true"
                   :value="true"
                   type="success"
-                >The Contract has been found. Please review the details below</v-alert>
+                >
+                  The Contract has been found. Please review the details below
+                </v-alert>
                 <v-alert
                   v-if="contractSpidered === true && contractFound === false"
                   :value="true"
                   type="info"
-                >The Contract could not be found. Please check the address and / or selected network</v-alert>
+                >
+                  The Contract could not be found. Please check the address and / or selected network
+                </v-alert>
 
                 <v-card v-if="contractFound === true">
                   <v-img
                     src="https://cdn.vuetifyjs.com/images/cards/desert.jpg"
-                    aspect-ratio="2.75" />
+                    aspect-ratio="2.75"
+                  />
                   <v-card-title primary-title>
                     <div>
-                      <h3 class="headline mb-0">{{ contractName }}</h3>
+                      <h3 class="headline mb-0">
+                        {{ contractName }}
+                      </h3>
                       <div>
-                        <strong>Symbol:</strong> {{ symbol }}<br >
+                        <strong>Symbol:</strong> {{ symbol }}<br>
                         <strong>Decimals:</strong> {{ decimals }}
                       </div>
                     </div>
@@ -101,8 +110,8 @@
             <v-layout row wrap>
               <v-form ref="qrScan" v-model="qrValid" class="full-width">
                 <v-select
-                  :items="ethereumWallets"
                   v-model="wallet"
+                  :items="ethereumWallets"
                   return-object
                   item-text="name"
                   label="Managing Ethereum Wallet"
@@ -114,7 +123,6 @@
                   required
                   placeholder="0x8ec1865e528bbf32a155519c73995d704305acd1"
                 />
-
 
                 <v-text-field
                   v-if="contractSpidered === true && contractFound === false"
@@ -135,132 +143,135 @@
           </v-card-text>
         </v-card>
 
+        <v-btn :disabled="!proceedValid" color="primary" @click="loadContract">
+          Load Contract
+        </v-btn>
 
-        <v-btn :disabled="!proceedValid" color="primary" @click="loadContract">Load Contract</v-btn>
-
-
-        <v-btn flat @click="back">Back</v-btn>
+        <v-btn flat @click="back">
+          Back
+        </v-btn>
       </v-stepper-content>
 
-      <v-stepper-step :complete="currentStep > 3" step="3">Summary
+      <v-stepper-step :complete="currentStep > 3" step="3">
+        Summary
         <small>Review your wallet</small>
       </v-stepper-step>
       <v-stepper-content step="3">
         <v-card>
           <v-card-text>
             <business-card :wallet="wallet" />
-            <backup-wallet :wallet="wallet"/>
+            <backup-wallet :wallet="wallet" />
           </v-card-text>
         </v-card>
-        <v-btn color="primary" @click="complete">Complete</v-btn>
+        <v-btn color="primary" @click="complete">
+          Complete
+        </v-btn>
       </v-stepper-content>
-
     </v-stepper>
   </v-layout>
 </template>
 
 <script>
-  import BusinessCard from "~/components/BusinessCard"
-  // import EventEmitter from "events"
-  import UploadButton from "vuetify-upload-button"
-  import BackupWallet from "~/components/BackupWallet"
-  import Contract from "~/class/network/Contract"
-  import Debounce from "lodash.debounce"
+import BusinessCard from '~/components/BusinessCard'
+// import EventEmitter from "events"
+import UploadButton from 'vuetify-upload-button'
+import BackupWallet from '~/components/BackupWallet'
+import Contract from '~/class/network/Contract'
+import Debounce from 'lodash.debounce'
 
-  export default {
-    components: {
-      BackupWallet,
-      BusinessCard,
-      UploadButton
-    },
-    props: {
-      main: {
-        type: Boolean,
-        default: function() {
-          return false
+export default {
+  components: {
+    BackupWallet,
+    BusinessCard,
+    UploadButton
+  },
+  props: {
+    main: {
+      type: Boolean,
+      default: function () {
+        return false
+      }
+    }
+  },
+  data() {
+    return {
+      networkHandler: {},
+      addType: '',
+      backupAgree: false,
+      currentStep: 1,
+      proceedValid: false,
+      loading: false,
+      wallet: {},
+      contractFound: false,
+      contractName: '',
+      contractSpidered: false,
+      contractAddress: '',
+      decimals: 0,
+      symbol: '',
+      rules: {
+        basic: {
+          required: value => !!value || 'Required.'
+        },
+        contract: {
+          length: v => v.length === 42 || '42 Characters'
+        },
+        decimal: {
+          max: v => v.length === 42 || '42 Characters'
+        },
+        symbol: {
+          minLength: v => v.length === 42 || '42 Characters'
         }
       }
-    },
-    data() {
-      return {
-        networkHandler: {},
-        addType: '',
-        backupAgree: false,
-        currentStep: 1,
-        proceedValid: false,
-        loading: false,
-        wallet: {},
-        contractFound: false,
-        contractName: '',
-        contractSpidered: false,
-        contractAddress: '',
-        decimals: 0,
-        symbol: '',
-        rules: {
-          basic: {
-            required: value => !!value || "Required."
-          },
-          contract: {
-            length: v => v.length === 42 || "42 Characters"
-          },
-          decimal: {
-            max: v => v.length === 42 || "42 Characters"
-          },
-          symbol: {
-            minLength: v => v.length === 42 || "42 Characters"
-          }
+    }
+  },
+  computed: {
+    ethereumWallets() {
+      const wallets = []
+      for (const wallet in this.$store.state.wallet.wallets) {
+        if (this.$store.state.wallet.wallets[wallet].type === 'eth') {
+          wallets.push(this.$store.state.wallet.wallets[wallet])
         }
       }
+      return wallets
     },
-    computed: {
-      ethereumWallets() {
-        let wallets = []
-        for(let wallet in this.$store.state.wallet.wallets) {
-          if(this.$store.state.wallet.wallets[wallet].type === 'eth') {
-            wallets.push(this.$store.state.wallet.wallets[wallet])
-          }
-        }
-        return wallets
-      },
-      stepTwoLabel() {
-        if(this.addType === 'fileImport') {
-          return 'File Import'
-        }
-        return 'Enter Details'
+    stepTwoLabel() {
+      if (this.addType === 'fileImport') {
+        return 'File Import'
       }
+      return 'Enter Details'
+    }
+  },
+  watch: {
+    contractAddress: function () {
+      this.getContractProfile()
+    }
+  },
+  mounted() {
+    this.networkHandler = new Contract(this.$store.state.wallet.ethereum.activeApiEndpoint)
+  },
+  methods: {
+    back() {
+      this.currentStep--
     },
-    watch: {
-      contractAddress: function() {
-        this.getContractProfile()
+    complete() {
+      console.log('emitting complete event from aen component')
+      this.$emit('complete', true)
+    },
+    getContractProfile: Debounce(function () {
+      // Make sure the contract address passes validation to save effort
+      if (!this.$refs.inputForm.validate()) {
+        console.log('form is invalid')
+        return false
       }
-    },
-    mounted() {
-      this.networkHandler = new Contract(this.$store.state.wallet.ethereum.activeApiEndpoint)
-    },
-    methods: {
-      back() {
-        this.currentStep--
-      },
-      complete() {
-        console.log('emitting complete event from aen component')
-        this.$emit('complete', true)
-      },
-      getContractProfile: Debounce(function() {
 
-        // Make sure the contract address passes validation to save effort
-        if (!this.$refs.inputForm.validate()) {
-          console.log("form is invalid");
-          return false;
-        }
-
-        this.contractFound = false
-        import("~/class/network/contract/" + this.contractAddress).then(erc20Interface => {
+      this.contractFound = false
+        import('~/class/network/contract/' + this.contractAddress).then((erc20Interface) => {
           this.contractFound = true
           this.contractName = erc20Interface.title
           this.decimals = erc20Interface.decimals
           this.symbol = erc20Interface.symbol
         })
-          .catch(err => {
+          .catch((err) => {
             console.debug(err)
             // Use the abstract and lookup details of the contract
             this.loading = true
@@ -269,7 +280,7 @@
             this.networkHandler.erc20PublicMethod({
               contractAddress: this.contractAddress,
               method: 'name'
-            }).then(contractName => {
+            }).then((contractName) => {
               this.contractSpidered = true
               this.loading = false
               this.contractFound = true
@@ -282,38 +293,38 @@
             this.networkHandler.erc20PublicMethod({
               contractAddress: this.contractAddress,
               method: 'symbol'
-            }).then(contractSymbol => {
+            }).then((contractSymbol) => {
               this.symbol = contractSymbol
             })
             this.networkHandler.erc20PublicMethod({
               contractAddress: this.contractAddress,
               method: 'decimals'
-            }).then(decimals => {
+            }).then((decimals) => {
               console.log('from decimal')
               console.log(decimals)
               this.decimals = decimals
             })
-        })
-      }, 1000),
-      loadContract() {
-        if (!this.$refs.inputForm.validate()) {
-          console.log("form is invalid");
-          return false;
-        }
-        this.$store.dispatch('wallet/load',{
-            type: 'contract',
-            name: this.contractName,
-            decimals: this.decimals,
-            symbol: this.symbol,
-            address: this.contractAddress,
-            network: this.wallet.network,
-            managerWalletAddress: this.wallet.address
-          }
-        ).then((wallet) => {
-          console.debug(wallet)
-          this.currentStep++
-        })
+          })
+    }, 1000),
+    loadContract() {
+      if (!this.$refs.inputForm.validate()) {
+        console.log('form is invalid')
+        return false
       }
+      this.$store.dispatch('wallet/load', {
+        type: 'contract',
+        name: this.contractName,
+        decimals: this.decimals,
+        symbol: this.symbol,
+        address: this.contractAddress,
+        network: this.wallet.network,
+        managerWalletAddress: this.wallet.address
+      }
+      ).then((wallet) => {
+        console.debug(wallet)
+        this.currentStep++
+      })
     }
   }
+}
 </script>
