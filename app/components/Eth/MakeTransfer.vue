@@ -5,7 +5,7 @@
       <v-container grid-list-md>
         <v-layout wrap>
           <v-flex xs12>
-            <p>Current Gas Price: {{ this.gasPrice / 1000000000 }} Gwei</p>
+            <p>Current Gas Price: {{ gasPrice / 1000000000 }} Gwei</p>
           </v-flex>
           <v-flex xs12>
             <v-combobox
@@ -83,10 +83,11 @@
         if(this.gasPrice < (this.normalGas)) return 'amber'
         if(this.gasPrice < (this.normalGas + (this.priorityGas - this.normalGas))) return 'light-green'
         if(this.gasPrice < (this.priorityGas)) return 'green'
-        if(this.gasPrice > (this.priorityGas)) return 'amber'
+        // Assumed default: if(this.gasPrice > (this.priorityGas))
+        return 'amber'
       },
       contacts() {
-        return this.$store.state.wallet.contacts
+        return Object.values(this.$store.state.wallet.contacts)
       }
     },
     watch: {
