@@ -5,7 +5,7 @@
       <v-container grid-list-md>
         <v-layout wrap>
           <v-flex xs12>
-            <p>Current Gas Price: {{ gasPrice / 1000000000 }} Gwei</p>
+            <p>Current Gas Price: {{ gasPriceGwei }} Gwei</p>
           </v-flex>
           <v-flex xs12>
             <v-combobox
@@ -24,10 +24,10 @@
             <v-slider
               v-model="gasPrice"
               :color="color"
-              :max="maximumGas"
+              :max="50000000000"
               label="Gas Price"
-              step="5000"
-              min="1"
+              step="1000000000"
+              min="5000000000"
               thumb-label
               ticks
             />
@@ -70,13 +70,6 @@
         priorityGas: 0
       }
     },
-      // watch: {
-      //   gasPrice() {
-      //       // this.gasPriceGwei = Web3.utils.fromWei(this.gasPrice, "Gwei")
-      //       this.gasPriceGwei = this.gasPrice / 1000000000
-      //       console.log('Hello Something is happening.......')
-      //   }
-      // },
     computed: {
       color () {
         if(this.gasPrice < (this.normalGas / 2)) return 'red'
@@ -97,6 +90,10 @@
         } else {
           this.gasPrice = this.$g("eth.available_networks")[0].gasPrice.normal
         }
+      },
+
+      gasPrice: function() {
+        this.gasPriceGwei = this.gasPrice / 1000000000
       }
     },
     created() {
@@ -112,8 +109,8 @@
           source: this.wallet,
           transfer: {
             gasPrice: this.gasPrice, // Cost per litre of gas (1 GWei = 1,000,000,000 Wei)
-            gas: this.$g("eth.available_networks")[0].gas.normal, // litre of gas, mileage
-            gasLimit: this.$g("eth.available_networks")[0].gas.normal + 4000 // full tank
+            gas: this.$g("eth.available_networks")[0].gas.transfer, // litre of gas, mileage
+            gasLimit: this.$g("eth.available_networks")[0].gas.transfer + 4000 // full tank
           },
           destination: {
             address: this.address,

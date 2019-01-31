@@ -25,6 +25,7 @@
     "is-electron": "^2.2.0",
     "lodash.debounce": "^4.0.8",
     "lodash.get": "^4.4.2",
+    "nem2-sdk": "^0.10.1",
     "nuxt": "^2.3.4",
     "qrcode-generator": "^1.4.1",
     "rxjs": "^6.4.0",
