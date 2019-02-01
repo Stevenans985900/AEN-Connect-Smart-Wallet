@@ -19,7 +19,6 @@
 
 <script>
 import TransactionStringify from '~/components/Eth/TransactionStringify'
-import Contract from '~/class/network/Contract'
 
 export default {
   components: {
@@ -45,15 +44,15 @@ export default {
       wallet: this.wallet,
       etherscan: this.$g('eth.etherscan')
     }
-    const networkHelper = new Contract(this.$store.state.wallet.ethereum.activeApiEndpoint)
-    networkHelper.transactionsHistorical(this.options).then((transactions) => {
+    const networkHandler = this.$store.getters['wallet/networkHandler']('contract')
+    networkHandler.transactionsHistorical(this.options).then((transactions) => {
       this.transactions = transactions
       this.loading = false
     })
 
     setInterval(
       function () {
-        networkHelper.transactionsHistorical(this.options).then((transactions) => {
+        networkHandler.transactionsHistorical(this.options).then((transactions) => {
           this.transactions = transactions
         })
       }.bind(this), this.$g('internal.commonTasksInterval')

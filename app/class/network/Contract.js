@@ -50,12 +50,12 @@ export default class Contract extends Generic {
   transactionsHistorical(options) {
     super.transactionsHistorical(options)
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       axios.get(options.wallet.network.etherscan_api_endpoint, {
         params: {
           module: 'account',
           action: 'txlist',
-          address: options.wallet.address,
+          address: options.wallet.managerWalletAddress,
           startblock: 0,
           endblock: 99999999,
           sort: 'desc',
@@ -63,11 +63,19 @@ export default class Contract extends Generic {
         }
       })
         .then(function (response) {
+          // Filter the results by the contract address
           console.log(response)
-          resolve(response.data.result)
+          let transactions = []
+          for(let transactionKey in response.data.result) {
+            let transaction = response.data.result[transactionKey]
+            if(transaction.contractAddress === options.address) {
+              transactions.push(transaction)
+            }
+          }
+          resolve(transactions)
         })
         .catch(function (error) {
-          console.log(error)
+          reject(error)
         })
     })
   }
