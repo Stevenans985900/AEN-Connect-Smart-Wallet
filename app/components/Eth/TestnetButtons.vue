@@ -1,6 +1,8 @@
 <template>
   <v-menu v-if="testnet" offset-y>
-    <v-btn slot="activator">TestNet Functions</v-btn>
+    <v-btn slot="activator">
+      TestNet Functions
+    </v-btn>
     <v-list>
       <v-list-tile :href="faucet.address" target="_blank">
         <v-list-tile-title>Visit Faucet</v-list-tile-title>
@@ -14,42 +16,43 @@ export default {
   props: {
     wallet: {
       type: Object,
-      default: function() {
-        return {};
+      default: function () {
+        return {}
       }
     }
   },
   computed: {
     faucet() {
-      return this.$g("eth.faucets")[0];
+      return this.$g('eth.faucets')[0]
     },
     testnet() {
-      if (this.wallet.network.hasOwnProperty("testing")) {
-        return true;
+      if (this.wallet.network.hasOwnProperty('testing')) {
+        return true
       }
+      return false
     }
   },
   methods: {
     checkWalletLive(wallet) {
-      this.$store.dispatch("wallet/checkWalletLive", wallet).then(response => {
-        this.$store.commit("wallet/setProperty", {
+      this.$store.dispatch('wallet/checkWalletLive', wallet).then((response) => {
+        this.$store.commit('wallet/setProperty', {
           address: wallet.address,
-          key: "onChain",
+          key: 'onChain',
           value: response
-        });
+        })
         if (response === true) {
-          this.$store.commit("showNotification", {
-            type: "success",
-            message: "The wallet is recognised on the blockchain"
-          });
+          this.$store.commit('showNotification', {
+            type: 'success',
+            message: 'The wallet is recognised on the blockchain'
+          })
         } else {
-          this.$store.commit("showNotification", {
-            type: "info",
-            message: "The wallet is not yet recognised on the blockchain"
-          });
+          this.$store.commit('showNotification', {
+            type: 'info',
+            message: 'The wallet is not yet recognised on the blockchain'
+          })
         }
-      });
+      })
     }
   }
-};
+}
 </script>

@@ -4,7 +4,9 @@
       <v-icon v-if="direction === 'incoming'">
         call_received
       </v-icon>
-      <v-icon v-else>call_made</v-icon>
+      <v-icon v-else>
+        call_made
+      </v-icon>
     </span>
     <span v-if="display === 'all' || display === 'date'">
       {{ date }}
@@ -21,7 +23,7 @@
 <script>
 import { format } from 'date-fns'
 export default {
-	props: {
+  props: {
     display: {
       type: String,
       default: 'all'
@@ -38,36 +40,36 @@ export default {
         return {}
       }
     }
-	},
-	computed: {
-		address () {
-			if(this.direction === 'incoming') {
+  },
+  computed: {
+    address() {
+      if (this.direction === 'incoming') {
         return this.data.signer.address.address
       } else {
         return this.data.recipient.address
       }
-
     },
     date() {
       return format((this.data.deadline.value), 'YYYY-MM-DD HH:mm')
     },
-		direction () {
-			if(this.data.recipient.address === this.wallet.address) {
+    direction() {
+      if (this.data.recipient.address === this.wallet.address) {
         return 'incoming'
-			} else {
-				return 'outgoing'
-			}
-		},
-		value () {
-			if (!this.data.hasOwnProperty('mosaics')) return 0
-			var mosaicCount = this.data.mosaics.length
-			for (var currentRound = 0; mosaicCount > currentRound; currentRound++) {
-				var value = this.data.mosaics[currentRound].amount.lower / 1000000
-				let b = value.toFixed(6).split('.')
-				let r = b[0].split(/(?=(?:...)*$)/).join(',')
-				return r
-			}
-		}
-	}
+      } else {
+        return 'outgoing'
+      }
+    },
+    value() {
+      if (!this.data.hasOwnProperty('mosaics')) return 0
+      const mosaicCount = this.data.mosaics.length
+      for (let currentRound = 0; mosaicCount > currentRound; currentRound++) {
+        const value = this.data.mosaics[currentRound].amount.lower / 1000000
+        const b = value.toFixed(6).split('.')
+        const r = b[0].split(/(?=(?:...)*$)/).join(',')
+        return r
+      }
+      return 0
+    }
+  }
 }
 </script>

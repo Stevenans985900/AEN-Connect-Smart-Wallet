@@ -13,16 +13,16 @@
             <template slot="items" slot-scope="props">
               <tr @click="props.expanded = !props.expanded">
                 <td>
-                  <transaction-stringify :transaction="props.item" display="date"/>
+                  <transaction-stringify :transaction="props.item" display="date" />
                 </td>
                 <td>
-                  <transaction-stringify :wallet="wallet" :transaction="props.item" display="direction"/>
+                  <transaction-stringify :wallet="wallet" :transaction="props.item" display="direction" />
                 </td>
                 <td>
-                  <transaction-stringify :wallet="wallet" :transaction="props.item" display="value"/>
+                  <transaction-stringify :wallet="wallet" :transaction="props.item" display="value" />
                 </td>
                 <td>
-                  <transaction-stringify :wallet="wallet" :transaction="props.item" display="address"/>
+                  <transaction-stringify :wallet="wallet" :transaction="props.item" display="address" />
                 </td>
               </tr>
             </template>
@@ -47,45 +47,49 @@ import TransactionStringify from '~/components/Aen/TransactionStringify'
 import Aen from '~/class/network/Aen'
 
 export default {
-    components: {
-      TransactionStringify
-    },
-    props: {
-      wallet: {
-        type: Object,
-        default: function () {
-          return {}
-        }
+  components: {
+    TransactionStringify
+  },
+  props: {
+    wallet: {
+      type: Object,
+      default: function () {
+        return {}
       }
-    },
-    data() {
-      return {
-        transactions: {},
-        loading: true,
-        expand: false,
-        headers: [
-          { text: 'Date', sortable: false, value: '' },
-          { text: 'Direction', sortable: false, value: '' },
-          { text: 'Amount', sortable: false, value: '' },
-          { text: 'Address', sortable: false, value: '' }
-        ]
-      }
-    },
-    mounted() {
-      let networkHelper = new Aen(this.$store.state.wallet.aen.activeApiEndpoint)
-      networkHelper.transactionsHistorical(this.wallet).then(transactions => {
-        this.transactions = transactions
-        this.loading = false
-      })
-
-      setInterval(
-        function() {
-          networkHelper.transactionsHistorical(this.wallet).then(transactions => {
-            this.transactions = transactions
-          })
-        }.bind(this), 15000
-      )
-
     }
+  },
+  data() {
+    return {
+      transactionsListener: null,
+      transactions: {},
+      loading: true,
+      expand: false,
+      headers: [
+        { text: 'Date', sortable: false, value: '' },
+        { text: 'Direction', sortable: false, value: '' },
+        { text: 'Amount', sortable: false, value: '' },
+        { text: 'Address', sortable: false, value: '' }
+      ]
+    }
+  },
+  mounted() {
+    const networkHelper = new Aen(this.$store.state.wallet.aen.activeApiEndpoint)
+    networkHelper.transactionsHistorical(this.wallet).then((transactions) => {
+      this.transactions = transactions
+      this.loading = false
+    })
+
+    this.transactionsListener = setInterval(
+      function () {
+        networkHelper.transactionsHistorical(this.wallet).then((transactions) => {
+          this.transactions = transactions
+        })
+      }.bind(this), 15000
+    )
+  },
+  beforeDestroy() {
+    console.log('CALLING DESTROY FUNCTION!')
+    clearInterval(this.transactionsListener)
+  }
 }
 </script>

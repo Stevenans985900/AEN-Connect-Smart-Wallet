@@ -22,11 +22,11 @@
 
 <script>
 export default {
-	computed: {
-		dialog: {
-			get: function () { return this.$store.getters.loading },
-			set: function () {}
-		}
-	}
+  computed: {
+    dialog: {
+      get: function () { return this.$store.getters.loading },
+      set: function () {}
+    }
+  }
 }
 </script>

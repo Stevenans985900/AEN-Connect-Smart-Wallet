@@ -2,7 +2,6 @@
   <v-layout row wrap align-center>
     <v-flex xs12>
       <v-stepper v-model="currentStep" vertical>
-
         <v-stepper-step :complete="currentStep > 1" step="1">
           Add Method
           <small>Determine if you want a new Bitcoin wallet or to add an existing wallet</small>
@@ -17,14 +16,15 @@
               </v-radio-group>
             </v-card-text>
           </v-card>
-          <v-btn color="primary" @click="currentStep = 2">Continue</v-btn>
+          <v-btn color="primary" @click="currentStep = 2">
+            Continue
+          </v-btn>
         </v-stepper-content>
 
-        <v-stepper-step :complete="currentStep > 2" step="2" >
+        <v-stepper-step :complete="currentStep > 2" step="2">
           {{ stepTwoLabel }}
         </v-stepper-step>
         <v-stepper-content step="2">
-
           <!-- ADD NEW WALLET -->
           <v-card v-if="addType == 'new'">
             <v-card-text>
@@ -37,8 +37,8 @@
                 >
                   <v-select
                     v-if="multipleNetworks"
-                    :items="availableNetworks"
                     v-model="network"
+                    :items="availableNetworks"
                     return-object
                     item-text="name"
                     label="Network"
@@ -75,8 +75,8 @@
                 <v-form ref="existingWalletForm" v-model="recoverValid" class="full-width">
                   <v-select
                     v-if="multipleNetworks"
-                    :items="availableNetworks"
                     v-model="network"
+                    :items="availableNetworks"
                     return-object
                     item-text="name"
                     label="Network"
@@ -94,7 +94,6 @@
                     label="Account Private Key"
                     required
                     counter
-
                   />
                   <v-text-field
                     v-model="walletPassword"
@@ -111,15 +110,20 @@
             </v-card-text>
           </v-card>
 
+          <v-btn v-if="addType == 'new'" color="primary" @click="createWallet">
+            Create
+          </v-btn>
+          <v-btn v-if="addType == 'manualRecover'" color="primary" @click="loadWallet">
+            Recover
+          </v-btn>
 
-          <v-btn v-if="addType == 'new'" color="primary" @click="createWallet">Create</v-btn>
-          <v-btn v-if="addType == 'manualRecover'" color="primary" @click="loadWallet">Recover</v-btn>
-
-
-          <v-btn flat @click="back">Back</v-btn>
+          <v-btn flat @click="back">
+            Back
+          </v-btn>
         </v-stepper-content>
 
-        <v-stepper-step :complete="currentStep > 3" step="3">Summary
+        <v-stepper-step :complete="currentStep > 3" step="3">
+          Summary
           <small>Review your wallet</small>
         </v-stepper-step>
         <v-stepper-content step="3">
@@ -136,29 +140,32 @@
                 <v-checkbox v-if="main == true" v-model="eulaAgree" :rules="[rules.basic.required]" required>
                   <span slot="label">
                     I agree to the
-                    <a href="http://aencoin.com/eula">AEN EULA</a>
+                    <a href="http://aencoin.com/eula">
+                      AEN EULA
+                    </a>
                   </span>
                 </v-checkbox>
 
-                <backup-wallet :wallet="wallet"/>
+                <backup-wallet :wallet="wallet" />
               </v-form>
             </v-card-text>
           </v-card>
-          <v-btn :disabled="!proceedValid" color="primary" @click="complete">Complete</v-btn>
+          <v-btn :disabled="!proceedValid" color="primary" @click="complete">
+            Complete
+          </v-btn>
         </v-stepper-content>
-
       </v-stepper>
     </v-flex>
   </v-layout>
 </template>
 
 <script>
-import BusinessCard from "~/components/BusinessCard"
-import BackupWallet from "~/components/BackupWallet"
-import RestoreFromFile from "~/components/RestoreFromFile"
+import BusinessCard from '~/components/BusinessCard'
+import BackupWallet from '~/components/BackupWallet'
+import RestoreFromFile from '~/components/RestoreFromFile'
 
 // TODO Approaching level of abstraction where no need for full network components. when have time, complete
-function initialDataState () {
+function initialDataState() {
   return {
     addType: 'new',
     backupAgree: false,
@@ -172,13 +179,13 @@ function initialDataState () {
     wallet: {},
     rules: {
       basic: {
-        required: value => !!value || "Required."
+        required: value => !!value || 'Required.'
       },
       walletName: {
-        minLength: v => v.length >= 4 || "Min 4 Characters"
+        minLength: v => v.length >= 4 || 'Min 4 Characters'
       },
       privateKey: {
-        length: v => v.length === 64 || "Length is 64 Characters"
+        length: v => v.length === 64 || 'Length is 64 Characters'
       }
     }
   }
@@ -193,7 +200,7 @@ export default {
   props: {
     main: {
       type: Boolean,
-      default: function() {
+      default: function () {
         return false
       }
     }
@@ -201,25 +208,25 @@ export default {
   data: function () { return initialDataState() },
   computed: {
     availableNetworks() {
-      return this.$g("bitcoin.available_networks");
+      return this.$g('bitcoin.available_networks')
     },
     stepTwoLabel() {
-      if(this.addType === 'fileImport') {
+      if (this.addType === 'fileImport') {
         return 'File Import'
       }
       return 'Enter Details'
     },
     multipleNetworks() {
-      if (this.$g("bitcoin.available_networks").length > 1) {
-        return true;
+      if (this.$g('bitcoin.available_networks').length > 1) {
+        return true
       }
       return false
     }
   },
   beforeMount() {
     this.reset()
-    if(this.multipleNetworks === false) {
-      this.network = this.$g("bitcoin.available_networks")[0]
+    if (this.multipleNetworks === false) {
+      this.network = this.$g('bitcoin.available_networks')[0]
     }
   },
   methods: {
@@ -238,7 +245,7 @@ export default {
       if (!this.$refs.newWalletForm.validate()) {
         return false
       }
-      let walletOptions = {
+      const walletOptions = {
         type: 'btc',
         network: this.network,
         name: this.walletName,
@@ -247,28 +254,28 @@ export default {
       console.log('going to add from controller')
       console.log(walletOptions)
       this.$store.dispatch('wallet/new', walletOptions)
-      .then((wallet) => {
-        console.log('wallet new response in controller')
-        console.log(wallet)
-        this.wallet = wallet
-        this.currentStep++
-        this.startLiveListener(wallet)
-      })
+        .then((wallet) => {
+          console.log('wallet new response in controller')
+          console.log(wallet)
+          this.wallet = wallet
+          this.currentStep++
+          this.startLiveListener(wallet)
+        })
       console.log('at end of btc add controller')
     },
     loadWallet() {
       if (!this.$refs.existingWalletForm.validate()) {
-        console.log("form is invalid");
-        return false;
+        console.log('form is invalid')
+        return false
       }
-      this.$store.dispatch('wallet/load',{
-          type: 'btc',
-          network: this.$store.state.wallet.context.network,
-          name: this.walletName,
-          password: this.walletPassword,
-          accountPrivateKey: this.accountPrivateKey,
-          main: this.main
-        }
+      this.$store.dispatch('wallet/load', {
+        type: 'btc',
+        network: this.$store.state.wallet.context.network,
+        name: this.walletName,
+        password: this.walletPassword,
+        accountPrivateKey: this.accountPrivateKey,
+        main: this.main
+      }
       ).then((wallet) => {
         this.wallet = wallet
         this.currentStep++
@@ -280,9 +287,9 @@ export default {
     },
     startLiveListener(wallet) {
       // Activate a listener on the wallet to check when it is live on the network
-      let walletCheckInterval = setInterval(
-        function() {
-          this.$store.dispatch('wallet/checkWalletLive', wallet).then(response => {
+      const walletCheckInterval = setInterval(
+        function () {
+          this.$store.dispatch('wallet/checkWalletLive', wallet).then((response) => {
             if (response === true) {
               clearInterval(walletCheckInterval)
             }
@@ -300,8 +307,8 @@ export default {
       console.log(wallet)
       this.wallet = wallet
       this.currentStep++
-      if(wallet.hasOwnProperty('onChain')) {
-        if(wallet.onChain === false) {
+      if (wallet.hasOwnProperty('onChain')) {
+        if (wallet.onChain === false) {
           this.startLiveListener(wallet)
         }
       }

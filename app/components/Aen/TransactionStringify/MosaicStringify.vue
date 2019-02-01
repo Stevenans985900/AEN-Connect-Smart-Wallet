@@ -15,14 +15,14 @@
 </template>
 
 <script>
-	export default {
-		props: {
-			mosaic: {
-				type: Object,
-				default: function () {
-					return {}
-				}
-			}
-		}
-	}
+export default {
+  props: {
+    mosaic: {
+      type: Object,
+      default: function () {
+        return {}
+      }
+    }
+  }
+}
 </script>

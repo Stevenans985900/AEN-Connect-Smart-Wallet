@@ -28,7 +28,7 @@ export default {
   data() {
     return {
       netStatus: false
-    };
+    }
   },
   computed: {
     connectionStrengthIcon() {
@@ -39,25 +39,25 @@ export default {
       return icon
     },
     blockHeight() {
-      return this.$store.state.wallet.aen.blockHeight;
+      return this.$store.state.wallet.aen.blockHeight
     },
     blockScore() {
-      return this.$store.state.wallet.aen.blockScore;
+      return this.$store.state.wallet.aen.blockScore
     },
     currentPing() {
-      return this.$store.state.wallet.aen.activeApiPing;
+      return this.$store.state.wallet.aen.activeApiPing
     },
     currentApi: {
-      get: function() {
-        return this.$store.state.wallet.aen.activeApiEndpoint;
+      get: function () {
+        return this.$store.state.wallet.aen.activeApiEndpoint
       },
-      set: function(value) {
-        this.$store.commit("setApiEndpoint", value)
+      set: function (value) {
+        this.$store.commit('setApiEndpoint', value)
       }
     },
     apiEndpoints() {
-      return this.$g("aen.api_endpoints");
+      return this.$g('aen.api_endpoints')
     }
   }
-};
+}
 </script>

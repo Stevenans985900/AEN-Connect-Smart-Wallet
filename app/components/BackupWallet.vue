@@ -15,17 +15,17 @@
         <v-card-text>
           <v-list subheader>
             <v-list-tile
-              v-for="wallet in wallets"
-              :key="wallet.address"
+              v-for="contextWallet in wallets"
+              :key="contextWallet.address"
               avatar
-              @click="backupWallet(wallet)"
+              @click="backupWallet(contextWallet)"
             >
               <v-list-tile-avatar>
-                <wallet-image :wallet="wallet" />
+                <wallet-image :wallet="contextWallet" />
               </v-list-tile-avatar>
 
               <v-list-tile-content>
-                <v-list-tile-title v-html="wallet.name" />
+                <v-list-tile-title>{{ contextWallet.name }}</v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
           </v-list>
@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import CryptoJS from "crypto-js"
+import CryptoJS from 'crypto-js'
 
 export default {
   props: {
@@ -57,41 +57,41 @@ export default {
       return this.$store.state.wallet.wallets
     },
     version() {
-      return this.$g("aen.network_version");
+      return this.$g('aen.network_version')
     }
   },
   methods: {
     clickBackupWallet() {
-      if(Object.keys(this.wallet).length === 0) {
+      if (Object.keys(this.wallet).length === 0) {
         this.dialogBackup = true
       } else {
         this.backupWallet(this.wallet)
       }
     },
     backupWallet(wallet) {
-      let exportName = wallet.name + "-"+wallet.type+"-" + new Date().toISOString().slice(0, 10)
-      let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(wallet))
-      let downloadAnchorNode = document.createElement("a");
-      downloadAnchorNode.setAttribute("href", dataStr);
-      downloadAnchorNode.setAttribute("download", exportName + ".json");
-      document.body.appendChild(downloadAnchorNode);
-      downloadAnchorNode.click();
-      downloadAnchorNode.remove();
+      const exportName = wallet.name + '-' + wallet.type + '-' + new Date().toISOString().slice(0, 10)
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(wallet))
+      const downloadAnchorNode = document.createElement('a')
+      downloadAnchorNode.setAttribute('href', dataStr)
+      downloadAnchorNode.setAttribute('download', exportName + '.json')
+      document.body.appendChild(downloadAnchorNode)
+      downloadAnchorNode.click()
+      downloadAnchorNode.remove()
 
       // Create an encrypted version of the backup
-      let encrypted = "data:application/octet-stream,"+CryptoJS.AES.encrypt(JSON.stringify(wallet), this.$g('salt')).toString()
-      var downloadEncryptedAnchorNode = document.createElement("a");
-      downloadEncryptedAnchorNode.setAttribute("href", encrypted);
-      downloadEncryptedAnchorNode.setAttribute("download", exportName + ".enc");
-      document.body.appendChild(downloadEncryptedAnchorNode);
-      downloadEncryptedAnchorNode.click();
-      downloadEncryptedAnchorNode.remove();
+      const encrypted = 'data:application/octet-stream,' + CryptoJS.AES.encrypt(JSON.stringify(wallet), this.$g('salt')).toString()
+      const downloadEncryptedAnchorNode = document.createElement('a')
+      downloadEncryptedAnchorNode.setAttribute('href', encrypted)
+      downloadEncryptedAnchorNode.setAttribute('download', exportName + '.enc')
+      document.body.appendChild(downloadEncryptedAnchorNode)
+      downloadEncryptedAnchorNode.click()
+      downloadEncryptedAnchorNode.remove()
 
-      this.$store.commit("showNotification", {
-        type: "info",
+      this.$store.commit('showNotification', {
+        type: 'info',
         message: 'A plain JSON version and an encrypted version (which can only be read from this program) have requested download'
       })
     }
   }
-};
+}
 </script>

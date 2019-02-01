@@ -1,7 +1,7 @@
 <template>
   <v-card flat>
     <v-card-text class="text-xs-center">
-      <address-render :address="wallet.address" :use-address-book="useAddressBook"/>
+      <address-render :address="wallet.address" :use-address-book="useAddressBook" />
       <v-text-field
         v-if="includePrivateKey"
         v-model="wallet.privateKey"
@@ -11,53 +11,53 @@
         readonly
         @click:append="showPrivateKey = !showPrivateKey"
       />
-      <v-img :src="imageData" aspect-ratio="1"/>
+      <v-img :src="imageData" aspect-ratio="1" />
     </v-card-text>
   </v-card>
 </template>
 
 <script>
-  import qrCodeGenerator from "qrcode-generator"
-  export default {
-    props: {
-      wallet: {
-        type: Object,
-        default: function () {
-          return {}
-        }
-      },
-      useAddressBook: {
-        type: Boolean,
-        default: true
-      },
-      includePrivateKey: {
-        type: Boolean,
-        default: false
+import qrCodeGenerator from 'qrcode-generator'
+export default {
+  props: {
+    wallet: {
+      type: Object,
+      default: function () {
+        return {}
       }
     },
-    data() {
-      return {
-        imageData: '',
-        showPrivateKey: false
-      }
+    useAddressBook: {
+      type: Boolean,
+      default: true
     },
-    watch: {
-      wallet: function() {
-        this.processWallet()
-      }
-    },
-    mounted: function() {
+    includePrivateKey: {
+      type: Boolean,
+      default: false
+    }
+  },
+  data() {
+    return {
+      imageData: '',
+      showPrivateKey: false
+    }
+  },
+  watch: {
+    wallet: function () {
       this.processWallet()
-    },
-    methods: {
-      processWallet() {
-        if(this.wallet.hasOwnProperty('address')) {
-          var qr = qrCodeGenerator(0, "M");
-          qr.addData(this.wallet.address);
-          qr.make();
-          this.imageData = qr.createDataURL(5);
-        }
+    }
+  },
+  mounted: function () {
+    this.processWallet()
+  },
+  methods: {
+    processWallet() {
+      if (this.wallet.hasOwnProperty('address')) {
+        const qr = qrCodeGenerator(0, 'M')
+        qr.addData(this.wallet.address)
+        qr.make()
+        this.imageData = qr.createDataURL(5)
       }
     }
   }
+}
 </script>

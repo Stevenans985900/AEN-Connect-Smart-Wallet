@@ -1,36 +1,20 @@
-const webpack = require('webpack')
-
+const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
+const pkg = require('./package')
 
 module.exports = {
-    mode: 'spa',
-    head: {
-        title: 'AEN Smart Wallet',
-        meta: [{
-                charset: 'utf-8'
-            },
-            {
-                name: 'viewport',
-                content: 'width=device-width, initial-scale=1'
-            },
-            {
-                hid: 'description',
-                name: 'description',
-                content: 'The AEN Smart Wallet, your multi-network blockchain manager and window in to AEN'
-            },
-            {
-                name: 'msapplication-TileColor',
-                content: '#ffffff'
-            },
-            {
-                name: 'msapplication-TileImage',
-                content: '/ms-icon-144x144.png'
-            },
-            {
-                name: 'theme-color',
-                content: '#ffffff'
-            }
-        ],
-        link: [{
+  mode: 'spa',
+
+  /*
+  ** Headers of the page
+  */
+  head: {
+    title: pkg.name,
+    meta: [
+      { charset: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { hid: 'description', name: 'description', content: pkg.description }
+    ],
+    link: [{
                 rel: 'manifest',
                 href: '/manifest.json'
             },
@@ -108,80 +92,89 @@ module.exports = {
                 href: 'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons'
             }
         ]
-    },
-    loading: false, // Disable default loading bar
-    modules: [
-        '@nuxtjs/dotenv',
-        '@nuxtjs/axios'
-        // ['nuxt-matomo', {
-        //     debug: true,
-        //     verbose: true,
-        //     matomoUrl: '//stats.aencoin.com/',
-        //     siteId: 6 }]
-    ],
-    plugins: [
-        '~/plugins/globals.js',
-        '~/plugins/addressRender.js',
-        '~/plugins/businessCard.js',
-        '~/plugins/clipboard.js',
-        {
-            src: '~/plugins/localStorage.js',
-            ssr: false
-        },
-        '~/plugins/vuetify',
-        '~/plugins/wallet',
-        '~/plugins/walletImage'
-    ],
-    build: {
-        extractCSS: true,
-        plugins: [
-            new webpack.DefinePlugin({
-                "global.GENTLY": false
-            })
-        ],
-        vendor: [
-            'vuetify'
-        ],
-        extend(config, {
-            isDev,
-            isClient
-        }) {
-            // config.module.rules.push({
-            //     test: /\.js$/,
-            //     loader: 'babel-loader',
-            //     include: /node_modules\/nuxt-matomo/
-            // })
-            if (isClient) {
-                config.node = {
-                    electron: 'empty',
-                    fs: 'empty',
-                    net: 'empty',
-                    tls: 'empty',
-                    child_process: 'empty'
-                }
-            }
-            if (isDev && isClient) {
-                config.module.rules.push({
-                    enforce: 'pre',
-                    test: /\.(js|vue)$/,
-                    loader: 'eslint-loader',
-                    exclude: /(node_modules)/,
-                }
-             )
-            }
+  },
 
-            // Check if we're in Electron and change the renderer if so
-            if (process.env.hasOwnProperty('CHROME_DESKTOP') && process.env.CHROME_DESKTOP === 'Electron.desktop') {
-                config.target = 'electron-renderer'
-            }
+  /*
+  ** Customize the progress-bar color
+  */
+  loading: { color: '#fff' },
+
+  /*
+  ** Global CSS
+  */
+  css: [
+    '@/assets/style/app.styl'
+  ],
+
+  /*
+  ** Plugins to load before mounting the App
+  */
+  plugins: [
+    '@/plugins/globals.js',
+    '@/plugins/addressRender.js',
+    '@/plugins/businessCard.js',
+    '@/plugins/clipboard.js',
+    {
+        src: '@/plugins/localStorage.js',
+        ssr: false
+    },
+    '@/plugins/vuetify',
+    '@/plugins/walletImage'
+  ],
+
+  /*
+  ** Nuxt.js modules
+  */
+  modules: [
+    // Doc: https://axios.nuxtjs.org/usage
+    '@nuxtjs/axios'
+  ],
+  /*
+  ** Axios module configuration
+  */
+  axios: {
+    // See https://github.com/nuxt-community/axios-module#options
+  },
+
+  /*
+  ** Build configuration
+  */
+  build: {
+    transpile: ['vuetify/lib'],
+    plugins: [new VuetifyLoaderPlugin()],
+    loaders: {
+      stylus: {
+        import: ['~assets/style/variables.styl']
+      }
+    },
+
+    /*
+    ** You can extend webpack config here
+    */
+    extend(config, ctx) {
+      if (ctx.isClient) {
+        config.node = {
+            electron: 'empty',
+            fs: 'empty',
+            net: 'empty',
+            tls: 'empty',
+            child_process: 'empty'
         }
-    },
-    dev: process.env.NODE_ENV === 'DEV',
-    env: {
-        baseUrl: process.env.BASE_URL || 'http://localhost:3000'
-    },
-    css: [
-        '~/assets/style/app.styl',
-        '~/assets/style/global.css'
-    ]
+      }
+      // Run ESLint on save
+      if (ctx.isDev && ctx.isClient) {
+        config.module.rules.push({
+          enforce: 'pre',
+          test: /\.(js|vue)$/,
+          loader: 'eslint-loader',
+          exclude: /(node_modules)/
+        })
+      }
+
+      // Check if we're in Electron and change the renderer if so
+      if (process.env.hasOwnProperty('CHROME_DESKTOP') && process.env.CHROME_DESKTOP === 'Electron.desktop') {
+          config.target = 'electron-renderer'
+      }
+    }
+  }
 }

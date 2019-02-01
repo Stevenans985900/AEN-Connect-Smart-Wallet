@@ -20,7 +20,7 @@ pipeline {
 						steps {
 						    dir('wallet/app') {
                     // TODO Remove the install of cross-env once going beyond standard node image
-                    sh 'ls -la && npm i'
+                    sh 'ls -la && yarn install'
                 }
             }
         }
@@ -28,7 +28,7 @@ pipeline {
         stage('Run tests') {
             steps {
                 dir('wallet/app') {
-                    sh 'npm run test'
+                    sh 'yarn run test'
                 }
             }
         }
@@ -43,7 +43,7 @@ pipeline {
                         props.build_number = env.BUILD_NUMBER
                         writeJSON file: 'globals.json', json: props, pretty: 4
                     }
-                    sh "npm run build"
+                    sh "yaen run build"
                 }
             }
         }

@@ -1,10 +1,16 @@
 <template>
   <v-layout row justify-center align-center>
-
     <!-- Contacts table -->
     <v-flex xs12>
       <v-card>
-        <v-btn color="success" absolute fab bottom left @click="dialogNewContact = true">
+        <v-btn
+          color="success"
+          absolute
+          fab
+          bottom
+          left
+          @click="dialogNewContact = true"
+        >
           <v-icon>add</v-icon>
         </v-btn>
         <v-card-title>
@@ -19,10 +25,16 @@
         <v-data-table :headers="headers" :items="contacts" :search="search">
           <template slot="items" slot-scope="props">
             <td>{{ props.item.displayText }}</td>
-            <td class="text-xs-right">{{ props.item.address }}</td>
+            <td class="text-xs-right">
+              {{ props.item.address }}
+            </td>
             <td class="justify-center layout px-0">
-              <v-icon small class="mr-2" @click="editContact(props.item)">edit</v-icon>
-              <v-icon small @click="deleteContact(props.item)">delete</v-icon>
+              <v-icon small class="mr-2" @click="editContact(props.item)">
+                edit
+              </v-icon>
+              <v-icon small @click="deleteContact(props.item)">
+                delete
+              </v-icon>
             </td>
           </template>
           <v-alert
@@ -30,7 +42,9 @@
             :value="true"
             color="error"
             icon="warning"
-          >Your search for "{{ search }}" found no results.</v-alert>
+          >
+            Your search for "{{ search }}" found no results.
+          </v-alert>
         </v-data-table>
       </v-card>
     </v-flex>
@@ -43,7 +57,7 @@
         </v-btn>
         <v-toolbar-title>Add Contact</v-toolbar-title>
       </v-toolbar>
-      <contact-edit @complete="contactAdded"/>
+      <contact-edit @complete="contactAdded" />
     </v-dialog>
 
     <!-- Edit contact -->
@@ -54,14 +68,13 @@
         </v-btn>
         <v-toolbar-title>Edit Contact</v-toolbar-title>
       </v-toolbar>
-      <contact-edit :display-text="displayText" :address="address" @complete="contactEdited"/>
+      <contact-edit :display-text="displayText" :address="address" @complete="contactEdited" />
     </v-dialog>
-
   </v-layout>
 </template>
 
 <script>
-  import ContactEdit from "~/components/ContactEdit"
+import ContactEdit from '~/components/ContactEdit'
 export default {
   components: { ContactEdit },
   /**
@@ -74,22 +87,22 @@ export default {
       address: '',
       dialogNewContact: false,
       dialogEditContact: false,
-      search: "",
+      search: '',
       headers: [
         {
-          text: "Name",
-          value: "name"
+          text: 'Name',
+          value: 'name'
         },
         {
-          text: "Address",
-          value: "address"
+          text: 'Address',
+          value: 'address'
         },
         {
-          text: "Actions",
-          value: ""
+          text: 'Actions',
+          value: ''
         }
       ]
-    };
+    }
   },
   /**
    * COMPUTED
@@ -102,33 +115,33 @@ export default {
   /**
    * MOUNTED
    */
-  mounted: function() {
+  mounted: function () {
     // Only start once global loading finished
-    let preparationInterval = setInterval(
-      function() {
+    const preparationInterval = setInterval(
+      function () {
         if (this.$store.getters.booting === false) {
-          clearInterval(preparationInterval);
-          this.$store.commit("setLoading", { t: "router", v: false });
+          clearInterval(preparationInterval)
+          this.$store.commit('setLoading', { t: 'router', v: false })
         }
       }.bind(this),
       this.$g('internal.controllerPollReadyInterval')
-    );
+    )
   },
   /**
    * METHODS
    */
   methods: {
     contactAdded() {
-      this.$store.commit("showNotification", {
-        type: "success",
-        message: "Contact added to address book"
+      this.$store.commit('showNotification', {
+        type: 'success',
+        message: 'Contact added to address book'
       })
       this.dialogNewContact = false
     },
     contactEdited() {
-      this.$store.commit("showNotification", {
-        type: "success",
-        message: "Changes Saved"
+      this.$store.commit('showNotification', {
+        type: 'success',
+        message: 'Changes Saved'
       })
       this.dialogEditContact = false
     },
@@ -139,5 +152,5 @@ export default {
       this.dialogEditContact = true
     }
   }
-};
+}
 </script>

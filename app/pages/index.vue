@@ -3,17 +3,21 @@
     <v-flex xs12>
       <!-- Initial setup -->
       <v-card>
-        <v-card-title class="headline">Welcome to AEN Smart Wallet ({{ network }})</v-card-title>
+        <v-card-title class="headline">
+          Welcome to AEN Smart Wallet ({{ network }})
+        </v-card-title>
         <v-card-text>
           <p>
             This Smart wallet allows you to generate and manage accounts on the
             <a
               href="https://aencoin.com/"
               target="_blank"
-            >AENChain network</a>
+            >
+              AENChain network
+            </a>
           </p>
           <p>Before proceeding, you need to have an AEN wallet setup on this device. Please choose one of the options below</p>
-          <wallet-add v-if="!wallet" type="aen" @complete="complete"/>
+          <wallet-add v-if="!wallet" type="aen" @complete="complete" />
         </v-card-text>
       </v-card>
     </v-flex>
@@ -32,13 +36,18 @@
           <p v-if="testnet">
             This wallet is on a testing network which means, you can receive some free coins to get started by visiting our faucet.
             Click the button below to visit the Faucet now or, click the accept button to agree to the <a href="http://aencoin.com/eula">
-            End User License Agreement</a> and go to your wallet management screen.
+              End User License Agreement
+            </a> and go to your wallet management screen.
           </p>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn v-if="testnet" flat="flat" @click="goToFaucet">Go to Faucet</v-btn>
-          <v-btn flat="flat" @click="acceptAndProceed">Accept EULA and proceed</v-btn>
+          <v-btn v-if="testnet" flat="flat" @click="goToFaucet">
+            Go to Faucet
+          </v-btn>
+          <v-btn flat="flat" @click="acceptAndProceed">
+            Accept EULA and proceed
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -46,7 +55,7 @@
 </template>
 
 <script>
-import WalletAdd from "~/components/WalletAdd";
+import WalletAdd from '~/components/WalletAdd'
 
 export default {
   /**
@@ -74,7 +83,7 @@ export default {
     testnet() {
       try {
         return this.wallet.network.testing
-      } catch(e) {
+      } catch (e) {
         return false
       }
     }
@@ -82,19 +91,19 @@ export default {
   /**
    * MOUNTED
    */
-  mounted: function() {
-    console.debug("Index Page: Started")
+  mounted: function () {
+    console.debug('Index Page: Started')
     // Only start once global loading finished
-    let preparationInterval = setInterval(
-      function() {
+    const preparationInterval = setInterval(
+      function () {
         if (this.$store.getters.booting === false) {
           // Redirect user to the dashboard if they already have account
           if (this.$store.state.wallet.aen.haveWallet === true) {
-            console.debug("User has saved wallet present, redirecting to dashboard")
-            this.$nuxt.$router.replace({ path: "/dashboard" })
+            console.debug('User has saved wallet present, redirecting to dashboard')
+            this.$nuxt.$router.replace({ path: '/dashboard' })
           }
           clearInterval(preparationInterval)
-          this.$store.commit("setLoading", { t: "router", v: false })
+          this.$store.commit('setLoading', { t: 'router', v: false })
         }
       }.bind(this),
       this.$g('internal.controllerPollReadyInterval')
@@ -107,17 +116,17 @@ export default {
     /**
      * Method to send user on to dashboard once wallet has been created
      */
-    complete: function(wallet) {
+    complete: function (wallet) {
       this.wallet = wallet
       this.dialogEulaAgree = true
     },
-    goToFaucet: function() {
+    goToFaucet: function () {
       window.open(this.$g('aen.faucets')[0].address + '?address=' + this.wallet.address)
     },
-    acceptAndProceed: function() {
-      this.$store.commit('setUserProperty', {key: 'eulaAgree', value: true})
-      this.$nuxt.$router.replace({ path: "/wallet" })
+    acceptAndProceed: function () {
+      this.$store.commit('setUserProperty', { key: 'eulaAgree', value: true })
+      this.$nuxt.$router.replace({ path: '/wallet' })
     }
   }
-};
+}
 </script>

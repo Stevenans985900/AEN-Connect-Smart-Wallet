@@ -13,8 +13,8 @@ export default {
     }
   },
   mounted() {
-   console.debug('Unrecognised transaction type')
-   console.debug(this.transaction)
+    console.debug('Unrecognised transaction type')
+    console.debug(this.transaction)
   }
 }
 </script>
