@@ -25,18 +25,12 @@ export default {
     }
   },
   mounted() {
-    // If the contract address is blank, then it's a plain transfer
-    console.debug(this.transaction)
-    if (this.transaction.value === '0') {
-      console.log('transaction has no value, this is a contract')
-      this.component = () => import('~/components/Eth/TransactionStringify/Contract')
-        .catch(function () {
-          this.component = () => import('~/components/Default/TransactionStringify')
-        }.bind(this))
-    } else {
-      console.log('showing plain transaction')
-      this.component = () => import('~/components/Eth/TransactionStringify/Transfer')
-    }
+    // Try to import the contract renderer by it's contact address
+    this.component = () => import('~/components/Contract/TransactionStringify/' + this.transaction.contractAddress)
+      // Fallback to ERC20 on failure
+      .catch(function () {
+        this.component = () => import('~/components/Contract/TransactionStringify/Erc20')
+      }.bind(this))
   }
 }
 </script>

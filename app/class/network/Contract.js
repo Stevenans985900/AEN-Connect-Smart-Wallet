@@ -13,30 +13,25 @@ export default class Contract extends Generic {
     super.balance(options)
 
     return new Promise((resolve, reject) => {
-            import('~/class/network/contract/erc20').then((erc20Interface) => {
-              const contract = new this.web3.eth.Contract(erc20Interface.abi, options.address)
-
-              contract.methods.balanceOf(options.managerWalletAddress).call().then((response) => {
-                resolve(response)
-              })
-                .catch((err) => {
-                  console.debug('The contract method does not exist at the remote address')
-                  reject(err)
-                })
-            })
+      import('~/class/network/contract/erc20').then((erc20Interface) => {
+        const contract = new this.web3.eth.Contract(erc20Interface.abi, options.address)
+        contract.methods.balanceOf(options.managerWalletAddress).call().then((response) => {
+          resolve(response.balance)
+        })
+          .catch((err) => {
+            console.debug('The contract method does not exist at the remote address')
+            reject(err)
+          })
+      })
     })
   }
 
   erc20PublicMethod(options) {
-    console.debug(this.pluginName + ': Load contract')
-    console.debug(options)
     return new Promise((resolve, reject) => {
             import('~/class/network/contract/erc20').then((erc20Interface) => {
               const contract = new this.web3.eth.Contract(erc20Interface.abi, options.contractAddress)
-
+              // TODO Insert parameter handling here
               contract.methods[options.method]().call().then((response) => {
-                console.log('response from public method call')
-                console.log(response)
                 resolve(response)
               })
                 .catch((err) => {
@@ -49,7 +44,6 @@ export default class Contract extends Generic {
 
   transactionsHistorical(options) {
     super.transactionsHistorical(options)
-
     return new Promise((resolve, reject) => {
       axios.get(options.wallet.network.etherscan_api_endpoint, {
         params: {
@@ -64,11 +58,11 @@ export default class Contract extends Generic {
       })
         .then(function (response) {
           // Filter the results by the contract address
-          console.log(response)
+          response = response.data.result
           let transactions = []
-          for(let transactionKey in response.data.result) {
-            let transaction = response.data.result[transactionKey]
-            if(transaction.contractAddress === options.address) {
+          for(let transactionKey in response) {
+            let transaction = response[transactionKey]
+            if(transaction.contractAddress === options.wallet.address) {
               transactions.push(transaction)
             }
           }
@@ -143,5 +137,9 @@ export default class Contract extends Generic {
   walletNew(options) {
     Generic.prototype.walletNew.call(this, options)
     return this.web3.eth.accounts.create(options.password)
+  }
+
+  getWeb3() {
+    return this.web3
   }
 }

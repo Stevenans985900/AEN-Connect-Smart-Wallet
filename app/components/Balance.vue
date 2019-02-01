@@ -28,6 +28,7 @@ export default {
       if (this.wallet.onChain === true) {
         this.$store.dispatch('wallet/balance', this.wallet).then((response) => {
           this.balance = response.balance
+          if(this.wallet.hasOwnProperty('symbol')) { this.balance.concat(this.wallet.symbol) }
         })
       } else {
         this.balance = '0'

@@ -1,18 +1,18 @@
 <template>
   <span>
     <span v-if="display === 'all' || display === 'direction'">
-      <v-icon v-if="direction === 'incoming'">
+      <v-icon v-if="direction === 'incoming'" color="green">
         call_received
       </v-icon>
-      <v-icon v-else>
+      <v-icon v-else  color="red">
         call_made
       </v-icon>
     </span>
-    <span v-if="display === 'all' || display === 'date'">
+    <span v-if="display === 'all' || display === 'date'" :class="direction">
       {{ date }}
     </span>
-    <span v-if="display === 'all' || display === 'value'">
-      {{ value }}ETH
+    <span v-if="display === 'all' || display === 'value'" :class="direction">
+      {{ value }}
     </span>
     <span v-if="display === 'all' || display === 'address'">
       <address-render :address="address" show-add />
@@ -23,9 +23,18 @@
   </span>
 </template>
 
+<style>
+  .incoming {
+    color: #4CAF50
+  }
+  .outgoing {
+    color: #F44336
+  }
+</style>
+
 <script>
 import { format } from 'date-fns'
-import Web3 from 'web3'
+// import Web3 from 'web3'
 
 export default {
   props: {
@@ -48,7 +57,7 @@ export default {
   },
   data() {
     return {
-      web3: {}
+      networkHandler: {}
     }
   },
   computed: {
@@ -57,10 +66,7 @@ export default {
       return this.transaction.from
     },
     direction() {
-      if (!this.transaction.hasOwnProperty('from')) return ''
-      if (
-        this.transaction.to.toUpperCase() === this.wallet.address.toUpperCase()
-      ) {
+      if(this.transaction.from.toUpperCase() === this.wallet.address.toUpperCase()) {
         return 'incoming'
       } else {
         return 'outgoing'
@@ -72,10 +78,7 @@ export default {
     value() {
       console.log(this.transaction)
       if (!this.transaction.hasOwnProperty('value')) return ''
-      return new Web3().utils.fromWei(
-        this.transaction.value.toString(),
-        'ether'
-      )
+      return this.transaction.value
     }
   },
   created() {}

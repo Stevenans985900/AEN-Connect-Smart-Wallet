@@ -250,15 +250,16 @@ export default {
             // Use the abstract and lookup details of the contract
             this.loading = true
 
-            this.$store.dispatch('wallet/getLiveWallet', {
-                type: 'contract',
-                address: this.contractAddress
-              }
-            ).then((wallet) => {
-              this.wallet = wallet
-              this.currentStep++
-              this.startLiveListener(wallet)
-            })
+
+            // this.$store.dispatch('wallet/getLiveWallet', {
+            //     type: 'contract',
+            //     address: this.contractAddress
+            //   }
+            // ).then((wallet) => {
+            //   this.wallet = wallet
+            //   this.currentStep++
+            //   this.startLiveListener(wallet)
+            // })
             const networkHandler = this.$store.getters['wallet/networkHandler']('contract')
             // TODO Combine these in to batch actions
             networkHandler.erc20PublicMethod({

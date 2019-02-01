@@ -61,13 +61,6 @@ export default {
     date() {
       return format(this.transaction.timeStamp * 1000, 'YYYY-MM-DD HH:mm')
     },
-    direction() {
-      if(this.transaction.from.toUpperCase() === this.wallet.address.toUpperCase()) {
-        return 'incoming'
-      } else {
-        return 'outgoing'
-      }
-    },
     totalGas() {
       return this.transaction.cumulativeGasUsed
     },

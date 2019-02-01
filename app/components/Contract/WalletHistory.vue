@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import TransactionStringify from '~/components/Eth/TransactionStringify'
+import TransactionStringify from '~/components/Contract/TransactionStringify'
 
 export default {
   components: {
