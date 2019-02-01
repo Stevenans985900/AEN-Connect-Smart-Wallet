@@ -170,7 +170,6 @@
 </template>
 
 <script>
-import BusinessCard from '~/components/BusinessCard'
 import BackupWallet from '~/components/BackupWallet'
 import RestoreFromFile from '~/components/RestoreFromFile'
 
@@ -188,7 +187,6 @@ function initialDataState() {
     accountPrivateKey: '',
     proceedValid: false,
     showPassword: false,
-    showEula: false,
     wallet: {},
     rules: {
       basic: {
@@ -215,7 +213,6 @@ export default {
    */
   components: {
     BackupWallet,
-    BusinessCard,
     RestoreFromFile
   },
   /**
@@ -310,8 +307,14 @@ export default {
       // Activate a listener on the wallet to check when it is live on the network
       const walletCheckInterval = setInterval(
         function () {
-          this.$store.dispatch('wallet/checkWalletLive', wallet).then((response) => {
-            if (response === true) {
+          this.$store.dispatch('wallet/getLiveWallet', wallet).then((response) => {
+
+            if (response !== false) {
+              this.$store.commit('wallet/setWalletProperty', {
+                wallet: wallet,
+                key: 'onChain',
+                value: true
+              })
               clearInterval(walletCheckInterval)
             }
           })

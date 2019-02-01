@@ -100,12 +100,13 @@ export default class Contract extends Generic {
   }
 
   /**
-     * For Ethereum, check the balance of the account to determine whether or not it is live
-     * @param options
-     */
-  walletIsLive(options) {
+   * For Ethereum, check the balance of the account to determine whether or not it is live
+   * @param options
+   */
+  getLiveWallet(options) {
     console.log('checking if CONTRACT has some wonga')
-    super.walletIsLive(options)
+    super.getLiveWallet(options)
+
     return new Promise((resolve) => {
       this.balance(options).then((balance) => {
         if (balance.toString() !== '0') {

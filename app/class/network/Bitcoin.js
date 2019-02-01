@@ -31,12 +31,14 @@ export default class Bitcoin extends Generic {
   /**
    * @param options
    */
-  walletIsLive(options) {
-    super.walletIsLive(options)
+  getLiveWallet(options) {
+    super.getLiveWallet(options)
     return new Promise((resolve) => {
-      this.balance(options).then(() => {
-        resolve(true)
-      })
+      const address = this.blockCypherEndpoint + 'v1/btc/' + options.wallet.network.block_cypher_id + '/addrs/' + options.wallet.address
+      axios.get(address)
+        .then(function (response) {
+          resolve(response)
+        })
         .catch(() => {
           resolve(false)
         })

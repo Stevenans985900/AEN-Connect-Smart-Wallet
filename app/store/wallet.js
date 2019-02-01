@@ -35,6 +35,27 @@ export const initialState = {
 export const state = () => initialState
 
 export const getters = {
+  networkHandler: (state) => (type) => {
+    switch (type) {
+      case 'aen':
+        return new Aen(state.aen.activeApiEndpoint)
+      case 'btc':
+        return new Bitcoin(state.bitcoin)
+      case 'contract':
+        return new Contract(state.ethereum.activeApiEndpoint)
+      case 'eth':
+        return new Ethereum(state.ethereum.activeApiEndpoint)
+    }
+  },
+  walletsByType: (state) => (type) => {
+    let wallets = []
+    for (const wallet in state.wallets) {
+      if (state.wallets[wallet].type === type) {
+        wallets.push(state.wallets[wallet])
+      }
+    }
+    return wallets
+  },
   haveAenWallet: (state) => {
     for (const wallet in state.wallets) {
       if (state.wallets[wallet].type === 'aen') {
@@ -91,7 +112,7 @@ export const actions = {
         })
     })
   },
-  checkWalletLive(context, wallet) {
+  getLiveWallet(context, wallet) {
     let networkHandler
     return new Promise((resolve) => {
       switch (wallet.type) {
@@ -99,37 +120,21 @@ export const actions = {
           networkHandler = new Aen(
             context.state.aen.activeApiEndpoint
           )
-          networkHandler.walletIsLive(wallet).then((response) => {
-            context.commit('setWalletProperty', {
-              wallet: wallet,
-              key: 'onChain',
-              value: response
-            })
+          networkHandler.getLiveWallet(wallet).then((response) => {
             resolve(response)
           })
           break
         case 'btc':
           networkHandler = new Bitcoin(context.state.bitcoin)
-          networkHandler.walletIsLive(wallet).then((response) => {
-            context.commit('setWalletProperty', {
-              wallet: wallet,
-              key: 'onChain',
-              value: response
-            })
-            resolve(wallet)
+          networkHandler.getLiveWallet(wallet).then((response) => {
+            resolve(response)
           })
           break
         case 'contract':
           networkHandler = new Contract(
             context.state.ethereum.activeApiEndpoint
           )
-          console.log(networkHandler)
-          networkHandler.walletIsLive(wallet).then((response) => {
-            context.commit('setWalletProperty', {
-              wallet: wallet,
-              key: 'onChain',
-              value: response
-            })
+          networkHandler.getLiveWallet(wallet).then((response) => {
             resolve(response)
           })
           break
@@ -137,12 +142,7 @@ export const actions = {
           networkHandler = new Ethereum(
             context.state.ethereum.activeApiEndpoint
           )
-          networkHandler.walletIsLive(wallet).then((response) => {
-            context.commit('setWalletProperty', {
-              wallet: wallet,
-              key: 'onChain',
-              value: response
-            })
+          networkHandler.getLiveWallet(wallet).then((response) => {
             resolve(response)
           })
           break
@@ -173,8 +173,8 @@ export const actions = {
               .then((walletObject) => {
                 Object.assign(wallet, walletObject)
                 // Check if the wallet is on the chain
-                context.dispatch('checkWalletLive', wallet)
-                // wallet.onChain = networkHandler.walletIsLive(options)
+                context.dispatch('getLiveWallet', wallet)
+                // wallet.onChain = networkHandler.getLiveWallet(options)
                 if (options.hasOwnProperty('main')) {
                   wallet.main = true
                   context.commit('setContext', wallet)
@@ -213,7 +213,7 @@ export const actions = {
               })
               resolve(wallet)
             })
-            context.dispatch('checkWalletLive', wallet)
+            context.dispatch('getLiveWallet', wallet)
             resolve(wallet)
           })
           break

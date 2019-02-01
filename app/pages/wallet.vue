@@ -201,7 +201,6 @@ export default {
     Balance,
     BackupWallet,
     TestnetButtons,
-    // VueRecaptcha,
     WalletAdd,
     WalletHistory
   },
@@ -243,7 +242,7 @@ export default {
       return this.$store.state.runtime.environment
     },
     haveEthereumWallet() {
-      return this.$store.state.wallet.haveEthereumWallet
+      return this.$store.getters["wallet/haveEthereumWallet"]
     },
     wallets() {
       return this.$store.state.wallet.wallets
@@ -283,7 +282,8 @@ export default {
     dialogWallet(wallet) {
       this.contextWallet = wallet
       // Perform a quick test to see whether the wallet is available online or not
-      this.$store.dispatch('wallet/checkWalletLive', this.contextWallet).then((response) => {
+      this.$store.dispatch('wallet/getLiveWallet', this.contextWallet).then((response) => {
+        if(response !== false) { response = true }
         this.$store.commit('wallet/setProperty', {
           type: 'aen',
           address: this.contextWallet.address,

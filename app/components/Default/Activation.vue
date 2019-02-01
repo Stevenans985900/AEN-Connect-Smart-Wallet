@@ -38,19 +38,18 @@ export default {
   },
   created: function () {},
   methods: {
-    checkWalletLive(wallet) {
-      this.$store.dispatch('wallet/checkWalletLive', wallet).then((response) => {
-        console.log('response from checking whether the wallet is live or not')
-        console.log(response)
-        if (response === true) {
-          this.$store.commit('showNotification', {
-            type: 'success',
-            message: 'The wallet is recognised on the blockchain'
-          })
-        } else {
+    getLiveWallet(wallet) {
+      this.$store.dispatch('wallet/getLiveWallet', wallet).then((response) => {
+        if(response !== false) { response = true }
+        if (response === false) {
           this.$store.commit('showNotification', {
             type: 'info',
             message: 'The wallet is not yet recognised on the blockchain'
+          })
+        } else {
+          this.$store.commit('showNotification', {
+            type: 'success',
+            message: 'The wallet is recognised on the blockchain'
           })
         }
       })

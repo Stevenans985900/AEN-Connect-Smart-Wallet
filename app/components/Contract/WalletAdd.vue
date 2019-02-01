@@ -1,5 +1,5 @@
 <template>
-  <v-layout row wrap>
+  <v-layout row wrap align-center>
     <v-stepper v-model="currentStep" vertical>
       <v-stepper-step :complete="currentStep > 1" step="1">
         Add Method
@@ -76,17 +76,13 @@
                     src="https://cdn.vuetifyjs.com/images/cards/desert.jpg"
                     aspect-ratio="2.75"
                   />
-                  <v-card-title primary-title>
+                  <v-card-title>{{ contractName }}</v-card-title>
+                  <v-card-text>
                     <div>
-                      <h3 class="headline mb-0">
-                        {{ contractName }}
-                      </h3>
-                      <div>
-                        <strong>Symbol:</strong> {{ symbol }}<br>
-                        <strong>Decimals:</strong> {{ decimals }}
-                      </div>
+                      <strong>Symbol:</strong> {{ symbol }}<br>
+                      <strong>Decimals:</strong> {{ decimals }}
                     </div>
-                  </v-card-title>
+                  </v-card-text>
                 </v-card>
               </v-form>
             </v-layout>
@@ -96,11 +92,7 @@
         <v-card v-if="addType == 'fileImport'">
           <v-card-text>
             <v-layout row wrap>
-              <upload-button :file-changed-callback="fileUploaded" title="Choose file">
-                <template slot="icon">
-                  <v-icon>attach_file</v-icon>
-                </template>
-              </upload-button>
+              <restore-from-file @complete="walletRestoredFromFile" />
             </v-layout>
           </v-card-text>
         </v-card>
@@ -172,32 +164,14 @@
 </template>
 
 <script>
-import BusinessCard from '~/components/BusinessCard'
-// import EventEmitter from "events"
-import UploadButton from 'vuetify-upload-button'
+  import RestoreFromFile from '~/components/RestoreFromFile'
 import BackupWallet from '~/components/BackupWallet'
-import Contract from '~/class/network/Contract'
 import Debounce from 'lodash.debounce'
 
-export default {
-  components: {
-    BackupWallet,
-    BusinessCard,
-    UploadButton
-  },
-  props: {
-    main: {
-      type: Boolean,
-      default: function () {
-        return false
-      }
-    }
-  },
-  data() {
+  function initialDataState() {
     return {
       networkHandler: {},
-      addType: '',
-      backupAgree: false,
+      addType: 'manualInput',
       currentStep: 1,
       proceedValid: false,
       loading: false,
@@ -223,16 +197,16 @@ export default {
         }
       }
     }
+  }
+export default {
+  components: {
+    BackupWallet,
+    RestoreFromFile
   },
+  data() { return initialDataState() },
   computed: {
     ethereumWallets() {
-      const wallets = []
-      for (const wallet in this.$store.state.wallet.wallets) {
-        if (this.$store.state.wallet.wallets[wallet].type === 'eth') {
-          wallets.push(this.$store.state.wallet.wallets[wallet])
-        }
-      }
-      return wallets
+      return this.$store.getters['wallet/walletsByType']('eth')
     },
     stepTwoLabel() {
       if (this.addType === 'fileImport') {
@@ -246,16 +220,16 @@ export default {
       this.getContractProfile()
     }
   },
-  mounted() {
-    this.networkHandler = new Contract(this.$store.state.wallet.ethereum.activeApiEndpoint)
-  },
   methods: {
     back() {
       this.currentStep--
     },
     complete() {
-      console.log('emitting complete event from aen component')
-      this.$emit('complete', true)
+      this.$emit('complete', this.wallet)
+      this.reset()
+    },
+    reset() {
+      Object.assign(this.$data, initialDataState())
     },
     getContractProfile: Debounce(function () {
       // Make sure the contract address passes validation to save effort
@@ -276,8 +250,18 @@ export default {
             // Use the abstract and lookup details of the contract
             this.loading = true
 
+            this.$store.dispatch('wallet/getLiveWallet', {
+                type: 'contract',
+                address: this.contractAddress
+              }
+            ).then((wallet) => {
+              this.wallet = wallet
+              this.currentStep++
+              this.startLiveListener(wallet)
+            })
+            const networkHandler = this.$store.getters['wallet/networkHandler']('contract')
             // TODO Combine these in to batch actions
-            this.networkHandler.erc20PublicMethod({
+            networkHandler.erc20PublicMethod({
               contractAddress: this.contractAddress,
               method: 'name'
             }).then((contractName) => {
@@ -290,13 +274,13 @@ export default {
                 this.contractSpidered = true
                 this.loading = false
               })
-            this.networkHandler.erc20PublicMethod({
+            networkHandler.erc20PublicMethod({
               contractAddress: this.contractAddress,
               method: 'symbol'
             }).then((contractSymbol) => {
               this.symbol = contractSymbol
             })
-            this.networkHandler.erc20PublicMethod({
+            networkHandler.erc20PublicMethod({
               contractAddress: this.contractAddress,
               method: 'decimals'
             }).then((decimals) => {
@@ -306,6 +290,7 @@ export default {
             })
           })
     }, 1000),
+
     loadContract() {
       if (!this.$refs.inputForm.validate()) {
         console.log('form is invalid')

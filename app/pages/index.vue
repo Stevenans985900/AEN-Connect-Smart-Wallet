@@ -98,7 +98,7 @@ export default {
       function () {
         if (this.$store.getters.booting === false) {
           // Redirect user to the dashboard if they already have account
-          if (this.$store.state.wallet.aen.haveWallet === true) {
+          if (this.$store.getters["wallet/haveAenWallet"] === true) {
             console.debug('User has saved wallet present, redirecting to dashboard')
             this.$nuxt.$router.replace({ path: '/dashboard' })
           }

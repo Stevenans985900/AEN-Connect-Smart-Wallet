@@ -299,10 +299,14 @@ export default {
       const walletCheckInterval = setInterval(
         function () {
           this.$store
-            .dispatch('wallet/checkWalletLive', wallet)
-            .then((response) => {
-              if (response === true) {
-                clearInterval(walletCheckInterval)
+            .dispatch('wallet/getLiveWallet', wallet).then((response) => {
+              if (response !== false) {
+                this.$store.commit('wallet/setWalletProperty', {
+                  wallet: wallet,
+                  key: 'onChain',
+                  value: true
+                })
+              clearInterval(walletCheckInterval)
               }
             })
         }.bind(this),

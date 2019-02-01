@@ -31,7 +31,7 @@ export default class Genetic {
     console.debug(this.pluginName + ' Plugin: Update API Endpoint')
     console.debug(options)
   }
-  walletIsLive(options) {
+  getLiveWallet(options) {
     console.debug(this.pluginName + ' Plugin: Wallet is Live?')
     console.debug(options)
   }

@@ -116,7 +116,6 @@
           <v-btn v-if="addType == 'manualRecover'" color="primary" @click="loadWallet">
             Recover
           </v-btn>
-
           <v-btn flat @click="back">
             Back
           </v-btn>
@@ -137,15 +136,6 @@
                   required
                   label="I have backed up my wallet and understand that keeping it safe is my duty"
                 />
-                <v-checkbox v-if="main == true" v-model="eulaAgree" :rules="[rules.basic.required]" required>
-                  <span slot="label">
-                    I agree to the
-                    <a href="http://aencoin.com/eula">
-                      AEN EULA
-                    </a>
-                  </span>
-                </v-checkbox>
-
                 <backup-wallet :wallet="wallet" />
               </v-form>
             </v-card-text>
@@ -164,7 +154,6 @@ import BusinessCard from '~/components/BusinessCard'
 import BackupWallet from '~/components/BackupWallet'
 import RestoreFromFile from '~/components/RestoreFromFile'
 
-// TODO Approaching level of abstraction where no need for full network components. when have time, complete
 function initialDataState() {
   return {
     addType: 'new',
@@ -175,7 +164,6 @@ function initialDataState() {
     loading: true,
     walletName: '',
     proceedValid: false,
-    showEula: false,
     wallet: {},
     rules: {
       basic: {
@@ -251,17 +239,11 @@ export default {
         name: this.walletName,
         main: this.main
       }
-      console.log('going to add from controller')
-      console.log(walletOptions)
       this.$store.dispatch('wallet/new', walletOptions)
         .then((wallet) => {
-          console.log('wallet new response in controller')
-          console.log(wallet)
-          this.wallet = wallet
           this.currentStep++
           this.startLiveListener(wallet)
         })
-      console.log('at end of btc add controller')
     },
     loadWallet() {
       if (!this.$refs.existingWalletForm.validate()) {
@@ -289,7 +271,7 @@ export default {
       // Activate a listener on the wallet to check when it is live on the network
       const walletCheckInterval = setInterval(
         function () {
-          this.$store.dispatch('wallet/checkWalletLive', wallet).then((response) => {
+          this.$store.dispatch('wallet/getLiveWallet', wallet).then((response) => {
             if (response === true) {
               clearInterval(walletCheckInterval)
             }
@@ -303,8 +285,6 @@ export default {
      * @param wallet
      */
     walletRestoredFromFile(wallet) {
-      console.log('picked up event after wallet creation')
-      console.log(wallet)
       this.wallet = wallet
       this.currentStep++
       if (wallet.hasOwnProperty('onChain')) {

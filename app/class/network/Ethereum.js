@@ -77,12 +77,12 @@ export default class Aen extends Generic {
      * For Ethereum, check the balance of the account to determine whether or not it is live
      * @param options
      */
-  walletIsLive(options) {
-    super.walletIsLive(options)
+  getLiveWallet(options) {
+    super.getLiveWallet(options)
     return new Promise((resolve) => {
       this.balance(options).then((balance) => {
         if (balance.toString() !== '0') {
-          resolve(true)
+          resolve(balance)
         } else {
           resolve(false)
         }
