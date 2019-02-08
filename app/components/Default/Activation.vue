@@ -8,7 +8,7 @@
             If you have already made a transfer, it is possible the network has not yet detected it. This app will periodically
             check in but, if you would like to manually try, click the button below
           </p>
-          <v-btn @click="checkWalletLive(wallet)">
+          <v-btn @click="getLiveWallet(wallet)">
             Check
           </v-btn>
         </v-card-text>

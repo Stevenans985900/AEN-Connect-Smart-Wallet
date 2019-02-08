@@ -16,8 +16,32 @@
               AENChain network
             </a>
           </p>
-          <p>Before proceeding, you need to have an AEN wallet setup on this device. Please choose one of the options below</p>
-          <wallet-add v-if="!wallet" type="aen" @complete="complete" />
+          <p>Before proceeding, you need to have an AEN wallet setup on this device and choose a basic security level. Please following the instructions below</p>
+          <v-expansion-panel
+            v-model="panel"
+            expand
+          >
+            <v-expansion-panel-content>
+              <div slot="header">
+                <h2>
+                  Choose Security features to use
+                </h2>
+              </div>
+              <security-controls :global-security-only="true" />
+              <v-btn @click="moveToWalletCreate">
+                Continue
+              </v-btn>
+            </v-expansion-panel-content>
+
+            <v-expansion-panel-content>
+              <div slot="header">
+                <h2>
+                  Wallet Creation
+                </h2>
+              </div>
+              <wallet-add v-if="!wallet" type="aen" :main="true" @complete="complete" />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
         </v-card-text>
       </v-card>
     </v-flex>
@@ -55,6 +79,7 @@
 </template>
 
 <script>
+import SecurityControls from '~/components/SecurityControls'
 import WalletAdd from '~/components/WalletAdd'
 
 export default {
@@ -62,6 +87,7 @@ export default {
    * COMPONENTS
    */
   components: {
+    SecurityControls,
     WalletAdd
   },
   /**
@@ -69,8 +95,15 @@ export default {
    */
   data() {
     return {
+      panel: [true, false],
       dialogEulaAgree: false,
-      wallet: null
+      wallet: null,
+      seasons: [
+        'Winter',
+        'Spring',
+        'Summer',
+        'Fall'
+      ]
     }
   },
   /**
@@ -113,6 +146,12 @@ export default {
    * METHODS
    */
   methods: {
+    season (val) {
+      return this.seasons[val]
+    },
+    moveToWalletCreate: function() {
+      this.panel = [false, true]
+    },
     /**
      * Method to send user on to dashboard once wallet has been created
      */

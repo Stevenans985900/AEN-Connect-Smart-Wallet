@@ -13,7 +13,8 @@ export const initialState = {
   // High level app properties
   runtime: {
     mode: 'web',
-    environment: 'production'
+    environment: 'production',
+    isOnline: false
   },
   // When running as a desktop app
   electron: {
@@ -34,7 +35,8 @@ export const initialState = {
   // Shared user preferences
   user: {
     rememberUser: false,
-    eulaAgree: false
+    eulaAgree: false,
+    developmentAgreed: false
   }
 }
 
@@ -100,9 +102,7 @@ export const actions = {
 
 export const mutations = {
   reset(state) {
-    Object.keys(state).forEach((key) => {
-      Object.assign(state[key], initialState[key])
-    })
+    Object.assign(state, initialState)
   },
   setAccountStatus(state, status) {
     state.meta.wallet_present = status

@@ -1,12 +1,16 @@
 <template>
   <span>
-    <component :is="component" v-if="component" @complete="complete" />
+    <component :is="component" v-if="component" :main="main" @complete="complete" />
   </span>
 </template>
 
 <script>
 export default {
   props: {
+    main: {
+      type: Boolean,
+      default: false
+    },
     type: {
       type: String,
       default: ''

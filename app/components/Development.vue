@@ -8,9 +8,25 @@
         <v-list-tile @click="dialogWalletControl = true">
           <v-list-tile-title>Wallet Control</v-list-tile-title>
         </v-list-tile>
+        <v-list-tile @click="dialogSecurity = true">
+          <v-list-tile-title>Security</v-list-tile-title>
+        </v-list-tile>
       </v-list>
     </v-menu>
 
+    <v-dialog v-model="dialogSecurity" fullscreen>
+      <v-toolbar color="primary">
+        <v-btn small fab outline @click="dialogSecurity = false">
+          <v-icon>arrow_back</v-icon>
+        </v-btn>
+        <v-toolbar-title>Security Controls</v-toolbar-title>
+      </v-toolbar>
+      <v-card>
+        <v-card-text>
+          {{ globalSecurity }}
+        </v-card-text>
+      </v-card>
+    </v-dialog>
     <v-dialog v-model="dialogWalletControl" fullscreen>
       <v-toolbar color="primary">
         <v-btn small fab outline @click="dialogWalletControl = false">
@@ -78,6 +94,7 @@ export default {
   data() {
     return {
       dialogWalletControl: false,
+      dialogSecurity: false,
       search: '',
       headers: [
         {
@@ -111,7 +128,8 @@ export default {
      * COMPUTED
      */
   computed: {
-    wallets() { return Object.values(this.$store.state.wallet.wallets) }
+    wallets() { return Object.values(this.$store.state.wallet.wallets) },
+    globalSecurity() { return this.$store.state.security.globalPolicy }
   },
   /**
      * METHODS

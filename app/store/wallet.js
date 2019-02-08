@@ -8,7 +8,7 @@ export const initialState = {
   contacts: {},
   wallets: {},
   aen: {
-    haveWallet: false,
+    mainAddress: '',
     activeApiEndpoint: '',
     activeApiPing: 9999,
     blockHeight: 0,
@@ -234,10 +234,13 @@ export const actions = {
           networkHandler.accountNew(options).then((account) => {
             options.account = account
             networkHandler.walletLoad(options).then((wallet) => {
-              context.commit('setAenProperty', {
-                key: 'haveWallet',
-                value: true
-              })
+              if(options.hasOwnProperty('main')) {
+                context.commit('setAenProperty', {
+                  key: 'mainAddress',
+                  value: wallet.address
+                })
+              }
+
               context.commit('setWallet', wallet)
               context.commit('setContact', {
                 address: wallet.address,
@@ -381,6 +384,9 @@ export const actions = {
 }
 
 export const mutations = {
+  reset(state) {
+    Object.assign(state, initialState)
+  },
   removeWallet(state, wallet) {
     Vue.delete(state.wallets, wallet.address)
   },

@@ -4,7 +4,7 @@
       <v-icon v-if="direction === 'incoming'" color="green">
         call_received
       </v-icon>
-      <v-icon v-else  color="red">
+      <v-icon v-else color="red">
         call_made
       </v-icon>
     </span>

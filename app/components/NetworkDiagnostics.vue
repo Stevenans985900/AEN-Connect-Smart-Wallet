@@ -33,6 +33,7 @@ export default {
   computed: {
     connectionStrengthIcon() {
       let icon = 'signal_wifi_off'
+      if(this.$store.state.runtime.isOnline === false) { return icon }
       if (this.currentPing < 9999) {
         icon = 'signal_wifi_4_bar'
       }

@@ -19,7 +19,7 @@
         </v-card-title>
         <v-card-text>
           <v-list two-line subheader>
-            <v-list-tile v-for="(wallet, address) in wallets" :key="address" avatar @click="dialogWallet(wallet)">
+            <v-list-tile v-for="(wallet, address) in wallets" :key="address" avatar @click="walletView(wallet)">
               <v-list-tile-avatar>
                 <wallet-image :wallet="wallet" />
               </v-list-tile-avatar>
@@ -39,9 +39,9 @@
     </v-flex>
 
     <!-- View Wallet Dialog -->
-    <v-dialog v-model="dialogViewWallet" fullscreen="">
+    <v-dialog v-model="dialogWalletView" fullscreen="">
       <v-toolbar class="primary">
-        <v-btn small fab outline @click="dialogViewWallet = false">
+        <v-btn small fab outline @click="dialogWalletView = false">
           <v-icon>arrow_back</v-icon>
         </v-btn>
         <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
@@ -207,7 +207,7 @@ export default {
   data() {
     return {
       dialogWalletAdd: false,
-      dialogViewWallet: false,
+      dialogWalletView: false,
       dialogMakeTransfer: false,
       dialogReceiveTransfer: false,
       dialogRemoveWallet: false,
@@ -279,23 +279,32 @@ export default {
           break
       }
     },
-    dialogWallet(wallet) {
+    walletView(wallet) {
       this.contextWallet = wallet
-      // Perform a quick test to see whether the wallet is available online or not
-      this.$store.dispatch('wallet/getLiveWallet', this.contextWallet).then((response) => {
-        if(response !== false) { response = true }
-        this.$store.commit('wallet/setProperty', {
-          type: 'aen',
-          address: this.contextWallet.address,
-          key: 'onChain',
-          value: response
+      console.log('going to view the wallet')
+
+      // Check whether the user security is ok
+      this.$store.dispatch('security/addCheck', {
+        walletAddress: wallet.address,
+        context: 'wallet_open'
+      }).then(() => {
+        // Perform a quick test to see whether the wallet is available online or not
+        this.$store.dispatch('wallet/getLiveWallet', this.contextWallet).then((response) => {
+          if(response !== false) { response = true }
+          this.$store.commit('wallet/setProperty', {
+            type: 'aen',
+            address: this.contextWallet.address,
+            key: 'onChain',
+            value: response
+          })
         })
+        this.dialogWalletView = true
       })
-      this.dialogViewWallet = true
     },
+
     removeWallet() {
       this.dialogRemoveWallet = false
-      this.dialogViewWallet = false
+      this.walletView = false
       this.$store.commit('wallet/removeWallet', this.contextWallet)
       this.$store.commit('showNotification', {
         type: 'success',
