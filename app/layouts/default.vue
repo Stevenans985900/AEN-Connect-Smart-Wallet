@@ -85,8 +85,12 @@
           <v-card>
             <v-card-title>If you choose to cancel, all app data will be reset. Are you sure?</v-card-title>
             <v-card-actions>
-              <v-btn @click="appWipe">Reset Application</v-btn>
-              <v-btn @click="cancelWipe">Go back to Password</v-btn>
+              <v-btn @click="appWipe">
+                Reset Application
+              </v-btn>
+              <v-btn @click="cancelWipe">
+                Go back to Password
+              </v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -156,8 +160,12 @@ export default {
           icon: 'contacts',
           title: 'Address Book',
           to: '/address-book'
+        },
+        {
+          icon: 'build',
+          title: 'Preferences',
+          to: '/preferences'
         }
-        // { icon: 'extension', title: 'Create Namespace', to: '/tokens', requireContext: true }
       ],
       title: 'Smart Wallet',
       userMenu: false

@@ -1,9 +1,12 @@
 <template>
-  <v-dialog v-model="dialogChallenge" persistent fullscreen max-width="600px">
+  <v-dialog v-model="dialogChallenge" persistent max-width="600px" class="blocking-overlay">
     <v-toolbar color="primary">
-
-      <v-toolbar-title v-if="challengeType === 'global'">Main Password</v-toolbar-title>
-      <v-toolbar-title v-else>Enter password for {{ walletName }}</v-toolbar-title>
+      <v-toolbar-title v-if="challengeType === 'global'">
+        Main Password
+      </v-toolbar-title>
+      <v-toolbar-title v-else>
+        Enter password for {{ walletName }}
+      </v-toolbar-title>
       <v-spacer />
       <v-btn small fab outline @click="cancelChallenge">
         <v-icon>close</v-icon>
@@ -32,6 +35,12 @@
   </v-dialog>
 </template>
 
+<style>
+  .v-overlay:before {
+    background-color: #47494e !important;
+    opacity: 1;
+  }
+</style>
 <script>
 export default {
   data() {

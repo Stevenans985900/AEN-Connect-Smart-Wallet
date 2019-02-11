@@ -1,16 +1,18 @@
+import Vue from 'vue'
+import CryptoJS from 'crypto-js'
 
 export const initialState = {
   configured: false,
   walletAddress: '',
+  securityLevel: 'medium',
   globalPolicy: {
     remove_wallet_global: true,
     app_start: true,
     transaction_start: true,
     wallet_open: false
   },
-  walletPolicies: {
-
-  },
+  mainPassword: '',
+  walletPolicies: {},
   requiredCheck: ''
 }
 
@@ -73,7 +75,14 @@ export const actions = {
           }.bind(context),200)
       }
     })
-
+  },
+  checkMainPassword(state, password) {
+    const hashedPassword = CryptoJS.SHA256(password + Vue.prototype.$g('salt'))
+    if(hashedPassword === state.mainPassword) {
+      return true
+    } else {
+      return false
+    }
   }
 }
 
@@ -85,12 +94,31 @@ export const mutations = {
     state.globalPolicy = options
   },
   setGlobalPolicyProperty(state, options) {
-    state.defaultPolicy[options.key] = options.value
+    state.globalPolicy[options.key] = options.value
+  },
+  setGlobalSecurityLevel(state, options) {
+    state.securityLevel = options
+  },
+  setMainPassword(state, password) {
+    const hashedPassword = CryptoJS.SHA256(password + Vue.prototype.$g('salt'))
+    state.password = hashedPassword
+  },
+  setWalletSecurityLevel(state, options) {
+    if(!state.walletPolicies.hasOwnProperty(options.walletAddress)) {
+      state.walletPolicies[options.walletAddress] = {}
+    }
+    state.walletPolicies[options.walletAddress].securityLevel = options
   },
   setWalletPolicy(state, options) {
+    if(!state.walletPolicies.hasOwnProperty(options.walletAddress)) {
+      state.walletPolicies[options.walletAddress] = {}
+    }
     state.walletPolicies[options.walletAddress] = options.policy
   },
   setWalletPolicyProperty(state, options) {
+    if(!state.walletPolicies.hasOwnProperty(options.walletAddress)) {
+      state.walletPolicies[options.walletAddress] = {}
+    }
     state.walletPolicies[options.walletAddress][options.key] = options.value
   },
   setRequiredCheck(state, options) {
@@ -99,6 +127,9 @@ export const mutations = {
   },
   setWalletAddress(state, options) {
     state.walletAddress = options
+  },
+  removeWalletPolicy(state, walletAddress) {
+    Vue.delete(state.walletPolicies, walletAddress)
   }
 
 }

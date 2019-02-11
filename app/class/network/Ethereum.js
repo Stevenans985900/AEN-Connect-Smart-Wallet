@@ -48,7 +48,6 @@ export default class Aen extends Generic {
         return new Promise((resolve, reject) => {
 
             let transaction
-
             transaction = {
                 "from": options.source.address,
                 "to": options.destination.address,

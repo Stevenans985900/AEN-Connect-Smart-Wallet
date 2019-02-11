@@ -1,12 +1,59 @@
 <template>
   <v-layout row justify-center>
-    <v-flex v-if="globalSecurityOnly === false" xs12 md3>
-      Wallet selection here
-    </v-flex>
-    <v-flex :class="securityControlsGrid">
+    <v-flex xs12>
+      <!--class="primary"-->
+      <v-toolbar v-if="globalSecurityOnly === false">
+        <v-toolbar-items>
+          <v-menu offset-y>
+            <v-btn
+              v-if="Object.keys(walletsWithoutSecurity).length > 0"
+              slot="activator"
+              fab outline small
+            >
+              <v-icon>
+                add
+              </v-icon>
+            </v-btn>
+            <v-list>
+              <v-list-tile
+                v-for="(menuWallet, index) in walletsWithoutSecurity"
+                :key="index"
+                @click="addSecurityPolicy(menuWallet)"
+              >
+                <v-list-tile-title>{{ menuWallet.name }}</v-list-tile-title>
+              </v-list-tile>
+            </v-list>
+          </v-menu>
+
+          <!-- Existing profile customisation -->
+          <v-btn
+            flat
+            :class="{ 'info': isAddressActive('global') }"
+            @click="walletAddress = 'global'"
+          >
+            Default / Global
+          </v-btn>
+          <v-btn
+            flat
+            v-for="(security, contextWalletAddress) in walletsWithSecurity"
+            :key="contextWalletAddress"
+            :class="{ 'info': isAddressActive(contextWalletAddress) }"
+            @click="walletAddress = contextWalletAddress"
+          >
+            {{ walletFromAddress(contextWalletAddress).name }}
+          </v-btn>
+        </v-toolbar-items>
+      </v-toolbar>
+
       <v-layout row>
-        <v-flex xs6 sm3>
+        <v-flex xs12 md3>
           <v-card flat>
+            <v-btn
+            v-if="walletAddress !== 'global'"
+            @click="dialogRemovePreset = true"
+            >
+              Remove preset
+            </v-btn>
             <v-card-title>Premade level</v-card-title>
             <v-card-text>
               <v-radio-group v-model="securityLevel">
@@ -16,22 +63,54 @@
                   :label="index"
                   :value="index"
                 />
+                <v-radio label="Custom" value="custom" />
               </v-radio-group>
             </v-card-text>
           </v-card>
         </v-flex>
-        <v-flex xs6 sm9>
-          <v-card flat>
+        <v-flex xs12 md9>
+          <v-card flat xs6 sm9>
             <v-card-title>Security Features enabled</v-card-title>
             <v-card-text>
-              <v-checkbox v-model="app_start" label="Password on App Start. Main AENC wallet password" />
-              <v-checkbox v-model="transaction_start" label="Password on Transaction. Operational wallet password" />
-              <v-checkbox v-model="wallet_open" label="Password on wallet. Operational wallet password" />
+              <!-- Global only options -->
+              <v-checkbox v-if="walletAddress === 'global'" v-model="app_start" label="Password on App Start. Main AENC wallet password" />
+              <!-- Wallet specific options -->
+              <v-checkbox v-model="transaction_start" label="Password on Transaction" />
+              <v-checkbox v-model="wallet_open" label="Password on wallet" />
             </v-card-text>
           </v-card>
         </v-flex>
       </v-layout>
     </v-flex>
+
+    <!-- Remove Wallet Dialog -->
+    <v-dialog v-model="dialogRemovePreset" v-if="dialogRemovePreset" persistent max-width="600px">
+      <v-toolbar color="primary">
+        <v-toolbar-title>Are you sure you want to remove the wallet preset?</v-toolbar-title>
+        <v-spacer />
+        <v-btn small fab outline @click="dialogRemovePreset = false">
+          <v-icon>close</v-icon>
+        </v-btn>
+      </v-toolbar>
+      <v-card>
+        <v-card-title class="headline">
+          {{ walletFromAddress(walletAddress).name }}
+        </v-card-title>
+        <v-card-text>
+          <p>If you remove the wallet preset, security options and challenges will revert to using the <strong>default / global</strong> options</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="blue darken-1" flat @click="dialogRemovePreset = false">
+            Cancel
+          </v-btn>
+          <v-btn color="blue darken-1" flat @click="removePreset">
+            Remove Wallet
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-layout>
 </template>
 
@@ -42,14 +121,16 @@ export default {
       type: Boolean,
       default: false
     },
-    walletAddress: {
+    inputWalletAddress: {
       type: String,
       default: 'global'
     }
   },
   data() {
     return {
-      securityLevel: 'medium',
+      walletAddress: '',
+      dialogNewSecurityPolicy: false,
+      dialogRemovePreset: false,
       securityLevels: {
         'high': {
           description: "Maximum Challenges",
@@ -78,7 +159,56 @@ export default {
       }
     }
   },
+  mounted: function () {
+    this.walletAddress = this.inputWalletAddress
+  },
   computed: {
+    walletsWithoutSecurity() {
+      let wallets = {}
+      for (let wallet in this.$store.state.wallet.wallets) {
+        if(!this.$store.state.security.walletPolicies.hasOwnProperty(wallet)) {
+          wallets[wallet] = this.$store.state.wallet.wallets[wallet]
+        }
+      }
+      return wallets
+    },
+    walletsWithSecurity() {
+      return this.$store.state.security.walletPolicies
+    },
+    securityLevel: {
+      get: function() {
+        if(this.walletAddress === 'global') {
+          return this.$store.state.security.securityLevel
+        } else {
+          // Try to get the property from state
+          try {
+            return this.$store.state.security.walletPolicies[this.walletAddress].securityLevel
+          } catch (e) {
+            return this.$store.state.security.globalPolicy.securityLevel
+          }
+        }
+      },
+      set: function(inputLevel) {
+
+        if(inputLevel !== 'custom') {
+          let policy = this.securityLevels[inputLevel].policy
+          if(this.walletAddress === 'global') {
+            this.$store.commit('security/setGlobalSecurityLevel', inputLevel)
+            this.$store.commit('security/setGlobalPolicy', policy)
+          } else {
+            this.$store.commit('security/setWalletPolicy', {
+              walletAddress: this.walletAddress,
+              policy: policy
+            })
+            this.$store.commit('security/setWalletPolicyProperty', {
+              walletAddress: this.walletAddress,
+              key: 'securityLevel',
+              value: inputLevel
+            })
+          }
+        }
+      }
+    },
     securityControlsGrid() {
       if(this.globalSecurityOnly === false) {
         return 'md9'
@@ -100,18 +230,11 @@ export default {
         }
       },
       set: function(val) {
-        if(this.walletAddress === 'global') {
-          this.$store.commit('security/setGlobalPolicyProperty', {
-            key: 'app_start',
-            value: val
-          })
-        } else {
-          this.$store.commit('security/setWalletPolicyProperty', {
-            walletAddress: this.walletAddress,
-            key: 'app_start',
-            value: val
-          })
-        }
+
+        this.$store.commit('security/setGlobalPolicyProperty', {
+          key: 'app_start',
+          value: val
+        })
       }
     },
     transaction_start: {
@@ -121,6 +244,7 @@ export default {
         } else {
           // Try to get the property from state
           try {
+            console.log('trying to get app_start options for: ' + this.walletAddress)
             return this.$store.state.security.walletPolicies[this.walletAddress].transaction_start
           } catch (e) {
             return false
@@ -129,11 +253,17 @@ export default {
       },
       set: function(val) {
         if(this.walletAddress === 'global') {
+          this.$store.commit('security/setGlobalSecurityLevel', 'custom')
           this.$store.commit('security/setGlobalPolicyProperty', {
             key: 'transaction_start',
             value: val
           })
         } else {
+          this.$store.commit('security/setWalletPolicyProperty', {
+            walletAddress: this.walletAddress,
+            key: 'securityLevel',
+            value: 'custom'
+          })
           this.$store.commit('security/setWalletPolicyProperty', {
             walletAddress: this.walletAddress,
             key: 'transaction_start',
@@ -157,6 +287,7 @@ export default {
       },
       set: function(val) {
         if(this.walletAddress === 'global') {
+          this.$store.commit('security/setGlobalSecurityLevel', 'custom')
           this.$store.commit('security/setGlobalPolicyProperty', {
             key: 'wallet_open',
             value: val
@@ -164,24 +295,52 @@ export default {
         } else {
           this.$store.commit('security/setWalletPolicyProperty', {
             walletAddress: this.walletAddress,
+            key: 'securityLevel',
+            value: 'custom'
+          })
+          this.$store.commit('security/setWalletPolicyProperty', {
+            walletAddress: this.walletAddress,
             key: 'wallet_open',
             value: val
           })
         }
       }
-    }
+    },
+    wallets: function() { return this.$store.state.wallet.wallets }
   },
   watch: {
-    securityLevel: function(selected) {
-      const policy = this.securityLevels[selected].policy
-      if(this.walletAddress === 'global') {
-        this.$store.commit('security/setGlobalPolicy', policy)
-      } else {
-        this.$store.commit('security/setWalletPolicy', {
-          walletAddress: this.walletAddress,
-          policy: policy
-        })
-      }
+    inputWalletAddress: function (val) {
+      this.walletAddress = val
+    }
+  },
+  methods: {
+    isAddressActive(address) {
+      if(address === this.walletAddress) { return true }
+    },
+    /**
+     *
+     */
+    removePreset() {
+      const addressToDelete = this.walletAddress
+      this.walletAddress = 'global'
+      this.dialogRemovePreset = false
+      this.$store.commit('security/removeWalletPolicy', addressToDelete)
+    },
+    addSecurityPolicy(wallet) {
+      this.$store.commit('security/setWalletPolicy', {
+        walletAddress:  wallet.address,
+        policy: this.$store.state.security.globalPolicy
+      })
+      this.$store.commit('security/setWalletPolicyProperty', {
+        walletAddress: wallet.address,
+        key: 'securityLevel',
+        value: this.$store.state.security.securityLevel
+      })
+      // Set the context to the wallet
+      this.walletAddress = wallet.address
+    },
+    walletFromAddress(address) {
+      return this.$store.state.wallet.wallets[address]
     }
   }
 }

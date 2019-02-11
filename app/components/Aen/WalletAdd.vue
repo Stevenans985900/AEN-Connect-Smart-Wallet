@@ -214,12 +214,6 @@ function initialDataState() {
 }
 
 export default {
-  props: {
-    main: {
-      type: Boolean,
-      default: false
-    }
-  },
   /**
    * COMPONENTS
    */
@@ -227,6 +221,16 @@ export default {
     BackupWallet,
     RestoreFromFile
   },
+  /**
+   * PROPS
+   */
+  props: {
+    main: {
+      type: Boolean,
+      default: false
+    }
+  },
+
   /**
    * DATA
    */

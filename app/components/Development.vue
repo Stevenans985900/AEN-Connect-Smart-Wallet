@@ -14,7 +14,7 @@
       </v-list>
     </v-menu>
 
-    <v-dialog v-model="dialogSecurity" fullscreen>
+    <v-dialog v-model="dialogSecurity" fullscreen v-if="dialogSecurity">
       <v-toolbar color="primary">
         <v-btn small fab outline @click="dialogSecurity = false">
           <v-icon>arrow_back</v-icon>
@@ -23,11 +23,26 @@
       </v-toolbar>
       <v-card>
         <v-card-text>
-          {{ globalSecurity }}
+          <h1>
+            Global
+          </h1>
+          <v-checkbox v-model="app_start" label="Password on App Start. Main AENC wallet password" />
+          <!-- Wallet specific options -->
+          <v-checkbox v-model="transaction_start" label="Password on Transaction" />
+          <v-checkbox v-model="wallet_open" label="Password on wallet" />
+          <h1>
+            Individual Wallet Policies
+          </h1>
+          <v-flex xs12 for="wallet in walletsWithSecurity">
+            <v-btn @click="removeSecurityPolicy(wallet)">
+              {{ wallet }}
+            </v-btn>
+          </v-flex>
         </v-card-text>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="dialogWalletControl" fullscreen>
+
+    <v-dialog v-model="dialogWalletControl" fullscreen v-if="dialogWalletControl">
       <v-toolbar color="primary">
         <v-btn small fab outline @click="dialogWalletControl = false">
           <v-icon>arrow_back</v-icon>
@@ -93,6 +108,7 @@ export default {
      */
   data() {
     return {
+      walletAddress: 'global',
       dialogWalletControl: false,
       dialogSecurity: false,
       search: '',
@@ -128,13 +144,146 @@ export default {
      * COMPUTED
      */
   computed: {
+    walletsWithSecurity() {
+      return this.$store.state.security.walletPolicies
+    },
     wallets() { return Object.values(this.$store.state.wallet.wallets) },
-    globalSecurity() { return this.$store.state.security.globalPolicy }
+    globalSecurity() { return this.$store.state.security.globalPolicy },
+    securityLevel: {
+      get: function() {
+        if(this.walletAddress === 'global') {
+          return this.$store.state.security.securityLevel
+        } else {
+          // Try to get the property from state
+          try {
+            return this.$store.state.security.walletPolicies[this.walletAddress].securityLevel
+          } catch (e) {
+            return this.$store.state.security.globalPolicy.securityLevel
+          }
+        }
+      },
+      set: function(inputLevel) {
+
+        if(inputLevel !== 'custom') {
+          let policy = this.securityLevels[inputLevel].policy
+          if(this.walletAddress === 'global') {
+            this.$store.commit('security/setGlobalSecurityLevel', inputLevel)
+            this.$store.commit('security/setGlobalPolicy', policy)
+          } else {
+            this.$store.commit('security/setWalletSecurityLevel', inputLevel)
+            this.$store.commit('security/setWalletPolicy', {
+              walletAddress: this.walletAddress,
+              policy: policy
+            })
+          }
+        }
+      }
+    },
+    securityControlsGrid() {
+      if(this.globalSecurityOnly === false) {
+        return 'md9'
+      } else {
+        return 'md12'
+      }
+    },
+    app_start: {
+      get: function() {
+        if(this.walletAddress === 'global') {
+          return this.$store.state.security.globalPolicy.app_start
+        } else {
+          // Try to get the property from state
+          try {
+            return this.$store.state.security.walletPolicies[this.walletAddress].app_start
+          } catch (e) {
+            return false
+          }
+        }
+      },
+      set: function(val) {
+
+        this.$store.commit('security/setGlobalPolicyProperty', {
+          key: 'app_start',
+          value: val
+        })
+      }
+    },
+    transaction_start: {
+      get: function() {
+        if(this.walletAddress === 'global') {
+          return this.$store.state.security.globalPolicy.transaction_start
+        } else {
+          // Try to get the property from state
+          try {
+            return this.$store.state.security.walletPolicies[this.walletAddress].transaction_start
+          } catch (e) {
+            return false
+          }
+        }
+      },
+      set: function(val) {
+        if(this.walletAddress === 'global') {
+          this.$store.commit('security/setGlobalSecurityLevel', 'custom')
+          this.$store.commit('security/setGlobalPolicyProperty', {
+            key: 'transaction_start',
+            value: val
+          })
+        } else {
+          this.$store.commit('security/setWalletSecurityLevel', {
+            walletAddress: this.walletAddress,
+            key: 'securityLevel',
+            value: 'custom'
+          })
+          this.$store.commit('security/setWalletPolicyProperty', {
+            walletAddress: this.walletAddress,
+            key: 'transaction_start',
+            value: val
+          })
+        }
+      }
+    },
+    wallet_open: {
+      get: function() {
+        if(this.walletAddress === 'global') {
+          return this.$store.state.security.globalPolicy.wallet_open
+        } else {
+          // Try to get the property from state
+          try {
+            return this.$store.state.security.walletPolicies[this.walletAddress].wallet_open
+          } catch (e) {
+            return false
+          }
+        }
+      },
+      set: function(val) {
+        if(this.walletAddress === 'global') {
+          this.$store.commit('security/setGlobalSecurityLevel', 'custom')
+          this.$store.commit('security/setGlobalPolicyProperty', {
+            key: 'wallet_open',
+            value: val
+          })
+        } else {
+          this.$store.commit('security/setWalletSecurityLevel', {
+            walletAddress: this.walletAddress,
+            key: 'securityLevel',
+            value: 'custom'
+          })
+          this.$store.commit('security/setWalletPolicyProperty', {
+            walletAddress: this.walletAddress,
+            key: 'wallet_open',
+            value: val
+          })
+        }
+      }
+    }
   },
   /**
      * METHODS
      */
   methods: {
+    removeSecurityPolicy(wallet) {
+      console.log('removing wallet policy')
+      console.log(wallet)
+    },
     switchOnChainStatus(wallet) {
       const newCondition = !wallet.onChain
       this.$store.commit('wallet/setWalletProperty', {

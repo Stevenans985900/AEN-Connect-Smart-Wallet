@@ -175,10 +175,16 @@ export const actions = {
                 // Check if the wallet is on the chain
                 context.dispatch('getLiveWallet', wallet)
                 // wallet.onChain = networkHandler.getLiveWallet(options)
-                if (options.hasOwnProperty('main')) {
-                  wallet.main = true
-                  context.commit('setContext', wallet)
+                if(options.hasOwnProperty('main')) {
+                  context.commit('setAenProperty', {
+                    key: 'mainAddress',
+                    value: wallet.address
+                  })
                 }
+                context.commit('setContact', {
+                  address: wallet.address,
+                  displayText: wallet.name
+                })
                 context.commit('setWallet', wallet)
                 resolve(wallet)
               })
