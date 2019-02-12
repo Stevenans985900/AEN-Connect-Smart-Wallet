@@ -35,22 +35,16 @@
   </v-dialog>
 </template>
 
-<style>
-  .v-overlay:before {
-    background-color: #47494e !important;
-    opacity: 1;
-  }
-</style>
 <script>
+
+function initialDataState() {
+  return {
+    password: '',
+    showPassword: false
+  }
+}
 export default {
-  data() {
-    return {
-      password: '',
-      showPassword: false,
-      failCount: 0,
-      failLimit: 3
-    }
-  },
+  data: function () { return initialDataState() },
   computed: {
     walletAddress() { return this.$store.state.security.walletAddress },
     walletName() {
@@ -64,7 +58,7 @@ export default {
       set: function(val) { this.$store.commit('security/setRequiredCheck', val) }
     },
     dialogChallenge() {
-      if(this.$store.state.security.requiredCheck !== '' && this.$store.state.security.requiredCheck !== 'INVALID') {
+      if(this.$store.state.security.context.requiredCheck !== '' && this.$store.state.security.context.requiredCheck !== 'INVALID') {
         return true
       } else {
         return false
@@ -73,35 +67,33 @@ export default {
   },
   methods: {
     cancelChallenge() {
-      this.challengeType = 'INVALID'
+      this.$store.commit('security/cancelChallenge')
+    },
+    reset() {
+      Object.assign(this.$data, initialDataState())
     },
     submitChallenge() {
-      let contextWallet
-      if(this.challengeType === 'global') {
-        contextWallet = this.$store.state.wallet.wallets[this.$store.state.wallet.aen.mainAddress]
-      } else {
-        contextWallet = this.$store.state.wallet.wallets[this.walletAddress]
-      }
+      this.$store.dispatch('security/checkPassword', this.password).then(() => {
+        this.reset()
+      })
+        .catch((reason) => {
+          console.log('failed auth because of: ' + reason)
+          switch (reason) {
+            case 'TOO_MANY_ATTEMPTS':
+              this.$store.commit('showNotification', {
+                type: 'error',
+                message: 'Challenge failed. Used up too many tries'
+              })
+              break
+            case 'INCORRECT_PASSWORD':
+              this.$store.commit('showNotification', {
+                type: 'error',
+                message: 'Challenge failed. ' + (this.failLimit - this.failCount) + ' tries remaining'
+              })
+              break
+          }
+        })
 
-      if(contextWallet.password === this.password) {
-        this.challengeType = ''
-        this.failCount = 0
-        console.log('passwords match')
-      } else {
-        this.failCount++
-        if(this.failLimit <= this.failCount) {
-          this.challengeType = 'INVALID'
-          this.$store.commit('showNotification', {
-            type: 'error',
-            message: 'Challenge failed. Used up too many tries'
-          })
-        } else {
-          this.$store.commit('showNotification', {
-            type: 'error',
-            message: 'Challenge failed. ' + (this.failLimit - this.failCount) + ' tries remaining'
-          })
-        }
-      }
     }
   }
 }

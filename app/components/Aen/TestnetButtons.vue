@@ -2,6 +2,7 @@
   <v-menu v-if="testnet" offset-y>
     <v-btn
       slot="activator"
+      small
     >
       TestNet Functions
     </v-btn>

@@ -35,6 +35,18 @@ export const initialState = {
 export const state = () => initialState
 
 export const getters = {
+  contactsByWallet: (state) => (wallet) => {
+    console.log('WALLET Store')
+    let contacts = []
+    for (const contact in state.contacts) {
+      console.log('Comparing: ' + state.contacts[contact].type + ' against ' + wallet.type)
+      if(state.contacts[contact].type === wallet.type && wallet.address !== contact) {
+        contacts.push(state.contacts[wallet])
+        console.log('pushing: ' + contact + ' because the address does not match ' + wallet.address)
+      }
+    }
+    return contacts
+  },
   networkHandler: (state) => (type) => {
     switch (type) {
       case 'aen':
@@ -75,32 +87,35 @@ export const getters = {
 }
 
 export const actions = {
-  balance: (context, wallet) => {
+  balance: ({state, commit, rootState}, wallet) => {
     let networkHandler
     return new Promise((resolve, reject) => {
+      if(rootState.runtime.isOnline === false) {
+        resolve(wallet)
+      }
       switch (wallet.type) {
         case 'aen':
           networkHandler = new Aen(
-            context.state.aen.activeApiEndpoint
+            state.aen.activeApiEndpoint
           )
           break
         case 'contract':
           // TODO For this active API endpoint, mixin network selection
           networkHandler = new Contract(
-            context.state.ethereum.activeApiEndpoint
+            state.ethereum.activeApiEndpoint
           )
           break
         case 'eth':
           // TODO For this active API endpoint, mixin network selection
           networkHandler = new Ethereum(
-            context.state.ethereum.activeApiEndpoint
+            state.ethereum.activeApiEndpoint
           )
           break
       }
       networkHandler
         .balance(wallet)
         .then((response) => {
-          context.commit('setWalletProperty', {
+          commit('setWalletProperty', {
             wallet: wallet,
             key: 'balance',
             value: response
@@ -183,7 +198,8 @@ export const actions = {
                 }
                 context.commit('setContact', {
                   address: wallet.address,
-                  displayText: wallet.name
+                  displayText: wallet.name,
+                  type: wallet.type
                 })
                 context.commit('setWallet', wallet)
                 resolve(wallet)
@@ -226,7 +242,7 @@ export const actions = {
       }
     })
   },
-  new(context, options) {
+  new({state, commit}, options) {
     console.debug('Wallet Service:New ' + options.type)
 
     return new Promise((resolve) => {
@@ -234,23 +250,24 @@ export const actions = {
       switch (options.type) {
         case 'aen':
           networkHandler = new Aen(
-            context.state.aen.activeApiEndpoint
+            state.aen.activeApiEndpoint
           )
           // Do behind the scenes work
           networkHandler.accountNew(options).then((account) => {
             options.account = account
             networkHandler.walletLoad(options).then((wallet) => {
               if(options.hasOwnProperty('main')) {
-                context.commit('setAenProperty', {
+                commit('setAenProperty', {
                   key: 'mainAddress',
                   value: wallet.address
                 })
               }
 
-              context.commit('setWallet', wallet)
-              context.commit('setContact', {
+              commit('setWallet', wallet)
+              commit('setContact', {
                 address: wallet.address,
-                displayText: wallet.name
+                displayText: wallet.name,
+                type: wallet.type
               })
               resolve(wallet)
             })
@@ -258,13 +275,14 @@ export const actions = {
           break
         case 'btc':
           networkHandler = new Bitcoin(
-            context.state.bitcoin.activeApiEndpoint
+            state.bitcoin.activeApiEndpoint
           )
           networkHandler.walletNew(options).then((wallet) => {
-            context.commit('setWallet', wallet)
-            context.commit('setContact', {
+            commit('setWallet', wallet)
+            commit('setContact', {
               address: wallet.address,
-              displayText: wallet.name
+              displayText: wallet.name,
+              type: wallet.type
             })
             resolve(wallet)
           })
@@ -272,13 +290,14 @@ export const actions = {
 
         case 'eth':
           networkHandler = new Ethereum(
-            context.state.ethereum.activeApiEndpoint
+            state.ethereum.activeApiEndpoint
           )
           networkHandler.walletNew(options).then((wallet) => {
-            context.commit('setWallet', wallet)
-            context.commit('setContact', {
+            commit('setWallet', wallet)
+            commit('setContact', {
               address: wallet.address,
-              displayText: wallet.name
+              displayText: wallet.name,
+              type: wallet.type
             })
             resolve(wallet)
           })

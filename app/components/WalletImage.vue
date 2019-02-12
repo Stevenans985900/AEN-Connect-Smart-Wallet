@@ -2,6 +2,11 @@
   <img :src="imagePath" :alt="wallet.name" onError="this.onerror=null;this.src='/question.png';">
 </template>
 
+<style scoped>
+  img {
+    max-width: 3rem;
+  }
+</style>
 <script>
 
 import $g from '~/globals.json'

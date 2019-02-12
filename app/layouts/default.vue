@@ -1,7 +1,7 @@
 <template>
   <v-app dark>
     <!-- NAV DRAWER -->
-    <v-navigation-drawer v-model="drawer" fixed stateless app>
+    <v-navigation-drawer v-model="showMainNav" :mini-variant.sync="drawer" fixed stateless app>
       <v-list>
         <v-list-tile v-for="(item, i) in navigationItems" :key="i" :to="item.to" router exact>
           <v-list-tile-action>
@@ -35,9 +35,9 @@
 
       <!-- Environment -->
       <development v-if="environment === 'development'" />
-
-      <network-diagnostics />
       <backup-wallet v-if="haveWallet" />
+      <network-diagnostics />
+      <help />
     </v-toolbar>
 
     <!-- MAIN CONTENT AREA -->
@@ -114,6 +114,7 @@ import Busy from '~/components/Busy'
 import Development from '~/components/Development'
 import NetworkDiagnostics from '~/components/NetworkDiagnostics'
 import Loading from '~/components/Loading'
+import Help from '~/components/Help'
 import SecurityChallenge from '~/components/SecurityChallenge'
 import isElectron from 'is-electron'
 import isOnline from 'is-online'
@@ -133,6 +134,7 @@ export default {
     BackupWallet,
     Busy,
     Development,
+    Help,
     Loading,
     NetworkDiagnostics,
     SecurityChallenge
@@ -142,6 +144,7 @@ export default {
    */
   data() {
     return {
+      showMainNav: true,
       navDrawer: true,
       hydrated: false,
       dialogResetEverything: false,
@@ -162,9 +165,9 @@ export default {
           to: '/address-book'
         },
         {
-          icon: 'build',
-          title: 'Preferences',
-          to: '/preferences'
+          icon: 'lock_open',
+          title: 'Security',
+          to: '/security'
         }
       ],
       title: 'Smart Wallet',
@@ -246,6 +249,7 @@ export default {
    *
    */
   beforeMount() {
+    this.$store.commit('security/resetAttemptCount')
     this.$store.commit('setAppMode', 'web')
     const env = process.env.NODE_ENV || 'dev'
     this.$store.commit('setRuntimeProperty', {
@@ -324,14 +328,15 @@ export default {
     )
 
     this.$store.commit('setLoading', { t: 'global', v: false })
-    console.log('MAIN WALLET ADDRESS')
-    console.log(this.$store.state.wallet.aen.mainAddress)
     if (this.$store.state.wallet.aen.mainAddress !== '') {
         this.$store.dispatch('security/addCheck', {
-          context: 'app_start'
+          context: 'app_start',
+          walletAddress: this.$store.state.wallet.aen.mainAddress
         }).then(() => {
           console.log('pass')
-        }).catch(() => {
+        }).catch((e) => {
+          console.log('failed auth from default')
+          console.log(e)
           // User has said they will not boot up the app, ask if they want to do a reset
           this.dialogResetEverything = true
         })

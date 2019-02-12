@@ -17,63 +17,55 @@
         <v-card-title class="headline">
           Wallet Management
         </v-card-title>
+
         <v-card-text>
-          <v-list two-line subheader>
-            <v-list-tile v-for="(wallet, address) in wallets" :key="address" avatar @click="walletView(wallet)">
-              <v-list-tile-avatar>
-                <wallet-image :wallet="wallet" />
-              </v-list-tile-avatar>
-
-              <v-list-tile-content>
-                <v-list-tile-title>{{ wallet.name }}</v-list-tile-title>
-                <!--<v-list-tile-sub-title class="text&#45;&#45;primary"></v-list-tile-sub-title>-->
-              </v-list-tile-content>
-
-              <v-list-tile-action>
-                <balance :wallet="wallet" />
-              </v-list-tile-action>
-            </v-list-tile>
-          </v-list>
+          <v-expansion-panel>
+            <v-expansion-panel-content v-for="(wallet, address) in wallets" :key="address">
+              <div slot="header" :color="walletShade(wallet)" @click="accordionTogglingWallet(wallet)">
+                <v-layout>
+                  <v-flex xs1 md1>
+                    <wallet-image :wallet="wallet" />
+                  </v-flex>
+                  <v-flex xs2 md2>
+                    <balance :wallet="wallet" />
+                  </v-flex>
+                  <v-flex xs11 md3 class="text-truncate">
+                    {{ wallet.name }}
+                  </v-flex>
+                  <v-flex xs12 md6 class="text-xs-right">
+                    <v-btn outline small @click="addressShow(wallet)">
+                      Receive
+                    </v-btn>
+                    <v-btn v-if="wallet.onChain === true" outline small @click="transferNewShow(wallet)">
+                      Send
+                    </v-btn>
+                    <v-btn outline small @click="dialogRemoveWallet = true">
+                      Remove
+                    </v-btn>
+                  </v-flex>
+                </v-layout>
+              </div>
+              <v-card>
+                <v-card-text>
+                  <testnet-buttons :wallet="wallet" />
+                  <address-render :address="wallet.address" :use-address-book="false" />
+                  <hr>
+                  <wallet-history v-if="wallet.onChain === true" :wallet="wallet" />
+                  <activation v-else :wallet="wallet" />
+                </v-card-text>
+              </v-card>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
         </v-card-text>
       </v-card>
     </v-flex>
 
-    <!-- View Wallet Dialog -->
-    <v-dialog v-model="dialogWalletView" fullscreen="">
-      <v-toolbar class="primary">
-        <v-btn small fab outline @click="dialogWalletView = false">
-          <v-icon>arrow_back</v-icon>
-        </v-btn>
-        <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
-        <v-toolbar-items>
-          <v-btn flat @click="dialogShowAddress = true">
-            Show Business Card
-          </v-btn>
-          <v-btn v-if="contextWallet.onChain === true" flat @click="dialogMakeTransfer = true">
-            Make Transfer
-          </v-btn>
-          <v-btn flat @click="dialogRemoveWallet = true">
-            Remove Wallet
-          </v-btn>
-        </v-toolbar-items>
-        <v-spacer />
-      </v-toolbar>
-      <v-card width="600px">
-        <v-card-text>
-          <testnet-buttons :wallet="contextWallet" />
-          <address-render :address="contextWallet.address" :use-address-book="false" />
-          <wallet-history v-if="contextWallet.onChain === true" :wallet="contextWallet" />
-          <activation v-else :wallet="contextWallet" />
-        </v-card-text>
-      </v-card>
-    </v-dialog>
-
     <!-- Show Address Dialog -->
-    <v-dialog v-model="dialogShowAddress" max-width="500px">
+    <v-dialog v-model="dialogAddressShow" max-width="500px">
       <v-toolbar class="primary">
         <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
         <v-spacer />
-        <v-btn small fab outline @click="dialogShowAddress = false">
+        <v-btn small fab outline @click="dialogAddressShow = false">
           <v-icon>close</v-icon>
         </v-btn>
       </v-toolbar>
@@ -141,7 +133,7 @@
     </v-dialog>
 
     <!-- Make Transfer Dialog -->
-    <v-dialog v-if="contextWallet.onChain" v-model="dialogMakeTransfer" persistent max-width="600px">
+    <v-dialog v-if="contextWallet.onChain" v-model="dialogMakeTransfer" persistent max-width="450px">
       <v-toolbar color="primary">
         <v-toolbar-title>Make a Transfer from {{ contextWallet.name }}</v-toolbar-title>
         <v-spacer />
@@ -206,12 +198,13 @@ export default {
   },
   data() {
     return {
+      accordionWallets: [],
       dialogWalletAdd: false,
       dialogWalletView: false,
       dialogMakeTransfer: false,
       dialogReceiveTransfer: false,
       dialogRemoveWallet: false,
-      dialogShowAddress: false,
+      dialogAddressShow: false,
       activeWatchers: [],
       walletType: 'aen',
       valid: false,
@@ -254,6 +247,13 @@ export default {
       return false
     }
   },
+  watch: {
+    accordionWallets: function(val) {
+      console.log('changing accordion')
+      console.log(val)
+      console.log(this)
+    }
+  },
   mounted: function () {
     console.debug('P:W:Wallets Page Started')
     // Only start once global loading finished
@@ -266,6 +266,38 @@ export default {
     )
   },
   methods: {
+    accordionTogglingWallet(wallet) {
+      this.contextWallet = wallet
+
+
+
+      // Check whether the user security is ok
+      this.$store.dispatch('security/addCheck', {
+        walletAddress: wallet.address,
+        context: 'wallet_open'
+      }).then(() => {
+        // Perform a quick test to see whether the wallet is available online or not
+        this.$store.dispatch('wallet/getLiveWallet', this.contextWallet).then((response) => {
+          if(response !== false) { response = true }
+          this.$store.commit('wallet/setWalletProperty', {
+            address: this.contextWallet.address,
+            key: 'onChain',
+            value: response
+          })
+        })
+        this.dialogWalletView = true
+      })
+    },
+    addressShow(wallet) {
+      this.contextWallet = wallet
+      this.dialogAddressShow = true
+    },
+    walletShade(wallet) {
+      switch (wallet.type) {
+        case 'aen':
+          return '#00616d'
+      }
+    },
     setActiveWallet(wallet) {
       switch (wallet.type) {
         case 'aen':
@@ -279,29 +311,16 @@ export default {
           break
       }
     },
-    walletView(wallet) {
+    transferNewShow(wallet) {
       this.contextWallet = wallet
-      console.log('going to view the wallet')
-
-      // Check whether the user security is ok
       this.$store.dispatch('security/addCheck', {
         walletAddress: wallet.address,
-        context: 'wallet_open'
+        context: 'transaction_start'
       }).then(() => {
-        // Perform a quick test to see whether the wallet is available online or not
-        this.$store.dispatch('wallet/getLiveWallet', this.contextWallet).then((response) => {
-          if(response !== false) { response = true }
-          this.$store.commit('wallet/setProperty', {
-            type: 'aen',
-            address: this.contextWallet.address,
-            key: 'onChain',
-            value: response
-          })
-        })
-        this.dialogWalletView = true
+        this.dialogMakeTransfer = true
       })
-    },
 
+    },
     removeWallet() {
       this.dialogRemoveWallet = false
       this.walletView = false

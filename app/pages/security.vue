@@ -15,27 +15,8 @@
         </v-card>
       </v-flex>
     </v-layout>
+
     <v-layout row>
-
-      <v-flex xs12>
-        <v-card>
-          <v-card-title>
-            <h1>
-              Network Preferences
-            </h1>
-          </v-card-title>
-          <v-card-text>
-            <v-select
-              :items="aenWallets"
-              v-model="mainAenWallet"
-              item-text="name"
-              item-value="address"
-              label="AEN Wallet"
-            ></v-select>
-          </v-card-text>
-        </v-card>
-      </v-flex>
-
       <v-flex xs12>
         <v-card>
           <v-card-title>
@@ -44,6 +25,10 @@
             </h1>
           </v-card-title>
           <v-card-text>
+            <p>
+              The master password is used to authenticate a user for access to the entire Smart Wallet app. By default,
+              it is set to the same password as your initial AEN Wallet.
+            </p>
             <v-text-field
               v-model="existingPassword"
               :append-icon="showPassword ? 'visibility_off' : 'visibility'"
@@ -51,7 +36,6 @@
               :rules="[rules.basic.required, rules.password.minLength]"
               label="Existing Password"
               required
-              counter
               @click:append="showPassword = !showPassword"
             />
             <v-text-field
@@ -79,10 +63,6 @@
           </v-card-text>
         </v-card>
       </v-flex>
-
-      <!-- Change master password -->
-
-
     </v-layout>
   </v-container>
 </template>

@@ -14,7 +14,7 @@
       </v-list>
     </v-menu>
 
-    <v-dialog v-model="dialogSecurity" fullscreen v-if="dialogSecurity">
+    <v-dialog v-if="dialogSecurity" v-model="dialogSecurity" fullscreen>
       <v-toolbar color="primary">
         <v-btn small fab outline @click="dialogSecurity = false">
           <v-icon>arrow_back</v-icon>
@@ -42,7 +42,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="dialogWalletControl" fullscreen v-if="dialogWalletControl">
+    <v-dialog v-if="dialogWalletControl" v-model="dialogWalletControl" fullscreen>
       <v-toolbar color="primary">
         <v-btn small fab outline @click="dialogWalletControl = false">
           <v-icon>arrow_back</v-icon>

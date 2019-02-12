@@ -1,7 +1,7 @@
 <template>
   <v-layout row justify-center>
     <v-flex xs12>
-      <!--class="primary"-->
+      <!-- For selecting / adding security scopes -->
       <v-toolbar v-if="globalSecurityOnly === false">
         <v-toolbar-items>
           <v-menu offset-y>
@@ -24,7 +24,6 @@
               </v-list-tile>
             </v-list>
           </v-menu>
-
           <!-- Existing profile customisation -->
           <v-btn
             flat
@@ -34,9 +33,9 @@
             Default / Global
           </v-btn>
           <v-btn
-            flat
             v-for="(security, contextWalletAddress) in walletsWithSecurity"
             :key="contextWalletAddress"
+            flat
             :class="{ 'info': isAddressActive(contextWalletAddress) }"
             @click="walletAddress = contextWalletAddress"
           >
@@ -46,45 +45,44 @@
       </v-toolbar>
 
       <v-layout row>
+        <!-- Remove current security scope -->
+        <v-btn
+          v-if="walletAddress !== 'global'"
+          @click="dialogRemovePreset = true"
+        >
+          Remove preset
+        </v-btn>
+
+        <!-- Select wizard templates -->
         <v-flex xs12 md3>
-          <v-card flat>
-            <v-btn
-            v-if="walletAddress !== 'global'"
-            @click="dialogRemovePreset = true"
-            >
-              Remove preset
-            </v-btn>
-            <v-card-title>Premade level</v-card-title>
-            <v-card-text>
-              <v-radio-group v-model="securityLevel">
-                <v-radio
-                  v-for="(options, index) in securityLevels"
-                  :key="index"
-                  :label="index"
-                  :value="index"
-                />
-                <v-radio label="Custom" value="custom" />
-              </v-radio-group>
-            </v-card-text>
-          </v-card>
+          <h3>
+            Wizard
+          </h3>
+          <v-radio-group v-model="securityLevel">
+            <v-radio
+              v-for="(options, index) in securityLevels"
+              :key="index"
+              :label="index + ' - ' + options.description"
+              :value="index"
+            />
+            <v-radio label="Custom" value="custom" />
+          </v-radio-group>
         </v-flex>
         <v-flex xs12 md9>
-          <v-card flat xs6 sm9>
-            <v-card-title>Security Features enabled</v-card-title>
-            <v-card-text>
-              <!-- Global only options -->
-              <v-checkbox v-if="walletAddress === 'global'" v-model="app_start" label="Password on App Start. Main AENC wallet password" />
-              <!-- Wallet specific options -->
-              <v-checkbox v-model="transaction_start" label="Password on Transaction" />
-              <v-checkbox v-model="wallet_open" label="Password on wallet" />
-            </v-card-text>
-          </v-card>
+          <h3>
+            Features
+          </h3>
+          <!-- Global only options -->
+          <v-checkbox v-if="walletAddress === 'global'" v-model="app_start" label="Password on App Start. Main AENC wallet password" />
+          <!-- Wallet specific options -->
+          <v-checkbox v-model="transaction_start" label="Password on Transaction" />
+          <v-checkbox v-model="wallet_open" label="Password on wallet" />
         </v-flex>
       </v-layout>
     </v-flex>
 
     <!-- Remove Wallet Dialog -->
-    <v-dialog v-model="dialogRemovePreset" v-if="dialogRemovePreset" persistent max-width="600px">
+    <v-dialog v-if="dialogRemovePreset" v-model="dialogRemovePreset" persistent max-width="600px">
       <v-toolbar color="primary">
         <v-toolbar-title>Are you sure you want to remove the wallet preset?</v-toolbar-title>
         <v-spacer />
@@ -110,7 +108,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
   </v-layout>
 </template>
 
@@ -119,7 +116,7 @@ export default {
   props: {
     globalSecurityOnly: {
       type: Boolean,
-      default: false
+      default: true
     },
     inputWalletAddress: {
       type: String,
@@ -140,15 +137,7 @@ export default {
             wallet_open: true
           }
         },
-        'medium': {
-          description: "Modest controls",
-          policy: {
-            app_start: true,
-            transaction_start: true,
-            wallet_open: false
-          }
-        },
-        'low': {
+        'normal': {
           description: "Minimum safety controls. Only to be used on trusted device",
           policy: {
             app_start: true,
@@ -158,9 +147,6 @@ export default {
         }
       }
     }
-  },
-  mounted: function () {
-    this.walletAddress = this.inputWalletAddress
   },
   computed: {
     walletsWithoutSecurity() {
@@ -312,6 +298,9 @@ export default {
     inputWalletAddress: function (val) {
       this.walletAddress = val
     }
+  },
+  mounted: function () {
+    this.walletAddress = this.inputWalletAddress
   },
   methods: {
     isAddressActive(address) {

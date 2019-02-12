@@ -1,27 +1,20 @@
 <template>
   <v-layout column justify-center align-center>
-    <v-flex xs12 sm8 md6 class="text-xs-center">
-      <v-card>
-        <v-card-title>This wallet is not yet online</v-card-title>
-        <v-card-text>
-          <p>
-            If you have already made a transfer, it is possible the network has not yet detected it. This app will periodically
-            check in but, if you would like to manually try, click the button below
-          </p>
-          <v-btn @click="getLiveWallet(wallet)">
-            Check
-          </v-btn>
-        </v-card-text>
-      </v-card>
-      <h1>This wallet is not yet online</h1>
-      <img src="/nothing.png" alt="nothing">
-
-      <p>
-        If you are still getting the message even after being sure a transfer has taken place, please get in contact with us at <a href="mailto:support@aencoin.io">
-          support@aencoin.io
-        </a>!
-      </p>
-    </v-flex>
+    <h1>
+      This wallet is not yet online
+    </h1>
+    <p>
+      If you have already made a transfer, it is possible the network has not yet detected it. This app will periodically
+      check in but, if you would like to manually try, click the button below
+    </p>
+    <v-btn @click="getLiveWallet(wallet)">
+      Check
+    </v-btn>
+    <p>
+      If you are still getting the message even after being sure a transfer has taken place, please get in contact with us at <a href="mailto:support@aencoin.io">
+        support@aencoin.io
+      </a>!
+    </p>
   </v-layout>
 </template>
 

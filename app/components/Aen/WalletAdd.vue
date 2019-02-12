@@ -59,6 +59,17 @@
                     counter
                     @click:append="showPassword = !showPassword"
                   />
+                  <v-text-field
+                    v-model="password2"
+                    :append-icon="showPassword ? 'visibility_off' : 'visibility'"
+                    :type="showPassword ? 'text' : 'password'"
+                    :rules="[rules.basic.required, rules.password.minLength]"
+                    label="Repeat Password"
+                    :error-messages="passwordsMatch()"
+                    required
+                    counter
+                    @click:append="showPassword = !showPassword"
+                  />
                   <!--<vue-recaptcha-->
                   <!--v-if="environment === 'Production'"-->
                   <!--ref="recaptcha"-->
@@ -189,6 +200,7 @@ function initialDataState() {
     recoverValid: false,
     walletName: '',
     walletPassword: '',
+    password2: '',
     network: {},
     accountPrivateKey: '',
     proceedValid: false,
@@ -294,6 +306,11 @@ export default {
       }
       this.$store.dispatch('wallet/new', walletOptions)
         .then((wallet) => {
+
+          this.$store.commit('security/setWalletPassword', {
+            walletAddress: wallet.address,
+            password: wallet.password
+          })
           this.wallet = wallet
           this.currentStep++
           this.startLiveListener(wallet)
@@ -316,6 +333,9 @@ export default {
         this.currentStep++
         this.startLiveListener(wallet)
       })
+    },
+    passwordsMatch() {
+      return (this.walletPassword === this.password2) ? '' : 'Passwords must match'
     },
     reset() {
       Object.assign(this.$data, initialDataState())

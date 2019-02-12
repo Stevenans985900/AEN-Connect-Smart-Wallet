@@ -30,7 +30,6 @@ export default {
       this.$emit('complete', wallet)
     },
     updateComponent() {
-      console.log('loading wallet add component using: ' + this.type)
       if(this.type !== '') {
         const componentName = this.type[0].toUpperCase() + this.type.slice(1)
         console.log(componentName)
@@ -38,7 +37,6 @@ export default {
           .catch(function () {
             this.component = () => import('~/components/Fallback')
           }.bind(this))
-        console.log('after component load attempt.')
         }
       }
   }

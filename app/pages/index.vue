@@ -1,81 +1,102 @@
 <template>
-  <v-layout row justify-center align-center>
-    <v-flex xs12>
-      <!-- Initial setup -->
-      <v-card>
-        <v-card-title class="headline">
-          Welcome to AEN Smart Wallet ({{ network }})
-        </v-card-title>
-        <v-card-text>
-          <p>
-            This Smart wallet allows you to generate and manage accounts on the
-            <a
-              href="https://aencoin.com/"
-              target="_blank"
+  <v-container justify-center align-center>
+    <v-card class="mb-4">
+      <v-card-text>
+        <v-layout row>
+          <v-flex xs12 md6>
+            <!-- Initial setup -->
+            <h1>
+              Welcome!
+            </h1>
+            <p>
+              This Smart wallet allows you to generate and manage multiple accounts on the
+              <a
+                href="https://aencoin.com/"
+                target="_blank"
+              >
+                AENChain network
+              </a>, Ethereum Network, ERC20/ERC223 Contracts, and Bitcoin network.
+            </p>
+            <p>
+              Before proceeding, you need to have an AEN wallet setup on this device, Please following the instructions
+              below to get started. If you need help at any point, you can click the question icon in the top right of
+              your screen to get both contextual and general help.
+            </p>
+          </v-flex>
+          <v-flex md6>
+            <v-img src="/get-started.png" max-height="180px" contain />
+          </v-flex>
+        </v-layout>
+      </v-card-text>
+    </v-card>
+
+    <v-card>
+      <v-card-text>
+        <v-layout>
+          <v-flex xs12>
+            <v-expansion-panel
+              v-model="panel"
+              expand
             >
-              AENChain network
-            </a>
-          </p>
-          <p>Before proceeding, you need to have an AEN wallet setup on this device and choose a basic security level. Please following the instructions below</p>
-          <v-expansion-panel
-            v-model="panel"
-            expand
-          >
-            <v-expansion-panel-content>
-              <div slot="header">
-                <h2>
-                  Choose Security features to use
-                </h2>
-              </div>
-              <security-controls :global-security-only="true" />
-              <v-btn @click="moveToWalletCreate">
-                Continue
-              </v-btn>
-            </v-expansion-panel-content>
-
-            <v-expansion-panel-content>
-              <div slot="header">
-                <h2>
+              <!-- Initial wallet creation screen -->
+              <v-expansion-panel-content>
+                <div slot="header">
                   Wallet Creation
-                </h2>
-              </div>
-              <wallet-add v-if="!wallet" type="aen" :main="true" @complete="complete" />
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-card-text>
-      </v-card>
-    </v-flex>
+                </div>
+                <wallet-add v-if="!wallet" type="aen" :main="true" @complete="walletCreated" />
+              </v-expansion-panel-content>
 
-    <!-- New Wallet Dialog -->
-    <v-dialog v-model="dialogEulaAgree" persistent max-width="600px">
-      <v-toolbar color="primary">
-        <v-toolbar-title>Accept End User License Agreement</v-toolbar-title>
-      </v-toolbar>
-      <v-card>
-        <v-card-text>
-          <p>
-            At the moment, your wallet is not live on the network. It is necessary to perform a transaction using
-            this address before it has any presence.
-          </p>
-          <p v-if="testnet">
-            This wallet is on a testing network which means, you can receive some free coins to get started by visiting our faucet.
-            Click the button below to visit the Faucet now or, click the accept button to agree to the <a href="http://aencoin.com/eula">
-              End User License Agreement
-            </a> and go to your wallet management screen.
-          </p>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn v-if="testnet" flat="flat" @click="goToFaucet">
-            Go to Faucet
-          </v-btn>
-          <v-btn flat="flat" @click="acceptAndProceed">
-            Accept EULA and proceed
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-layout>
+              <!-- Security configuration -->
+              <v-expansion-panel-content>
+                <div slot="header">
+                  <h2>
+                    Choose Security features to use
+                  </h2>
+                </div>
+                <security-controls />
+                <v-btn @click="panel = [false,false,true]">
+                  Continue
+                </v-btn>
+              </v-expansion-panel-content>
+
+              <!-- License agreement -->
+              <v-expansion-panel-content>
+                <div slot="header">
+                  <h2>
+                    Accept End User License Agreement
+                  </h2>
+                </div>
+                <v-card>
+                  <v-card-text>
+                    <p v-if="testnet">
+                      This wallet is on a testing network which means, you can receive some free coins to get started by visiting our faucet.
+                      Click the button below to visit the Faucet.
+                    </p>
+                    <p>
+                      Click the accept button to agree to the <a href="http://aencoin.com/eula">
+                        End User License Agreement
+                      </a>
+                      and go to your wallet management screen.
+                    </p>
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-spacer />
+                    <v-btn v-if="testnet" flat="flat" @click="goToFaucet">
+                      Go to Faucet
+                    </v-btn>
+                    <v-btn flat="flat" @click="acceptAndProceed">
+                      Accept EULA and proceed
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+                <wallet-add v-if="!wallet" type="aen" :main="true" @complete="walletCreated" />
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+          </v-flex>
+        </v-layout>
+      </v-card-text>
+    </v-card>
+  </v-container>
 </template>
 
 <script>
@@ -95,7 +116,7 @@ export default {
    */
   data() {
     return {
-      panel: [true, false],
+      panel: [true, false, false],
       dialogEulaAgree: false,
       wallet: null,
       seasons: [
@@ -149,14 +170,18 @@ export default {
     season (val) {
       return this.seasons[val]
     },
-    moveToWalletCreate: function() {
-      this.panel = [false, true]
-    },
     /**
      * Method to send user on to dashboard once wallet has been created
      */
-    complete: function (wallet) {
+    walletCreated: function (wallet) {
       this.wallet = wallet
+      this.$store.commit('security/setWalletPassword', {
+        walletAddress: wallet.address,
+        password: wallet.password
+      })
+      this.panel = [false,true,false]
+    },
+    setupComplete: function () {
       this.dialogEulaAgree = true
     },
     goToFaucet: function () {

@@ -3,16 +3,15 @@
     <v-flex xs12>
       <v-stepper v-model="currentStep" vertical>
         <v-stepper-step :complete="currentStep > 1" step="1">
-          Add Method
-          <small>Determine if you want a new Bitcoin wallet or to add an existing wallet</small>
+          How do you want to add your wallet?
         </v-stepper-step>
         <v-stepper-content step="1">
           <v-card>
             <v-card-text>
               <v-radio-group v-model="addType">
-                <v-radio label="New Wallet" value="new" />
-                <v-radio label="Import from File" value="fileImport" />
-                <v-radio label="Manually enter wallet details" value="manualRecover" />
+                <v-radio label="Create a New Wallet right now" value="new" />
+                <v-radio label="Import an existing wallet from file" value="fileImport" />
+                <v-radio label="Manually enter wallet private key and password" value="manualRecover" />
               </v-radio-group>
             </v-card-text>
           </v-card>
@@ -50,6 +49,17 @@
                     required
                     placeholder="AEN Wallet"
                   />
+                  <v-text-field
+                    v-model="walletPassword"
+                    :append-icon="showPassword ? 'visibility_off' : 'visibility'"
+                    :type="showPassword ? 'text' : 'password'"
+                    :rules="[rules.basic.required, rules.password.minLength]"
+                    label="Wallet Password"
+                    required
+                    counter
+                    @click:append="showPassword = !showPassword"
+                  />
+
                   <!--<vue-recaptcha-->
                   <!--v-if="environment === 'Production'"-->
                   <!--ref="recaptcha"-->
@@ -164,10 +174,15 @@ function initialDataState() {
     loading: true,
     walletName: '',
     proceedValid: false,
+    showPassword: false,
+    walletPassword: '',
     wallet: {},
     rules: {
       basic: {
         required: value => !!value || 'Required.'
+      },
+      password: {
+        minLength: v => v.length >= 8 || 'Min 8 characters'
       },
       walletName: {
         minLength: v => v.length >= 4 || 'Min 4 Characters'
