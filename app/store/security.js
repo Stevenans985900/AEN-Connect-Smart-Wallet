@@ -13,7 +13,7 @@ export const initialState = {
   authenticationAttemptLimit: 3,
   lockoutDuration: 30000,
   configured: false,
-  securityLevel: 'medium',
+  securityLevel: 'normal',
   globalPolicy: {
     remove_wallet_global: true,
     app_start: true,

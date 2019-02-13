@@ -18,8 +18,8 @@
 </template>
 
 <script>
-import TransactionStringify from '~/components/Bitcoin/TransactionStringify'
-import Bitcoin from '~/class/network/Bitcoin'
+import TransactionStringify from '~/components/Btc/TransactionStringify'
+import Btc from '~/class/network/Btc'
 
 export default {
   components: {
@@ -41,7 +41,7 @@ export default {
     }
   },
   mounted() {
-    const networkHelper = new Bitcoin(this.$store.state.wallet.bitcoin.activeApiEndpoint)
+    const networkHelper = new Btc(this.$store.state.wallet.Btc.activeApiEndpoint)
     networkHelper.transactionsHistorical(this.wallet).then((transactions) => {
       this.transactions = transactions
       this.loading = false

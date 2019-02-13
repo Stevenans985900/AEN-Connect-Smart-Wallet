@@ -1,7 +1,7 @@
 <template>
   <v-app dark>
     <!-- NAV DRAWER -->
-    <v-navigation-drawer v-model="showMainNav" :mini-variant.sync="drawer" fixed stateless app>
+    <v-navigation-drawer v-model="showMainNav" :mini-variant="minifyDrawer" fixed stateless app>
       <v-list>
         <v-list-tile v-for="(item, i) in navigationItems" :key="i" :to="item.to" router exact>
           <v-list-tile-action>
@@ -11,13 +11,24 @@
             <v-list-tile-title v-text="item.title" />
           </v-list-tile-content>
         </v-list-tile>
-
+        <v-list-tile exact @click="dialogHelpShow = !dialogHelpShow">
+          <v-list-tile-action>
+            <v-icon>help</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>
+              Help
+            </v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
         <v-list-tile v-if="appMode === 'app'" exact @click="exit">
           <v-list-tile-action>
             <v-icon>exit_to_app</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
-            <v-list-tile-title>Exit</v-list-tile-title>
+            <v-list-tile-title>
+              Exit
+            </v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
       </v-list>
@@ -25,7 +36,7 @@
 
     <!-- TOP BAR -->
     <v-toolbar fixed app>
-      <v-toolbar-side-icon v-if="eulaAgree" @click="navDrawer = !navDrawer" />
+      <v-toolbar-side-icon v-if="showMainNav" @click="minifyDrawer = !minifyDrawer" />
       <!--size="24"-->
       <!--<v-avatar >-->
       <v-img src="/logo.png" height="20" contain />
@@ -144,8 +155,7 @@ export default {
    */
   data() {
     return {
-      showMainNav: true,
-      navDrawer: true,
+      minifyDrawer: false,
       hydrated: false,
       dialogResetEverything: false,
       navigationItems: [
@@ -178,14 +188,18 @@ export default {
    * COMPUTED
    */
   computed: {
-    drawer: {
+    dialogHelpShow: {
+      get: function () { return this.$store.state.user.help },
+      set: function (val) { this.$store.commit('setUserProperty', {key: 'help', value: val}) }
+    },
+    showMainNav: {
       get: function () {
-        if (this.navDrawer === true && this.eulaAgree === true) {
+        if (this.$store.state.wallet.aen.mainAddress !== '' && this.$store.state.user.eulaAgree === true) {
           return true
         }
         return false
       },
-      set: function () {}
+      set : function () {}
     },
     developmentAgreed: {
       get: function () { return this.$store.state.user.developmentAgreed },
@@ -256,6 +270,11 @@ export default {
       key: 'environment',
       value: env
     })
+    if(window.innerWidth < 1366) {
+      this.minifyDrawer = true
+    } else {
+      this.minifyDrawer = false
+    }
     this.$store.commit('setLoading', {
       t: 'global',
       v: true,
@@ -303,13 +322,13 @@ export default {
       this.$store.commit('wallet/setEthereumProperty', { key: 'activeApiEndpoint', value: ethereumNetwork.infura_api_endpoint })
     }
     if (Object.keys(this.$store.state.wallet.bitcoin.activeApiEndpoint).length === 0) {
-      this.$store.commit('wallet/setBitcoinProperty', {
+      this.$store.commit('wallet/setBtcProperty', {
         key: 'network',
         value: this.$g('bitcoin.available_networks')[0]
       })
     }
-    this.$store.commit('wallet/setBitcoinProperty', { key: 'blockCypherEndpoint', value: this.$g('bitcoin.block_cypher.api_endpoint') })
-    this.$store.commit('wallet/setBitcoinProperty', { key: 'bitapsEndpoint', value: this.$g('bitcoin.bitaps.api_endpoint') })
+    this.$store.commit('wallet/setBtcProperty', { key: 'blockCypherEndpoint', value: this.$g('bitcoin.block_cypher.api_endpoint') })
+    this.$store.commit('wallet/setBtcProperty', { key: 'bitapsEndpoint', value: this.$g('bitcoin.bitaps.api_endpoint') })
 
     this.$store.dispatch('wallet/rankApiNodes')
     setInterval(
@@ -326,6 +345,9 @@ export default {
       }.bind(this),
       this.$g('internal.commonTasksInterval')
     )
+
+    // Update currency exchange rates from binance
+    this.$store.dispatch('exchange/updateRates')
 
     this.$store.commit('setLoading', { t: 'global', v: false })
     if (this.$store.state.wallet.aen.mainAddress !== '') {

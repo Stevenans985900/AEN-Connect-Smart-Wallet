@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Aen from '~/class/network/Aen'
-import Bitcoin from '~/class/network/Bitcoin'
+import Btc from '~/class/network/Btc'
 import Contract from '~/class/network/Contract'
 import Ethereum from '~/class/network/Ethereum'
 
@@ -15,7 +15,7 @@ export const initialState = {
     blockScore: 0,
     network: {}
   },
-  bitcoin: {
+  Btc: {
     activeApiEndpoint: '',
     activeApiPing: 9999,
     network: {}
@@ -35,14 +35,20 @@ export const initialState = {
 export const state = () => initialState
 
 export const getters = {
+  getByName: (state) => (walletName) => {
+    for (let walletAddress in state.wallets) {
+      if(state.wallets[walletAddress].name === walletName) {
+        return state.wallets[walletAddress]
+      }
+    }
+    return false
+  },
   contactsByWallet: (state) => (wallet) => {
-    console.log('WALLET Store')
     let contacts = []
-    for (const contact in state.contacts) {
-      console.log('Comparing: ' + state.contacts[contact].type + ' against ' + wallet.type)
-      if(state.contacts[contact].type === wallet.type && wallet.address !== contact) {
-        contacts.push(state.contacts[wallet])
-        console.log('pushing: ' + contact + ' because the address does not match ' + wallet.address)
+    for (let contactIndex in state.contacts) {
+      let contact = state.contacts[contactIndex]
+      if(contact.type === wallet.type && wallet.address !== contactIndex) {
+        contacts.push(contact)
       }
     }
     return contacts
@@ -52,7 +58,7 @@ export const getters = {
       case 'aen':
         return new Aen(state.aen.activeApiEndpoint)
       case 'btc':
-        return new Bitcoin(state.bitcoin)
+        return new Btc(state.Btc)
       case 'contract':
         return new Contract(state.ethereum.activeApiEndpoint)
       case 'eth':
@@ -99,6 +105,10 @@ export const actions = {
             state.aen.activeApiEndpoint
           )
           break
+        case 'btc':
+          // TODO For this active API endpoint, mixin network selection
+          networkHandler = new Btc(state.Btc)
+          break
         case 'contract':
           // TODO For this active API endpoint, mixin network selection
           networkHandler = new Contract(
@@ -116,7 +126,7 @@ export const actions = {
         .balance(wallet)
         .then((response) => {
           commit('setWalletProperty', {
-            wallet: wallet,
+            address: wallet.address,
             key: 'balance',
             value: response
           })
@@ -140,7 +150,7 @@ export const actions = {
           })
           break
         case 'btc':
-          networkHandler = new Bitcoin(context.state.bitcoin)
+          networkHandler = new Btc(context.state.Btc)
           networkHandler.getLiveWallet(wallet).then((response) => {
             resolve(response)
           })
@@ -229,7 +239,7 @@ export const actions = {
             networkHandler.balance(wallet).then((response) => {
               console.debug(response)
               context.commit('setWalletProperty', {
-                wallet: wallet,
+                address: wallet.address,
                 key: 'balance',
                 value: response
               })
@@ -274,8 +284,8 @@ export const actions = {
           })
           break
         case 'btc':
-          networkHandler = new Bitcoin(
-            state.bitcoin.activeApiEndpoint
+          networkHandler = new Btc(
+            state.Btc.activeApiEndpoint
           )
           networkHandler.walletNew(options).then((wallet) => {
             commit('setWallet', wallet)
@@ -427,14 +437,14 @@ export const mutations = {
   setAenProperty(state, options) {
     state.aen[options.key] = options.value
   },
-  setBitcoinProperty(state, options) {
-    state.bitcoin[options.key] = options.value
+  setBtcProperty(state, options) {
+    state.Btc[options.key] = options.value
   },
   setEthereumProperty(state, options) {
     state.ethereum[options.key] = options.value
   },
   setWalletProperty(state, options) {
-    state.wallets[options.wallet.address][options.key] = options.value
+    state.wallets[options.address][options.key] = options.value
   },
   setProperty(state, options) {
     state.wallets[options.address][options.key] = options.value

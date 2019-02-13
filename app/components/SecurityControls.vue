@@ -141,7 +141,7 @@ export default {
           description: "Minimum safety controls. Only to be used on trusted device",
           policy: {
             app_start: true,
-            transaction_start: false,
+            transaction_start: true,
             wallet_open: false
           }
         }

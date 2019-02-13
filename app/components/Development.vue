@@ -287,7 +287,7 @@ export default {
     switchOnChainStatus(wallet) {
       const newCondition = !wallet.onChain
       this.$store.commit('wallet/setWalletProperty', {
-        wallet: wallet,
+        address: wallet.address,
         key: 'onChain',
         value: newCondition
       })

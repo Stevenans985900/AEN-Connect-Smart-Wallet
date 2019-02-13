@@ -5,6 +5,7 @@
 <style scoped>
   img {
     max-width: 3rem;
+    max-height: 3rem;
   }
 </style>
 <script>

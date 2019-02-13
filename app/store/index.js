@@ -36,7 +36,8 @@ export const initialState = {
   user: {
     rememberUser: false,
     eulaAgree: false,
-    developmentAgreed: false
+    developmentAgreed: false,
+    help: false
   }
 }
 

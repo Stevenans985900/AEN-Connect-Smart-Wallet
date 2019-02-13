@@ -22,6 +22,13 @@ export default {
   },
   created() {
     this.getBalance()
+
+    setInterval(
+      function () {
+        this.getBalance()
+      }.bind(this),
+      this.$g('internal.commonTasksInterval')
+    )
   },
   methods: {
     getBalance() {

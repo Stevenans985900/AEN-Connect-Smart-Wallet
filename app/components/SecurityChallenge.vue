@@ -2,10 +2,10 @@
   <v-dialog v-model="dialogChallenge" persistent max-width="600px" class="blocking-overlay">
     <v-toolbar color="primary">
       <v-toolbar-title v-if="challengeType === 'global'">
-        Main Password
+        Global Challenge
       </v-toolbar-title>
       <v-toolbar-title v-else>
-        Enter password for {{ walletName }}
+        {{ walletName }} Challenge
       </v-toolbar-title>
       <v-spacer />
       <v-btn small fab outline @click="cancelChallenge">
@@ -14,12 +14,16 @@
     </v-toolbar>
     <v-card>
       <v-card-text>
+        <p>
+          To proceed, please enter your password
+        </p>
         <v-text-field
           v-model="password"
           :append-icon="showPassword ? 'visibility_off' : 'visibility'"
           :type="showPassword ? 'text' : 'password'"
           label="Password"
           @click:append="showPassword = !showPassword"
+          @keyup.enter="submitChallenge"
         />
       </v-card-text>
       <v-card-actions>
@@ -39,6 +43,7 @@
 
 function initialDataState() {
   return {
+    formValid: false,
     password: '',
     showPassword: false
   }
@@ -49,7 +54,9 @@ export default {
     walletAddress() { return this.$store.state.security.walletAddress },
     walletName() {
       if(this.walletAddress !== '') {
-        return this.$store.state.wallet.wallets[this.walletAddress].name
+        if(this.$store.state.wallet.wallets.hasOwnProperty(this.walletAddress)) {
+          return this.$store.state.wallet.wallets[this.walletAddress].name
+        }
       }
       return ''
     },
@@ -73,6 +80,7 @@ export default {
       Object.assign(this.$data, initialDataState())
     },
     submitChallenge() {
+      console.log('submitting the security challenge')
       this.$store.dispatch('security/checkPassword', this.password).then(() => {
         this.reset()
       })

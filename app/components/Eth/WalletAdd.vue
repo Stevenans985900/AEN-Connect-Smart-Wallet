@@ -302,7 +302,7 @@ export default {
             .dispatch('wallet/getLiveWallet', wallet).then((response) => {
               if (response !== false) {
                 this.$store.commit('wallet/setWalletProperty', {
-                  wallet: wallet,
+                  address: wallet.address,
                   key: 'onChain',
                   value: true
                 })

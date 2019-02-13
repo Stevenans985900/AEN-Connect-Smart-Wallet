@@ -69,6 +69,7 @@ export default {
   },
   data() {
     return {
+      transactionsListener: null,
       options: {},
       transactions: {},
       loading: true,
@@ -92,7 +93,7 @@ export default {
       this.loading = false
     })
 
-    setInterval(
+    this.transactionsListener = setInterval(
       function () {
         networkHandler
           .transactionsHistorical(this.options)
@@ -102,6 +103,9 @@ export default {
       }.bind(this),
       this.$g('internal.commonTasksInterval')
     )
+  },
+  beforeDestroy() {
+    clearInterval(this.transactionsListener)
   }
 }
 </script>

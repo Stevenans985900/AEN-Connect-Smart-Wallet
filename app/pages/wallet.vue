@@ -22,17 +22,23 @@
           <v-expansion-panel>
             <v-expansion-panel-content v-for="(wallet, address) in wallets" :key="address">
               <div slot="header" :color="walletShade(wallet)" @click="accordionTogglingWallet(wallet)">
-                <v-layout>
-                  <v-flex xs1 md1>
+                <v-layout row wrap>
+                  <v-flex xs2 sm1>
                     <wallet-image :wallet="wallet" />
                   </v-flex>
-                  <v-flex xs2 md2>
-                    <balance :wallet="wallet" />
+
+                  <v-flex xs7 sm5 class="text-truncate">
+                    <v-layout row wrap>
+                      <v-flex xs12 sm6>
+                        {{ wallet.name }}
+                      </v-flex>
+                      <v-flex xs12 sm6>
+                        <balance :wallet="wallet" />
+                      </v-flex>
+                    </v-layout>
                   </v-flex>
-                  <v-flex xs11 md3 class="text-truncate">
-                    {{ wallet.name }}
-                  </v-flex>
-                  <v-flex xs12 md6 class="text-xs-right">
+
+                  <v-flex xs3 sm6 class="text-xs-right" v-if="$vuetify.breakpoint.mdAndUp">
                     <v-btn outline small @click="addressShow(wallet)">
                       Receive
                     </v-btn>
@@ -43,15 +49,37 @@
                       Remove
                     </v-btn>
                   </v-flex>
+                  <v-flex v-else xs3 sm6 class="text-xs-right">
+                    <v-menu offset-y>
+                      <v-btn
+                        slot="activator"
+                        outline
+                        small
+                      >
+                        Actions
+                      </v-btn>
+                      <v-list>
+                        <v-list-tile @click="addressShow(wallet)">
+                          <v-list-tile-title>Receive</v-list-tile-title>
+                        </v-list-tile>
+                        <v-list-tile v-if="wallet.onChain === true" @click="transferNewShow(wallet)">
+                          <v-list-tile-title>Receive</v-list-tile-title>
+                        </v-list-tile>
+                        <v-list-tile @click="dialogRemoveWallet = true">
+                          <v-list-tile-title>Remove</v-list-tile-title>
+                        </v-list-tile>
+                      </v-list>
+                    </v-menu>
+                  </v-flex>
                 </v-layout>
               </div>
               <v-card>
                 <v-card-text>
                   <testnet-buttons :wallet="wallet" />
                   <address-render :address="wallet.address" :use-address-book="false" />
-                  <hr>
                   <wallet-history v-if="wallet.onChain === true" :wallet="wallet" />
                   <activation v-else :wallet="wallet" />
+                  <hr>
                 </v-card-text>
               </v-card>
             </v-expansion-panel-content>
@@ -73,7 +101,7 @@
     </v-dialog>
 
     <!-- New Wallet Dialog -->
-    <v-dialog v-model="dialogWalletAdd" persistent max-width="800px">
+    <v-dialog v-model="dialogWalletAdd" persistent max-width="1024px">
       <v-toolbar color="primary">
         <v-toolbar-title>Choose a wallet type to add from the list below</v-toolbar-title>
         <v-spacer />
@@ -91,7 +119,7 @@
             Ethereum
           </v-tab>
           <v-tab href="#btc" @click="walletType = 'btc'">
-            Bitcoin
+            Btc
           </v-tab>
           <v-tab v-if="haveEthereumWallet" href="#contract" @click="walletType = 'contract'">
             Custom Token
@@ -116,7 +144,7 @@
           <v-tab-item value="btc">
             <v-card flat>
               <v-card-text>
-                <wallet-add type="bitcoin" @complete="walletAdded()" />
+                <wallet-add type="btc" @complete="walletAdded()" />
               </v-card-text>
             </v-card>
           </v-tab-item>
@@ -262,29 +290,34 @@ export default {
         clearInterval(preparationInterval)
         this.$store.commit('setLoading', { t: 'router', v: false })
       }.bind(this),
-      2000
+      this.$g('internal.commonTasksInterval')
     )
   },
   methods: {
     accordionTogglingWallet(wallet) {
       this.contextWallet = wallet
-
-
-
       // Check whether the user security is ok
       this.$store.dispatch('security/addCheck', {
-        walletAddress: wallet.address,
+        walletAddress: this.contextWallet.address,
         context: 'wallet_open'
       }).then(() => {
-        // Perform a quick test to see whether the wallet is available online or not
-        this.$store.dispatch('wallet/getLiveWallet', this.contextWallet).then((response) => {
-          if(response !== false) { response = true }
-          this.$store.commit('wallet/setWalletProperty', {
-            address: this.contextWallet.address,
-            key: 'onChain',
-            value: response
-          })
-        })
+        if(this.contextWallet.onChain === false) {
+          const walletLiveCheckInterval = setInterval(
+            function () {
+              this.$store.dispatch('wallet/getLiveWallet', this.contextWallet).then((response) => {
+                if(response !== false) {
+                  this.$store.commit('wallet/setWalletProperty', {
+                    address: this.contextWallet.address,
+                    key: 'onChain',
+                    value: true
+                  })
+                  clearInterval(walletLiveCheckInterval)
+                }
+              })
+            }.bind(this),
+            this.$g('internal.commonTasksInterval')
+          )
+        }
         this.dialogWalletView = true
       })
     },

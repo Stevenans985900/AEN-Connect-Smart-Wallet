@@ -15,7 +15,7 @@
                 target="_blank"
               >
                 AENChain network
-              </a>, Ethereum Network, ERC20/ERC223 Contracts, and Bitcoin network.
+              </a>, Ethereum Network, ERC20/ERC223 Contracts, and Btc network.
             </p>
             <p>
               Before proceeding, you need to have an AEN wallet setup on this device, Please following the instructions
@@ -89,7 +89,6 @@
                     </v-btn>
                   </v-card-actions>
                 </v-card>
-                <wallet-add v-if="!wallet" type="aen" :main="true" @complete="walletCreated" />
               </v-expansion-panel-content>
             </v-expansion-panel>
           </v-flex>

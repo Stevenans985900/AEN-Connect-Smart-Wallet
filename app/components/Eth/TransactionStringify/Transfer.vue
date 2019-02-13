@@ -66,11 +66,14 @@ export default {
       return this.transaction.from
     },
     direction() {
-      if(this.transaction.from.toUpperCase() === this.wallet.address.toUpperCase()) {
-        return 'incoming'
-      } else {
-        return 'outgoing'
+      if(this.transaction.hasOwnProperty('to') && this.wallet.hasOwnProperty('address')) {
+        if (this.transaction.to.toUpperCase() === this.wallet.address.toUpperCase()) {
+          return 'incoming'
+        } else {
+          return 'outgoing'
+        }
       }
+      return ''
     },
     date() {
       return format(this.transaction.timeStamp * 1000, 'YYYY-MM-DD HH:mm')

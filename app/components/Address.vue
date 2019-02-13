@@ -1,6 +1,8 @@
 <template>
   <span>
-    <v-btn v-clipboard:copy="address" v-clipboard:success="onCopy" flat>
+    <v-btn v-clipboard:copy="address" v-clipboard:success="onCopy" flat small
+           :class="{'smaller-font': $vuetify.breakpoint.smAndDown}"
+    >
       <v-icon small>
         file_copy
       </v-icon>&nbsp;&nbsp;{{ displayText }}
@@ -9,7 +11,7 @@
     <!-- New transfer -->
     <v-dialog v-if="haveContact === false && showAdd === true" v-model="dialog" persistent max-width="600px">
       <v-btn slot="activator" outline small>
-        Add Contact
+        Add
       </v-btn>
       <v-toolbar color="primary">
         <v-toolbar-title>Add Contact</v-toolbar-title>
@@ -23,6 +25,11 @@
   </span>
 </template>
 
+<style scoped>
+  .smaller-font {
+    font-size: 0.6rem;
+  }
+</style>
 <script>
 import ContactEdit from '~/components/ContactEdit'
 export default {

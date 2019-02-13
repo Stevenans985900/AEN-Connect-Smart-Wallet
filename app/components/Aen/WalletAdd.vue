@@ -45,6 +45,7 @@
                   <v-text-field
                     v-model="walletName"
                     :rules="[rules.basic.required, rules.walletName.minLength]"
+                    :error-messages="walletNameAvailable()"
                     label="Wallet Name"
                     required
                     placeholder="AEN Wallet"
@@ -177,7 +178,7 @@
               </v-btn>
             </v-flex>
             <v-flex xs12 md6>
-              <business-card :wallet="wallet" :include-private-key="true" :use-addrress-book="false" />
+              <business-card :wallet="wallet" :include-private-key="true" :use-address-book="false" />
             </v-flex>
           </v-layout>
         </v-stepper-content>
@@ -205,6 +206,7 @@ function initialDataState() {
     accountPrivateKey: '',
     proceedValid: false,
     showPassword: false,
+    errorMessages: [],
     wallet: {},
     rules: {
       basic: {
@@ -337,6 +339,9 @@ export default {
     passwordsMatch() {
       return (this.walletPassword === this.password2) ? '' : 'Passwords must match'
     },
+    walletNameAvailable() {
+      return this.$store.getters['wallet/getByName'](this.walletName) ? 'Wallet Name is already in use' : ''
+    },
     reset() {
       Object.assign(this.$data, initialDataState())
     },
@@ -348,7 +353,7 @@ export default {
 
             if (response !== false) {
               this.$store.commit('wallet/setWalletProperty', {
-                wallet: wallet,
+                address: wallet.address,
                 key: 'onChain',
                 value: true
               })
