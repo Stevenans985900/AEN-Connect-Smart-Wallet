@@ -1,1 +1,112 @@
 @require '~vuetify/src/stylus/settings/_variables.styl'
+
+$aen = {
+  primary: #00BCCA,
+  secondary: #003840,
+  secondarydark: #042a31,
+  secondarylight: #00616d
+}
+
+$material-dark = {
+  status-bar: {
+    regular: $shades.black,
+    lights-out: rgba($shades.black, .2)
+  },
+  app-bar: $shades.black,
+  background: $aen.secondary,
+  cards: $aen.secondarydark,
+  chips: {
+    background: $aen.secondarylight,
+    color: $shades.white
+  },
+  dividers: rgba($shades.white, .12),
+  text: {
+    theme: $shades.white,
+    primary: $shades.white,
+    secondary: rgba($shades.white, .70),
+    disabled: rgba($shades.white, .50),
+    link: $blue.accent-1,
+    link-hover: $grey.lighten-3
+  },
+  icons: {
+    active: $shades.white,
+    inactive: rgba($shades.white, .5)
+  },
+  inputs: {
+    box: $shades.white,
+    solo-inverted: rgba($shades.white, .16),
+    solo-inverted-focused: $shades.white,
+    solo-inverted-focused-text: $material-light.text.primary
+  },
+  list-tile: {
+    hover: rgba($shades.white, .08)
+  },
+  buttons: {
+    disabled: rgba($shades.white, .3),
+    focused: rgba($shades.white, .12),
+    focused-alt: rgba($shades.white, .1),
+    pressed: rgba(#ccc, .25)
+  },
+  expansion-panels: {
+    focus: $aen.secondarylight
+  },
+  selection-controls: {
+    thumb: {
+      inactive: $grey.lighten-1,
+      disabled: $grey.darken-3
+    },
+    track: {
+      inactive: rgba($shades.white, .3),
+      disabled: rgba($shades.white, .1)
+    }
+  },
+  slider: {
+    active: rgba($shades.white, .3),
+    inactive: rgba($shades.white, .2),
+    disabled: rgba($shades.white, .2),
+    discrete: $shades.white
+  },
+  tabs: {
+    active: $shades.white
+  },
+  text-fields: {
+    box: rgba($shades.black, .1),
+    box-hover: rgba($shades.black, .2),
+    box-focus: rgba($shades.black, .3)
+  },
+  input-bottom-line: rgba($shades.white, .7),
+
+  stepper: {
+    active: rgba($shades.white, 1),
+    completed: rgba($shades.white, 0.87),
+    hover: rgba($shades.white, 0.75)
+  },
+  table: {
+    active: #505050
+    hover: $aen.secondary
+  },
+  picker: {
+    body: $grey.darken-3,
+    clock: $aen.secondary,
+    indeterminateTime: $grey.darken-1,
+    title: $aen.secondary
+  },
+  bg-color: $aen.secondarydark
+  fg-color: $shades.white
+  text-color: $shades.white
+  primary-text-percent: 1
+  secondary-text-percent: .70
+  disabledORhints-text-percent: .50
+  divider-percent: .12
+  active-icon-percent: 1
+  inactive-icon-percent: .50
+  calendar: {
+    background-color: #303030
+    outside-background-color: #202020
+    line-color: $grey.base
+    interval-color: $grey.lighten-3
+    interval-line-color: $grey.darken-2
+    text-color: #fff
+    past-color: rgba(#fff, .50)
+  }
+}

@@ -1,9 +1,9 @@
 <template>
   <div>
-    <v-menu v-model="netStatus" :close-on-content-click="false" :nudge-width="200" offset-x>
-      <v-btn slot="activator" flat>
+    <v-menu v-model="netStatus" :close-on-content-click="false" offset-y>
+      <v-btn slot="activator" fab flat small>
         <v-avatar size="24">
-          <v-icon v-text="connectionStrengthIcon" />
+          <v-icon :color="color" v-text="connectionStrengthIcon" />
         </v-avatar>
       </v-btn>
 
@@ -31,8 +31,16 @@ export default {
     }
   },
   computed: {
+    color() {
+      if(this.$store.state.runtime.isOnline === false) {
+        return 'red'
+      } else {
+        return 'green'
+      }
+    },
     connectionStrengthIcon() {
       let icon = 'signal_wifi_off'
+      if(this.$store.state.runtime.isOnline === false) { return icon }
       if (this.currentPing < 9999) {
         icon = 'signal_wifi_4_bar'
       }

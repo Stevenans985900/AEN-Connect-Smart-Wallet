@@ -4,7 +4,14 @@
     <v-card-text>
       <v-container grid-list-md>
         <v-layout wrap>
-          <v-flex xs12 sm6>
+          <v-flex xs12>
+            <v-text-field
+              v-model="destination.amount"
+              label="Amount"
+              suffix="XEM"
+            />
+          </v-flex>
+          <v-flex xs12>
             <v-combobox
               v-model="destination.address"
               :items="contacts"
@@ -13,14 +20,7 @@
               prepend-icon="contacts"
             />
           </v-flex>
-          <v-flex xs12 sm6>
-            <v-text-field
-              v-model="destination.amount"
-              label="Amount"
-              suffix="XEM"
-            />
-          </v-flex>
-          <v-flex xs12 sm6>
+          <v-flex xs12>
             <v-text-field
               v-model="destination.message"
               label="Optional Message"
@@ -59,7 +59,7 @@ export default {
   },
   computed: {
     contacts() {
-      return Object.values(this.$store.state.wallet.contacts)
+      return this.$store.getters['wallet/contactsByWallet'](this.wallet)
     }
   },
   methods: {

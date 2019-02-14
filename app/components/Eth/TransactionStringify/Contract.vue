@@ -29,8 +29,6 @@
 
 <script>
 import { format } from 'date-fns'
-import Web3 from 'web3'
-import Contract from '~/class/network/Contract'
 
 export default {
   props: {
@@ -53,7 +51,7 @@ export default {
   },
   data() {
     return {
-      web3: {},
+      networkHandler: null,
       contractDetails: {},
       title: 'Unrecognised Contract',
       controlledTokens: 0
@@ -63,25 +61,22 @@ export default {
     date() {
       return format(this.transaction.timeStamp * 1000, 'YYYY-MM-DD HH:mm')
     },
+    direction() {
+
+      if(this.transaction.from.toUpperCase() === this.wallet.address.toUpperCase()) {
+        return 'incoming'
+      } else {
+        return 'outgoing'
+      }
+    },
     totalGas() {
-      return this.web3.utils.fromWei(
-        this.transaction.cumulativeGasUsed.toString(),
-        'ether'
-      )
+      return this.transaction.cumulativeGasUsed
     },
     transactionGas() {
-      return this.web3.utils.fromWei(
-        this.transaction.gasUsed.toString(),
-        'ether'
-      )
+      return this.transaction.gasUsed
     },
     operationGas() {
-      return this.web3.utils.fromWei(
-        (
-          this.transaction.cumulativeGasUsed - this.transaction.gasUsed
-        ).toString(),
-        'ether'
-      )
+      return this.transaction.cumulativeGasUsed - this.transaction.gasUsed
     }
   },
   watch: {
@@ -92,17 +87,14 @@ export default {
       deep: true
     }
   },
-  created() {
-    this.web3 = new Web3(this.$store.state.wallet.ethereum.activeApiEndpoint)
-  },
   mounted() {
     this.fetchContractInfo()
   },
   methods: {
     fetchContractInfo() {
-      const networkHandler = new Contract(
-        this.$store.state.wallet.ethereum.activeApiEndpoint
-      )
+      const networkHandler = this.$store.getters['wallet/networkHandler']('contract')
+      console.log('fetching transaction info for contract')
+      console.log(this.transaction)
       networkHandler
         .balance({
           managerWalletAddress: this.wallet.address,
@@ -111,27 +103,22 @@ export default {
         .then((response) => {
           this.controlledTokens = response
         })
-        .catch(function () {})
-
-      import('~/class/network/contract/' + this.transaction.contractAddress)
-        .then((erc20Interface) => {
-          this.title = erc20Interface.title
+        .catch(function () {
+          console.log('caught bad return from balance')
         })
-        .catch(
-          function () {
-            networkHandler
-              .erc20PublicMethod({
-                contractAddress: this.transaction.contractAddress,
-                method: 'name'
-              })
-              .then((contractName) => {
-                this.title = contractName
-              })
-              .catch(function () {
-                console.debug('This contract does not really exist...')
-              })
-          }.bind(this)
-        )
+
+      networkHandler
+          .erc20PublicMethod({
+            contractAddress: this.transaction.contractAddress,
+            method: 'name'
+          })
+          .then((contractName) => {
+            this.title = contractName
+          })
+          .catch(function () {
+              console.debug('This contract does not really exist...')
+            })
+
     }
   }
 }

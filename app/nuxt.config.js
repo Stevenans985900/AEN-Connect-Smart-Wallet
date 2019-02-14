@@ -97,7 +97,7 @@ module.exports = {
   /*
   ** Customize the progress-bar color
   */
-  loading: { color: '#fff' },
+  loading: false,
 
   /*
   ** Global CSS
@@ -119,7 +119,8 @@ module.exports = {
         ssr: false
     },
     '@/plugins/vuetify',
-    '@/plugins/walletImage'
+    '@/plugins/walletImage',
+    '@/plugins/youtube'
   ],
 
   /*
@@ -140,6 +141,8 @@ module.exports = {
   ** Build configuration
   */
   build: {
+    cache: true,
+    parallel: true,
     transpile: ['vuetify/lib'],
     plugins: [new VuetifyLoaderPlugin()],
     loaders: {

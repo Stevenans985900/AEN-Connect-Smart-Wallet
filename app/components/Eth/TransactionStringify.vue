@@ -2,7 +2,7 @@
   <component
     :is="component"
     v-if="component"
-    :data="transaction"
+    :transaction="transaction"
     :wallet="wallet"
     :display="display"
   />
@@ -36,7 +36,6 @@ export default {
   },
   mounted() {
     // If the contract address is blank, then it's a plain transfer
-    console.debug(this.transaction)
     if (this.transaction.value === '0') {
       this.component = () => import('~/components/Eth/TransactionStringify/Contract')
         .catch(function () {
