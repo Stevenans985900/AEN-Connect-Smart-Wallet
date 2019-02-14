@@ -43,6 +43,27 @@ export const getters = {
     }
     return false
   },
+  // TODO Move the contact handling to a store of it's own
+  /**
+   * Get a contact by the display name
+   *
+   * @param state
+   * @returns {Function}
+   */
+  contactByProperty: (state) => (options) => {
+    for (let contact in state.contacts) {
+      if(state.contacts[contact][options.property] === options.value) {
+        return state.contacts[contact]
+      }
+    }
+    return false
+  },
+  /**
+   * Get all available contacts pertinent to a wallet
+   *
+   * @param state
+   * @returns {function(*): Array}
+   */
   contactsByWallet: (state) => (wallet) => {
     let contacts = []
     for (let contactIndex in state.contacts) {
@@ -107,7 +128,7 @@ export const actions = {
           break
         case 'btc':
           // TODO For this active API endpoint, mixin network selection
-          networkHandler = new Btc(state.Btc)
+          networkHandler = new Btc(Vue.prototype.$g('bitcoin'))
           break
         case 'contract':
           // TODO For this active API endpoint, mixin network selection
@@ -136,6 +157,49 @@ export const actions = {
           reject(err)
         })
     })
+  },
+  transactionsHistorical({state, commit, rootState}, wallet) {
+    let networkHandler
+    return new Promise((resolve) => {
+      if(rootState.runtime.isOnline === false) {
+        resolve(wallet)
+      }
+      switch (wallet.type) {
+        case 'aen':
+          networkHandler = new Aen(
+            state.aen.activeApiEndpoint
+          )
+          break
+        case 'btc':
+          // TODO For this active API endpoint, mixin network selection
+          networkHandler = new Btc(Vue.prototype.$g('bitcoin'))
+
+          break
+        case 'contract':
+          // TODO For this active API endpoint, mixin network selection
+          networkHandler = new Contract(
+            state.ethereum.activeApiEndpoint
+          )
+          break
+        case 'eth':
+          // TODO For this active API endpoint, mixin network selection
+          networkHandler = new Ethereum(
+            state.ethereum.activeApiEndpoint
+          )
+          break
+      }
+
+      // Do behind the scenes work
+      networkHandler.transactionsHistorical(wallet).then((transactions) => {
+        commit('setWalletProperty', {
+          address: wallet.address,
+          key: 'balance',
+          value: transactions
+        })
+        resolve(wallet)
+      })
+    })
+
   },
   getLiveWallet(context, wallet) {
     let networkHandler
@@ -174,16 +238,18 @@ export const actions = {
       }
     })
   },
-  load(context, options) {
+  load({state, commit}, options) {
     console.debug('Wallet Service:Load ' + options.type)
-    console.log(context)
     // var vm = this
 
     return new Promise((resolve) => {
       const wallet = {
         onChain: false,
         name: options.name,
-        balance: 0
+        balance: 0,
+        balanceLastSynced: false,
+        transactions: [],
+        transactionsLastSynced: false
       }
 
       let networkHandler
@@ -197,21 +263,19 @@ export const actions = {
               .walletLoad(options)
               .then((walletObject) => {
                 Object.assign(wallet, walletObject)
-                // Check if the wallet is on the chain
-                context.dispatch('getLiveWallet', wallet)
                 // wallet.onChain = networkHandler.getLiveWallet(options)
                 if(options.hasOwnProperty('main')) {
-                  context.commit('setAenProperty', {
+                  commit('setAenProperty', {
                     key: 'mainAddress',
                     value: wallet.address
                   })
                 }
-                context.commit('setContact', {
+                commit('setContact', {
                   address: wallet.address,
                   displayText: wallet.name,
                   type: wallet.type
                 })
-                context.commit('setWallet', wallet)
+                commit('setWallet', wallet)
                 resolve(wallet)
               })
           })
@@ -219,33 +283,32 @@ export const actions = {
 
         case 'contract':
           networkHandler = new Contract(
-            context.state.ethereum.activeApiEndpoint
+            state.ethereum.activeApiEndpoint
           )
           networkHandler.walletLoad(options).then((walletObject) => {
             Object.assign(wallet, walletObject)
-            context.commit('setWallet', wallet)
+            commit('setWallet', wallet)
             resolve(wallet)
           })
           break
 
         case 'eth':
           networkHandler = new Ethereum(
-            context.state.ethereum.activeApiEndpoint
+            state.ethereum.activeApiEndpoint
           )
           networkHandler.walletLoad(options).then((walletObject) => {
             Object.assign(wallet, walletObject)
-            context.commit('setWallet', wallet)
+            commit('setWallet', wallet)
 
             networkHandler.balance(wallet).then((response) => {
               console.debug(response)
-              context.commit('setWalletProperty', {
+              commit('setWalletProperty', {
                 address: wallet.address,
                 key: 'balance',
                 value: response
               })
               resolve(wallet)
             })
-            context.dispatch('getLiveWallet', wallet)
             resolve(wallet)
           })
           break
@@ -256,6 +319,14 @@ export const actions = {
     console.debug('Wallet Service:New ' + options.type)
 
     return new Promise((resolve) => {
+      const wallet = {
+        onChain: false,
+        name: options.name,
+        balance: 0,
+        balanceLastSynced: false,
+        transactions: [],
+        transactionsLastSynced: false
+      }
       let networkHandler
       switch (options.type) {
         case 'aen':
@@ -265,7 +336,8 @@ export const actions = {
           // Do behind the scenes work
           networkHandler.accountNew(options).then((account) => {
             options.account = account
-            networkHandler.walletLoad(options).then((wallet) => {
+            networkHandler.walletLoad(options).then((walletObject) => {
+              Object.assign(wallet, walletObject)
               if(options.hasOwnProperty('main')) {
                 commit('setAenProperty', {
                   key: 'mainAddress',
@@ -287,7 +359,8 @@ export const actions = {
           networkHandler = new Btc(
             state.Btc.activeApiEndpoint
           )
-          networkHandler.walletNew(options).then((wallet) => {
+          networkHandler.walletNew(options).then((walletObject) => {
+            Object.assign(wallet, walletObject)
             commit('setWallet', wallet)
             commit('setContact', {
               address: wallet.address,
@@ -302,7 +375,8 @@ export const actions = {
           networkHandler = new Ethereum(
             state.ethereum.activeApiEndpoint
           )
-          networkHandler.walletNew(options).then((wallet) => {
+          networkHandler.walletNew(options).then((walletObject) => {
+            Object.assign(wallet, walletObject)
             commit('setWallet', wallet)
             commit('setContact', {
               address: wallet.address,
@@ -320,12 +394,8 @@ export const actions = {
       let networkHandler
 
       // Check whether the destination is using a contact from the address book
-      if (
-        typeof options.destination.address === 'object' &&
-                options.destination.address !== null
-      ) {
-        options.destination.address =
-                    options.destination.address.address
+      if (typeof options.destination.address === 'object' && options.destination.address !== null) {
+        options.destination.address = options.destination.address.address
       }
       switch (options.source.type) {
         case 'aen':

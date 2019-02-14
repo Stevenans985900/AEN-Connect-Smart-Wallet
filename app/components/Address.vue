@@ -1,13 +1,6 @@
 <template>
   <span>
-    <v-btn v-clipboard:copy="address" v-clipboard:success="onCopy" flat small
-           :class="{'smaller-font': $vuetify.breakpoint.smAndDown}"
-    >
-      <v-icon small>
-        file_copy
-      </v-icon>&nbsp;&nbsp;{{ displayText }}
-    </v-btn>
-
+    <clipboard :data="address" :display-text="displayText" />
     <!-- New transfer -->
     <v-dialog v-if="haveContact === false && showAdd === true" v-model="dialog" persistent max-width="600px">
       <v-btn slot="activator" outline small>
@@ -25,15 +18,11 @@
   </span>
 </template>
 
-<style scoped>
-  .smaller-font {
-    font-size: 0.6rem;
-  }
-</style>
 <script>
 import ContactEdit from '~/components/ContactEdit'
+import Clipboard from '~/components/Clipboard'
 export default {
-  components: { ContactEdit },
+  components: { Clipboard, ContactEdit },
   props: {
     address: {
       type: String,
@@ -70,12 +59,6 @@ export default {
     }
   },
   methods: {
-    onCopy() {
-      this.$store.commit('showNotification', {
-        type: 'success',
-        message: 'Address copied to clipboard'
-      })
-    },
     contactAdded() {
       this.$store.commit('showNotification', {
         type: 'success',

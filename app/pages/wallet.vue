@@ -38,7 +38,7 @@
                     </v-layout>
                   </v-flex>
 
-                  <v-flex xs3 sm6 class="text-xs-right" v-if="$vuetify.breakpoint.mdAndUp">
+                  <v-flex v-if="$vuetify.breakpoint.mdAndUp" xs3 sm6 class="text-xs-right">
                     <v-btn outline small @click="addressShow(wallet)">
                       Receive
                     </v-btn>

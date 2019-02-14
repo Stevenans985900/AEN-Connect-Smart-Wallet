@@ -6,10 +6,10 @@
   "internal": {
     "baseImagePath": "/",
     "controllerPollReadyInterval": 1000,
-    "commonTasksInterval": 450000,
+    "commonTasksInterval": 900000,
     "apiEndpointPingInterval": 450000,
-    "walletCheckInterval": 300000,
-    "exchangeRateUpdateInterval": 600000
+    "walletCheckInterval": 600000,
+    "exchangeRateUpdateInterval": 900000
   },
   "userExperience": {
     "notificationTimeout": 6000
@@ -54,8 +54,11 @@
     "block_cypher": {
       "api_endpoint": "http://api.blockcypher.com/v1/btc/"
     },
+    "blockchain_info": {
+      "api_endpoint": "https://testnet.blockchain.info/"
+    },
     "bitaps": {
-      "api_endpoint": "https://bitaps.com/api/"
+      "api_endpoint": "https://api.bitaps.com/btc/{network_identifier}/v1/"
     },
     "available_networks": [
       {

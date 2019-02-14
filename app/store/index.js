@@ -14,7 +14,8 @@ export const initialState = {
   runtime: {
     mode: 'web',
     environment: 'production',
-    isOnline: false
+    isOnline: false,
+    intervalTimers: {}
   },
   // When running as a desktop app
   electron: {

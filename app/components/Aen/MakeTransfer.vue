@@ -20,8 +20,7 @@
               prepend-icon="contacts"
             />
           </v-flex>
-          <v-flex xs12>
-            <v-text-field
+          <v-flex xs12>            <v-text-field
               v-model="destination.message"
               label="Optional Message"
             />
@@ -59,11 +58,7 @@ export default {
   },
   computed: {
     contacts() {
-      console.log('trying to get contacts from the getts')
-      const contacts = this.$store.getters['wallet/contactsByWallet'](this.wallet)
-      console.log(contacts)
-      return contacts
-      // return Object.values(this.$store.state.wallet.contacts)
+      return this.$store.getters['wallet/contactsByWallet'](this.wallet)
     }
   },
   methods: {

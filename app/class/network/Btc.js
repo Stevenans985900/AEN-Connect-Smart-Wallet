@@ -3,10 +3,31 @@ import axios from 'axios'
 import Generic from './Generic.js'
 
 export default class Btc extends Generic {
-  constructor(apiEndpoints) {
+  /**
+   * START OF CUSTOM METHODS
+   */
+  getTransactionInfo(transactionHash) {
+    return new Promise((resolve, reject) => {
+      const address = this.blockchainInfoEndpoint + 'rawtx/' + transactionHash
+      axios.get(address)
+        .then(function (response) {
+          console.log(response)
+          resolve(response.data)
+        })
+        .catch(function (error) {
+          reject(error)
+        })
+    })
+  }
+  /**
+   * START OF COMMON METHODS
+   */
+
+  constructor(btcConfig) {
     super()
-    this.blockCypherEndpoint = apiEndpoints.blockCypherEndpoint
-    this.bitapsEndpoint = apiEndpoints.bitapsEndpoint
+    this.blockchainInfoEndpoint = btcConfig.blockchain_info.api_endpoint
+    this.blockCypherEndpoint = btcConfig.block_cypher.api_endpoint
+    this.bitapsEndpoint = btcConfig.bitaps.api_endpoint
     this.pluginName = 'Btc'
   }
   /**
@@ -16,12 +37,10 @@ export default class Btc extends Generic {
   balance(options) {
     super.balance(options)
     return new Promise((resolve, reject) => {
-      const address = this.blockCypherEndpoint + options.network.block_cypher_id + '/addrs/' + options.address
+      const address = this.blockCypherEndpoint + options.network.block_cypher_id + '/addrs/' + options.address + '/balance'
       axios.get(address)
         .then(function (response) {
-          console.log('Result from running balance check on blockchain')
-          console.log(response)
-          resolve(response.balance)
+          resolve(response.data.balance)
         })
         .catch(function (error) {
           reject(error)
@@ -37,6 +56,8 @@ export default class Btc extends Generic {
       const address = this.blockCypherEndpoint + options.network.block_cypher_id + '/addrs/' + options.address
       axios.get(address)
         .then(function (response) {
+          console.log('response from checking for btc address')
+          console.log(response)
           resolve(response)
         })
         .catch(() => {
@@ -74,8 +95,16 @@ export default class Btc extends Generic {
    */
   transactionsHistorical(options) {
     super.transactionsHistorical(options)
-    return new Promise((resolve) => {
-      resolve({})
+    return new Promise((resolve, reject) => {
+      const address = this.blockCypherEndpoint + options.network.block_cypher_id + '/addrs/' + options.address
+      axios.get(address)
+        .then(function (response) {
+          console.log(response)
+          resolve(response.data.txrefs)
+        })
+        .catch(function (error) {
+          reject(error)
+        })
     })
   }
   /**
