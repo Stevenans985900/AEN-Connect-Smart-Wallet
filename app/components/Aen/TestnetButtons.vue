@@ -2,6 +2,7 @@
   <v-menu v-if="testnet" offset-y>
     <v-btn
       slot="activator"
+      small
     >
       TestNet Functions
     </v-btn>
@@ -39,8 +40,9 @@ export default {
     }
   },
   methods: {
-    checkWalletLive(wallet) {
-      this.$store.dispatch('wallet/checkWalletLive', wallet).then((response) => {
+    getLiveWallet(wallet) {
+      this.$store.dispatch('wallet/getLiveWallet', wallet).then((response) => {
+        if(response !== false) { response = true }
         this.$store.commit('wallet/setProperty', {
           address: wallet.address,
           key: 'onChain',

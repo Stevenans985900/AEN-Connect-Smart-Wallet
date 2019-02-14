@@ -1,27 +1,19 @@
 <template>
   <v-layout column justify-center align-center>
-    <v-flex xs12 sm8 md6 class="text-xs-center">
-      <v-card>
-        <v-card-title>This wallet is not yet online</v-card-title>
-        <v-card-text>
-          <p>
-            If you have already made a transfer, it is possible the network has not yet detected it. This app will periodically
-            check in but, if you would like to manually try, click the button below
-          </p>
-          <v-btn @click="checkWalletLive(wallet)">
-            Check
-          </v-btn>
-        </v-card-text>
-      </v-card>
-      <h1>This wallet is not yet online</h1>
-      <img src="/nothing.png" alt="nothing">
-
-      <p>
-        If you are still getting the message even after being sure a transfer has taken place, please get in contact with us at <a href="mailto:support@aencoin.io">
-          support@aencoin.io
-        </a>!
-      </p>
-    </v-flex>
+    <h1>
+      This wallet is not yet online
+    </h1>
+    <p>
+      If you have already made a transfer, it is possible the network has not yet detected it. This app will periodically
+      check in but, if you would like to manually try, click the button below
+    </p>
+    <v-btn @click="getLiveWallet(wallet)">
+      Check
+    </v-btn>
+    <p>
+      If you are still getting the message even after being sure a transfer has taken place, please try using the help
+      feature by clicking the question mark in the top right corner to help diagnose the problem.
+    </p>
   </v-layout>
 </template>
 
@@ -38,11 +30,15 @@ export default {
   },
   created: function () {},
   methods: {
-    checkWalletLive(wallet) {
-      this.$store.dispatch('wallet/checkWalletLive', wallet).then((response) => {
-        console.log('response from checking whether the wallet is live or not')
-        console.log(response)
-        if (response === true) {
+    getLiveWallet(wallet) {
+
+      this.$store.dispatch('wallet/getLiveWallet', wallet).then((response) => {
+        if(response !== false) {
+          this.$store.commit('wallet/setWalletProperty', {
+            address: this.wallet.address,
+            key: 'onChain',
+            value: true
+          })
           this.$store.commit('showNotification', {
             type: 'success',
             message: 'The wallet is recognised on the blockchain'

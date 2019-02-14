@@ -1,28 +1,24 @@
 <template>
   <span>
-    <component :is="component" v-if="component" :show-eula="showEula" @complete="complete" />
+    <component :is="component" v-if="component" :main="main" @complete="complete" />
   </span>
 </template>
 
 <script>
 export default {
   props: {
-    showEula: {
+    main: {
       type: Boolean,
-      default: function () {
-        return false
-      }
+      default: false
     },
     type: {
       type: String,
-      default: function () {
-        return 'aen'
-      }
+      default: ''
     }
   },
   data() {
     return {
-      componentName: '',
+      componentName: null,
       component: null
     }
   },
@@ -34,19 +30,15 @@ export default {
       this.$emit('complete', wallet)
     },
     updateComponent() {
-      this.componentName = this.type[0].toUpperCase() + this.type.slice(1)
-      if (this.componentName) {
-        try {
-          this.component = () => import('~/components/' + this.componentName + '/WalletAdd')
-        } catch (err) {
-          console.debug(err)
-          this.component = () => import('~/components/Fallback')
+      if(this.type !== '') {
+        const componentName = this.type[0].toUpperCase() + this.type.slice(1)
+        console.log(componentName)
+        this.component = () => import('~/components/' + componentName + '/WalletAdd')
+          .catch(function () {
+            this.component = () => import('~/components/Fallback')
+          }.bind(this))
         }
-      } else {
-        this.component = () => import('~/components/Fallback')
       }
-    }
   }
-
 }
 </script>

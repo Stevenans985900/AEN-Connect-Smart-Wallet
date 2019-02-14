@@ -1,12 +1,16 @@
 <template>
   <v-layout row justify-center align-center>
-    <v-flex xs12>
+    <v-flex xs12 md4>
+      <v-progress-circular v-if="loading === true" indeterminate />
+      <doughnut v-else :chartdata="chartdata" />
+    </v-flex>
+    <v-flex xs12 md8>
       <v-progress-circular v-if="loading === true" indeterminate />
       <v-card v-else>
         <v-card-text v-if="haveLiveWallet == true">
           <v-list>
             <template v-for="(wallet, address) in wallets">
-              <v-list-tile v-if="wallet.onChain == true" :key="address">
+              <v-list-tile v-if="wallet.onChain == true" :key="address" @click="showWallet(wallet)">
                 <v-list-tile-avatar>
                   <wallet-image :wallet="wallet" />
                 </v-list-tile-avatar>
@@ -23,19 +27,33 @@
         </v-card-text>
       </v-card>
     </v-flex>
-    <v-flex xs12 md6>
-      <v-progress-circular v-if="loading === true" indeterminate />
-      <doughnut v-else :chartdata="chartdata" />
-    </v-flex>
+
+    <!-- Show Address Dialog -->
+    <v-dialog v-if="contextWallet" v-model="dialogShowWallet" fullscreen="">
+      <v-toolbar class="primary">
+        <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
+        <v-spacer />
+        <v-btn small fab outline @click="dialogShowWallet = false">
+          <v-icon>close</v-icon>
+        </v-btn>
+      </v-toolbar>
+      <v-card>
+        <v-card-text>
+          <address-render :address="contextWallet.address" :use-address-book="false" />
+          <wallet-history :wallet="contextWallet" />
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-layout>
 </template>
 
 <script>
 import Doughnut from '~/components/Doughnut'
-
+import WalletHistory from '~/components/WalletHistory'
 export default {
   components: {
-    Doughnut
+    Doughnut,
+    WalletHistory
   },
   data() {
     return {
@@ -56,13 +74,12 @@ export default {
           }
         ],
         labels: []
-      }
+      },
+      contextWallet: {},
+      dialogShowWallet: false
     }
   },
   computed: {
-    contextWallet() {
-      return this.$store.state.wallet.context
-    },
     faucet() {
       return this.$g('aen.faucets')[0]
     },
@@ -132,6 +149,10 @@ export default {
           this.processedWallets++
         }
       }
+    },
+    showWallet(wallet) {
+      this.dialogShowWallet = true
+      this.contextWallet = wallet
     }
   }
 }

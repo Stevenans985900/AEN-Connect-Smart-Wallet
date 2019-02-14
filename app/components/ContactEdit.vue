@@ -2,26 +2,30 @@
   <v-card>
     <v-card-text>
       <v-container grid-list-md>
-        <v-layout wrap>
+        <v-layout row wrap>
           <v-flex xs12>
-            <v-select
-              v-model="inputNetwork"
-              :items="networks"
-              item-text="display"
-              item-value="internalValue"
-              label="Network"
+            <v-text-field
+              v-model="contact.displayText"
+              :error-messages="contactNameAvailable()"
+              label="Name"
+              hint="The name you want to identify the contact by"
               required
+              @keyup.enter="save"
             />
           </v-flex>
-          <v-flex xs12 sm6>
-            <v-text-field v-model="inputDisplayText" label="Name" required />
-          </v-flex>
-          <v-flex xs12 sm6>
+          <v-flex v-if="!existingContact" xs12>
             <v-text-field
-              v-model="inputAddress"
-              :readonly="readOnly"
+              v-model="contact.address"
               label="Blockchain Address"
-              hint="example: TCQS4NLATONNFT2SEY6Y3SZNQTMXF7O5K7TU7L7F"
+              hint="Put in the raw network address here"
+            />
+          </v-flex>
+          <v-flex v-if="!existingContact" xs12>
+            <v-combobox
+              v-model="contact.type"
+              label="Blockchain Network"
+              :items="availableNetworks"
+              hint="The network which this address operates on"
             />
           </v-flex>
         </v-layout>
@@ -37,66 +41,74 @@
 </template>
 
 <script>
+function initialDataState() {
+  return {
+    availableNetworks: [
+      'aen',
+      'btc',
+      'eth'
+    ],
+    contact: {
+      address: '',
+      displayText: '',
+      type: ''
+    },
+    existingContact: false
+  }
+}
+
 export default {
   props: {
-    displayText: {
-      type: String,
-      default: ''
-    },
     address: {
       type: String,
       default: ''
-    },
-    network: {
-      type: String,
-      default: ''
-    },
-    showNetwork: {
-      type: Boolean,
-      default: false
     }
   },
-  data() {
-    return {
-      inputDisplayText: '',
-      inputAddress: '',
-      inputNetwork: '',
-      readOnly: false,
-      networks: [
-        {
-          display: 'AENChain',
-          internalValue: 'aen'
-        },
-        {
-          display: 'Ethereum',
-          internalValue: 'eth'
-        },
-        {
-          display: 'Bitcoin',
-          internalValue: 'btc'
-        },
-      ]
-    }
-  },
+  data() { return initialDataState() },
   watch: {
-    address: function(val) {
-      this.inputAddress = val
-    },
-    displayText: function(val) {
-      this.inputDisplayText = val
-    },
-    network: function(val) {
-      this.inputNetwork = val
+    address: function() {
+      this.processAddress()
     }
+  },
+  mounted() {
+    this.processAddress()
+  },
+  beforeDestroy() {
+    console.log('calling DESTROY')
+    this.reset()
   },
   methods: {
+    contactNameAvailable() {
+      if(this.existingContact === false) {
+        return this.$store.getters['wallet/contactByProperty']({
+          property: 'name',
+          value: this.contact.displayText
+        }) ? 'Name is already in use' : ''
+      }
+      return ''
+    },
+    processAddress() {
+      console.log('processing address: ' + this.address)
+      if (this.address !== '') {
+        this.contact.address = this.address
+
+        // Try and get details of the contact if existing
+        if(this.$store.state.wallet.contacts.hasOwnProperty(this.address)) {
+          this.contact.displayText = this.$store.state.wallet.contacts[this.address].displayText
+          this.contact.type = this.$store.state.wallet.contacts[this.address].type
+        }
+        this.existingContact = true
+      } else {
+        this.reset()
+      }
+    },
+    reset() {
+      Object.assign(this.$data, initialDataState())
+    },
     save() {
-      this.$store.commit('wallet/setContact', {
-        'displayText': this.inputDisplayText,
-        'address': this.inputAddress,
-        'network': this.inputNetwork
-      })
+      this.$store.commit('wallet/setContact', this.contact)
       this.$emit('complete')
+      this.reset()
     }
   }
 }

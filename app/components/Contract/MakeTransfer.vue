@@ -88,7 +88,8 @@ export default {
       return 'amber'
     },
     contacts() {
-      return this.$store.state.wallet.contacts
+      // TODO Replace these with getter from state machine
+      return Object.values(this.$store.state.wallet.contacts)
     }
   },
   watch: {

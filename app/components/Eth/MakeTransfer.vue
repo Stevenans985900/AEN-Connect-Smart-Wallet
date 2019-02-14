@@ -103,8 +103,8 @@
     created() {
       this.normalGas = this.$g("eth.available_networks")[0].gasPrice.normal
       // this.normalGas = this.wallet.network.gasPrices.normal
-      this.priorityGas = this.wallet.network.gasPrices.priority
-      this.maximumGas = this.wallet.network.gasPrices.maximum
+      this.priorityGas = this.$g("eth.available_networks")[0].gasPrice.priority
+      this.maximumGas = this.$g("eth.available_networks")[0].gasPrice.maximum
     },
     methods: {
       initiateTransfer() {

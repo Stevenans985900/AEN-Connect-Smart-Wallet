@@ -45,6 +45,7 @@
                   <v-text-field
                     v-model="walletName"
                     :rules="[rules.basic.required, rules.walletName.minLength]"
+                    :error-messages="walletNameAvailable()"
                     label="Wallet Name"
                     required
                     placeholder="AEN Wallet"
@@ -55,6 +56,17 @@
                     :type="showPassword ? 'text' : 'password'"
                     :rules="[rules.basic.required, rules.password.minLength]"
                     label="Wallet Password"
+                    required
+                    counter
+                    @click:append="showPassword = !showPassword"
+                  />
+                  <v-text-field
+                    v-model="password2"
+                    :append-icon="showPassword ? 'visibility_off' : 'visibility'"
+                    :type="showPassword ? 'text' : 'password'"
+                    :rules="[rules.basic.required, rules.password.minLength]"
+                    label="Repeat Password"
+                    :error-messages="passwordsMatch()"
                     required
                     counter
                     @click:append="showPassword = !showPassword"
@@ -139,13 +151,11 @@
             <v-flex xs12 md6>
               <h1>Wallet Created: {{ wallet.name }}</h1>
               <p>
-                With this wallet, you can now receive and transfer tokens using the AENChain network.
+                With this wallet, you can now receive and transfer tokens using the AENChain network. Before proceeding,
+                we strongly recommend you create a backup of your wallet using the button below.
               </p>
 
               <span v-if="addType === 'new'">
-                <p>
-                  Before proceeding, we strongly recommend you create a backup of your wallet using the button below.
-                </p>
                 <backup-wallet :wallet="wallet" />
                 <v-form ref="backupForm" v-model="proceedValid">
                   <v-checkbox
@@ -168,7 +178,7 @@
               </v-btn>
             </v-flex>
             <v-flex xs12 md6>
-              <business-card :wallet="wallet" :include-private-key="true" :use-addrress-book="false" />
+              <business-card :wallet="wallet" :include-private-key="true" :use-address-book="false" />
             </v-flex>
           </v-layout>
         </v-stepper-content>
@@ -178,7 +188,6 @@
 </template>
 
 <script>
-import BusinessCard from '~/components/BusinessCard'
 import BackupWallet from '~/components/BackupWallet'
 import RestoreFromFile from '~/components/RestoreFromFile'
 
@@ -192,11 +201,12 @@ function initialDataState() {
     recoverValid: false,
     walletName: '',
     walletPassword: '',
+    password2: '',
     network: {},
     accountPrivateKey: '',
     proceedValid: false,
     showPassword: false,
-    showEula: false,
+    errorMessages: [],
     wallet: {},
     rules: {
       basic: {
@@ -223,9 +233,18 @@ export default {
    */
   components: {
     BackupWallet,
-    BusinessCard,
     RestoreFromFile
   },
+  /**
+   * PROPS
+   */
+  props: {
+    main: {
+      type: Boolean,
+      default: false
+    }
+  },
+
   /**
    * DATA
    */
@@ -284,10 +303,16 @@ export default {
         type: 'aen',
         network: this.$store.state.wallet.aen.network,
         name: this.walletName,
-        password: this.walletPassword
+        password: this.walletPassword,
+        main: this.main
       }
       this.$store.dispatch('wallet/new', walletOptions)
         .then((wallet) => {
+
+          this.$store.commit('security/setWalletPassword', {
+            walletAddress: wallet.address,
+            password: wallet.password
+          })
           this.wallet = wallet
           this.currentStep++
           this.startLiveListener(wallet)
@@ -311,6 +336,12 @@ export default {
         this.startLiveListener(wallet)
       })
     },
+    passwordsMatch() {
+      return (this.walletPassword === this.password2) ? '' : 'Passwords must match'
+    },
+    walletNameAvailable() {
+      return this.$store.getters['wallet/getByName'](this.walletName) ? 'Wallet Name is already in use' : ''
+    },
     reset() {
       Object.assign(this.$data, initialDataState())
     },
@@ -318,8 +349,14 @@ export default {
       // Activate a listener on the wallet to check when it is live on the network
       const walletCheckInterval = setInterval(
         function () {
-          this.$store.dispatch('wallet/checkWalletLive', wallet).then((response) => {
-            if (response === true) {
+          this.$store.dispatch('wallet/getLiveWallet', wallet).then((response) => {
+
+            if (response !== false) {
+              this.$store.commit('wallet/setWalletProperty', {
+                address: wallet.address,
+                key: 'onChain',
+                value: true
+              })
               clearInterval(walletCheckInterval)
             }
           })

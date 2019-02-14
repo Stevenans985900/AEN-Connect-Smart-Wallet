@@ -3,27 +3,21 @@
   <v-card>
     <v-card-text>
       <v-container grid-list-md>
-        <v-layout wrap>
-          <v-flex xs12 sm6>
-            <v-combobox
-              v-model="destination.address"
-              :items="contacts"
-              item-text="displayText"
-              label="To"
-              prepend-icon="contacts"
-            />
-          </v-flex>
-          <v-flex xs12 sm6>
+        <v-layout row wrap>
+          <v-flex xs12>
             <v-text-field
               v-model="destination.amount"
               label="Amount"
               suffix="XEM"
             />
           </v-flex>
-          <v-flex xs12 sm6>
-            <v-text-field
-              v-model="destination.message"
-              label="Optional Message"
+          <v-flex xs12>
+            <v-combobox
+              v-model="destination.address"
+              :items="contacts"
+              item-text="displayText"
+              label="To"
+              append-outer-icon="contacts"
             />
           </v-flex>
         </v-layout>
@@ -39,6 +33,16 @@
 </template>
 
 <script>
+
+function initialDataState() {
+  return {
+    destination: {
+      address: '',
+      amount: 0,
+      message: ''
+    }
+  }
+}
 export default {
   props: {
     wallet: {
@@ -48,18 +52,10 @@ export default {
       }
     }
   },
-  data() {
-    return {
-      destination: {
-        address: '',
-        amount: 0,
-        message: ''
-      }
-    }
-  },
+  data() { return initialDataState() },
   computed: {
     contacts() {
-      return this.$store.state.wallet.contacts
+      return this.$store.getters['wallet/contactsByWallet'](this.wallet)
     }
   },
   methods: {

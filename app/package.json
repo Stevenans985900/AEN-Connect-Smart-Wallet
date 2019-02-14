@@ -1,8 +1,8 @@
 {
-  "name": "aen-connect-smart-wallet",
-  "version": "1.0.0",
-  "description": "A multi-chain wallet capable of working with AENC, Ethereum, and Bitcoin networks",
-  "author": "Simon Ball",
+  "name": "aenco-smart-wallet",
+  "version": "0.1.0",
+  "description": "A multi blockchain wallet primarily supporting AENChain, Ethereum, ERC20 contracts, Bitcoin",
+  "author": "Simon Ball <simon.ball@aencoin.com>",
   "private": true,
   "scripts": {
     "dev": "nuxt",
@@ -23,6 +23,7 @@
     "date-fns": "^1.30.1",
     "fs": "^0.0.1-security",
     "is-electron": "^2.2.0",
+    "is-online": "^8.0.0",
     "lodash.debounce": "^4.0.8",
     "lodash.get": "^4.4.2",
     "nem2-sdk": "^0.10.1",
@@ -32,6 +33,7 @@
     "vue-chartjs": "^3.4.0",
     "vue-clipboard2": "^0.2.1",
     "vue-recaptcha": "^1.1.1",
+    "vue-youtube-embed": "^2.2.1",
     "vuetify": "^1.3.14",
     "vuetify-loader": "^1.0.8",
     "vuetify-upload-button": "^1.2.2",
