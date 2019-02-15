@@ -13,7 +13,7 @@
     </v-btn>
 
     <v-toolbar>
-      <v-img src="/logo.png" contain height="25" max-width="125px"/>
+      <v-img src="/logo.png" contain height="25" max-width="125px" />
       <v-toolbar-title>Help</v-toolbar-title>
       <v-spacer />
 

@@ -1,6 +1,5 @@
 <template>
   <v-container>
-
     <v-layout row justify-center align-center>
       <v-flex xs12>
         <v-card class="mb-4">
@@ -16,7 +15,9 @@
                   <a
                     href="https://aencoin.com/"
                     target="_blank"
-                  >AENChain network</a>, Ethereum Network, Smart Contracts, and Bitcoin networks.
+                  >
+                    AENChain network
+                  </a>, Ethereum Network, Smart Contracts, and Bitcoin networks.
                 </p>
                 <p>
                   Before proceeding, you need to have an AEN wallet setup on this device, Please following the instructions

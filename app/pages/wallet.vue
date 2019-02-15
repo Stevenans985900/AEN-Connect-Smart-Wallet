@@ -7,10 +7,10 @@
             Wallet Management
           </v-toolbar-title>
           <v-spacer />
+          <backup-wallet :show-icon="true" />
           <v-btn color="success" @click="dialogWalletAdd = true">
             <v-icon>add</v-icon>Add Wallet
           </v-btn>
-          <backup-wallet :show-icon="true" />
         </v-toolbar>
         <!-- Wallet Management -->
         <v-card>
@@ -35,13 +35,13 @@
                     </v-flex>
 
                     <v-flex v-if="$vuetify.breakpoint.mdAndUp" xs3 sm6 class="text-xs-right">
-                      <v-btn outline small @click="addressShow(wallet)">
-                        Receive
-                      </v-btn>
                       <v-btn v-if="wallet.onChain === true" outline small @click="transferNewShow(wallet)">
                         Send
                       </v-btn>
-                      <v-btn outline small @click="dialogRemoveWallet = true">
+                      <v-btn outline small @click="addressShow(wallet)">
+                        Receive
+                      </v-btn>
+                      <v-btn outline class="error" small @click="dialogRemoveWallet = true">
                         Remove
                       </v-btn>
                     </v-flex>
@@ -55,10 +55,10 @@
                           Actions
                         </v-btn>
                         <v-list>
-                          <v-list-tile @click="addressShow(wallet)">
-                            <v-list-tile-title>Receive</v-list-tile-title>
-                          </v-list-tile>
                           <v-list-tile v-if="wallet.onChain === true" @click="transferNewShow(wallet)">
+                            <v-list-tile-title>Send</v-list-tile-title>
+                          </v-list-tile>
+                          <v-list-tile @click="addressShow(wallet)">
                             <v-list-tile-title>Receive</v-list-tile-title>
                           </v-list-tile>
                           <v-list-tile @click="dialogRemoveWallet = true">

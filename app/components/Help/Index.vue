@@ -18,7 +18,7 @@
     </v-flex>
     <v-flex xs12 md5 offset-md1>
       <v-card>
-        <youtube video-id="xwftD2aehpM" player-width="100%"/>
+        <youtube video-id="xwftD2aehpM" player-width="100%" />
       </v-card>
     </v-flex>
   </v-layout>

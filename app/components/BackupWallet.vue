@@ -1,6 +1,6 @@
 <template>
   <span>
-    <v-btn class="success" @click="clickBackupWallet">
+    <v-btn outline @click="clickBackupWallet">
       <v-icon v-if="showIcon === true">
         security
       </v-icon>

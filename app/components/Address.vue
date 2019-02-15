@@ -59,6 +59,14 @@ export default {
       }
     }
   },
+  watch: {
+    contacts: {
+      handler: function () {
+        this.$forceUpdate()
+      },
+      deep: true
+    }
+  },
   methods: {
     contactAdded() {
       this.$store.commit('showNotification', {
@@ -66,14 +74,6 @@ export default {
         message: 'Contact added to address book'
       })
       this.dialog = false
-    }
-  },
-  watch: {
-    contacts: {
-      handler: function () {
-        this.$forceUpdate()
-      },
-      deep: true
     }
   }
 }

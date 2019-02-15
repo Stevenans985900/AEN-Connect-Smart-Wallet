@@ -10,7 +10,6 @@
         <v-btn color="success" @click="dialogEditContact = true; address = ''">
           <v-icon>add</v-icon>Add Contact
         </v-btn>
-        <backup-wallet :show-icon="true" />
       </v-toolbar>
       <v-card>
         <v-card-title>
