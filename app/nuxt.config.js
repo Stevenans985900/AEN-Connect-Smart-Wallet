@@ -97,7 +97,7 @@ module.exports = {
   /*
   ** Customize the progress-bar color
   */
-  loading: { color: '#fff' },
+  loading: false,
 
   /*
   ** Global CSS
@@ -119,7 +119,8 @@ module.exports = {
         ssr: false
     },
     '@/plugins/vuetify',
-    '@/plugins/walletImage'
+    '@/plugins/walletImage',
+    '@/plugins/youtube'
   ],
 
   /*
@@ -127,7 +128,15 @@ module.exports = {
   */
   modules: [
     // Doc: https://axios.nuxtjs.org/usage
-    '@nuxtjs/axios'
+    '@nuxtjs/axios',
+    ['nuxt-matomo', {
+      matomoUrl: '//stats.aencoin.com/',
+      scriptUrl: 'matomo.js',
+      trackerUrl: 'matomo.php',
+      siteId: 6,
+      debug: true,
+      verbose: true
+    }]
   ],
   /*
   ** Axios module configuration
@@ -140,6 +149,8 @@ module.exports = {
   ** Build configuration
   */
   build: {
+    cache: true,
+    parallel: true,
     transpile: ['vuetify/lib'],
     plugins: [new VuetifyLoaderPlugin()],
     loaders: {

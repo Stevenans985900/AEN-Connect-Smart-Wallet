@@ -1,7 +1,7 @@
 <template>
   <v-app dark>
     <!-- NAV DRAWER -->
-    <v-navigation-drawer v-model="drawer" fixed stateless app>
+    <v-navigation-drawer v-model="showMainNav" :mini-variant="minifyDrawer" fixed stateless app>
       <v-list>
         <v-list-tile v-for="(item, i) in navigationItems" :key="i" :to="item.to" router exact>
           <v-list-tile-action>
@@ -11,13 +11,14 @@
             <v-list-tile-title v-text="item.title" />
           </v-list-tile-content>
         </v-list-tile>
-
         <v-list-tile v-if="appMode === 'app'" exact @click="exit">
           <v-list-tile-action>
             <v-icon>exit_to_app</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
-            <v-list-tile-title>Exit</v-list-tile-title>
+            <v-list-tile-title>
+              Exit
+            </v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
       </v-list>
@@ -25,19 +26,17 @@
 
     <!-- TOP BAR -->
     <v-toolbar fixed app>
-      <v-toolbar-side-icon v-if="eulaAgree" @click="navDrawer = !navDrawer" />
+      <v-toolbar-side-icon v-if="showMainNav" @click="minifyDrawer = !minifyDrawer" />
       <!--size="24"-->
       <!--<v-avatar >-->
-      <v-img src="/logo.png" height="20" contain />
+      <v-img src="/logo.png" contain height="25" max-width="125px" />
       <!--</v-avatar>-->
-      <v-toolbar-title class="hidden-sm-and-down" v-text="title" />
+      <v-toolbar-title class="hidden-sm-and-down text-xs-left" v-text="title" />
       <v-spacer />
-
       <!-- Environment -->
       <development v-if="environment === 'development'" />
-
       <network-diagnostics />
-      <backup-wallet v-if="haveWallet" />
+      <help />
     </v-toolbar>
 
     <!-- MAIN CONTENT AREA -->
@@ -49,6 +48,7 @@
         <no-ssr>
           <busy />
         </no-ssr>
+        <security-challenge />
         <v-snackbar v-model="showNotification" :timeout="timeout" :top="true" :vertical="true">
           {{ notification_message }}
           <v-btn flat @click="showNotification = false">
@@ -57,6 +57,27 @@
         </v-snackbar>
         <!-- NUXT BEGINNING -->
         <nuxt />
+
+        <v-dialog v-model="developmentAgreed" persistent max-width="500px">
+          <v-layout align-center justify-center>
+            <v-flex xs12>
+              <v-card width="500px">
+                <youtube video-id="kfWu3fKLe2I" player-width="500" />
+                <v-alert
+                  :value="true"
+                  type="warning"
+                >
+                  This is the first community release, please do not use this wallet to store real accounts on!
+                </v-alert>
+                <v-card-actions>
+                  <v-btn block @click="developmentAgreed = true">
+                    Click here to continue
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-flex>
+          </v-layout>
+        </v-dialog>
 
         <!-- Force the user to agree to the End User license agreement before being able to use the wallet -->
         <v-dialog v-model="dialogEulaAgree" persistent max-width="600px">
@@ -69,6 +90,20 @@
                 </a>
               </span>
             </v-checkbox>
+          </v-card>
+        </v-dialog>
+
+        <v-dialog v-model="dialogResetEverything" persistent max-width="600px">
+          <v-card>
+            <v-card-title>If you choose to cancel, all app data will be reset. Are you sure?</v-card-title>
+            <v-card-actions>
+              <v-btn @click="appWipe">
+                Reset Application
+              </v-btn>
+              <v-btn @click="cancelWipe">
+                Go back to Password
+              </v-btn>
+            </v-card-actions>
           </v-card>
         </v-dialog>
       </v-container>
@@ -86,12 +121,16 @@
 </template>
 
 <script>
-import BackupWallet from '~/components/BackupWallet'
+
 import Busy from '~/components/Busy'
 import Development from '~/components/Development'
 import NetworkDiagnostics from '~/components/NetworkDiagnostics'
 import Loading from '~/components/Loading'
+import Help from '~/components/Help'
+import SecurityChallenge from '~/components/SecurityChallenge'
 import isElectron from 'is-electron'
+import isOnline from 'is-online'
+
 // import childProcess from 'child_process'
 if (isElectron()) {
   // TODO Satisfy linter
@@ -104,19 +143,21 @@ export default {
    * COMPONENTS
    */
   components: {
-    BackupWallet,
     Busy,
     Development,
+    Help,
     Loading,
-    NetworkDiagnostics
+    NetworkDiagnostics,
+    SecurityChallenge
   },
   /**
    * DATA
    */
   data() {
     return {
-      navDrawer: true,
+      minifyDrawer: false,
       hydrated: false,
+      dialogResetEverything: false,
       navigationItems: [
         {
           icon: 'apps',
@@ -132,8 +173,12 @@ export default {
           icon: 'contacts',
           title: 'Address Book',
           to: '/address-book'
+        },
+        {
+          icon: 'lock_open',
+          title: 'Security',
+          to: '/security'
         }
-        // { icon: 'extension', title: 'Create Namespace', to: '/tokens', requireContext: true }
       ],
       title: 'Smart Wallet',
       userMenu: false
@@ -143,14 +188,27 @@ export default {
    * COMPUTED
    */
   computed: {
-    drawer: {
+    dialogHelpShow: {
+      get: function () { return this.$store.state.user.help },
+      set: function (val) { this.$store.commit('setUserProperty', {key: 'help', value: val}) }
+    },
+    showMainNav: {
       get: function () {
-        if (this.navDrawer === true && this.eulaAgree === true) {
+        if (this.$store.state.wallet.aen.mainAddress !== '' && this.$store.state.user.eulaAgree === true) {
           return true
         }
         return false
       },
-      set: function () {}
+      set : function () {}
+    },
+    developmentAgreed: {
+      get: function () { return !this.$store.state.user.developmentAgreed },
+      set: function (val) {
+        this.$store.commit('setUserProperty', {
+          key: 'developmentAgreed',
+          value: val
+        })
+      }
     },
     dialogEulaAgree() {
       if (this.$store.state.user.eulaAgree === false && this.$nuxt.$route.name !== 'index') {
@@ -167,6 +225,7 @@ export default {
         })
       }
     },
+    isOnline() { return this.$store.state.runtime.isOnline },
     version() { return this.$g('version') },
     appMode() { return this.$store.state.runtime.mode },
     environment() { return this.$store.state.runtime.environment },
@@ -204,12 +263,18 @@ export default {
    *
    */
   beforeMount() {
+    this.$store.commit('security/resetAttemptCount')
     this.$store.commit('setAppMode', 'web')
     const env = process.env.NODE_ENV || 'dev'
     this.$store.commit('setRuntimeProperty', {
       key: 'environment',
       value: env
     })
+    if(window.innerWidth < 1366) {
+      this.minifyDrawer = true
+    } else {
+      this.minifyDrawer = false
+    }
     this.$store.commit('setLoading', {
       t: 'global',
       v: true,
@@ -219,6 +284,14 @@ export default {
       t: 'page',
       v: false
     })
+
+    this.onlineCheck()
+    setInterval(
+      function () {
+        this.onlineCheck()
+      }.bind(this),
+      this.$g('internal.commonTasksInterval')
+    )
 
     // Desktop app setup
     // if (isElectron()) {
@@ -243,19 +316,10 @@ export default {
     if (Object.keys(this.$store.state.wallet.aen.network).length === 0) {
       this.$store.commit('wallet/setAenProperty', { key: 'network', value: this.$g('aen.available_networks')[0] })
     }
-    if (Object.keys(this.$store.state.wallet.ethereum.activeApiEndpoint).length === 0) {
-      const ethereumNetwork = this.$g('eth.available_networks')[0]
-      this.$store.commit('wallet/setEthereumProperty', { key: 'network', value: ethereumNetwork })
-      this.$store.commit('wallet/setEthereumProperty', { key: 'activeApiEndpoint', value: ethereumNetwork.infura_api_endpoint })
+    if (this.$store.state.wallet.ethereum.activeApiEndpoint === '') {
+      this.$store.commit('wallet/setEthereumProperty', { key: 'network', value: this.$g('eth.available_networks')[0] })
+      this.$store.commit('wallet/setEthereumProperty', { key: 'activeApiEndpoint', value: this.$g('eth.available_networks')[0].infura_api_endpoint })
     }
-    if (Object.keys(this.$store.state.wallet.bitcoin.activeApiEndpoint).length === 0) {
-      this.$store.commit('wallet/setBitcoinProperty', {
-        key: 'network',
-        value: this.$g('bitcoin.available_networks')[0]
-      })
-    }
-    this.$store.commit('wallet/setBitcoinProperty', { key: 'blockCypherEndpoint', value: this.$g('bitcoin.block_cypher.api_endpoint') })
-    this.$store.commit('wallet/setBitcoinProperty', { key: 'bitapsEndpoint', value: this.$g('bitcoin.bitaps.api_endpoint') })
 
     this.$store.dispatch('wallet/rankApiNodes')
     setInterval(
@@ -273,24 +337,57 @@ export default {
       this.$g('internal.commonTasksInterval')
     )
 
-    // Short timeout to give API ranking a chance to get some accurate results
-    setTimeout(
-      function () {
-        // Hydrate local state from cold storage
-        if (this.$store.state.wallet.aen.haveWallet === false && this.$nuxt.$route.name !== 'index') {
-          console.log('No wallet so redirecting to launch')
-          this.$nuxt.$router.replace({ path: '/' })
-        }
-        // Finished the global loading procedure
-        this.$store.commit('setLoading', { t: 'global', v: false })
-      }.bind(this),
-      2000
-    )
+    // Update currency exchange rates from binance
+    this.$store.dispatch('exchange/updateRates')
+
+    this.$store.commit('setLoading', { t: 'global', v: false })
+    if (this.$store.state.wallet.aen.mainAddress !== '') {
+        this.$store.dispatch('security/addCheck', {
+          context: 'app_start',
+          walletAddress: this.$store.state.wallet.aen.mainAddress
+        }).then(() => {
+          console.log('pass')
+        }).catch((e) => {
+          console.log('failed auth from default')
+          console.log(e)
+          // User has said they will not boot up the app, ask if they want to do a reset
+          this.dialogResetEverything = true
+        })
+    } else {
+      if (this.$nuxt.$route.name !== 'index') {
+        this.$nuxt.$router.replace({ path: '/' })
+      }
+    }
   },
   methods: {
     /**
      * Shutdown procedure
      */
+    async onlineCheck() {
+      const result = await isOnline()
+      this.$store.commit('setRuntimeProperty', {
+        key: 'isOnline',
+        value: result
+      })
+    },
+    appWipe() {
+      console.log('reset all data here')
+      this.$store.commit("reset")
+      this.$store.commit("security/reset")
+      this.$store.commit("wallet/reset")
+      this.$nuxt.$router.replace({ path: '/' })
+    },
+    cancelWipe() {
+      this.dialogResetEverything = false
+      this.$store.dispatch('security/addCheck', {
+        context: 'app_start'
+      }).then(() => {
+        console.log('pass')
+      }).catch(() => {
+        // User has said they will not boot up the app, ask if they want to do a reset
+        this.dialogResetEverything = true
+      })
+    },
     exit() {
       console.debug('F:E:Exit')
 

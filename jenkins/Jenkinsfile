@@ -25,13 +25,13 @@ pipeline {
             }
         }
 
-        stage('Run tests') {
-            steps {
-                dir('wallet/app') {
-                    sh 'yarn run test'
-                }
-            }
-        }
+        // stage('Run tests') {
+        //     steps {
+        //         dir('wallet/app') {
+        //             sh 'yarn run test'
+        //         }
+        //     }
+        // }
 
         stage('Build Distribution') {
 						steps {
@@ -43,7 +43,7 @@ pipeline {
                         props.build_number = env.BUILD_NUMBER
                         writeJSON file: 'globals.json', json: props, pretty: 4
                     }
-                    sh "yaen run build"
+                    sh "yarn run build"
                 }
             }
         }

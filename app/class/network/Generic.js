@@ -7,6 +7,14 @@ export default class Genetic {
     console.debug(this.pluginName + ' Plugin: Balance')
     console.debug(options)
   }
+  /**
+   * Get details on an individual transaction
+   * @param options
+   */
+  transactionDetails(options) {
+    console.debug(this.pluginName + ' Plugin: Transaction Details')
+    console.debug(options)
+  }
   transactionsHistorical(options) {
     console.debug(this.pluginName + ' Plugin: Transactions Historical')
     console.debug(options)
@@ -23,15 +31,15 @@ export default class Genetic {
     console.debug(this.pluginName + ' Plugin: Transactions Unconfirmed')
     console.debug(options)
   }
+  /**
+   * Send tokens / contract specifics from a wallet
+   * @param options
+   */
   transfer(options) {
     console.debug(this.pluginName + ' Plugin: Transfer')
     console.debug(options)
   }
-  updateApiEndpoint(options) {
-    console.debug(this.pluginName + ' Plugin: Update API Endpoint')
-    console.debug(options)
-  }
-  walletIsLive(options) {
+  getLiveWallet(options) {
     console.debug(this.pluginName + ' Plugin: Wallet is Live?')
     console.debug(options)
   }

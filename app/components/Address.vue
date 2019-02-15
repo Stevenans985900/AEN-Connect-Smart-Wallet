@@ -1,11 +1,6 @@
 <template>
   <span>
-    <v-btn v-clipboard:copy="address" v-clipboard:success="onCopy" flat>
-      <v-icon small>
-        file_copy
-      </v-icon>&nbsp;&nbsp;{{ displayText }}
-    </v-btn>
-
+    <clipboard :data="address" :display-text="displayText" />
     <!-- New transfer -->
     <v-dialog v-if="haveContact === false && showAdd === true" v-model="dialog" persistent max-width="600px">
       <v-btn slot="activator" outline small>
@@ -25,8 +20,9 @@
 
 <script>
 import ContactEdit from '~/components/ContactEdit'
+import Clipboard from '~/components/Clipboard'
 export default {
-  components: { ContactEdit },
+  components: { Clipboard, ContactEdit },
   props: {
     address: {
       type: String,
@@ -47,8 +43,9 @@ export default {
     }
   },
   computed: {
+    contacts() { return this.$store.state.wallet.contacts },
     haveContact() {
-      if (this.$store.state.wallet.contacts.hasOwnProperty(this.address)) {
+      if (this.contacts.hasOwnProperty(this.address)) {
         return true
       } else {
         return false
@@ -56,19 +53,21 @@ export default {
     },
     displayText() {
       if (this.haveContact && this.useAddressBook === true) {
-        return this.$store.state.wallet.contacts[this.address].displayText
+        return this.contacts[this.address].displayText
       } else {
         return this.address
       }
     }
   },
+  watch: {
+    contacts: {
+      handler: function () {
+        this.$forceUpdate()
+      },
+      deep: true
+    }
+  },
   methods: {
-    onCopy() {
-      this.$store.commit('showNotification', {
-        type: 'success',
-        message: 'Address copied to clipboard'
-      })
-    },
     contactAdded() {
       this.$store.commit('showNotification', {
         type: 'success',

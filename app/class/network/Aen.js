@@ -80,15 +80,15 @@ export default class Aen extends Generic {
   /**
      * @param options
      */
-  walletIsLive(options) {
-    super.walletIsLive(options)
+  getLiveWallet(options) {
+    super.getLiveWallet(options)
     return new Promise((resolve) => {
       try {
         const addressObject = Address.createFromRawAddress(options.address)
         const accountHttp = new AccountHttp(this.apiEndpoint)
         return accountHttp.getAccountInfo(addressObject)
           .subscribe(() => {
-            resolve(true)
+            resolve(addressObject)
           },
           () => {
             resolve(false)
