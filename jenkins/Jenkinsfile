@@ -43,7 +43,7 @@ pipeline {
                         props.build_number = env.BUILD_NUMBER
                         writeJSON file: 'globals.json', json: props, pretty: 4
                     }
-                    sh "yaen run build"
+                    sh "yarn run build"
                 }
             }
         }
