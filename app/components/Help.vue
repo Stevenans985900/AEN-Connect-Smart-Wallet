@@ -23,8 +23,9 @@
     </v-toolbar>
     <v-card>
       <v-card-text>
-        <component :is="component" v-if="component" />
         <v-layout row wrap>
+          <component :is="component" v-if="component" />
+
           <v-flex xs12 md6>
             <v-card>
               <v-card-title>
@@ -39,7 +40,8 @@
               </v-card-text>
             </v-card>
           </v-flex>
-          <v-flex xs12 md5 offset-md1>
+
+          <v-flex xs12 md6>
             <v-card>
               <v-card-title>
                 <h2>
