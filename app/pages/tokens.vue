@@ -49,24 +49,34 @@
 
 <script>
 const debounce = require('lodash.debounce')
+
+function initialDataState() {
+  return {
+    debounceName: {},
+    // Used to determine the outcome action after clicking the save button
+    namespace: {
+      name: '',
+      duration: 1000
+    },
+    nameRules: {
+      required: value => !!value || 'Required.',
+      min: v => v.length >= 3 || 'Min 3 Characters'
+    },
+    durationRules: {
+      required: value => !!value || 'Required.'
+    },
+    outcome: false,
+    dialog: false
+  }
+}
 export default {
-  data() {
+  data() { return initialDataState() },
+  head() {
     return {
-      debounceName: {},
-      // Used to determine the outcome action after clicking the save button
-      namespace: {
-        name: '',
-        duration: 1000
-      },
-      nameRules: {
-        required: value => !!value || 'Required.',
-        min: v => v.length >= 3 || 'Min 3 Characters'
-      },
-      durationRules: {
-        required: value => !!value || 'Required.'
-      },
-      outcome: false,
-      dialog: false
+      title: 'AENConnect Smart Wallet - Service Management',
+      meta: [
+        { hid: 'description', name: 'description', content: 'Create and use the services on the AENC network' }
+      ]
     }
   },
   computed: {

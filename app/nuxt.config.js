@@ -128,7 +128,15 @@ module.exports = {
   */
   modules: [
     // Doc: https://axios.nuxtjs.org/usage
-    '@nuxtjs/axios'
+    '@nuxtjs/axios',
+    ['nuxt-matomo', {
+      matomoUrl: '//stats.aencoin.com/',
+      scriptUrl: 'matomo.js',
+      trackerUrl: 'matomo.php',
+      siteId: 6,
+      debug: true,
+      verbose: true
+    }]
   ],
   /*
   ** Axios module configuration

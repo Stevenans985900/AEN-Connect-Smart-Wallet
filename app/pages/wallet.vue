@@ -211,6 +211,40 @@ import MakeTransfer from '~/components/MakeTransfer'
 import TestnetButtons from '~/components/TestnetButtons'
 import WalletAdd from '~/components/WalletAdd'
 
+function initialDataState() {
+  return {
+    accordionWallets: [],
+    dialogWalletAdd: false,
+    dialogWalletView: false,
+    dialogMakeTransfer: false,
+    dialogReceiveTransfer: false,
+    dialogRemoveWallet: false,
+    dialogAddressShow: false,
+    activeWatchers: [],
+    walletType: 'aen',
+    valid: false,
+    backupAgree: false,
+    newAccount: false,
+    existingAccount: false,
+    walletCreated: false,
+    showPassword: false,
+    walletName: '',
+    walletPassword: '',
+    contextWallet: {},
+    rules: {
+      required: value => !!value || 'Required.'
+    },
+    walletRules: {
+      required: value => !!value || 'Required.',
+      min: v => v.length >= 6 || 'Min 6 Characters'
+    },
+    passwordRules: {
+      required: value => !!value || 'Required.',
+      min: v => v.length >= 8 || 'Min 8 characters'
+    },
+    validity: {}
+  }
+}
 export default {
   components: {
     Activation,
@@ -221,38 +255,13 @@ export default {
     WalletAdd,
     WalletHistory
   },
-  data() {
+  data() { return initialDataState() },
+  head() {
     return {
-      accordionWallets: [],
-      dialogWalletAdd: false,
-      dialogWalletView: false,
-      dialogMakeTransfer: false,
-      dialogReceiveTransfer: false,
-      dialogRemoveWallet: false,
-      dialogAddressShow: false,
-      activeWatchers: [],
-      walletType: 'aen',
-      valid: false,
-      backupAgree: false,
-      newAccount: false,
-      existingAccount: false,
-      walletCreated: false,
-      showPassword: false,
-      walletName: '',
-      walletPassword: '',
-      contextWallet: {},
-      rules: {
-        required: value => !!value || 'Required.'
-      },
-      walletRules: {
-        required: value => !!value || 'Required.',
-        min: v => v.length >= 6 || 'Min 6 Characters'
-      },
-      passwordRules: {
-        required: value => !!value || 'Required.',
-        min: v => v.length >= 8 || 'Min 8 characters'
-      },
-      validity: {}
+      title: 'AENConnect Smart Wallet - Wallet Management',
+      meta: [
+        { hid: 'description', name: 'description', content: 'Manage your various wallets and make transfers' }
+      ]
     }
   },
   computed: {
