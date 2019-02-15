@@ -1,26 +1,38 @@
 <template>
-  <v-layout row justify-center align-center>
-    <v-flex xs12>
-      <v-btn @click="getMore">
-        Get more xfer
-      </v-btn>
-    </v-flex>
-    <v-flex xs12>
-      <v-card flat>
-        <v-progress-circular v-if="loading === true" indeterminate />
-        <span v-else>
-          {{ transactions }}
-          <v-card-text v-if="transactions">
-            <transaction-stringify v-for="(transaction,index) in transactions" :key="index" :wallet="wallet" :transaction="transaction" />
-          </v-card-text>
-          <v-card-text v-else>
-            <h1>No Transactions</h1>
-            <img src="/nothing.png" alt="nothing">
-          </v-card-text>
-        </span>
-      </v-card>
-    </v-flex>
-  </v-layout>
+  <span>
+    <v-progress-circular v-if="loading === true" indeterminate />
+    <span v-if="transactions && loading === false">
+      <v-data-table
+        :headers="headers"
+        :items="transactions"
+        item-key="signature"
+      >
+        <!-- :expand="expand" -->
+        <template slot="items" slot-scope="props">
+          <tr @click="props.expanded = !props.expanded">
+            <td>
+              <transaction-stringify :transaction="props.item" display="date" />
+            </td>
+            <td>
+              <transaction-stringify :wallet="wallet" :transaction="props.item" display="direction" />
+            </td>
+            <td>
+              <transaction-stringify :wallet="wallet" :transaction="props.item" display="value" />
+            </td>
+          </tr>
+        </template>
+        <!-- <template slot="expand" slot-scope="props">
+          <v-card flat>
+            <v-card-text>Peek-a-boo!</v-card-text>
+          </v-card>
+        </template> -->
+      </v-data-table>
+    </span>
+    <span v-else>
+      <h1>No Transactions</h1>
+      <img src="/nothing.png" alt="nothing">
+    </span>
+  </span>
 </template>
 
 <script>
@@ -40,9 +52,15 @@ export default {
   },
   data() {
     return {
-      options: {},
+      transactionsListener: null,
       transactions: {},
-      loading: true
+      loading: true,
+      expand: false,
+      headers: [
+        { text: 'Date', sortable: false, value: '' },
+        { text: 'Direction', sortable: false, value: '' },
+        { text: 'Amount', sortable: false, value: '' }
+      ]
     }
   },
   mounted() {

@@ -44,7 +44,6 @@ import Aen from '~/class/network/Aen'
 
 export default {
   components: {
-
     TransactionStringify
   },
   props: {
