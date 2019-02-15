@@ -29,7 +29,7 @@ test('Route / exits and render HTML', async t => {
 	const window = await nuxt.renderAndGetWindow('http://localhost:4000/')
 	const element = window.document.querySelector('.v-toolbar__title')
 	t.not(element, null)
-	t.is(element.textContent, 'AENChain Wallet')
+	t.is(element.textContent, 'Smart Wallet')
 })
 
 // Close the Nuxt server

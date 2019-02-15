@@ -25,13 +25,13 @@ pipeline {
             }
         }
 
-        stage('Run tests') {
-            steps {
-                dir('wallet/app') {
-                    sh 'yarn run test'
-                }
-            }
-        }
+        // stage('Run tests') {
+        //     steps {
+        //         dir('wallet/app') {
+        //             sh 'yarn run test'
+        //         }
+        //     }
+        // }
 
         stage('Build Distribution') {
 						steps {
