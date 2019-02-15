@@ -47,9 +47,7 @@
                 </h2>
               </v-card-title>
               <v-card-text>
-                <p>
-                  Insert a feedback form here
-                </p>
+                <feedback-form />
               </v-card-text>
             </v-card>
           </v-flex>
@@ -60,7 +58,9 @@
 </template>
 
 <script>
+  import FeedbackForm from '~/components/FeedbackForm'
   export default {
+    components: { FeedbackForm },
     data() {
       return {
         component: null,
