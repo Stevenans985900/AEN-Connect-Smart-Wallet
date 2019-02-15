@@ -7487,6 +7487,11 @@ number-to-bn@1.7.0:
     bn.js "4.11.6"
     strip-hex-prefix "1.0.0"
 
+nuxt-matomo@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/nuxt-matomo/-/nuxt-matomo-1.2.1.tgz#fa64eab794369425e47a0ad3960eee973071dc07"
+  integrity sha512-BTkv8sHrnFzKOUgdvCLRKFcwCZvACapLYle8aKmopRVuQZTe4hh/yp7wmGSqFZFJprv9tPoxhLeelj39w1/oyQ==
+
 nuxt@^2.3.4:
   version "2.4.3"
   resolved "https://registry.yarnpkg.com/nuxt/-/nuxt-2.4.3.tgz#1584fbbaed2bfb4839da2298c00bdcac2d71dcdd"

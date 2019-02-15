@@ -16,6 +16,14 @@ export default {
   components: {
     GraphBalanceSpread
   },
+  head() {
+    return {
+      title: 'AENConnect Smart Wallet - Dashboard',
+      meta: [
+        { hid: 'description', name: 'description', content: 'Review your wallets and get details of the latest ICOs' }
+      ]
+    }
+  },
   /**
    * MOUNTED
    */

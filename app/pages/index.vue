@@ -112,6 +112,19 @@
 import SecurityControls from '~/components/SecurityControls'
 import WalletAdd from '~/components/WalletAdd'
 
+function initialDataState() {
+  return {
+    panel: [true, false, false],
+    dialogEulaAgree: false,
+    wallet: null,
+    seasons: [
+      'Winter',
+      'Spring',
+      'Summer',
+      'Fall'
+    ]
+  }
+}
 export default {
   /**
    * COMPONENTS
@@ -123,16 +136,12 @@ export default {
   /**
    * DATA
    */
-  data() {
+  data() { return initialDataState() },
+  head() {
     return {
-      panel: [true, false, false],
-      dialogEulaAgree: false,
-      wallet: null,
-      seasons: [
-        'Winter',
-        'Spring',
-        'Summer',
-        'Fall'
+      title: 'AENConnect Smart Wallet - Welcomes you',
+      meta: [
+        { hid: 'description', name: 'description', content: 'The start of your blockchain journey with AEN, supporting existing networks' }
       ]
     }
   },

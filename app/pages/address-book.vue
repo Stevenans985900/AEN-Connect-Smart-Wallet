@@ -99,37 +99,46 @@
 import ContactEdit from '~/components/ContactEdit'
 import WalletImage from '~/components/WalletImage'
 
+function initialDataState() {
+  return {
+    displayText: '',
+    contact: {},
+    address: '',
+    dialogEditContact: false,
+    dialogDeleteContact: false,
+    search: '',
+    headers: [
+      {
+        text: 'Network',
+        value: 'type'
+      },
+      {
+        text: 'Name',
+        value: 'displayText'
+      },
+      {
+        text: 'Address',
+        value: 'address'
+      },
+      {
+        text: 'Actions',
+        value: ''
+      }
+    ]
+  }
+}
 export default {
   components: {ContactEdit, WalletImage },
   /**
    * DATA
    * @returns {{dialog: boolean, headers: *[], search: string}}
    */
-  data() {
+  data() { return initialDataState() },
+  head() {
     return {
-      displayText: '',
-      contact: {},
-      address: '',
-      dialogEditContact: false,
-      dialogDeleteContact: false,
-      search: '',
-      headers: [
-        {
-          text: 'Network',
-          value: 'type'
-        },
-        {
-          text: 'Name',
-          value: 'displayText'
-        },
-        {
-          text: 'Address',
-          value: 'address'
-        },
-        {
-          text: 'Actions',
-          value: ''
-        }
+      title: 'AENConnect Smart Wallet - Address Book',
+      meta: [
+        { hid: 'description', name: 'description', content: 'The address book makes remembering all those addresses a breeze!' }
       ]
     }
   },

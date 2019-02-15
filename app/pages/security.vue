@@ -69,15 +69,8 @@
 
 <script>
   import SecurityControls from '~/components/SecurityControls'
-export default {
-  components: {
-    SecurityControls
-  },
-  /**
-   * DATA
-   * @returns {{dialog: boolean, headers: *[], search: string}}
-   */
-  data() {
+
+  function initialDataState() {
     return {
       existingPassword: false,
       password1: '',
@@ -91,6 +84,23 @@ export default {
           minLength: v => v.length >= 8 || 'Min 8 characters'
         }
       }
+    }
+  }
+export default {
+  components: {
+    SecurityControls
+  },
+  /**
+   * DATA
+   * @returns {{dialog: boolean, headers: *[], search: string}}
+   */
+  data() { return initialDataState() },
+  head() {
+    return {
+      title: 'AENConnect Smart Wallet - Security Controls',
+      meta: [
+        { hid: 'description', name: 'description', content: 'Define what level of security you will use with the program and various wallets' }
+      ]
     }
   },
   computed: {
