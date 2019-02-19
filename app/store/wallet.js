@@ -109,7 +109,7 @@ export const actions = {
   balance: ({state, commit, rootState}, wallet) => {
     let networkHandler
     return new Promise((resolve, reject) => {
-      if(rootState.runtime.isOnline === false) {
+      if(rootState.runtime.isOnline === false || wallet.onChain === false) {
         resolve(wallet)
       }
       switch (wallet.type) {
@@ -302,7 +302,7 @@ export const actions = {
       }
     })
   },
-  new({state, commit}, options) {
+  new({dispatch, state, commit}, options) {
     console.debug('Wallet Service:New ' + options.type)
 
     return new Promise((resolve) => {
@@ -312,7 +312,8 @@ export const actions = {
         balance: 0,
         balanceLastSynced: false,
         transactions: [],
-        transactionsLastSynced: false
+        transactionsLastSynced: false,
+        type: options.type
       }
       let networkHandler
       switch (options.type) {
@@ -331,7 +332,8 @@ export const actions = {
                   value: wallet.address
                 })
               }
-
+              dispatch('security/monitorWallet', wallet, {root:true})
+              delete wallet.security
               commit('setWallet', wallet)
               resolve(wallet)
             })
@@ -343,6 +345,8 @@ export const actions = {
           )
           networkHandler.walletNew(options).then((walletObject) => {
             Object.assign(wallet, walletObject)
+            dispatch('security/monitorWallet', wallet)
+            delete wallet.security
             commit('setWallet', wallet)
             resolve(wallet)
           })
@@ -354,6 +358,8 @@ export const actions = {
           )
           networkHandler.walletNew(options).then((walletObject) => {
             Object.assign(wallet, walletObject)
+            dispatch('security/monitorWallet', wallet)
+            delete wallet.security
             commit('setWallet', wallet)
             resolve(wallet)
           })

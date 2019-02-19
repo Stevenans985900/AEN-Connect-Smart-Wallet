@@ -121,16 +121,14 @@ export default class Aen extends Generic {
         options.network.byte)
 
       const walletObject = {
-        onChain: false,
-        name: options.name,
-        balance: 0,
-        password: options.password,
-        accountPrivateKey: options.account.privateKey,
-        privateKey: wallet.encryptedPrivateKey.encryptedKey,
         publicKey: options.account.publicKey,
         address: wallet.address.address,
         network: options.network,
-        type: 'aen'
+        security: {
+          password: options.password,
+          accountPrivateKey: options.account.privateKey,
+          privateKey: wallet.encryptedPrivateKey.encryptedKey,
+        }
       }
       resolve(walletObject)
     })

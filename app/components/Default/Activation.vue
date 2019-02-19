@@ -4,12 +4,14 @@
       This wallet is not yet online
     </h1>
     <p>
-      If you have already made a transfer, it is possible the network has not yet detected it. This app will periodically
+      If you have already made a transfer, it is possible the network has not yet processed it. This app will periodically
       check in but, if you would like to manually try, click the button below
     </p>
-    <v-btn @click="getLiveWallet(wallet)">
-      Check
-    </v-btn>
+    <wallet-check-on-chain v-if="wallet.onChain === false" :wallet="wallet"/>
+
+    <!--<v-btn @click="getLiveWallet(wallet)">-->
+      <!--Check-->
+    <!--</v-btn>-->
     <p>
       If you are still getting the message even after being sure a transfer has taken place, please try using the help
       feature by clicking the question mark in the top right corner to help diagnose the problem.
@@ -18,8 +20,10 @@
 </template>
 
 <script>
+import WalletCheckOnChain from '~/components/WalletCheckOnChain'
 
 export default {
+  components: { WalletCheckOnChain },
   props: {
     wallet: {
       type: Object,
@@ -39,6 +43,8 @@ export default {
             key: 'onChain',
             value: true
           })
+          this.$store.dispatch('wallet/balance', this.wallet)
+
           this.$store.commit('showNotification', {
             type: 'success',
             message: 'The wallet is recognised on the blockchain'

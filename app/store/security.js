@@ -145,6 +145,13 @@ export const actions = {
         return false
       }
     })
+  },
+  monitorWallet({commit, state}, wallet) {
+    // TODO Fork handler depending on security rules. await further definition
+    commit('setWalletPolicy', {
+      walletAddress: wallet.address,
+      policy: state.globalPolicy
+    })
   }
 }
 

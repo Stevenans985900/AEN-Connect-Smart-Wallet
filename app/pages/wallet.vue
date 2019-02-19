@@ -85,7 +85,7 @@
       </v-flex>
 
       <!-- Show Address Dialog -->
-      <v-dialog v-model="dialogAddressShow" max-width="500px">
+      <v-dialog v-if="dialogAddressShow === true" v-model="dialogAddressShow" max-width="500px">
         <v-toolbar class="primary">
           <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
           <v-spacer />
@@ -99,65 +99,33 @@
       <!-- New Wallet Dialog -->
       <v-dialog v-model="dialogWalletAdd" persistent max-width="1024px">
         <v-toolbar color="primary">
-          <v-toolbar-title>Choose a wallet type to add from the list below</v-toolbar-title>
+          <v-toolbar-title>Choose a wallet type:</v-toolbar-title>
+          <v-btn outline @click="walletType = 'aen'" :class="{ 'info': walletType == 'aen'}">
+            AEN
+          </v-btn>
+          <v-btn outline :class="{ 'info': walletType == 'eth'}" @click="walletType = 'eth'">
+            ETH
+          </v-btn>
+          <v-btn outline :class="{ 'info': walletType == 'btc'}" @click="walletType = 'btc'">
+            BTC
+          </v-btn>
+          <v-btn outline :class="{ 'info': walletType == 'contract'}" v-if="haveEthereumWallet" @click="walletType = 'contract'">
+            Contract
+          </v-btn>
           <v-spacer />
           <v-btn icon @click="dialogWalletAdd = false">
             <v-icon>close</v-icon>
           </v-btn>
         </v-toolbar>
         <v-card>
-          <v-tabs centered grow>
-            <v-tabs-slider color="yellow" />
-            <v-tab href="#aen" @click="walletType = 'aen'">
-              AEN
-            </v-tab>
-            <v-tab href="#eth" @click="walletType = 'eth'">
-              Ethereum
-            </v-tab>
-            <v-tab href="#btc" @click="walletType = 'btc'">
-              Btc
-            </v-tab>
-            <v-tab v-if="haveEthereumWallet" href="#contract" @click="walletType = 'contract'">
-              Custom Token
-            </v-tab>
-            <!-- AEN -->
-            <v-tab-item value="aen">
-              <v-card flat>
-                <v-card-text>
-                  <wallet-add type="aen" @complete="walletAdded()" />
-                </v-card-text>
-              </v-card>
-            </v-tab-item>
-            <!-- ETH -->
-            <v-tab-item value="eth">
-              <v-card flat>
-                <v-card-text>
-                  <wallet-add type="eth" @complete="walletAdded()" />
-                </v-card-text>
-              </v-card>
-            </v-tab-item>
-            <!-- BTC -->
-            <v-tab-item value="btc">
-              <v-card flat>
-                <v-card-text>
-                  <wallet-add type="btc" @complete="walletAdded()" />
-                </v-card-text>
-              </v-card>
-            </v-tab-item>
-            <!-- contract -->
-            <v-tab-item v-if="haveEthereumWallet" value="contract">
-              <v-card flat>
-                <v-card-text>
-                  <wallet-add type="contract" @complete="walletAdded()" />
-                </v-card-text>
-              </v-card>
-            </v-tab-item>
-          </v-tabs>
+          <v-card-text>
+            <wallet-add :type="walletType" @complete="walletAdded()" />
+          </v-card-text>
         </v-card>
       </v-dialog>
 
       <!-- Make Transfer Dialog -->
-      <v-dialog v-if="contextWallet.onChain" v-model="dialogMakeTransfer" persistent max-width="450px">
+      <v-dialog v-if="dialogMakeTransfer === true" v-model="dialogMakeTransfer" persistent max-width="450px">
         <v-toolbar color="primary">
           <v-toolbar-title>Make a Transfer from {{ contextWallet.name }}</v-toolbar-title>
           <v-spacer />
@@ -169,7 +137,7 @@
       </v-dialog>
 
       <!-- Remove Wallet Dialog -->
-      <v-dialog v-model="dialogRemoveWallet" persistent max-width="600px">
+      <v-dialog v-if="dialogRemoveWallet" v-model="dialogRemoveWallet" persistent max-width="600px">
         <v-toolbar color="primary">
           <v-toolbar-title>Are you sure you want to remove the wallet?</v-toolbar-title>
           <v-spacer />
@@ -213,7 +181,6 @@ import WalletAdd from '~/components/WalletAdd'
 
 function initialDataState() {
   return {
-    accordionWallets: [],
     dialogWalletAdd: false,
     dialogWalletView: false,
     dialogMakeTransfer: false,
@@ -230,7 +197,10 @@ function initialDataState() {
     showPassword: false,
     walletName: '',
     walletPassword: '',
-    contextWallet: {},
+    contextWallet: null,
+    accordionControlMap: [],
+    accordionControlling: false,
+    accordionCurrentPosition: 0,
     rules: {
       required: value => !!value || 'Required.'
     },
@@ -281,22 +251,16 @@ export default {
       return false
     }
   },
-  watch: {
-    accordionWallets: function(val) {
-      console.log('changing accordion')
-      console.log(val)
-      console.log(this)
-    }
-  },
   mounted: function () {
     console.debug('P:W:Wallets Page Started')
     // Only start once global loading finished
     const preparationInterval = setInterval(
       function () {
+        // Create a wallet index map to control accordion with
         clearInterval(preparationInterval)
         this.$store.commit('setLoading', { t: 'router', v: false })
       }.bind(this),
-      this.$g('internal.commonTasksInterval')
+      this.$g('internal.controllerPollReadyInterval')
     )
   },
   methods: {
