@@ -4,14 +4,12 @@
       This wallet is not yet online
     </h1>
     <p>
-      If you have already made a transfer, it is possible the network has not yet processed it. This app will periodically
-      check in but, if you would like to manually try, click the button below
+      If you have already made a transfer, it is possible the network has not yet processed it. The app will periodically
+      check network status and this message will disappear once verified. If you would like to manually check, click the button below
     </p>
-    <wallet-check-on-chain v-if="wallet.onChain === false" :wallet="wallet"/>
-
-    <!--<v-btn @click="getLiveWallet(wallet)">-->
-      <!--Check-->
-    <!--</v-btn>-->
+    <v-alert :value="true" color="info">
+      <wallet-check-on-chain v-if="wallet.onChain === false" :wallet="wallet" />
+    </v-alert>
     <p>
       If you are still getting the message even after being sure a transfer has taken place, please try using the help
       feature by clicking the question mark in the top right corner to help diagnose the problem.
@@ -30,32 +28,6 @@ export default {
       default: function () {
         return {}
       }
-    }
-  },
-  created: function () {},
-  methods: {
-    getLiveWallet(wallet) {
-
-      this.$store.dispatch('wallet/getLiveWallet', wallet).then((response) => {
-        if(response !== false) {
-          this.$store.commit('wallet/setWalletProperty', {
-            address: this.wallet.address,
-            key: 'onChain',
-            value: true
-          })
-          this.$store.dispatch('wallet/balance', this.wallet)
-
-          this.$store.commit('showNotification', {
-            type: 'success',
-            message: 'The wallet is recognised on the blockchain'
-          })
-        } else {
-          this.$store.commit('showNotification', {
-            type: 'info',
-            message: 'The wallet is not yet recognised on the blockchain'
-          })
-        }
-      })
     }
   }
 }

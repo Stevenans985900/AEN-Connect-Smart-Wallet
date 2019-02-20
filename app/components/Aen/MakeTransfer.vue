@@ -64,17 +64,23 @@ export default {
   },
   methods: {
     initiateTransfer() {
-      this.$store.dispatch('wallet/transfer', {
-        source: this.wallet,
-        destination: this.destination
-      }).then((transfer) => {
-        console.debug(transfer)
-        this.$store.commit('showNotification', {
-          type: 'success',
-          message: 'Your transfer has been successfully dispatched to the network'
+        console.log('getting credentials')
+        this.$store.dispatch('security/getCredentials', this.wallet.address).then((credentials) => {
+            this.$store.dispatch('wallet/transfer', {
+                credentials: credentials,
+                source: this.wallet,
+                destination: this.destination
+            }).then(() => {
+                this.$store.commit('showNotification', {
+                    type: 'success',
+                    message: 'Your transfer has been successfully dispatched to the network'
+                })
+                this.$emit('complete')
+            })
         })
-        this.$emit('complete')
-      })
+
+
+
     }
   }
 }

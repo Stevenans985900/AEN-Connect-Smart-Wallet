@@ -1,10 +1,10 @@
 import Vue from 'vue'
 import CryptoJS from 'crypto-js'
 
-export const initialState = {
+const initialState = {
   context: {
     authenticationAttempts: 0,
-    walletAddress: '',
+    address: '',
     requiredCheck: '',
     validity: 'VALID',
     lockedUntil: null,
@@ -20,12 +20,25 @@ export const initialState = {
     transaction_start: true,
     wallet_open: false
   },
-  walletPolicies: {}
+  wallets: {}
 }
 
 export const state = () => (initialState)
 
 export const getters = {
+  /**
+   * Return a value from the encrypted security store
+   * @param state
+   * @returns {function(*): string}
+   */
+  secureProperty: (state) => (options) => {
+    return JSON.parse(CryptoJS.AES.decrypt(
+        state.wallets[options.address].credentials,
+        Vue.prototype.$g('salt')
+    ).toString(CryptoJS.enc.Utf8))[options.key]
+
+
+  },
   challengeType: (state) => {
     switch (state.context.requiredCheck) {
       case 'app_start':
@@ -52,63 +65,62 @@ export const actions = {
     console.debug(options)
 
     return new Promise((resolve, reject) => {
-      // Create a blank security policy if needed
-      if(!state.walletPolicies.hasOwnProperty(options.walletAddress)) {
-        commit('setWalletPolicy', {
-          walletAddress: options.walletAddress,
-          policy: {}
-        })
+
+      // Set global settings as the default
+      let challengeUser = state.globalPolicy[options.challenge]
+      // Use a try statement and intermediary value here because the wallet might not have parts of this path
+      try {
+        const walletChallengeCondition = state.wallets[options.address].policy[options.challenge]
+        challengeUser = walletChallengeCondition
+      } catch (e) {
+        console.debug('Wallet does not yet have a policy of it\'s own')
       }
-      // Check to see if the wallet has it's own security option and whether or not it is in currently unlocked period
-      if(state.walletPolicies[options.walletAddress].hasOwnProperty(options.context)) {
-        if (state.walletPolicies[options.walletAddress].hasOwnProperty('last_authenticated')) {
-          const date = Date.now()
-          if (date < (state.walletPolicies[options.walletAddress].hasOwnProperty('last_authenticated') + state.lockoutDuration)) {
-            resolve()
-            return
-          }
+
+      // Check whether the user authenticated within the acceptable timeout period
+      if (challengeUser === true) {
+        commit('setRequiredCheck', options.context)
+        if (options.hasOwnProperty('address')) {
+          commit('setContextProperty', {
+            key: 'address',
+            value: options.address
+          })
         }
-        if (state.walletPolicies[options.walletAddress][options.context] === false) {
-          resolve()
-          return
-        }
-        if (state.globalPolicy[options.context] === false) {
-          resolve()
-          return
-        }
+
+        const preparationInterval = setInterval(
+            function () {
+              if (state.context.requiredCheck === 'INVALID') {
+                commit('setRequiredCheck', '')
+                clearInterval(preparationInterval)
+                reject(true)
+              }
+              if (state.context.requiredCheck === '') {
+                clearInterval(preparationInterval)
+                resolve(true)
+              }
+            }, 200)
       } else {
-        if (state.globalPolicy[options.context] === false) {
-          resolve()
-          return
-        }
+        resolve()
       }
-
-      commit('setRequiredCheck', options.context)
-      if(options.hasOwnProperty('walletAddress')) {
-        commit('setContextProperty', {
-          key: 'walletAddress',
-          value: options.walletAddress
-        })
-      }
-
-      const preparationInterval = setInterval(
-        function () {
-          if (state.context.requiredCheck === 'INVALID') {
-            commit('setRequiredCheck', '')
-            clearInterval(preparationInterval)
-            reject(true)
-          }
-          if (state.context.requiredCheck === '') {
-            clearInterval(preparationInterval)
-            resolve(true)
-          }
-        },200)
-        // .bind(context)
     })
   },
-  test(state) {
-    console.log('hello from test dispatch')
-    console.log(state)
+  getCredentials({state, dispatch}, address) {
+    console.debug('Security Store: Add Check')
+    console.debug(address)
+
+    return new Promise((resolve) => {
+      dispatch('addCheck', {
+        challenge: 'transaction_start',
+        address: address
+      }).then(() => {
+        console.log('passed auth from get credentials')
+
+        const credentials = JSON.parse(CryptoJS.AES.decrypt(
+            state.wallets[address].credentials,
+            Vue.prototype.$g('salt'))
+            .toString(CryptoJS.enc.Utf8))
+        resolve(credentials)
+      })
+    })
   },
   checkPassword({state, commit}, password) {
     return new Promise((resolve, reject) => {
@@ -134,9 +146,9 @@ export const actions = {
       }
       commit('incrementAttemptCount')
 
+
       const hashedPassword = CryptoJS.SHA256(password + Vue.prototype.$g('salt')).toString()
-      console.log(state)
-      if (hashedPassword === state.walletPolicies[state.context.walletAddress].password) {
+      if (hashedPassword === state.wallets[state.context.address].password) {
         commit('setRequiredCheck', '')
         commit('resetAttemptCount')
         resolve()
@@ -146,16 +158,27 @@ export const actions = {
       }
     })
   },
-  monitorWallet({commit, state}, wallet) {
+  monitorWallet({commit}, wallet) {
+
+    const credentials = CryptoJS.AES.encrypt(JSON.stringify(wallet.credentials), Vue.prototype.$g('salt')).toString()
+    const hashedPassword = CryptoJS.SHA256(wallet.credentials.password + Vue.prototype.$g('salt')).toString()
+
     // TODO Fork handler depending on security rules. await further definition
-    commit('setWalletPolicy', {
-      walletAddress: wallet.address,
-      policy: state.globalPolicy
+    commit('setWallet', {
+      address: wallet.address,
+      password: hashedPassword,
+      credentials: credentials
     })
   }
 }
 
 export const mutations = {
+  removeWallet(state, wallet) {
+    Vue.delete(state.wallets, wallet.address)
+  },
+  setWallet(state, wallet) {
+    state.wallets[wallet.address] = wallet
+  },
   reset(state) {
     Object.assign(state, initialState)
   },
@@ -181,42 +204,39 @@ export const mutations = {
     state.securityLevel = options
   },
   setWalletSecurityLevel(state, options) {
-    if(!state.walletPolicies.hasOwnProperty(options.walletAddress)) {
-      state.walletPolicies[options.walletAddress] = {}
+    if(!state.wallets.hasOwnProperty(options.address)) {
+      state.wallets[options.address] = {}
     }
-    state.walletPolicies[options.walletAddress].securityLevel = options
+    state.wallets[options.address].securityLevel = options
   },
-  setWalletPolicy(state, options) {
-    if(!state.walletPolicies.hasOwnProperty(options.walletAddress)) {
-      state.walletPolicies[options.walletAddress] = {}
-    }
-    state.walletPolicies[options.walletAddress] = options.policy
+  WALLET_POLICY(state, options) {
+    state.wallets[options.address].policy = options.policy
   },
   setWalletPolicyProperty(state, options) {
-    if(!state.walletPolicies.hasOwnProperty(options.walletAddress)) {
-      state.walletPolicies[options.walletAddress] = {}
+    if(!state.wallets.hasOwnProperty(options.address)) {
+      state.wallets[options.address] = {}
     }
-    state.walletPolicies[options.walletAddress][options.key] = options.value
+    state.wallets[options.address].policy[options.key] = options.value
   },
-  setWalletPassword(state, options) {
-    console.log('setting password')
-    console.log(options)
-    if(!state.walletPolicies.hasOwnProperty(options.walletAddress)) {
-      state.walletPolicies[options.walletAddress] = {}
-    }
-    // TODO Encrypt the password here
-    const password = CryptoJS.SHA256(options.password + Vue.prototype.$g('salt')).toString()
-    state.walletPolicies[options.walletAddress].password = password
-  },
+  // setWalletPassword(state, options) {
+  //   console.log('setting password')
+  //   console.log(options)
+  //   if(!state.wallets.hasOwnProperty(options.address)) {
+  //     state.wallets[options.address] = {}
+  //   }
+  //   // TODO Encrypt the password here
+  //   const password = CryptoJS.SHA256(options.password + Vue.prototype.$g('salt')).toString()
+  //   state.wallets[options.address].options.password = password
+  // },
   setRequiredCheck(state, options) {
     console.log('setting requirement to: ' + options)
     state.context.requiredCheck = options
   },
-  setWalletAddress(state, options) {
-    state.walletAddress = options
+  setaddress(state, options) {
+    state.address = options
   },
-  removeWalletPolicy(state, walletAddress) {
-    Vue.delete(state.walletPolicies, walletAddress)
+  removeWalletPolicy(state, address) {
+    Vue.delete(state.wallets, address)
   }
 
 }

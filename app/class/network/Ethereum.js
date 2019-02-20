@@ -96,7 +96,7 @@ export default class Aen extends Generic {
       const walletObject = {
         address: wallet.address,
         network: options.network,
-        security: {
+        credentials: {
           keystore: wallet.encrypt(options.password),
           password: options.password,
           privateKey: wallet.privateKey
@@ -113,7 +113,7 @@ export default class Aen extends Generic {
       const walletObject = {
         address: wallet.address,
         network: options.network,
-        security: {
+        credentials: {
           keystore: wallet.encrypt(options.password),
           password: options.password,
           privateKey: wallet.privateKey

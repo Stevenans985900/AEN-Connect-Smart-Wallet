@@ -1,17 +1,17 @@
 <template>
   <span>
-    <span v-if="display === 'all' || display === 'direction'">
-      <v-icon v-if="direction === 'incoming'">
+    <span v-if="display === 'all' || display === 'direction'" >
+      <v-icon v-if="direction === 'incoming'" :class="direction">
         call_received
       </v-icon>
-      <v-icon v-else>
+      <v-icon v-else :class="direction">
         call_made
       </v-icon>
     </span>
     <span v-if="display === 'all' || display === 'date'">
       {{ date }}
     </span>
-    <span v-if="display === 'all' || display === 'value'">
+    <span v-if="display === 'all' || display === 'value'" :class="direction">
       {{ value }}XEM
     </span>
     <span v-if="display === 'all' || display === 'address'">
@@ -20,6 +20,14 @@
   </span>
 </template>
 
+<style scoped>
+  .incoming {
+    color: #4CAF50
+  }
+  .outgoing {
+    color: #F44336
+  }
+</style>
 <script>
 import { format } from 'date-fns'
 export default {

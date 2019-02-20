@@ -89,16 +89,6 @@ export const actions = {
           })
         }
       })
-    // Get current blockchain score
-    blockchainHttp.getBlockchainScore()
-      .subscribe((score) => {
-        if (score.scoreLow.lower !== context.state.wallet.aen.blockScore) {
-          context.commit('wallet/setAenProperty', {
-            key: 'blockScore',
-            value: score.scoreLow.lower
-          })
-        }
-      })
   }
 }
 

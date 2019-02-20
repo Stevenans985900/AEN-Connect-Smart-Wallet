@@ -22,7 +22,9 @@
                 {{ faqQuestion.title }}
               </div>
               <v-card>
-                <v-card-text v-html="faqQuestion.content" />
+                <v-card-text>
+                  {{ faqQuestion.content }}
+                </v-card-text>
               </v-card>
             </v-expansion-panel-content>
           </v-expansion-panel>

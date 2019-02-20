@@ -1,7 +1,7 @@
 <template>
   <v-layout>
     <v-stepper v-model="currentStep" vertical>
-      <v-stepper-step :complete="currentStep > 1" step="1">
+      <v-stepper-step :complete="currentStep > 1" editable step="1">
         How do you want to add your wallet?
       </v-stepper-step>
       <v-stepper-content step="1">
@@ -29,7 +29,7 @@
         <v-card v-if="addType == 'fileImport'">
           <v-card-text>
             <v-layout row wrap>
-              <restore-from-file @complete="walletRestoredFromFile" />
+              <restore-from-file :type="type" @complete="walletRestoredFromFile" />
             </v-layout>
           </v-card-text>
         </v-card>
@@ -87,6 +87,7 @@
 
 <script>
   import BackupWallet from '~/components/BackupWallet'
+  import RestoreFromFile from '~/components/RestoreFromFile'
 
   function initialDataState() {
       return {
@@ -105,7 +106,10 @@
       }
   }
 export default {
-  components: { BackupWallet },
+  components: {
+      BackupWallet,
+      RestoreFromFile
+    },
     props: {
     main: {
       type: Boolean,
@@ -138,6 +142,7 @@ export default {
       },
     complete() {
       this.$emit('complete', this.wallet)
+        this.reset()
     },
     updateComponent() {
       if(this.type !== '') {
@@ -155,6 +160,14 @@ export default {
       reset() {
           Object.assign(this.$data, initialDataState())
       },
+      /**
+       * Event listener for the
+       * @param wallet
+       */
+      walletRestoredFromFile(wallet) {
+          this.wallet = wallet
+          this.currentStep++
+      }
   }
 }
 </script>

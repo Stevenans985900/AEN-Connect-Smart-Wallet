@@ -35,7 +35,7 @@
                     </v-flex>
 
                     <v-flex v-if="$vuetify.breakpoint.mdAndUp" xs3 sm6 class="text-xs-right">
-                      <v-btn v-if="wallet.onChain === true" outline small @click="transferNewShow(wallet)">
+                      <v-btn v-if="wallet.onChain === true" outline small @click="contextWallet = wallet; dialogMakeTransfer = true">
                         Send
                       </v-btn>
                       <v-btn outline small @click="addressShow(wallet)">
@@ -55,7 +55,7 @@
                           Actions
                         </v-btn>
                         <v-list>
-                          <v-list-tile v-if="wallet.onChain === true" @click="transferNewShow(wallet)">
+                          <v-list-tile v-if="wallet.onChain === true" @click="contextWallet = wallet; dialogMakeTransfer = true">
                             <v-list-tile-title>Send</v-list-tile-title>
                           </v-list-tile>
                           <v-list-tile @click="addressShow(wallet)">
@@ -100,7 +100,7 @@
       <v-dialog v-model="dialogWalletAdd" persistent max-width="1024px">
         <v-toolbar color="primary">
           <v-toolbar-title>Choose a wallet type:</v-toolbar-title>
-          <v-btn outline @click="walletType = 'aen'" :class="{ 'info': walletType == 'aen'}">
+          <v-btn outline :class="{ 'info': walletType == 'aen'}" @click="walletType = 'aen'">
             AEN
           </v-btn>
           <v-btn outline :class="{ 'info': walletType == 'eth'}" @click="walletType = 'eth'">
@@ -109,7 +109,7 @@
           <v-btn outline :class="{ 'info': walletType == 'btc'}" @click="walletType = 'btc'">
             BTC
           </v-btn>
-          <v-btn outline :class="{ 'info': walletType == 'contract'}" v-if="haveEthereumWallet" @click="walletType = 'contract'">
+          <v-btn v-if="haveEthereumWallet" outline :class="{ 'info': walletType == 'contract'}" @click="walletType = 'contract'">
             Contract
           </v-btn>
           <v-spacer />
@@ -267,29 +267,24 @@ export default {
     accordionTogglingWallet(wallet) {
       this.contextWallet = wallet
       // Check whether the user security is ok
-      this.$store.dispatch('security/addCheck', {
-        walletAddress: this.contextWallet.address,
-        context: 'wallet_open'
-      }).then(() => {
-        if(this.contextWallet.onChain === false) {
-          const walletLiveCheckInterval = setInterval(
-            function () {
-              this.$store.dispatch('wallet/getLiveWallet', this.contextWallet).then((response) => {
-                if(response !== false) {
-                  this.$store.commit('wallet/setWalletProperty', {
-                    address: this.contextWallet.address,
-                    key: 'onChain',
-                    value: true
-                  })
-                  clearInterval(walletLiveCheckInterval)
-                }
-              })
-            }.bind(this),
-            this.$g('internal.commonTasksInterval')
-          )
-        }
-        this.dialogWalletView = true
-      })
+      if(this.contextWallet.onChain === false) {
+        const walletLiveCheckInterval = setInterval(
+          function () {
+            this.$store.dispatch('wallet/getLiveWallet', this.contextWallet).then((response) => {
+              if(response !== false) {
+                this.$store.commit('wallet/setWalletProperty', {
+                  address: this.contextWallet.address,
+                  key: 'onChain',
+                  value: true
+                })
+                clearInterval(walletLiveCheckInterval)
+              }
+            })
+          }.bind(this),
+          this.$g('internal.commonTasksInterval')
+        )
+      }
+      this.dialogWalletView = true
     },
     addressShow(wallet) {
       this.contextWallet = wallet
@@ -313,16 +308,6 @@ export default {
           this.$store.commit('setActiveWallet', wallet)
           break
       }
-    },
-    transferNewShow(wallet) {
-      this.contextWallet = wallet
-      this.$store.dispatch('security/addCheck', {
-        walletAddress: wallet.address,
-        context: 'transaction_start'
-      }).then(() => {
-        this.dialogMakeTransfer = true
-      })
-
     },
     removeWallet() {
       this.dialogRemoveWallet = false

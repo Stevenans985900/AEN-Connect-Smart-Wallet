@@ -1,52 +1,52 @@
 <template>
   <v-form
-          ref="newWalletForm"
-          v-model="newValid"
-          @submit.prevent="onSubmit"
+    ref="newWalletForm"
+    v-model="newValid"
+    @submit.prevent="onSubmit"
   >
     <v-layout row wrap>
       <v-flex v-if="multipleNetworks" xs12>
         <v-select
-                v-model="network"
-                :items="availableNetworks"
-                return-object
-                item-text="name"
-                label="Network"
+          v-model="network"
+          :items="availableNetworks"
+          return-object
+          item-text="name"
+          label="Network"
         />
       </v-flex>
       <v-flex xs12>
         <v-text-field
-                v-model="walletName"
-                :rules="[rules.basic.required, rules.walletName.minLength]"
-                :error-messages="walletNameAvailable()"
-                label="Wallet Name"
-                required
+          v-model="walletName"
+          :rules="[rules.basic.required, rules.walletName.minLength]"
+          :error-messages="walletNameAvailable()"
+          label="Wallet Name"
+          required
         />
       </v-flex>
       <v-flex xs12>
         <v-text-field
-                v-model="walletPassword"
-                :append-icon="showPassword ? 'visibility_off' : 'visibility'"
-                :type="showPassword ? 'text' : 'password'"
-                :rules="[rules.basic.required, rules.password.minLength]"
-                label="Wallet Password"
-                required
-                counter
-                @click:append="showPassword = !showPassword"
+          v-model="walletPassword"
+          :append-icon="showPassword ? 'visibility_off' : 'visibility'"
+          :type="showPassword ? 'text' : 'password'"
+          :rules="[rules.basic.required, rules.password.minLength]"
+          label="Wallet Password"
+          required
+          counter
+          @click:append="showPassword = !showPassword"
         />
         <password v-model="walletPassword" :strength-meter-only="true" />
       </v-flex>
       <v-flex xs12>
         <v-text-field
-                v-model="password2"
-                :append-icon="showPassword ? 'visibility_off' : 'visibility'"
-                :type="showPassword ? 'text' : 'password'"
-                :rules="[rules.basic.required, rules.password.minLength]"
-                label="Repeat Password"
-                :error-messages="passwordsMatch()"
-                required
-                counter
-                @click:append="showPassword = !showPassword"
+          v-model="password2"
+          :append-icon="showPassword ? 'visibility_off' : 'visibility'"
+          :type="showPassword ? 'text' : 'password'"
+          :rules="[rules.basic.required, rules.password.minLength]"
+          label="Repeat Password"
+          :error-messages="passwordsMatch()"
+          required
+          counter
+          @click:append="showPassword = !showPassword"
         />
       </v-flex>
     </v-layout>
@@ -146,7 +146,7 @@
                 }
                 const walletOptions = {
                     type: this.type,
-                    network: this.$store.state.wallet.aen.network,
+                    network: this.$store.state.wallet[this.type].network,
                     name: this.walletName,
                     password: this.walletPassword,
                     main: this.main

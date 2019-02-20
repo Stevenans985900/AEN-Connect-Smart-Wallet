@@ -34,6 +34,9 @@
       <v-toolbar-title class="hidden-sm-and-down text-xs-left" v-text="title" />
       <v-spacer />
       <!-- Environment -->
+      <no-ssr>
+        <busy />
+      </no-ssr>
       <development v-if="environment === 'development'" />
       <network-diagnostics />
       <help />
@@ -44,9 +47,6 @@
       <v-container fluid>
         <no-ssr>
           <loading />
-        </no-ssr>
-        <no-ssr>
-          <busy />
         </no-ssr>
         <security-challenge />
         <v-snackbar v-model="showNotification" :timeout="timeout" :top="true" :vertical="true">
@@ -313,10 +313,13 @@ export default {
 
     // Check network settings and create a set of defaults based from first available
     // TODO Abstract this defaulting to a component of it's own which can pickup a "wallets available" setting
-    if (Object.keys(this.$store.state.wallet.aen.network).length === 0) {
-      this.$store.commit('wallet/setAenProperty', { key: 'network', value: this.$g('aen.available_networks')[0] })
-    }
-    if (this.$store.state.wallet.ethereum.activeApiEndpoint === '') {
+      if (Object.keys(this.$store.state.wallet.aen.network).length === 0) {
+          this.$store.commit('wallet/setAenProperty', { key: 'network', value: this.$g('aen.available_networks')[0] })
+      }
+      if (Object.keys(this.$store.state.wallet.btc.network).length === 0) {
+          this.$store.commit('wallet/setBtcProperty', { key: 'network', value: this.$g('bitcoin.available_networks')[0] })
+      }
+    if (this.$store.state.wallet.eth.activeApiEndpoint === '') {
       this.$store.commit('wallet/setEthereumProperty', { key: 'network', value: this.$g('eth.available_networks')[0] })
       this.$store.commit('wallet/setEthereumProperty', { key: 'activeApiEndpoint', value: this.$g('eth.available_networks')[0].infura_api_endpoint })
     }
@@ -337,14 +340,14 @@ export default {
       this.$g('internal.commonTasksInterval')
     )
 
-    // Update currency exchange rates from binance
-    this.$store.dispatch('exchange/updateRates')
+    // TODO Update currency exchange rates from binance. Due to CORS restriction, investigate web account or use proxy
+    // this.$store.dispatch('exchange/updateRates')
 
     this.$store.commit('setLoading', { t: 'global', v: false })
     if (this.$store.state.wallet.aen.mainAddress !== '') {
         this.$store.dispatch('security/addCheck', {
-          context: 'app_start',
-          walletAddress: this.$store.state.wallet.aen.mainAddress
+          challenge: 'app_start',
+          address: this.$store.state.wallet.aen.mainAddress
         }).then(() => {
           console.log('pass')
         }).catch((e) => {

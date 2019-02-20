@@ -74,7 +74,7 @@ export default class Btc extends Generic {
         network: options.network,
         address: address,
         publicKey: keyPair.publicKey,
-        security: {
+        credentials: {
           password: options.password,
           walletImportFormat: keyPair.toWIF(),
         }

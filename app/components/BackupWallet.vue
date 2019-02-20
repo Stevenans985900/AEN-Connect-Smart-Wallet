@@ -85,7 +85,12 @@ export default {
     },
     backupWallet(wallet) {
       const exportName = wallet.name + '-' + wallet.type + '-' + new Date().toISOString().slice(0, 10)
-      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(wallet))
+        const forExport = {
+          address: wallet.address,
+          wallet: wallet,
+          credentials: this.$store.state.security.wallets[wallet.address].credentials
+        }
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(forExport))
       const downloadAnchorNode = document.createElement('a')
       downloadAnchorNode.setAttribute('href', dataStr)
       downloadAnchorNode.setAttribute('download', exportName + '.json')
@@ -94,7 +99,7 @@ export default {
       downloadAnchorNode.remove()
 
       // Create an encrypted version of the backup
-      const encrypted = 'data:application/octet-stream,' + CryptoJS.AES.encrypt(JSON.stringify(wallet), this.$g('salt')).toString()
+      const encrypted = 'data:application/octet-stream,' + CryptoJS.AES.encrypt(JSON.stringify(forExport), this.$g('salt')).toString()
       const downloadEncryptedAnchorNode = document.createElement('a')
       downloadEncryptedAnchorNode.setAttribute('href', encrypted)
       downloadEncryptedAnchorNode.setAttribute('download', exportName + '.enc')

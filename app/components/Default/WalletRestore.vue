@@ -1,17 +1,17 @@
 <template>
   <v-form
-          ref="restoreWalletForm"
-          v-model="restoreValid"
-          @submit.prevent="onSubmit"
+    ref="restoreWalletForm"
+    v-model="restoreValid"
+    @submit.prevent="onSubmit"
   >
     <v-layout row wrap>
       <v-flex v-if="multipleNetworks" xs12>
         <v-select
-                v-model="network"
-                :items="availableNetworks"
-                return-object
-                item-text="name"
-                label="Network"
+          v-model="network"
+          :items="availableNetworks"
+          return-object
+          item-text="name"
+          label="Network"
         />
       </v-flex>
       <v-flex xs12>
@@ -21,23 +21,34 @@
                 :error-messages="walletNameAvailable()"
                 label="Wallet Name"
                 required
-                placeholder="AEN Wallet"
         />
       </v-flex>
       <v-flex xs12>
         <v-text-field
-                v-model="walletPassword"
-                :append-icon="showPassword ? 'visibility_off' : 'visibility'"
-                :type="showPassword ? 'text' : 'password'"
-                :rules="[rules.basic.required, rules.password.minLength]"
-                label="Wallet Password"
-                required
+          v-model="walletPassword"
+          :append-icon="showPassword ? 'visibility_off' : 'visibility'"
+          :type="showPassword ? 'text' : 'password'"
+          :rules="[rules.basic.required, rules.password.minLength]"
+          label="Wallet Password"
+          required
+          counter
+          @click:append="showPassword = !showPassword"
+        />
+      </v-flex>
+      <v-flex xs12>
+        <v-text-field
+                v-model="accountPrivateKey"
+                :append-icon="showKey ? 'visibility_off' : 'visibility'"
+                :type="showKey ? 'text' : 'password'"
+                :rules="[rules.basic.required, rules.privateKey.length]"
+                label="Private Key"
                 counter
-                @click:append="showPassword = !showPassword"
+                required
+                @click:append="showKey = !showKey"
         />
       </v-flex>
     </v-layout>
-    <v-btn color="primary" @click="restorerWallet">
+    <v-btn color="primary" @click="restoreWallet">
       Restore
     </v-btn>
   </v-form>
@@ -54,6 +65,7 @@
             network: {},
             accountPrivateKey: '',
             proceedValid: false,
+            showKey: false,
             showPassword: false,
             errorMessages: [],
             wallet: {},
@@ -119,7 +131,7 @@
                 this.$emit('complete', wallet)
                 this.reset()
             },
-            createWallet() {
+            restoreWallet() {
                 if (!this.$refs.restoreWalletForm.validate()) {
                     return false
                 }

@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-layout row justify-center align-center>
+    <v-layout row justify-center align-center mb-2>
       <!-- Security Options -->
       <v-flex xs12 md12>
         <v-card>

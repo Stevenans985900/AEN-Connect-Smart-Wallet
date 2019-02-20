@@ -186,10 +186,6 @@ export default {
      */
     walletCreated: function (wallet) {
       this.wallet = wallet
-      this.$store.commit('security/setWalletPassword', {
-        walletAddress: wallet.address,
-        password: wallet.password
-      })
       this.panel = [false,true,false]
     },
     setupComplete: function () {

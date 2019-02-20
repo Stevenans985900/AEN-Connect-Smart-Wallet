@@ -1,18 +1,9 @@
 <template>
   <span>
     <v-btn @click="manualCheck()">
-      Check
+      Check now
     </v-btn>
-    <v-progress-circular
-      v-if="wallet.onChain === false"
-      :rotate="180"
-      :size="35"
-      :width="3"
-      :value="timeToCheckPercentage"
-      color="secondary"
-    >
-      {{ timeToCheck }}
-    </v-progress-circular>
+    {{ timeToCheck }}s until next check
   </span>
 </template>
 
@@ -35,7 +26,7 @@
             }
         },
         computed: {
-            timeToCheckPercentage() { return (100 / this.$g('internal.walletCheckInterval')) * (this.timeToCheck * 1000) }
+            timeToCheckPercentage() { return (100 / (this.timeToCheck * 1000)) * this.$g('internal.walletCheckInterval') - 100 }
         },
         mounted: function ()  {
             this.checkOnline()
@@ -62,23 +53,35 @@
                 this.checkOnline()
             },
             checkOnline: function () {
+                console.log('checking if online')
+                this.$store.commit('setLoading', {
+                    t: 'page',
+                    v: true,
+                    m: 'Checking Wallet Status'
+                })
                 this.$store.dispatch('wallet/getLiveWallet', this.wallet).then((response) => {
+                    this.$store.commit('setLoading', {
+                        t: 'page',
+                        v: false
+                    })
                     if (response !== false) {
                         if(this.walletOnlineCheckInterval)  { clearInterval(this.walletOnlineCheckInterval) }
-                        this.$store.commit('wallet/setWalletProperty', {
-                            address: this.wallet.address,
-                            key: 'onChain',
-                            value: true
-                        })
-                        if(this.complete === false) {
-                            this.$store.commit('showNotification', {
-                                type: 'success',
-                                message: 'The wallet is recognised on the blockchain'
+
+                        if(this.$store.state.wallet.wallets[this.wallet.address].onChain === false) {
+                            this.$store.commit('wallet/setWalletProperty', {
+                                address: this.wallet.address,
+                                key: 'onChain',
+                                value: true
                             })
-                            this.complete = true
                         }
                     }
                 })
+                    .catch(() => {
+                        this.$store.commit('setLoading', {
+                            t: 'page',
+                            v: false
+                        })
+                    })
             }
         }
     }
