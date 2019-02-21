@@ -1,5 +1,5 @@
 <template>
-  <v-form v-model="formValid" ref="feedbackForm">
+  <v-form ref="feedbackForm" v-model="formValid">
     <v-layout row wrap align-center justify-center>
       <v-flex xs12>
         <h3>Feedback Type</h3>
@@ -15,18 +15,21 @@
           v-model="feedbackMessage"
           :rules="[rules.basic.required, rules.feedbackMessage.minLength, rules.feedbackMessage.maxLength]"
           label="Feedback"
-          required />
+          required
+        />
       </v-flex>
       <v-flex xs12>
         <v-text-field
           v-model="name"
-          label="Name" />
+          label="Name"
+        />
       </v-flex>
       <v-flex xs12>
         <v-text-field
           v-model="contactDetails"
           label="Contact Information"
-          placeholder="If you'd like us to get in contact with you, please provide details" />
+          placeholder="If you'd like us to get in contact with you, please provide details"
+        />
       </v-flex>
       <v-flex xs12>
         <v-btn :disabled="!formValid || disableContact" color="primary" @click="submit">

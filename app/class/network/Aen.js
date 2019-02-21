@@ -34,7 +34,7 @@ export default class Aen extends Generic {
     console.debug(this.pluginName + ' Plugin: Account Load')
     console.debug(options)
     return new Promise((resolve) => {
-      const account = Account.createFromPrivateKey(options.credentials.accountPrivateKey, options.wallet.network.byte)
+      const account = Account.createFromPrivateKey(options.accountPrivateKey, options.network.byte)
       resolve(account)
     })
   }

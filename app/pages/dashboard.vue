@@ -14,7 +14,7 @@
           <v-flex xs12 md4>
             <v-card>
               <v-card-title>
-                <v-img src="/question.png" max-width="50px"/>
+                <v-img src="/question.png" max-width="50px" />
                 &nbsp;&nbsp;
                 <span>AENCoin</span>
               </v-card-title>
@@ -28,8 +28,8 @@
                     <v-list-tile-title>Finished</v-list-tile-title>
                   </v-list-tile-content>
                   <v-layout
-                          align-center
-                          justify-end
+                    align-center
+                    justify-end
                   >
                     <v-icon class="mr-1">
                       attach_money
@@ -46,7 +46,7 @@
           <v-flex xs12 md4>
             <v-card>
               <v-card-title>
-                <v-img src="/question.png" max-width="50px"/>
+                <v-img src="/question.png" max-width="50px" />
                 &nbsp;&nbsp;
                 <span>AENCoin</span>
               </v-card-title>
@@ -60,8 +60,8 @@
                     <v-list-tile-title>Finished</v-list-tile-title>
                   </v-list-tile-content>
                   <v-layout
-                          align-center
-                          justify-end
+                    align-center
+                    justify-end
                   >
                     <v-icon class="mr-1">
                       attach_money
@@ -78,7 +78,7 @@
           <v-flex xs12 md4>
             <v-card>
               <v-card-title>
-                <v-img src="/question.png" max-width="50px"/>
+                <v-img src="/question.png" max-width="50px" />
                 &nbsp;&nbsp;
                 <span>AENCoin</span>
               </v-card-title>
@@ -92,8 +92,8 @@
                     <v-list-tile-title>Finished</v-list-tile-title>
                   </v-list-tile-content>
                   <v-layout
-                          align-center
-                          justify-end
+                    align-center
+                    justify-end
                   >
                     <v-icon class="mr-1">
                       attach_money

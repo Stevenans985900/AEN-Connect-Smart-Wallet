@@ -129,6 +129,11 @@ export default {
           return 'Enter Details'
       },
     },
+  watch: {
+    type: function () {
+      this.updateComponent()
+    }
+  },
   mounted: function () {
     this.updateComponent()
   },

@@ -7,11 +7,11 @@
       <v-icon v-if="direction === 'incoming'" :class="direction">
         call_received
       </v-icon>
-      <v-icon v-else color="red">
+      <v-icon v-else :class="direction">
         call_made
       </v-icon>
     </span>
-    <span v-if="display === 'all' || display === 'value'" :class="direction" >
+    <span v-if="display === 'all' || display === 'value'" :class="direction">
       {{ value }}
     </span>
     <span v-if="display === 'all' || display === 'address'">

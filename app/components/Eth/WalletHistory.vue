@@ -3,9 +3,9 @@
     <v-progress-circular v-if="loading === true" indeterminate />
     <span>
       <v-data-table
-              :headers="headers"
-              :items="transactions"
-              item-key="signature"
+        :headers="headers"
+        :items="transactions"
+        item-key="signature"
       >
         <template slot="items" slot-scope="props">
           <tr @click="props.expanded = !props.expanded">
@@ -36,7 +36,7 @@
           </tr>
         </template>
       </v-data-table>
-  </span>
+    </span>
   </span>
 </template>
 

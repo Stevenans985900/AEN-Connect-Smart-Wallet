@@ -44,10 +44,10 @@
           </v-list>
         </v-flex>
 
-        <v-flex xs12 md9 v-if="categoryComponent">
-          <component :is="categoryComponent"  />
+        <v-flex v-if="categoryComponent" xs12 md9>
+          <component :is="categoryComponent" />
         </v-flex>
-        <v-flex xs12 md4 v-if="selectedCategory">
+        <v-flex v-if="selectedCategory" xs12 md4>
           <v-list>
             <template v-for="(faqEntry, faqIndex) in help[selectedCategory].faq">
               <v-list-tile
@@ -77,7 +77,6 @@
             </p>
           </template>
         </v-flex>
-
       </v-layout>
     </v-card>
   </v-dialog>

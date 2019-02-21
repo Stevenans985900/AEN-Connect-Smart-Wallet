@@ -1,14 +1,14 @@
 <template>
   <span v-if="busy" class="text-xs-center">
-      <v-chip>
-        <v-avatar>
-          <v-icon class="loader-icon">
-            loop
-          </v-icon>
-        </v-avatar>
-        {{ busyMessage }}
-      </v-chip>
-    </span>
+    <v-chip>
+      <v-avatar>
+        <v-icon class="loader-icon">
+          loop
+        </v-icon>
+      </v-avatar>
+      {{ busyMessage }}
+    </v-chip>
+  </span>
 </template>
 
 <style scoped>
