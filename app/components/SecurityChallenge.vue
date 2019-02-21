@@ -96,7 +96,7 @@ export default {
             case 'INCORRECT_PASSWORD':
               this.$store.commit('showNotification', {
                 type: 'error',
-                message: 'Challenge failed. ' + (this.failLimit - this.failCount) + ' tries remaining'
+                message: 'Challenge failed.'
               })
               break
           }

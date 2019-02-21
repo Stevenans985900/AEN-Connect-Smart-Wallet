@@ -1,6 +1,6 @@
 <template>
   <v-layout row wrap>
-    <v-flex xs12 md7>
+    <v-flex xs12 md6>
       <v-toolbar>
         <v-toolbar-title>
           Wallet Management
@@ -22,14 +22,16 @@
                 {{ faqQuestion.title }}
               </div>
               <v-card>
-                <v-card-text v-html="faqQuestion.content" />
+                <v-card-text>
+                  {{ faqQuestion.content }}
+                </v-card-text>
               </v-card>
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-card-text>
       </v-card>
     </v-flex>
-    <v-flex xs12 md5>
+    <v-flex xs12 md6>
       <v-card>
         <youtube video-id="xwftD2aehpM" player-width="100%" />
       </v-card>

@@ -33,13 +33,15 @@
     "rxjs": "^6.4.0",
     "vue-chartjs": "^3.4.0",
     "vue-clipboard2": "^0.2.1",
+    "vue-password-strength-meter": "^1.4.1",
     "vue-recaptcha": "^1.1.1",
     "vue-youtube-embed": "^2.2.1",
     "vuetify": "^1.3.14",
     "vuetify-loader": "^1.0.8",
     "vuetify-upload-button": "^1.2.2",
     "vuex-persistedstate": "^2.5.4",
-    "web3": "^1.0.0-beta.41"
+    "web3": "^1.0.0-beta.41",
+    "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
     "@nuxtjs/eslint-config": "^0.0.1",

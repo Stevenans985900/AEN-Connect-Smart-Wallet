@@ -1,22 +1,32 @@
 <template>
-  <div v-if="busy" id="loading-spinner">
-    <v-tooltip bottom>
-      <span slot="activator">
-        <h2>Busy</h2>
-        <v-progress-circular indeterminate color="primary" />
-      </span>
-      <span>You can continue working during this time but, if there are any problems, you may lose your work.</span>
-    </v-tooltip>
-  </div>
+  <span v-if="busy" class="text-xs-center">
+      <v-chip>
+        <v-avatar>
+          <v-icon class="loader-icon">
+            loop
+          </v-icon>
+        </v-avatar>
+        {{ busyMessage }}
+      </v-chip>
+    </span>
 </template>
+
+<style scoped>
+  .loader-icon {
+    -webkit-animation:spin 3s linear infinite;
+    -moz-animation:spin 3s linear infinite;
+    animation:spin 3s linear infinite;
+  }
+  @-moz-keyframes spin { 100% { -moz-transform: rotate(-360deg); } }
+  @-webkit-keyframes spin { 100% { -webkit-transform: rotate(-360deg); } }
+  @keyframes spin { 100% { -webkit-transform: rotate(-360deg); transform:rotate(-360deg); } }
+</style>
 
 <script>
 export default {
   computed: {
-    busy: {
-      get: function () { return this.$store.getters.busy },
-      set: function () {}
-    }
+      busy() { return this.$store.state.busy.page },
+      busyMessage() { return this.$store.state.busy.message }
   }
 }
 </script>

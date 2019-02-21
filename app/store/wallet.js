@@ -20,7 +20,7 @@ export const initialState = {
     activeApiPing: 9999,
     network: {}
   },
-  ethereum: {
+  eth: {
     activeApiEndpoint: '',
     activeApiPing: 9999,
     network: {}
@@ -81,9 +81,9 @@ export const getters = {
       case 'btc':
         return new Btc(Vue.prototype.$g('bitcoin'))
       case 'contract':
-        return new Contract(state.ethereum.activeApiEndpoint)
+        return new Contract(state.eth.activeApiEndpoint)
       case 'eth':
-        return new Ethereum(state.ethereum.activeApiEndpoint)
+        return new Ethereum(state.eth.activeApiEndpoint)
     }
   },
   walletsByType: (state) => (type) => {
@@ -109,7 +109,7 @@ export const actions = {
   balance: ({state, commit, rootState}, wallet) => {
     let networkHandler
     return new Promise((resolve, reject) => {
-      if(rootState.runtime.isOnline === false) {
+      if(rootState.runtime.isOnline === false || wallet.onChain === false) {
         resolve(wallet)
       }
       switch (wallet.type) {
@@ -125,13 +125,13 @@ export const actions = {
         case 'contract':
           // TODO For this active API endpoint, mixin network selection
           networkHandler = new Contract(
-            state.ethereum.activeApiEndpoint
+            state.eth.activeApiEndpoint
           )
           break
         case 'eth':
           // TODO For this active API endpoint, mixin network selection
           networkHandler = new Ethereum(
-            state.ethereum.activeApiEndpoint
+            state.eth.activeApiEndpoint
           )
           break
       }
@@ -170,13 +170,13 @@ export const actions = {
         case 'contract':
           // TODO For this active API endpoint, mixin network selection
           networkHandler = new Contract(
-            state.ethereum.activeApiEndpoint
+            state.eth.activeApiEndpoint
           )
           break
         case 'eth':
           // TODO For this active API endpoint, mixin network selection
           networkHandler = new Ethereum(
-            state.ethereum.activeApiEndpoint
+            state.eth.activeApiEndpoint
           )
           break
       }
@@ -185,7 +185,7 @@ export const actions = {
       networkHandler.transactionsHistorical(wallet).then((transactions) => {
         commit('setWalletProperty', {
           address: wallet.address,
-          key: 'balance',
+          key: 'transactions',
           value: transactions
         })
         resolve(wallet)
@@ -206,14 +206,14 @@ export const actions = {
           })
           break
         case 'btc':
-          networkHandler = new Btc(context.state.Btc)
+          networkHandler = new Btc(Vue.prototype.$g('bitcoin'))
           networkHandler.getLiveWallet(wallet).then((response) => {
             resolve(response)
           })
           break
         case 'contract':
           networkHandler = new Contract(
-            context.state.ethereum.activeApiEndpoint
+            context.state.eth.activeApiEndpoint
           )
           networkHandler.getLiveWallet(wallet).then((response) => {
             resolve(response)
@@ -221,7 +221,7 @@ export const actions = {
           break
         case 'eth':
           networkHandler = new Ethereum(
-            context.state.ethereum.activeApiEndpoint
+            context.state.eth.activeApiEndpoint
           )
           networkHandler.getLiveWallet(wallet).then((response) => {
             resolve(response)
@@ -270,7 +270,7 @@ export const actions = {
 
         case 'contract':
           networkHandler = new Contract(
-            state.ethereum.activeApiEndpoint
+            state.eth.activeApiEndpoint
           )
           networkHandler.walletLoad(options).then((walletObject) => {
             Object.assign(wallet, walletObject)
@@ -281,7 +281,7 @@ export const actions = {
 
         case 'eth':
           networkHandler = new Ethereum(
-            state.ethereum.activeApiEndpoint
+            state.eth.activeApiEndpoint
           )
           networkHandler.walletLoad(options).then((walletObject) => {
             Object.assign(wallet, walletObject)
@@ -302,7 +302,7 @@ export const actions = {
       }
     })
   },
-  new({state, commit}, options) {
+  new({dispatch, state, commit}, options) {
     console.debug('Wallet Service:New ' + options.type)
 
     return new Promise((resolve) => {
@@ -312,7 +312,8 @@ export const actions = {
         balance: 0,
         balanceLastSynced: false,
         transactions: [],
-        transactionsLastSynced: false
+        transactionsLastSynced: false,
+        type: options.type
       }
       let networkHandler
       switch (options.type) {
@@ -331,29 +332,31 @@ export const actions = {
                   value: wallet.address
                 })
               }
-
+              dispatch('security/monitorWallet', wallet, {root:true})
+              delete wallet.credentials
               commit('setWallet', wallet)
               resolve(wallet)
             })
           })
           break
         case 'btc':
-          networkHandler = new Btc(
-            state.Btc.activeApiEndpoint
-          )
+          networkHandler = new Btc(Vue.prototype.$g('bitcoin'))
           networkHandler.walletNew(options).then((walletObject) => {
             Object.assign(wallet, walletObject)
+            dispatch('security/monitorWallet', wallet, {root:true})
+            delete wallet.credentials
             commit('setWallet', wallet)
             resolve(wallet)
           })
           break
 
         case 'eth':
-          networkHandler = new Ethereum(
-            state.ethereum.activeApiEndpoint
-          )
+          networkHandler = new Ethereum(state.eth.activeApiEndpoint)
           networkHandler.walletNew(options).then((walletObject) => {
             Object.assign(wallet, walletObject)
+            console.log('about to add wallet to security')
+            dispatch('security/monitorWallet', wallet, {root:true})
+            delete wallet.credentials
             commit('setWallet', wallet)
             resolve(wallet)
           })
@@ -378,9 +381,15 @@ export const actions = {
             resolve(transfer)
           })
           break
+        case 'btc':
+          networkHandler = new Btc(Vue.prototype.$g('bitcoin'))
+          networkHandler.transfer(options).then((transfer) => {
+            resolve(transfer)
+          })
+          break
         case 'contract':
           networkHandler = new Contract(
-            context.state.ethereum.activeApiEndpoint
+            context.state.eth.activeApiEndpoint
           )
           networkHandler.transfer(options).then((transfer) => {
             resolve(transfer)
@@ -388,7 +397,7 @@ export const actions = {
           break
         case 'eth':
           networkHandler = new Ethereum(
-            context.state.ethereum.activeApiEndpoint
+            context.state.eth.activeApiEndpoint
           )
           networkHandler.transfer(options).then((transfer) => {
             resolve(transfer)
@@ -485,10 +494,10 @@ export const mutations = {
     state.aen[options.key] = options.value
   },
   setBtcProperty(state, options) {
-    state.Btc[options.key] = options.value
+    state.btc[options.key] = options.value
   },
   setEthereumProperty(state, options) {
-    state.ethereum[options.key] = options.value
+    state.eth[options.key] = options.value
   },
   setWalletProperty(state, options) {
     state.wallets[options.address][options.key] = options.value

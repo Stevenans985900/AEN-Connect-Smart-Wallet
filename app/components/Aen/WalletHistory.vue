@@ -1,7 +1,7 @@
 <template>
   <span>
     <v-progress-circular v-if="loading === true" indeterminate />
-    <span v-if="transactions && loading === false">
+    <span>
       <v-data-table
         :headers="headers"
         :items="transactions"
@@ -31,16 +31,11 @@
         </template> -->
       </v-data-table>
     </span>
-    <span v-else>
-      <h1>No Transactions</h1>
-      <img src="/nothing.png" alt="nothing">
-    </span>
   </span>
 </template>
 
 <script>
 import TransactionStringify from '~/components/Aen/TransactionStringify'
-import Aen from '~/class/network/Aen'
 
 export default {
   components: {
@@ -57,7 +52,7 @@ export default {
   data() {
     return {
       transactionsListener: null,
-      transactions: {},
+      // transactions: {},
       loading: true,
       expand: false,
       headers: [
@@ -68,21 +63,23 @@ export default {
       ]
     }
   },
-  mounted() {
-    const networkHelper = new Aen(this.$store.state.wallet.aen.activeApiEndpoint)
-    networkHelper.transactionsHistorical(this.wallet).then((transactions) => {
-      this.transactions = transactions
-      this.loading = false
-    })
+    computed: {
+      transactions() {
+          return this.$store.state.wallet.wallets[this.wallet.address].transactions
+      }
+    },
+    mounted() {
+      this.$store.dispatch('wallet/transactionsHistorical', this.wallet).then(() => {
+          this.loading = false
+      })
+        this.transactionsListener = setInterval(
+          function () {
+              this.$store.dispatch('wallet/transactionsHistorical', this.wallet)
+          }.bind(this),
+          this.$g('internal.commonTasksInterval')
+        )
 
-    this.transactionsListener = setInterval(
-      function () {
-        networkHelper.transactionsHistorical(this.wallet).then((transactions) => {
-          this.transactions = transactions
-        })
-      }.bind(this), this.$g('internal.commonTasksInterval')
-    )
-  },
+    },
   beforeDestroy() {
     clearInterval(this.transactionsListener)
   }

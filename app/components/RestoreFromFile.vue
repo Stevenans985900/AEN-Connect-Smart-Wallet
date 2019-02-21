@@ -18,6 +18,12 @@ export default {
     UploadButton
   },
   props: {
+    // If network type specified, restrict import to this type
+    type: {
+        type: String,
+        default: ''
+    },
+    // Forcee imported wallet to be considered main AEN wallet
     main: {
       type: Boolean,
       default: function () {
@@ -46,16 +52,29 @@ export default {
             } else {
               walletInformation = JSON.parse(walletData.data)
             }
+            walletInformation.credentials = JSON.parse(CryptoJS.AES.decrypt(
+                walletInformation.credentials,
+                this.$g('salt')
+            ).toString(CryptoJS.enc.Utf8))
+
+            console.debug('Information parsed from file')
+            console.debug(walletInformation)
 
             // If prop states wallet is a main, force property in wallet
             if (this.main === true) {
               walletInformation.main = true
             }
 
+            if(this.type !== '' && this.type !== walletInformation.type) {
+              throw 'Wallet type does not meet type requirement (' + this.type + ')'
+            }
             this.$store.dispatch('wallet/load', walletInformation).then((wallet) => {
-              this.$emit('complete', wallet)
+                this.$emit('complete', wallet)
             })
+
+
           } catch (e) {
+              console.debug(e)
             this.$store.commit('showNotification', {
               type: 'error',
               message: 'The file you uploaded appears invalid, please make sure it is a wallet backup'

@@ -71,13 +71,13 @@ export default class Btc extends Generic {
       const keyPair = bitcoin.ECPair.makeRandom({ network: bitcoin.networks[options.network.identifier] })
       const { address } = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey, network: bitcoin.networks[options.network.identifier] })
       const walletObject = {
-        name: options.name,
         network: options.network,
-        type: options.type,
         address: address,
-        walletImportFormat: keyPair.toWIF(),
         publicKey: keyPair.publicKey,
-        onChain: false
+        credentials: {
+          password: options.password,
+          walletImportFormat: keyPair.toWIF(),
+        }
       }
       resolve(walletObject)
     })

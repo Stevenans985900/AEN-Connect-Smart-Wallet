@@ -34,7 +34,7 @@ export default class Aen extends Generic {
     console.debug(this.pluginName + ' Plugin: Account Load')
     console.debug(options)
     return new Promise((resolve) => {
-      const account = Account.createFromPrivateKey(options.accountPrivateKey, options.network.byte)
+      const account = Account.createFromPrivateKey(options.credentials.accountPrivateKey, options.wallet.network.byte)
       resolve(account)
     })
   }
@@ -121,16 +121,14 @@ export default class Aen extends Generic {
         options.network.byte)
 
       const walletObject = {
-        onChain: false,
-        name: options.name,
-        balance: 0,
-        password: options.password,
-        accountPrivateKey: options.account.privateKey,
-        privateKey: wallet.encryptedPrivateKey.encryptedKey,
         publicKey: options.account.publicKey,
         address: wallet.address.address,
         network: options.network,
-        type: 'aen'
+        credentials: {
+          password: options.password,
+          accountPrivateKey: options.account.privateKey,
+          privateKey: wallet.encryptedPrivateKey.encryptedKey,
+        }
       }
       resolve(walletObject)
     })
@@ -207,7 +205,7 @@ export default class Aen extends Generic {
     return new Promise((resolve) => {
       // Transaction data preparation
       const recipientAddress = Address.createFromRawAddress(options.destination.address)
-      const account = Account.createFromPrivateKey(options.source.accountPrivateKey, options.source.network.byte)
+      const account = Account.createFromPrivateKey(options.credentials.accountPrivateKey, options.source.network.byte)
       const transactionHttp = new TransactionHttp(this.apiEndpoint)
       const message = options.destination.message || ''
 

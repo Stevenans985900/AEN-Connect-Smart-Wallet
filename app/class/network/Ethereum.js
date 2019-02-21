@@ -94,14 +94,13 @@ export default class Aen extends Generic {
     return new Promise((resolve) => {
       const wallet = this.web3.eth.accounts.privateKeyToAccount(options.privateKey)
       const walletObject = {
-        type: 'eth',
-        name: options.name,
-        password: options.password,
-        privateKey: wallet.privateKey,
         address: wallet.address,
-        keystore: wallet.encrypt(options.password),
         network: options.network,
-        onChain: false
+        credentials: {
+          keystore: wallet.encrypt(options.password),
+          password: options.password,
+          privateKey: wallet.privateKey
+        }
       }
       resolve(walletObject)
     })
@@ -112,14 +111,13 @@ export default class Aen extends Generic {
     return new Promise((resolve) => {
       const wallet = this.web3.eth.accounts.create(options.password)
       const walletObject = {
-        name: options.name,
         address: wallet.address,
-        privateKey: wallet.privateKey,
-        keystore: wallet.encrypt(options.password),
         network: options.network,
-        type: 'eth',
-        password: options.password,
-        onChain: false
+        credentials: {
+          keystore: wallet.encrypt(options.password),
+          password: options.password,
+          privateKey: wallet.privateKey
+        }
       }
       resolve(walletObject)
     })

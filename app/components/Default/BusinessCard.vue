@@ -4,7 +4,7 @@
       <address-render :address="wallet.address" :use-address-book="useAddressBook" />
       <v-text-field
         v-if="includePrivateKey"
-        v-model="wallet.privateKey"
+        v-model="privateKey"
         :append-icon="showPrivateKey ? 'visibility_off' : 'visibility'"
         :type="showPrivateKey ? 'text' : 'password'"
         label="Private Key, click the eye to reveal"
@@ -41,6 +41,12 @@ export default {
       showPrivateKey: false
     }
   },
+    computed: {
+      privateKey() { return this.$store.getters['security/secureProperty']({
+          key: 'privateKey',
+          address: this.wallet.address
+      }) }
+    },
   watch: {
     wallet: function () {
       this.processWallet()

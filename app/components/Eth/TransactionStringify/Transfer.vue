@@ -1,17 +1,17 @@
 <template>
   <span>
+    <span v-if="display === 'all' || display === 'date'">
+      {{ date }}
+    </span>
     <span v-if="display === 'all' || display === 'direction'">
-      <v-icon v-if="direction === 'incoming'" color="green">
+      <v-icon v-if="direction === 'incoming'" :class="direction">
         call_received
       </v-icon>
       <v-icon v-else color="red">
         call_made
       </v-icon>
     </span>
-    <span v-if="display === 'all' || display === 'date'" :class="direction">
-      {{ date }}
-    </span>
-    <span v-if="display === 'all' || display === 'value'" :class="direction">
+    <span v-if="display === 'all' || display === 'value'" :class="direction" >
       {{ value }}
     </span>
     <span v-if="display === 'all' || display === 'address'">
@@ -64,6 +64,9 @@ export default {
     address() {
       if (!this.transaction.hasOwnProperty('from')) return 'Unknown'
       return this.transaction.from
+    },
+    color() {
+      return (this.direction === 'incoming' ? 'green' : 'red')
     },
     direction() {
       if(this.transaction.hasOwnProperty('to') && this.wallet.hasOwnProperty('address')) {
