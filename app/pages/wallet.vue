@@ -41,7 +41,7 @@
                       <v-btn outline small @click="addressShow(wallet)">
                         Receive
                       </v-btn>
-                      <v-btn outline class="error" small @click="dialogRemoveWallet = true">
+                      <v-btn outline class="error" small @click="contextWallet = wallet; dialogRemoveWallet = true">
                         Remove
                       </v-btn>
                     </v-flex>
@@ -61,7 +61,7 @@
                           <v-list-tile @click="addressShow(wallet)">
                             <v-list-tile-title>Receive</v-list-tile-title>
                           </v-list-tile>
-                          <v-list-tile @click="dialogRemoveWallet = true">
+                          <v-list-tile @click="contextWallet = wallet; dialogRemoveWallet = true">
                             <v-list-tile-title>Remove</v-list-tile-title>
                           </v-list-tile>
                         </v-list>

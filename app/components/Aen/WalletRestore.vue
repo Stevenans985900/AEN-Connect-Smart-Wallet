@@ -37,11 +37,11 @@
       </v-flex>
       <v-flex xs12>
         <v-text-field
-          v-model="privateKey"
+          v-model="accountPrivateKey"
           :append-icon="showKey ? 'visibility_off' : 'visibility'"
           :type="showKey ? 'text' : 'password'"
-          :rules="[rules.basic.required, rules.privateKey.length]"
-          label="Private Key"
+          :rules="[rules.basic.required, rules.accountPrivateKey.length]"
+          label="Account Private Key"
           counter
           required
           @click:append="showKey = !showKey"
@@ -63,7 +63,7 @@
             walletPassword: '',
             password2: '',
             network: {},
-            privateKey: '',
+            accountPrivateKey: '',
             proceedValid: false,
             showKey: false,
             showPassword: false,
@@ -81,8 +81,8 @@
                 password: {
                     minLength: v => v.length >= 8 || 'Min 8 characters'
                 },
-                privateKey: {
-                    length: v => v.length >= 64 || 'Length is 64 Characters'
+                accountPrivateKey: {
+                    length: v => v.length === 64 || 'Length is 64 Characters'
                 }
             }
         }
@@ -116,29 +116,17 @@
                 return false
             }
         },
-        watch: {
-          type: function () {
-            if(!this.multipleNetworks) {
-              this.network = this.$g(this.type + '.available_networks')[0]
-            }
-          }
-        },
-        mounted: function () {
+        mounted: function() {
+          this.reset()
+          console.log('before mount')
+          console.log(this.multipleNetworks)
           if(!this.multipleNetworks) {
-            this.network = this.$g(this.type + '.available_networks')[0]
+            this.network = this.$store.state.wallet[this.type].network
+            console.log('set network to')
+            console.log(this.network)
           }
         },
         methods: {
-            /**
-             * Make sure the data is clean for adding a new wallet before trying to render the HTML.
-             * @param file
-             */
-            beforeMount() {
-                this.reset()
-                if(!this.multipleNetworks) {
-                    this.network = this.$store.state[this.type].defaultNetwork
-                }
-            },
             complete(wallet) {
                 this.$emit('complete', wallet)
                 this.reset()
@@ -152,7 +140,7 @@
                     network: this.network,
                     name: this.walletName,
                     password: this.walletPassword,
-                    privateKey: this.privateKey,
+                    accountPrivateKey: this.accountPrivateKey,
                     main: this.main
                 }
                 this.$store.dispatch('wallet/load', walletOptions)

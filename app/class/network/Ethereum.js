@@ -1,6 +1,7 @@
 import Web3 from 'web3'
 import axios from 'axios'
 import Generic from './Generic.js'
+import Vue from 'vue'
 
 export default class Aen extends Generic {
   constructor(apiEndpoint) {
@@ -23,15 +24,15 @@ export default class Aen extends Generic {
     super.transactionsHistorical(options)
 
     return new Promise((resolve, reject) => {
-      axios.get(options.wallet.network.etherscan_api_endpoint, {
+      axios.get(options.network.etherscan_api_endpoint, {
         params: {
           module: 'account',
           action: 'txlist',
-          address: options.wallet.address,
+          address: options.address,
           startblock: 0,
           endblock: 99999999,
           sort: 'desc',
-          apikey: options.etherscan.api_key
+          apikey: Vue.prototype.$g('eth.etherscan.api_key')
         }
       })
         .then(function (response) {

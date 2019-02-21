@@ -174,13 +174,9 @@ export const actions = {
           )
           break
         case 'eth':
-          // TODO For this active API endpoint, mixin network selection
-          networkHandler = new Ethereum(
-            state.eth.activeApiEndpoint
-          )
+          networkHandler = new Ethereum(state.eth.activeApiEndpoint)
           break
       }
-
       // Do behind the scenes work
       networkHandler.transactionsHistorical(wallet).then((transactions) => {
         commit('setWalletProperty', {
@@ -230,7 +226,7 @@ export const actions = {
       }
     })
   },
-  load({state, commit}, options) {
+  load({state, commit, dispatch}, options) {
     console.debug('Wallet Service:Load ' + options.type)
     // var vm = this
 
@@ -241,7 +237,8 @@ export const actions = {
         balance: 0,
         balanceLastSynced: false,
         transactions: [],
-        transactionsLastSynced: false
+        transactionsLastSynced: false,
+        type: options.type
       }
 
       let networkHandler
@@ -262,6 +259,8 @@ export const actions = {
                     value: wallet.address
                   })
                 }
+                dispatch('security/monitorWallet', wallet, {root:true})
+                delete wallet.credentials
                 commit('setWallet', wallet)
                 resolve(wallet)
               })
@@ -285,17 +284,9 @@ export const actions = {
           )
           networkHandler.walletLoad(options).then((walletObject) => {
             Object.assign(wallet, walletObject)
+            dispatch('security/monitorWallet', wallet, {root:true})
+            delete wallet.credentials
             commit('setWallet', wallet)
-
-            networkHandler.balance(wallet).then((response) => {
-              console.debug(response)
-              commit('setWalletProperty', {
-                address: wallet.address,
-                key: 'balance',
-                value: response
-              })
-              resolve(wallet)
-            })
             resolve(wallet)
           })
           break
@@ -303,8 +294,7 @@ export const actions = {
     })
   },
   new({dispatch, state, commit}, options) {
-    console.debug('Wallet Service:New ' + options.type)
-
+    
     return new Promise((resolve) => {
       const wallet = {
         onChain: false,

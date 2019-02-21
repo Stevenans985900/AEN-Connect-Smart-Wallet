@@ -115,26 +115,30 @@
          * COMPUTED
          */
         computed: {
-            networks() { return this.$g('aen.available_networks') },
+            networks() { return this.$g(this.type + '.available_networks') },
             environment() { return this.$store.state.runtime.environment },
             multipleNetworks() {
-                if (this.$g('eth.available_networks').length > 1) {
+                if (this.$g(this.type + '.available_networks').length > 1) {
                     return true
                 }
                 return false
             }
         },
+      watch: {
+        type: function () {
+          if(!this.multipleNetworks) {
+            this.network = this.$g(this.type + '.available_networks')[0]
+          }
+        }
+      },
+      mounted: function () {
+        if(!this.multipleNetworks) {
+          this.network = this.$g(this.type + '.available_networks')[0]
+        }
+      },
         methods: {
             back() {
-                this.currentStep--
-            },
-            /**
-             * Make sure the data is clean for adding a new wallet before trying to render the HTML.
-             * @param file
-             */
-            beforeMount() {
-                this.reset()
-
+              this.currentStep--
             },
             complete(wallet) {
                 this.$emit('complete', wallet)

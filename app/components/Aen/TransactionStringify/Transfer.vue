@@ -1,6 +1,6 @@
 <template>
   <span>
-    <span v-if="display === 'all' || display === 'direction'" >
+    <span v-if="display === 'all' || display === 'direction'">
       <v-icon v-if="direction === 'incoming'" :class="direction">
         call_received
       </v-icon>
