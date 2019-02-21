@@ -23,6 +23,7 @@
     </v-toolbar>
     <v-card>
       <v-layout row wrap>
+        <!-- Category Selection -->
         <v-flex xs12 md3>
           <v-list>
             <template v-for="(faqCategory, categoryIndex) in help">
@@ -31,8 +32,10 @@
                 avatar
                 @click="chooseCategory(categoryIndex)"
               >
-                <v-list-tile-avatar>
-                  <img src="/question.png">
+                <v-list-tile-avatar v-if="faqCategory.icon">
+                  <v-icon>
+                    {{ faqCategory.icon }}
+                  </v-icon>
                 </v-list-tile-avatar>
                 <v-list-tile-content>
                   <v-list-tile-title>
@@ -44,10 +47,13 @@
           </v-list>
         </v-flex>
 
+        <!-- If one of the categories themselves spin off in to a different component -->
         <v-flex v-if="categoryComponent" xs12 md9>
           <component :is="categoryComponent" />
         </v-flex>
-        <v-flex v-if="selectedCategory" xs12 md4>
+
+        <!-- Entry Selection -->
+        <v-flex v-if="selectedCategory" xs12 md3>
           <v-list>
             <template v-for="(faqEntry, faqIndex) in help[selectedCategory].faq">
               <v-list-tile
@@ -59,22 +65,21 @@
                   <v-list-tile-title>
                     {{ faqEntry.title }}
                   </v-list-tile-title>
-                  <v-list-tile-sub-title>
-                    sometimes there may need to be a subheading to the FAQ
+                  <v-list-tile-sub-title v-if="faqEntry.subtitle">
+                    {{ faqEntry.subtitle }}
                   </v-list-tile-sub-title>
                 </v-list-tile-content>
               </v-list-tile>
             </template>
           </v-list>
         </v-flex>
-        <v-flex xs12 md5>
-          <component :is="component" v-if="component" />
+
+        <!-- Entry Display -->
+        <v-flex xs12 md6>
+          <component :is="component" v-if="component !== null" />
           <template v-else>
-            {{ youtubeVideo }}
-            <youtube v-if="youtubeVideo" video-id="xwftD2aehpM" player-width="100%" />
-            <p>
-              {{ displayText }}
-            </p>
+            <youtube v-if="youtubeVideo" :video-id="youtubeVideo" player-width="100%" />
+            <span v-html="displayText"></span>
           </template>
         </v-flex>
       </v-layout>
@@ -96,21 +101,39 @@
         selectedEntry: null,
         help: {
           'getting-started': {
-            'title': 'Getting Started',
+            'title': 'Introduction',
+            'icon': 'flash_on',
             'faq': [
               {
-                'template': 'adding-first-wallet',
-                'title': 'Adding your first wallet'
+                'title': 'What is Smart Connect Wallet?',
+                'subtitle': 'Find out why this app exists and what you can do with it',
+                'youtubeVideo': '4F7sdy2rZws',
+                'displayText': 'The Smart Wallet allows a person to interact with various blockchain networks, managing '
+                + 'multiple wallets at the same time. Primarily though, it is the public gateway for people to interact '
+                + 'with various AEN services. For more information, please visit <a _target="blank" href="https://aencoin.com" '
+                + '>our main website</a> for more information.'
+              },
+              {
+                'title': 'Getting Started',
+                'template': 'getting-started'
               },
               {
                 'title': 'Adding more wallets',
-                'youtubeVideo': 'xwftD2aehpM',
-                'displayText': 'Here be the guide to adding multiple wallets'
+                'subtitle': 'Adding more AEN, BTC, ETH, ERC20 wallets',
+                'youtubeVideo': 'FjHGZj2IjBk',
+                'displayText': 'Lorem Ipsum'
               }
             ]
           },
           'dashboard': {
-            'title': 'The Dashboard'
+            'title': 'The Dashboard',
+            'faq': [
+              {
+                'title': 'What can I do from the Dashboard?',
+                'youtubeVideo': 'l3ty4tdSZMY',
+                'displayText': 'Lorem Ipsum'
+              }
+            ]
           },
           'wallet': {
             'title': 'Wallet Management'
@@ -163,6 +186,9 @@
           this.component = () => import('./Help/' + entry.template)
         } else {
           this.displayText = entry.displayText
+          console.log('using bare faq')
+          console.log(entry)
+          console.log(this.displayText)
           if(entry.hasOwnProperty('youtubeVideo')) {
             this.youtubeVideo = entry.youtubeVideo
           }

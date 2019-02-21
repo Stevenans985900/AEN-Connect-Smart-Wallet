@@ -49,7 +49,8 @@
       <v-stepper-content step="3">
         <v-layout v-if="wallet">
           <v-flex xs12 md6 lg4>
-            <h1>Wallet Created: {{ wallet.name }}</h1>
+            <h2>Wallet Created</h2>
+            <h3>{{ wallet.name }}</h3>
             <p>
               With this wallet, you can now receive and transfer tokens using the AENChain network. Before proceeding,
               we strongly recommend you create a backup of your wallet using the button below.
