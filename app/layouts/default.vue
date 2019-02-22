@@ -102,7 +102,7 @@
       <v-toolbar dense>
         <v-toolbar-title>&copy; {{ new Date().getFullYear() }} Aenco Solutions Ltd - Global Health Blockchain Financial Solutions</v-toolbar-title>
         <v-spacer />
-        {{ version }}
+        {{ version }}#{{ buildNumber }}
       </v-toolbar>
     </v-footer>
   </v-app>
@@ -213,6 +213,7 @@ export default {
       }
     },
     isOnline() { return this.$store.state.runtime.isOnline },
+    buildNumber() { return this.$g('build_number') },
     version() { return this.$g('version') },
     appMode() { return this.$store.state.runtime.mode },
     environment() { return this.$store.state.runtime.environment },

@@ -1,7 +1,7 @@
 {
   "version": "0.0.1",
   "salt": "o/e|6)~AorFA$7y!.IJaD_{c;r.ZS>7v+dr4:LMxiSRFKu|0CICdj0vD#h~ZujU96BA)ya(xMw;pb3T+6f.A1N|_o>+&U)|aa3DD+`aWKz1",
-  "build_number": "",
+  "build_number": "DEV",
   "google_recaptcha_key": "NA",
   "internal": {
     "baseImagePath": "/",
