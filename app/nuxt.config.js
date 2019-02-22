@@ -131,8 +131,7 @@ module.exports = {
     '@nuxtjs/axios',
     ['nuxt-matomo', {
       matomoUrl: '//stats.aencoin.com/',
-      scriptUrl: 'matomo.js',
-      trackerUrl: 'matomo.php',
+      // trackerUrl: 'https://stats.aencoin.com/matomo.php',
       siteId: 6,
       debug: true,
       verbose: true

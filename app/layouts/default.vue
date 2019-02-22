@@ -29,7 +29,9 @@
       <v-toolbar-side-icon v-if="showMainNav" @click="minifyDrawer = !minifyDrawer" />
       <!--size="24"-->
       <!--<v-avatar >-->
-      <v-img src="/logo.png" contain height="25" max-width="125px" />
+      <v-btn flat active-class="" to="/dashboard" :disabled="!showMainNav">
+        <v-img src="/logo.png" contain height="25" max-width="125px" />
+      </v-btn>
       <!--</v-avatar>-->
       <v-toolbar-title class="hidden-sm-and-down text-xs-left" v-text="title" />
       <v-spacer />
@@ -92,20 +94,6 @@
             </v-checkbox>
           </v-card>
         </v-dialog>
-
-        <v-dialog v-model="dialogResetEverything" persistent max-width="600px">
-          <v-card>
-            <v-card-title>If you choose to cancel, all app data will be reset. Are you sure?</v-card-title>
-            <v-card-actions>
-              <v-btn @click="appWipe">
-                Reset Application
-              </v-btn>
-              <v-btn @click="cancelWipe">
-                Go back to Password
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
       </v-container>
     </v-content>
 
@@ -157,7 +145,6 @@ export default {
     return {
       minifyDrawer: false,
       hydrated: false,
-      dialogResetEverything: false,
       navigationItems: [
         {
           icon: 'apps',
@@ -345,16 +332,11 @@ export default {
 
     this.$store.commit('setLoading', { t: 'global', v: false })
     if (this.$store.state.wallet.aen.mainAddress !== '') {
-        this.$store.dispatch('security/addCheck', {
+
+      this.$store.dispatch('security/addCheck', {
           challenge: 'app_start',
-          address: this.$store.state.wallet.aen.mainAddress
-        }).then(() => {
-          console.log('pass')
-        }).catch((e) => {
-          console.log('failed auth from default')
-          console.log(e)
-          // User has said they will not boot up the app, ask if they want to do a reset
-          this.dialogResetEverything = true
+          address: this.$store.state.wallet.aen.mainAddress,
+          blocking: true
         })
     } else {
       if (this.$nuxt.$route.name !== 'index') {
@@ -373,24 +355,7 @@ export default {
         value: result
       })
     },
-    appWipe() {
-      console.log('reset all data here')
-      this.$store.commit("reset")
-      this.$store.commit("security/reset")
-      this.$store.commit("wallet/reset")
-      this.$nuxt.$router.replace({ path: '/' })
-    },
-    cancelWipe() {
-      this.dialogResetEverything = false
-      this.$store.dispatch('security/addCheck', {
-        context: 'app_start'
-      }).then(() => {
-        console.log('pass')
-      }).catch(() => {
-        // User has said they will not boot up the app, ask if they want to do a reset
-        this.dialogResetEverything = true
-      })
-    },
+
     exit() {
       console.debug('F:E:Exit')
 

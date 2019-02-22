@@ -1,6 +1,9 @@
 <template>
   <v-card flat>
     <v-card-text class="text-xs-center">
+      <h4>
+        Address
+      </h4>
       <address-render :address="wallet.address" :use-address-book="useAddressBook" />
       <v-text-field
         v-if="includePrivateKey"

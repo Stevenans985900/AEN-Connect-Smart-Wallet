@@ -4,9 +4,10 @@ import CryptoJS from 'crypto-js'
 const initialState = {
   context: {
     authenticationAttempts: 0,
-    address: '',
-    requiredCheck: '',
+    address: null,
+    requiredCheck: null,
     validity: 'VALID',
+    blocking: false,
     lockedUntil: null,
     openUntil: null
   },
@@ -38,19 +39,6 @@ export const getters = {
     ).toString(CryptoJS.enc.Utf8))[options.key]
 
 
-  },
-  challengeType: (state) => {
-    switch (state.context.requiredCheck) {
-      case 'app_start':
-        return 'global'
-      case 'transaction_start':
-      case 'wallet_open':
-        return 'wallet'
-      default:
-        console.log('unrecognised challenge type')
-        console.log(state.context.requiredCheck)
-        return false
-    }
   }
 }
 
@@ -64,36 +52,27 @@ export const actions = {
     console.debug('Security Store: Add Check')
     console.debug(options)
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
 
       // Set global settings as the default
       let challengeUser = state.globalPolicy[options.challenge]
-      // Use a try statement and intermediary value here because the wallet might not have parts of this path
-      try {
-        const walletChallengeCondition = state.wallets[options.address].policy[options.challenge]
-        challengeUser = walletChallengeCondition
-      } catch (e) {
-        console.debug('Wallet does not yet have a policy of it\'s own')
+      if(state.wallets[options.address].hasOwnProperty('policy')) {
+        challengeUser = state.wallets[options.address].policy[options.challenge]
       }
 
       // Check whether the user authenticated within the acceptable timeout period
       if (challengeUser === true) {
-        commit('setRequiredCheck', options.context)
-        if (options.hasOwnProperty('address')) {
-          commit('setContextProperty', {
-            key: 'address',
-            value: options.address
-          })
-        }
+        commit('CONTEXT_PROPERTY', { key: 'validity', value: 'CHALLENGE' })
+        commit('CONTEXT_PROPERTY', { key: 'requiredCheck', value: options.challenge })
+        commit('CONTEXT_PROPERTY', { key: 'address', value: options.address })
 
+        if(options.hasOwnProperty('blocking')) {
+          commit('CONTEXT_PROPERTY', { key: 'blocking', value: true })
+        }
+        
         const preparationInterval = setInterval(
             function () {
-              if (state.context.requiredCheck === 'INVALID') {
-                commit('setRequiredCheck', '')
-                clearInterval(preparationInterval)
-                reject(true)
-              }
-              if (state.context.requiredCheck === '') {
+              if (state.context.validity === 'VALID') {
                 clearInterval(preparationInterval)
                 resolve(true)
               }
@@ -113,7 +92,6 @@ export const actions = {
         address: address
       }).then(() => {
         console.log('passed auth from get credentials')
-
         const credentials = JSON.parse(CryptoJS.AES.decrypt(
             state.wallets[address].credentials,
             Vue.prototype.$g('salt'))
@@ -125,32 +103,25 @@ export const actions = {
   checkPassword({state, commit}, password) {
     return new Promise((resolve, reject) => {
 
-      if(state.context.lockedUntil !== null) {
-        reject('LOCKED')
-      }
+      commit('incrementAttemptCount')
+      if(state.context.lockedUntil !== null) { reject('LOCKED') }
 
+      // Check if the number of attempts made by user is over the limit and deny
       if (state.context.authenticationAttempts >= state.authenticationAttemptLimit) {
-        commit('setRequiredCheck', 'INVALID')
-        commit('setContextProperty', {
-          key: 'lockedUntil',
-          value: (Date.now() + state.lockoutDuration)
-        })
         setInterval(function() {
-          commit('setContextProperty', {
-            key: 'lockedUntil',
-            value: null
-          })
+          commit('CONTEXT_PROPERTY', { key: 'lockedUntil', value: null })
+          commit('CONTEXT_PROPERTY', { key: 'authenticationAttempts', value: 0 })
         }, state.lockoutDuration)
-        commit('resetAttemptCount')
+        commit('CONTEXT_PROPERTY', { key: 'validity', value: 'INVALID' })
+        commit('CONTEXT_PROPERTY', { key: 'lockedUntil', value: (Date.now() + state.lockoutDuration) })
         reject('TOO_MANY_ATTEMPTS')
       }
-      commit('incrementAttemptCount')
-
 
       const hashedPassword = CryptoJS.SHA256(password + Vue.prototype.$g('salt')).toString()
       if (hashedPassword === state.wallets[state.context.address].password) {
-        commit('setRequiredCheck', '')
-        commit('resetAttemptCount')
+        commit('CONTEXT_PROPERTY', { key: 'authenticationAttempts', value: 0 })
+        commit('CONTEXT_PROPERTY', { key: 'validity', value: 'VALID' })
+        commit('CONTEXT_PROPERTY', { key: 'blocking', value: false })
         resolve()
       } else {
         reject('INCORRECT_PASSWORD')
@@ -182,16 +153,13 @@ export const mutations = {
   reset(state) {
     Object.assign(state, initialState)
   },
-  cancelChallenge(state) {
-    state.context.requiredCheck = 'INVALID'
-  },
   incrementAttemptCount(state) {
     state.context.authenticationAttempts++
   },
   resetAttemptCount(state) {
     state.context.authenticationAttempts = 0
   },
-  setContextProperty(state, options) {
+  CONTEXT_PROPERTY(state, options) {
     state.context[options.key] = options.value
   },
   setGlobalPolicy(state, options) {
@@ -217,20 +185,6 @@ export const mutations = {
       state.wallets[options.address] = {}
     }
     state.wallets[options.address].policy[options.key] = options.value
-  },
-  // setWalletPassword(state, options) {
-  //   console.log('setting password')
-  //   console.log(options)
-  //   if(!state.wallets.hasOwnProperty(options.address)) {
-  //     state.wallets[options.address] = {}
-  //   }
-  //   // TODO Encrypt the password here
-  //   const password = CryptoJS.SHA256(options.password + Vue.prototype.$g('salt')).toString()
-  //   state.wallets[options.address].options.password = password
-  // },
-  setRequiredCheck(state, options) {
-    console.log('setting requirement to: ' + options)
-    state.context.requiredCheck = options
   },
   setaddress(state, options) {
     state.address = options

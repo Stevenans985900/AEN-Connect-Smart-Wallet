@@ -20,6 +20,7 @@
           :rules="[rules.basic.required, rules.walletName.minLength]"
           :error-messages="walletNameAvailable()"
           label="Wallet Name"
+          @keyup.enter="createWallet"
           required
         />
       </v-flex>
@@ -33,6 +34,7 @@
           required
           counter
           @click:append="showPassword = !showPassword"
+          @keyup.enter="createWallet"
         />
         <password v-model="walletPassword" :strength-meter-only="true" />
       </v-flex>
@@ -47,6 +49,7 @@
           required
           counter
           @click:append="showPassword = !showPassword"
+          @keyup.enter="createWallet"
         />
       </v-flex>
     </v-layout>

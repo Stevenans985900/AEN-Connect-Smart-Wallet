@@ -39,7 +39,8 @@ export default class Aen extends Generic {
           resolve(response.data.result)
         })
         .catch(function (error) {
-          reject(error)
+          console.debug(error)
+          reject([])
         })
     })
   }
@@ -62,12 +63,9 @@ export default class Aen extends Generic {
       this.web3.eth.accounts.signTransaction(transaction, options.source.privateKey)
         .then(signedTx => this.web3.eth.sendSignedTransaction(signedTx.rawTransaction))
         .then((receipt) => {
-          console.log(receipt)
-          console.log('Transaction receipt: ', receipt)
           resolve(receipt)
         })
         .catch((err) => {
-          console.log('something went wrong when sending a transaction')
           reject(err)
         })
     })

@@ -41,8 +41,8 @@
                       <v-btn outline small @click="addressShow(wallet)">
                         Receive
                       </v-btn>
-                      <v-btn outline class="error" small @click="contextWallet = wallet; dialogRemoveWallet = true">
-                        Remove
+                      <v-btn v-if="wallet.address !== mainWallet.address" outline class="error" small @click="contextWallet = wallet; dialogRemoveWallet = true">
+                        Disable
                       </v-btn>
                     </v-flex>
                     <v-flex v-else xs3 sm6 class="text-xs-right">
@@ -61,8 +61,8 @@
                           <v-list-tile @click="addressShow(wallet)">
                             <v-list-tile-title>Receive</v-list-tile-title>
                           </v-list-tile>
-                          <v-list-tile @click="contextWallet = wallet; dialogRemoveWallet = true">
-                            <v-list-tile-title>Remove</v-list-tile-title>
+                          <v-list-tile v-if="wallet.address !== mainWallet.address" @click="contextWallet = wallet; dialogRemoveWallet = true">
+                            <v-list-tile-title>Disable</v-list-tile-title>
                           </v-list-tile>
                         </v-list>
                       </v-menu>
@@ -71,8 +71,14 @@
                 </div>
                 <v-card>
                   <v-card-text>
-                    <testnet-buttons :wallet="wallet" />
                     <address-render :address="wallet.address" :use-address-book="false" />
+                    <v-btn small @click="refreshHistory">
+                      <v-icon>
+                        loop
+                      </v-icon>
+                      Refresh
+                    </v-btn>
+                    <testnet-buttons :wallet="wallet" />
                     <wallet-history v-if="wallet.onChain === true" :wallet="wallet" />
                     <activation v-else :wallet="wallet" />
                     <hr>
@@ -97,7 +103,7 @@
       </v-dialog>
 
       <!-- New Wallet Dialog -->
-      <v-dialog v-model="dialogWalletAdd" persistent max-width="1024px">
+      <v-dialog v-if="dialogWalletAdd" v-model="dialogWalletAdd" persistent max-width="1024px">
         <v-toolbar color="primary">
           <v-toolbar-title>Choose a wallet type:</v-toolbar-title>
           <v-btn outline :class="{ 'info': walletType == 'aen'}" @click="walletType = 'aen'">
@@ -235,6 +241,9 @@ export default {
     }
   },
   computed: {
+    mainWallet() {
+      return this.$store.state.wallet.wallets[this.$store.state.wallet.aen.mainAddress]
+    },
     environment() {
       return this.$store.state.runtime.environment
     },
@@ -308,6 +317,19 @@ export default {
           this.$store.commit('setActiveWallet', wallet)
           break
       }
+    },
+    refreshHistory() {
+      this.$store.commit('setLoading', {
+        t: 'page',
+        v: true,
+        m: 'Refreshing Transaction History'
+      })
+      this.$store.dispatch('wallet/transactionsHistorical', this.contextWallet).then(() => {
+        this.$store.commit('setLoading', {
+          t: 'page',
+          v: false
+        })
+      })
     },
     removeWallet() {
       this.dialogRemoveWallet = false

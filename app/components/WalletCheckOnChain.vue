@@ -53,7 +53,6 @@
                 this.checkOnline()
             },
             checkOnline: function () {
-                console.log('checking if online')
                 this.$store.commit('setLoading', {
                     t: 'page',
                     v: true,
@@ -74,6 +73,19 @@
                                 value: true
                             })
                         }
+                        // Update the balance for first time
+                        this.$store.commit('setLoading', {
+                          t: 'page',
+                          v: true,
+                          m: 'Updating Balance'
+                        })
+                        this.$store.dispatch('wallet/balance', this.wallet).then(() => {
+                          this.$store.commit('setLoading', {
+                            t: 'page',
+                            v: false
+                          })
+                        })
+
                     }
                 })
                     .catch(() => {

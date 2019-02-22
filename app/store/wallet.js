@@ -13,17 +13,20 @@ export const initialState = {
     activeApiPing: 9999,
     blockHeight: 0,
     blockScore: 0,
-    network: {}
+    network: {},
+    symbol: 'aen'
   },
   btc: {
     activeApiEndpoint: '',
     activeApiPing: 9999,
-    network: {}
+    network: {},
+    symbol: 'btc'
   },
   eth: {
     activeApiEndpoint: '',
     activeApiPing: 9999,
-    network: {}
+    network: {},
+    symbol: 'wei'
   },
   internal: {
     walletCheckInterval: 10000,
@@ -253,7 +256,7 @@ export const actions = {
               .then((walletObject) => {
                 Object.assign(wallet, walletObject)
                 // wallet.onChain = networkHandler.getLiveWallet(options)
-                if(options.hasOwnProperty('main')) {
+                if(options.main === true) {
                   commit('setAenProperty', {
                     key: 'mainAddress',
                     value: wallet.address
@@ -316,7 +319,7 @@ export const actions = {
             options.account = account
             networkHandler.walletLoad(options).then((walletObject) => {
               Object.assign(wallet, walletObject)
-              if(options.hasOwnProperty('main')) {
+              if(options.main === true) {
                 commit('setAenProperty', {
                   key: 'mainAddress',
                   value: wallet.address
