@@ -42,6 +42,7 @@
               <v-flex xs12>
                 <v-expansion-panel
                   v-model="panel"
+                  readonly
                   expand
                 >
                   <!-- Initial wallet creation screen -->
@@ -61,6 +62,9 @@
                         Choose Security features to use
                       </h2>
                     </div>
+                    <p>
+                      Please select, from below, some security settings you would like to apply to protect your wallets.
+                    </p>
                     <security-controls />
                     <v-btn @click="panel = [false,false,true]">
                       Continue

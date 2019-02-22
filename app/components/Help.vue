@@ -79,7 +79,7 @@
           <component :is="component" v-if="component !== null" />
           <template v-else>
             <youtube v-if="youtubeVideo" :video-id="youtubeVideo" player-width="100%" />
-            <span v-html="displayText"></span>
+            <span v-html="displayText" />
           </template>
         </v-flex>
       </v-layout>

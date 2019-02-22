@@ -1,21 +1,40 @@
 <template>
-  <v-dialog v-model="dialogChallenge" persistent max-width="600px" class="blocking-overlay">
+  <v-dialog v-if="wallet" v-model="dialog" persistent max-width="400px" class="blocking-overlay">
     <v-toolbar color="primary">
-      <v-toolbar-title v-if="challengeType === 'global'">
-        Global Challenge
-      </v-toolbar-title>
-      <v-toolbar-title v-else>
-        {{ walletName }} Challenge
+      <v-toolbar-title>
+        Security Challenge
       </v-toolbar-title>
       <v-spacer />
-      <v-btn small fab outline @click="cancelChallenge">
+      <v-btn small fab outline @click="validity = 'CANCELLED'">
         <v-icon>close</v-icon>
       </v-btn>
     </v-toolbar>
-    <v-card>
+
+    <!-- user is cancelling the challenge -->
+    <v-card v-if="validity === 'CANCELLED'">
       <v-card-text>
         <p>
-          To proceed, please enter your password
+          You cannot proceed without authorisation. If you choose to cancell, all app data will be reset. Are you sure?
+        </p>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn color="blue darken-1" flat @click="validity = 'CHALLENGE'">
+          Enter Password
+        </v-btn>
+        <v-btn color="blue darken-1" flat @click="appWipe">
+          Wipe Data
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+
+    <!-- Display challenge -->
+    <v-card v-else>
+      <v-card-text>
+        <p>
+          Enter password for <span class="font-weight-medium">
+            {{ wallet.name }}
+          </span>
         </p>
         <v-text-field
           v-model="password"
@@ -25,10 +44,13 @@
           @click:append="showPassword = !showPassword"
           @keyup.enter="submitChallenge"
         />
+        <v-alert v-if="message" :value="true">
+          {{ message }}
+        </v-alert>
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn color="blue darken-1" flat @click="cancelChallenge">
+        <v-btn color="blue darken-1" flat @click="validity = 'CANCELLED'">
           Cancel
         </v-btn>
         <v-btn color="blue darken-1" flat @click="submitChallenge">
@@ -43,7 +65,7 @@
 
 function initialDataState() {
   return {
-    formValid: false,
+    message: null,
     password: '',
     showPassword: false
   }
@@ -51,30 +73,42 @@ function initialDataState() {
 export default {
   data: function () { return initialDataState() },
   computed: {
-    walletAddress() { return this.$store.state.security.walletAddress },
-    walletName() {
-      if(this.walletAddress !== '') {
-        if(this.$store.state.wallet.wallets.hasOwnProperty(this.walletAddress)) {
-          return this.$store.state.wallet.wallets[this.walletAddress].name
-        }
+    wallet() {
+      if(this.$store.state.security.context.address) {
+        return this.$store.state.wallet.wallets[this.$store.state.security.context.address]
       }
-      return ''
+      return null
     },
-    challengeType: {
-      get: function() { return this.$store.getters["security/challengeType"] },
-      set: function(val) { this.$store.commit('security/setRequiredCheck', val) }
+    challengeKey() { return this.$store.state.security.context.requiredCheck },
+    validity: {
+      get: function () {
+        return this.$store.state.security.context.validity
+      },
+      set: function (val) {
+        this.$store.commit('security/CONTEXT_PROPERTY', {key: 'validity', value: val })
+      }
     },
-    dialogChallenge() {
-      if(this.$store.state.security.context.requiredCheck !== '' && this.$store.state.security.context.requiredCheck !== 'INVALID') {
-        return true
+    dialog() {
+      if(this.$store.state.security.context.blocking === true) {
+        if(this.validity !== 'VALID') { return true }
+        return false
       } else {
+        console.log('checking if dialog should be shown')
+        console.log(this.validity.indexOf('VALID', 'CANCELLED'))
+        if(['VALID', 'CANCELLED'].indexOf(this.validity) === -1) {
+          return true
+        }
         return false
       }
     }
   },
   methods: {
-    cancelChallenge() {
-      this.$store.commit('security/cancelChallenge')
+    appWipe() {
+      console.log('reset all data here')
+      this.$store.commit("reset")
+      this.$store.commit("security/reset")
+      this.$store.commit("wallet/reset")
+      this.$nuxt.$router.replace({ path: '/' })
     },
     reset() {
       Object.assign(this.$data, initialDataState())
@@ -84,22 +118,23 @@ export default {
       this.$store.dispatch('security/checkPassword', this.password).then(() => {
         this.reset()
       })
+        // Respond to reason for failure
         .catch((reason) => {
-          console.log('failed auth because of: ' + reason)
           switch (reason) {
+            case 'LOCKED':
             case 'TOO_MANY_ATTEMPTS':
-              this.$store.commit('showNotification', {
-                type: 'error',
-                message: 'Challenge failed. Used up too many tries'
-              })
+              this.message = 'Too Many Failed attempts. Wallet locked for ' + (this.$store.state.security.lockoutDuration / 1000) + 's'
               break
             case 'INCORRECT_PASSWORD':
-              this.$store.commit('showNotification', {
-                type: 'error',
-                message: 'Challenge failed.'
-              })
+              this.message = 'Incorrect password.'
               break
           }
+
+          // Clear the message after a short time
+          setTimeout(function() {
+            console.log('clearing the message')
+            this.message = null
+          }.bind(this), 5000)
         })
 
     }

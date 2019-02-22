@@ -12,7 +12,7 @@
       {{ date }}
     </span>
     <span v-if="display === 'all' || display === 'value'" :class="direction">
-      {{ value }}XEM
+      <token-value :symbol="symbol" :value="value" />
     </span>
     <span v-if="display === 'all' || display === 'address'">
       <address-render :address="address" show-add />
@@ -30,7 +30,10 @@
 </style>
 <script>
 import { format } from 'date-fns'
+import TokenValue from '~/components/TokenValue'
+
 export default {
+  components: { TokenValue },
   props: {
     display: {
       type: String,
@@ -50,6 +53,7 @@ export default {
     }
   },
   computed: {
+    symbol() { return this.$store.state.wallet.aen.symbol },
     address() {
       if (this.direction === 'incoming') {
         return this.data.signer.address.address
@@ -69,14 +73,7 @@ export default {
     },
     value() {
       if (!this.data.hasOwnProperty('mosaics')) return 0
-      const mosaicCount = this.data.mosaics.length
-      for (let currentRound = 0; mosaicCount > currentRound; currentRound++) {
-        const value = this.data.mosaics[currentRound].amount.lower / 1000000
-        const b = value.toFixed(6).split('.')
-        const r = b[0].split(/(?=(?:...)*$)/).join(',')
-        return r
-      }
-      return 0
+      return (this.data.mosaics[0].amount.lower / 1000000)
     }
   }
 }

@@ -1,7 +1,5 @@
 <template>
-  <span>
-    <component :is="component" v-if="component" :wallet="wallet" />
-  </span>
+  <component :is="component" v-if="component" :wallet="wallet" />
 </template>
 
 <script>
@@ -32,14 +30,10 @@ export default {
     updateComponent() {
       if (Object.keys(this.wallet).length !== 0) {
         this.type = this.wallet.type[0].toUpperCase() + this.wallet.type.slice(1)
-        if (this.type) {
-          this.component = () => import('~/components/' + this.type + '/Activation')
-            .catch(function () {
-              this.component = () => import('~/components/Default/Activation')
-            }.bind(this))
-        } else {
-          this.component = () => import('~/components/Fallback')
-        }
+        this.component = () => import('~/components/' + this.type + '/Activation')
+          .catch(function () {
+            this.component = () => import('~/components/Default/Activation')
+          }.bind(this))
       }
     }
   }
