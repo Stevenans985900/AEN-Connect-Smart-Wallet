@@ -4,14 +4,14 @@
       slot="activator"
       small
     >
-      TestNet Functions
+      {{ $t('network.label.testnet_functions') }}
     </v-btn>
     <v-list>
       <v-list-tile
         :href="faucet.address + '?address=' + wallet.address"
         target="_blank"
       >
-        <v-list-tile-title>Visit Faucet</v-list-tile-title>
+        <v-list-tile-title>{{ $t('network.action.goto_faucet') }}</v-list-tile-title>
       </v-list-tile>
     </v-list>
   </v-menu>
@@ -41,8 +41,17 @@ export default {
   },
   methods: {
     getLiveWallet(wallet) {
+      this.$store.commit('setLoading', {
+        t: 'page',
+        v: true,
+        m: this.$t('wallet.message.checking_wallet_status')
+      })
       this.$store.dispatch('wallet/getLiveWallet', wallet).then((response) => {
         if(response !== false) { response = true }
+        this.$store.commit('setLoading', {
+          t: 'page',
+          v: false
+        })
         this.$store.commit('wallet/setProperty', {
           address: wallet.address,
           key: 'onChain',
@@ -51,12 +60,12 @@ export default {
         if (response === true) {
           this.$store.commit('showNotification', {
             type: 'success',
-            message: 'The wallet is recognised on the blockchain'
+            message: this.$t('wallet.message.network_recognise_wallet')
           })
         } else {
           this.$store.commit('showNotification', {
             type: 'info',
-            message: 'The wallet is not yet recognised on the blockchain'
+            message: this.$t('wallet.message.network_miss_wallet')
           })
         }
       })

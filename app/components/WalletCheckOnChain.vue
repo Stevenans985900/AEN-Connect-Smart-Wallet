@@ -1,9 +1,9 @@
 <template>
   <span>
     <v-btn @click="manualCheck()">
-      Check now
+      {{ $t('common.action.refresh') }}
     </v-btn>
-    {{ timeToCheck }}s until next check
+    {{ timeToCheck }}{{ $t('network.message.s_until_next_check') }}
   </span>
 </template>
 
@@ -56,7 +56,7 @@
                 this.$store.commit('setLoading', {
                     t: 'page',
                     v: true,
-                    m: 'Checking Wallet Status'
+                    m: this.$t('wallet.message.checking_wallet_status')
                 })
                 this.$store.dispatch('wallet/getLiveWallet', this.wallet).then((response) => {
                     this.$store.commit('setLoading', {
@@ -77,7 +77,7 @@
                         this.$store.commit('setLoading', {
                           t: 'page',
                           v: true,
-                          m: 'Updating Balance'
+                          m: this.$t('wallet.message.updating_balance')
                         })
                         this.$store.dispatch('wallet/balance', this.wallet).then(() => {
                           this.$store.commit('setLoading', {

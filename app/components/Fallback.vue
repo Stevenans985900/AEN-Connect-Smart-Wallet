@@ -1,3 +1,3 @@
 <template>
-  <span>Unrecognised type</span>
+  <span>{{ $t('common.label.na') }}</span>
 </template>

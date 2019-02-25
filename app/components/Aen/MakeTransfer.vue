@@ -11,7 +11,7 @@
             <v-flex xs12>
               <v-text-field
                 v-model="destination.amount"
-                label="Amount"
+                :label="$t('common.label.amount')"
                 :suffix="symbol"
                 :error-messages="lessThanBalance()"
                 required
@@ -22,7 +22,7 @@
                 v-model="destination.address"
                 :items="contacts"
                 item-text="displayText"
-                label="To"
+                :label="$t('common.label.address')"
                 prepend-icon="contacts"
                 required
               />
@@ -30,7 +30,7 @@
             <v-flex xs12>
               <v-text-field
                 v-model="destination.message"
-                label="Optional Message"
+                :label="$t('common.label.optional_message')"
               />
             </v-flex>
           </v-layout>
@@ -39,7 +39,7 @@
       <v-card-actions>
         <v-spacer />
         <v-btn :disabled="!transferValid" color="blue darken-1" flat @click="initiateTransfer">
-          Initiate
+          {{ $t('common.action.send') }}
         </v-btn>
       </v-card-actions>
     </v-form>
@@ -76,22 +76,30 @@ export default {
   },
   methods: {
     lessThanBalance() {
-      return (this.destination.amount < this.wallet.balance) ? '' : 'Cannot send more than your balance'
+      return (this.destination.amount < this.wallet.balance) ? '' : this.$t('wallet.message.cannot_exceed_balance')
     },
     initiateTransfer() {
       if (!this.$refs.makeTransferForm.validate()) {
         return false
       }
-        console.log('getting credentials')
+      this.$store.commit('setLoading', {
+        t: 'page',
+        v: true,
+        m: this.$t('wallet.message.transfer_start')
+      })
         this.$store.dispatch('security/getCredentials', this.wallet.address).then((credentials) => {
             this.$store.dispatch('wallet/transfer', {
                 credentials: credentials,
                 source: this.wallet,
                 destination: this.destination
             }).then(() => {
+              this.$store.commit('setLoading', {
+                t: 'page',
+                v: false
+              })
                 this.$store.commit('showNotification', {
                     type: 'success',
-                    message: 'Your transfer has been successfully dispatched to the network'
+                    message: this.$t('wallet.message.transfer_complete')
                 })
                 this.$emit('complete')
             })

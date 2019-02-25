@@ -3,12 +3,12 @@
     <v-layout row justify-center align-center mb-2>
       <!-- Security Options -->
       <v-flex xs12 md12>
+        <v-toolbar class="primary">
+          <v-toolbar-title>
+            Security Controls
+          </v-toolbar-title>
+        </v-toolbar>
         <v-card>
-          <v-card-title>
-            <h1>
-              Security Options
-            </h1>
-          </v-card-title>
           <v-card-text>
             <security-controls />
           </v-card-text>

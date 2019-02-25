@@ -38,7 +38,8 @@ export const initialState = {
     rememberUser: false,
     eulaAgree: false,
     developmentAgreed: false,
-    help: false
+    help: false,
+    locale: 'en'
   }
 }
 

@@ -1,35 +1,46 @@
 <template>
   <v-app dark>
     <!-- NAV DRAWER -->
-    <v-navigation-drawer v-model="showMainNav" :mini-variant="minifyDrawer" fixed stateless app>
-      <v-list>
-        <v-list-tile v-for="(item, i) in navigationItems" :key="i" :to="item.to" router exact>
-          <v-list-tile-action>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title v-text="item.title" />
-          </v-list-tile-content>
-        </v-list-tile>
-        <v-list-tile v-if="appMode === 'app'" exact @click="exit">
-          <v-list-tile-action>
-            <v-icon>exit_to_app</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>
-              Exit
-            </v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-      </v-list>
+    <v-navigation-drawer :value="true" :mini-variant="minifyDrawer" fixed stateless app>
+      <v-layout column fill-height>
+        <v-list>
+          <v-list-tile v-for="(item, i) in navigationItems" :key="i" :to="item.to" router exact>
+            <v-list-tile-action>
+              <v-icon>{{ item.icon }}</v-icon>
+            </v-list-tile-action>
+            <v-list-tile-content>
+              {{ $t('common.navigation.'+item.key) }}
+            </v-list-tile-content>
+          </v-list-tile>
+        </v-list>
+        <v-spacer />
+        <v-list>
+          <v-list-tile router exact>
+            <v-list-tile-action>
+              <v-icon>help</v-icon>
+            </v-list-tile-action>
+            <v-list-tile-content>
+              {{ $t('common.navigation.help') }}
+            </v-list-tile-content>
+          </v-list-tile>
+          <v-list-tile router exact>
+            <v-list-tile-action>
+              <v-icon>exit_to_app</v-icon>
+            </v-list-tile-action>
+            <v-list-tile-content>
+              {{ $t('common.navigation.exit') }}
+            </v-list-tile-content>
+          </v-list-tile>
+        </v-list>
+      </v-layout>
     </v-navigation-drawer>
 
     <!-- TOP BAR -->
     <v-toolbar fixed app>
-      <v-toolbar-side-icon v-if="showMainNav" @click="minifyDrawer = !minifyDrawer" />
+      <v-toolbar-side-icon @click="minifyDrawer = !minifyDrawer" />
       <!--size="24"-->
       <!--<v-avatar >-->
-      <v-btn flat active-class="" to="/dashboard" :disabled="!showMainNav">
+      <v-btn flat active-class="" to="/" :disabled="!showMainNav">
         <v-img src="/logo.png" contain height="25" max-width="125px" />
       </v-btn>
       <!--</v-avatar>-->
@@ -47,9 +58,6 @@
     <!-- MAIN CONTENT AREA -->
     <v-content>
       <v-container fluid>
-        <no-ssr>
-          <loading />
-        </no-ssr>
         <security-challenge />
         <v-snackbar v-model="showNotification" :timeout="timeout" :top="true" :vertical="true">
           {{ notification_message }}
@@ -58,42 +66,10 @@
           </v-btn>
         </v-snackbar>
         <!-- NUXT BEGINNING -->
+        <v-flex v-if="!eulaAgreed" xs12>
+          <end-use-license-agreement />
+        </v-flex>
         <nuxt />
-
-        <v-dialog v-model="developmentAgreed" persistent max-width="500px">
-          <v-layout align-center justify-center>
-            <v-flex xs12>
-              <v-card width="500px">
-                <youtube video-id="kfWu3fKLe2I" player-width="500" />
-                <v-alert
-                  :value="true"
-                  type="warning"
-                >
-                  This is the first community release, please do not use this wallet to store real accounts on!
-                </v-alert>
-                <v-card-actions>
-                  <v-btn block @click="developmentAgreed = true">
-                    Click here to continue
-                  </v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-flex>
-          </v-layout>
-        </v-dialog>
-
-        <!-- Force the user to agree to the End User license agreement before being able to use the wallet -->
-        <v-dialog v-model="dialogEulaAgree" persistent max-width="600px">
-          <v-card>
-            <v-checkbox v-model="eulaAgree">
-              <span slot="label">
-                I agree to the
-                <a href="http://aencoin.com/eula">
-                  AEN EULA
-                </a>
-              </span>
-            </v-checkbox>
-          </v-card>
-        </v-dialog>
       </v-container>
     </v-content>
 
@@ -113,12 +89,11 @@
 import Busy from '~/components/Busy'
 import Development from '~/components/Development'
 import NetworkDiagnostics from '~/components/NetworkDiagnostics'
-import Loading from '~/components/Loading'
 import Help from '~/components/Help'
 import SecurityChallenge from '~/components/SecurityChallenge'
 import isElectron from 'is-electron'
 import isOnline from 'is-online'
-
+import EndUseLicenseAgreement from '~/components/EndUserLicenseAgreement'
 // import childProcess from 'child_process'
 if (isElectron()) {
   // TODO Satisfy linter
@@ -133,8 +108,8 @@ export default {
   components: {
     Busy,
     Development,
+    EndUseLicenseAgreement,
     Help,
-    Loading,
     NetworkDiagnostics,
     SecurityChallenge
   },
@@ -148,26 +123,36 @@ export default {
       navigationItems: [
         {
           icon: 'apps',
-          title: 'Dashboard',
-          to: '/dashboard'
+          key: 'dashboard',
+          to: '/'
         },
         {
           icon: 'settings_system_daydream',
-          title: 'Wallet Management',
+          key: 'wallet_management',
           to: '/wallet'
         },
         {
+          icon: 'settings_ethernet',
+          key: 'exchange',
+          to: '/exchange'
+        },
+        {
+          icon: 'settings_remote',
+          key: 'aen',
+          to: '/aen-blockchain'
+        },
+        {
           icon: 'contacts',
-          title: 'Address Book',
+          key: 'address_book',
           to: '/address-book'
         },
         {
           icon: 'lock_open',
-          title: 'Security',
+          key: 'security',
           to: '/security'
         }
       ],
-      title: 'Smart Wallet',
+      title: 'Smart Connect',
       userMenu: false
     }
   },
@@ -197,21 +182,7 @@ export default {
         })
       }
     },
-    dialogEulaAgree() {
-      if (this.$store.state.user.eulaAgree === false && this.$nuxt.$route.name !== 'index') {
-        return true
-      }
-      return false
-    },
-    eulaAgree: {
-      get: function () { return this.$store.state.user.eulaAgree },
-      set: function (val) {
-        this.$store.commit('setUserProperty', {
-          key: 'eulaAgree',
-          value: val
-        })
-      }
-    },
+    eulaAgreed() { return this.$store.state.user.eulaAgree },
     isOnline() { return this.$store.state.runtime.isOnline },
     buildNumber() { return this.$g('build_number') },
     version() { return this.$g('version') },
@@ -333,7 +304,6 @@ export default {
 
     this.$store.commit('setLoading', { t: 'global', v: false })
     if (this.$store.state.wallet.aen.mainAddress !== '') {
-
       this.$store.dispatch('security/addCheck', {
           challenge: 'app_start',
           address: this.$store.state.wallet.aen.mainAddress,

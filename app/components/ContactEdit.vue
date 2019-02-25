@@ -7,8 +7,7 @@
             <v-text-field
               v-model="contact.displayText"
               :error-messages="contactNameAvailable()"
-              label="Name"
-              hint="The name you want to identify the contact by"
+              :label="$t('common.label.name')"
               required
               @keyup.enter="save"
             />
@@ -16,16 +15,15 @@
           <v-flex v-if="!existingContact" xs12>
             <v-text-field
               v-model="contact.address"
-              label="Blockchain Address"
-              hint="Put in the raw network address here"
+              :label="$t('common.label.address')"
+              required
             />
           </v-flex>
           <v-flex v-if="!existingContact" xs12>
             <v-combobox
               v-model="contact.type"
-              label="Blockchain Network"
+              :label="$t('common.label.network')"
               :items="availableNetworks"
-              hint="The network which this address operates on"
             />
           </v-flex>
         </v-layout>
@@ -34,7 +32,7 @@
     <v-card-actions>
       <v-spacer />
       <v-btn color="blue darken-1" flat @click="save">
-        Save
+        {{ $t('common.action.save') }}
       </v-btn>
     </v-card-actions>
   </v-card>
@@ -74,7 +72,6 @@ export default {
     this.processAddress()
   },
   beforeDestroy() {
-    console.log('calling DESTROY')
     this.reset()
   },
   methods: {
@@ -83,16 +80,14 @@ export default {
         return this.$store.getters['wallet/contactByProperty']({
           property: 'name',
           value: this.contact.displayText
-        }) ? 'Name is already in use' : ''
+        }) ? this.$t('common.message.name_already_used') : ''
       }
       return ''
     },
     processAddress() {
-      console.log('processing address: ' + this.address)
       if (this.address !== '') {
         this.contact.address = this.address
-
-        // Try and get details of the contact if existing
+  // Try and get details of the contact if existing
         if(this.$store.state.wallet.contacts.hasOwnProperty(this.address)) {
           this.contact.displayText = this.$store.state.wallet.contacts[this.address].displayText
           this.contact.type = this.$store.state.wallet.contacts[this.address].type

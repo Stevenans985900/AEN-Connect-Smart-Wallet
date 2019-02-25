@@ -11,16 +11,16 @@
         <template slot="items" slot-scope="props">
           <tr @click="props.expanded = !props.expanded">
             <td>
-              <transaction-stringify :transaction="props.item" display="date" />
+              <transaction-stringify :transaction="props.item" :display="$t('common.label.date')" />
             </td>
             <td>
-              <transaction-stringify :wallet="wallet" :transaction="props.item" display="direction" />
+              <transaction-stringify :wallet="wallet" :transaction="props.item" :display="$t('common.label.direction')" />
             </td>
             <td>
-              <transaction-stringify :wallet="wallet" :transaction="props.item" display="value" />
+              <transaction-stringify :wallet="wallet" :transaction="props.item" :display="$t('common.label.value')" />
             </td>
             <td>
-              <transaction-stringify :wallet="wallet" :transaction="props.item" display="address" />
+              <transaction-stringify :wallet="wallet" :transaction="props.item" :display="$t('common.label.address')" />
             </td>
           </tr>
         </template>
@@ -64,9 +64,7 @@ export default {
     }
   },
     computed: {
-      transactions() {
-          return this.$store.state.wallet.wallets[this.wallet.address].transactions
-      }
+      transactions() { return this.$store.state.wallet.wallets[this.wallet.address].transactions }
     },
     mounted() {
       this.$store.dispatch('wallet/transactionsHistorical', this.wallet).then(() => {
@@ -74,7 +72,17 @@ export default {
       })
         this.transactionsListener = setInterval(
           function () {
-              this.$store.dispatch('wallet/transactionsHistorical', this.wallet)
+            this.$store.commit('setLoading', {
+              t: 'page',
+              v: true,
+              m: this.$t('wallet.message.updating_history')
+            })
+              this.$store.dispatch('wallet/transactionsHistorical', this.wallet).then(() => {
+                this.$store.commit('setLoading', {
+                  t: 'page',
+                  v: false
+                })
+              })
           }.bind(this),
           this.$g('internal.commonTasksInterval')
         )

@@ -4,11 +4,11 @@
     <v-flex xs12>
       <v-toolbar class="primary">
         <v-toolbar-title>
-          Address Book
+          {{ $t('common.navigation.address_book') }}
         </v-toolbar-title>
         <v-spacer />
         <v-btn color="success" @click="dialogEditContact = true; address = ''">
-          <v-icon>add</v-icon>Add Contact
+          <v-icon>add</v-icon>{{ $t('contact.action.add') }}
         </v-btn>
       </v-toolbar>
       <v-card>
@@ -16,7 +16,7 @@
           <v-text-field
             v-model="search"
             append-icon="search"
-            label="Search"
+            :label="$t('common.label.search')"
             single-line
             hide-details
           />
@@ -30,10 +30,10 @@
             </td>
             <td class="justify-center layout px-0">
               <v-icon small class="mr-2" @click="editContact(props.item)">
-                edit
+                {{ $t('common.action.edit') }}
               </v-icon>
               <v-icon small @click="dialogDeleteContact = true;contact = props.item">
-                delete
+                {{ $t('common.action.remove') }}
               </v-icon>
             </td>
           </template>
@@ -43,7 +43,7 @@
             color="error"
             icon="warning"
           >
-            Your search for "{{ search }}" found no results.
+            {{ $t('common.message.results_empty') }}
           </v-alert>
         </v-data-table>
       </v-card>
@@ -53,7 +53,7 @@
     <v-dialog v-model="dialogEditContact" persistent max-width="600px">
       <v-toolbar color="primary">
         <v-toolbar-title>
-          Contact
+          {{ $t('contact.label.contact') }}
         </v-toolbar-title>
         <v-spacer />
         <v-btn small fab outline @click="dialogEditContact = false; address = ''">
@@ -67,7 +67,7 @@
     <v-dialog v-model="dialogDeleteContact" persistent max-width="600px">
       <v-toolbar color="primary">
         <v-toolbar-title>
-          Are you Sure you want to remove {{ contact.displayText }}?
+          {{ $t('common.message.are_you_sure') }}
         </v-toolbar-title>
         <v-spacer />
         <v-btn small fab outline @click="dialogDeleteContact = false">
@@ -76,18 +76,15 @@
       </v-toolbar>
       <v-card>
         <v-card-text>
-          <p>
-            If you remove this contact from your address book, you will no longer be able to quickly look them up during
-            operations and where applicable, the long form of their address will be used.
-          </p>
+          <span v-html="$t('contact.chunk.removal_warning')" />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
           <v-btn color="blue darken-1" flat @click="dialogDeleteContact = false">
-            Cancel
+            {{ $t('common.action.cancel') }}
           </v-btn>
           <v-btn color="blue darken-1" flat @click="deleteContact(contact)">
-            Remove Contact
+            {{ $t('common.action.confirm') }}
           </v-btn>
         </v-card-actions>
       </v-card>

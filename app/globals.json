@@ -12,7 +12,8 @@
     "exchangeRateUpdateInterval": 900000
   },
   "userExperience": {
-    "notificationTimeout": 6000
+    "notificationTimeout": 6000,
+    "defaultLocale": "en"
   },
   "aen": {
     "networkVersion": "0.1",

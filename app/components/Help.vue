@@ -53,7 +53,7 @@
         </v-flex>
 
         <!-- Entry Selection -->
-        <v-flex v-if="selectedCategory" xs12 md3>
+        <v-flex v-if="help[selectedCategory]" xs12 md3>
           <v-list>
             <template v-for="(faqEntry, faqIndex) in help[selectedCategory].faq">
               <v-list-tile
@@ -179,6 +179,10 @@
         this.displayText = null
         this.youtubeVideo = null
 
+        if(!this.help.hasOwnProperty(this.selectedCategory)) {
+          console.debug('Help could not find category definition for: ' + this.selectedCategory)
+          return false
+        }
         // Check to see whether there is a template associated with this help entry
         let entry = this.help[this.selectedCategory].faq[this.selectedEntry]
         console.log(entry)

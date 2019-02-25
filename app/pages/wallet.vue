@@ -4,13 +4,29 @@
       <v-flex xs12>
         <v-toolbar class="primary">
           <v-toolbar-title>
-            Wallet Management
+            {{ $t('common.navigation.wallet_management') }}
           </v-toolbar-title>
           <v-spacer />
           <backup-wallet :show-icon="true" />
-          <v-btn color="success" @click="dialogWalletAdd = true">
-            <v-icon>add</v-icon>Add Wallet
-          </v-btn>
+          <v-menu offset-y>
+            <v-btn slot="activator" color="success">
+              <v-icon>add</v-icon>{{ $t('wallet.action.add') }}
+            </v-btn>
+            <v-list>
+              <v-list-tile @click="walletType = 'aen'; dialogWalletAdd = true">
+                <v-list-tile-title>{{ $t('network.label.aen') }}</v-list-tile-title>
+              </v-list-tile>
+              <v-list-tile @click="walletType = 'eth'; dialogWalletAdd = true">
+                <v-list-tile-title>{{ $t('network.label.eth') }}</v-list-tile-title>
+              </v-list-tile>
+              <v-list-tile @click="walletType = 'btc'; dialogWalletAdd = true">
+                <v-list-tile-title>{{ $t('network.label.btc') }}</v-list-tile-title>
+              </v-list-tile>
+              <v-list-tile v-if="haveEthereumWallet" @click="walletType = 'contract'; dialogWalletAdd = true">
+                <v-list-tile-title>{{ $t('network.contract') }}</v-list-tile-title>
+              </v-list-tile>
+            </v-list>
+          </v-menu>
         </v-toolbar>
         <!-- Wallet Management -->
         <v-card>
@@ -36,13 +52,13 @@
 
                     <v-flex v-if="$vuetify.breakpoint.mdAndUp" xs3 sm6 class="text-xs-right">
                       <v-btn v-if="wallet.onChain === true" outline small @click="contextWallet = wallet; dialogMakeTransfer = true">
-                        Send
+                        {{ $t('common.action.send') }}
                       </v-btn>
                       <v-btn outline small @click="addressShow(wallet)">
-                        Receive
+                        {{ $t('common.action.receive') }}
                       </v-btn>
-                      <v-btn v-if="wallet.address !== mainWallet.address" outline class="error" small @click="contextWallet = wallet; dialogRemoveWallet = true">
-                        Disable
+                      <v-btn v-if="wallet.address !== mainWalletAddress" outline class="error" small @click="contextWallet = wallet; dialogRemoveWallet = true">
+                        {{ $t('common.action.disable') }}
                       </v-btn>
                     </v-flex>
                     <v-flex v-else xs3 sm6 class="text-xs-right">
@@ -52,17 +68,17 @@
                           outline
                           small
                         >
-                          Actions
+                          {{ $t('common.actions') }}
                         </v-btn>
                         <v-list>
                           <v-list-tile v-if="wallet.onChain === true" @click="contextWallet = wallet; dialogMakeTransfer = true">
-                            <v-list-tile-title>Send</v-list-tile-title>
+                            <v-list-tile-title>{{ $t('common.action.send') }}</v-list-tile-title>
                           </v-list-tile>
                           <v-list-tile @click="addressShow(wallet)">
-                            <v-list-tile-title>Receive</v-list-tile-title>
+                            <v-list-tile-title>{{ $t('common.action.receive') }}</v-list-tile-title>
                           </v-list-tile>
                           <v-list-tile v-if="wallet.address !== mainWallet.address" @click="contextWallet = wallet; dialogRemoveWallet = true">
-                            <v-list-tile-title>Disable</v-list-tile-title>
+                            <v-list-tile-title>{{ $t('common.action.disable') }}</v-list-tile-title>
                           </v-list-tile>
                         </v-list>
                       </v-menu>
@@ -76,7 +92,7 @@
                       <v-icon>
                         loop
                       </v-icon>
-                      Refresh
+                      {{ $t('common.action.refresh') }}
                     </v-btn>
                     <testnet-buttons :wallet="wallet" />
                     <wallet-history v-if="wallet.onChain === true" :wallet="wallet" />
@@ -105,19 +121,8 @@
       <!-- New Wallet Dialog -->
       <v-dialog v-if="dialogWalletAdd" v-model="dialogWalletAdd" persistent max-width="1024px">
         <v-toolbar color="primary">
-          <v-toolbar-title>Choose a wallet type:</v-toolbar-title>
-          <v-btn outline :class="{ 'info': walletType == 'aen'}" @click="walletType = 'aen'">
-            AEN
-          </v-btn>
-          <v-btn outline :class="{ 'info': walletType == 'eth'}" @click="walletType = 'eth'">
-            ETH
-          </v-btn>
-          <v-btn outline :class="{ 'info': walletType == 'btc'}" @click="walletType = 'btc'">
-            BTC
-          </v-btn>
-          <v-btn v-if="haveEthereumWallet" outline :class="{ 'info': walletType == 'contract'}" @click="walletType = 'contract'">
-            Contract
-          </v-btn>
+          <v-toolbar-title>{{ $t('wallet.action.add') }}</v-toolbar-title>
+
           <v-spacer />
           <v-btn icon @click="dialogWalletAdd = false">
             <v-icon>close</v-icon>
@@ -133,7 +138,7 @@
       <!-- Make Transfer Dialog -->
       <v-dialog v-if="dialogMakeTransfer === true" v-model="dialogMakeTransfer" persistent max-width="450px">
         <v-toolbar color="primary">
-          <v-toolbar-title>Make a Transfer from {{ contextWallet.name }}</v-toolbar-title>
+          <v-toolbar-title>{{ $t('wallet.make_transfer_from') }}{{ contextWallet.name }}</v-toolbar-title>
           <v-spacer />
           <v-btn small fab outline @click="dialogMakeTransfer = false">
             <v-icon>close</v-icon>
@@ -145,7 +150,7 @@
       <!-- Remove Wallet Dialog -->
       <v-dialog v-if="dialogRemoveWallet" v-model="dialogRemoveWallet" persistent max-width="600px">
         <v-toolbar color="primary">
-          <v-toolbar-title>Are you sure you want to remove the wallet?</v-toolbar-title>
+          <v-toolbar-title>{{ $t('common.message.are_you_sure') }}</v-toolbar-title>
           <v-spacer />
           <v-btn small fab outline @click="dialogRemoveWallet = false">
             <v-icon>close</v-icon>
@@ -156,17 +161,16 @@
             {{ contextWallet.name }}
           </v-card-title>
           <v-card-text>
-            <p>If you remove the wallet, there will be no way to access it unless you have made a backup. Click the button below to remove </p>
-            <p>If you would like to make a backup, you can do so now by clicking the button below</p>
+            <span v-html="$t('wallet.remove_instruction')" />
             <backup-wallet :wallet="contextWallet" />
           </v-card-text>
           <v-card-actions>
             <v-spacer />
             <v-btn color="blue darken-1" flat @click="dialogRemoveWallet = false">
-              Cancel
+              {{ $t('common.action.cancel') }}
             </v-btn>
             <v-btn color="blue darken-1" flat @click="removeWallet">
-              Remove Wallet
+              {{ $t('common.action.confirm') }}
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -194,7 +198,7 @@ function initialDataState() {
     dialogRemoveWallet: false,
     dialogAddressShow: false,
     activeWatchers: [],
-    walletType: 'aen',
+    walletType: null,
     valid: false,
     backupAgree: false,
     newAccount: false,
@@ -241,9 +245,7 @@ export default {
     }
   },
   computed: {
-    mainWallet() {
-      return this.$store.state.wallet.wallets[this.$store.state.wallet.aen.mainAddress]
-    },
+    mainWalletAddress() { return this.$store.state.wallet.aen.mainAddress },
     environment() {
       return this.$store.state.runtime.environment
     },

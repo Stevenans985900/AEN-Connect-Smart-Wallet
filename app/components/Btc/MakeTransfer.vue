@@ -7,8 +7,8 @@
           <v-flex xs12>
             <v-text-field
               v-model="destination.amount"
-              label="Amount"
-              suffix="XEM"
+              :label="$t('common.label.amount')"
+              suffix="BTC"
             />
           </v-flex>
           <v-flex xs12>
@@ -26,7 +26,7 @@
     <v-card-actions>
       <v-spacer />
       <v-btn color="blue darken-1" flat @click="initiateTransfer">
-        Initiate
+        {{ $t('common.action.send') }}
       </v-btn>
     </v-card-actions>
   </v-card>
@@ -60,15 +60,22 @@ export default {
   },
   methods: {
     initiateTransfer() {
-      console.log('initiating transfer')
+      this.$store.commit('setLoading', {
+        t: 'page',
+        v: true,
+        m: this.$t('wallet.message.transfer_start')
+      })
       this.$store.dispatch('wallet/transfer', {
         source: this.wallet,
         destination: this.destination
-      }).then((transfer) => {
-        console.debug(transfer)
+      }).then(() => {
+        this.$store.commit('setLoading', {
+          t: 'page',
+          v: false
+        })
         this.$store.commit('showNotification', {
           type: 'success',
-          message: 'Your transfer has been successfully dispatched to the network'
+          message: this.$t('wallet.message.transfer_complete')
         })
         this.$emit('complete')
       })

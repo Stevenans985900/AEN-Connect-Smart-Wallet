@@ -11,7 +11,7 @@
           :items="availableNetworks"
           return-object
           item-text="name"
-          label="Network"
+          :label="$t('common.label.network')"
         />
       </v-flex>
       <v-flex xs12>
@@ -19,7 +19,7 @@
           v-model="walletName"
           :rules="[rules.basic.required, rules.walletName.minLength]"
           :error-messages="walletNameAvailable()"
-          label="Wallet Name"
+          :label="$t('wallet.label.name')"
           @keyup.enter="createWallet"
           required
         />
@@ -30,7 +30,7 @@
           :append-icon="showPassword ? 'visibility_off' : 'visibility'"
           :type="showPassword ? 'text' : 'password'"
           :rules="[rules.basic.required, rules.password.minLength]"
-          label="Wallet Password"
+          :label="$t('common.label.password')"
           required
           counter
           @click:append="showPassword = !showPassword"
@@ -44,7 +44,7 @@
           :append-icon="showPassword ? 'visibility_off' : 'visibility'"
           :type="showPassword ? 'text' : 'password'"
           :rules="[rules.basic.required, rules.password.minLength]"
-          label="Repeat Password"
+          :label="$t('common.label.password_repeat')"
           :error-messages="passwordsMatch()"
           required
           counter
@@ -54,7 +54,7 @@
       </v-flex>
     </v-layout>
     <v-btn color="primary" @click="createWallet">
-      Create
+      {{ $t('common.action.create') }}
     </v-btn>
   </v-form>
 </template>
@@ -164,10 +164,10 @@
                     })
             },
             passwordsMatch() {
-                return (this.walletPassword === this.password2) ? '' : 'Passwords must match'
+                return (this.walletPassword === this.password2) ? '' : this.$t('security.message.passwords_must_match')
             },
             walletNameAvailable() {
-                return this.$store.getters['wallet/getByName'](this.walletName) ? 'Wallet Name is already in use' : ''
+                return this.$store.getters['wallet/getByName'](this.walletName) ? this.$t('common.message.name_already_used') : ''
             },
             reset() {
                 Object.assign(this.$data, initialDataState())
