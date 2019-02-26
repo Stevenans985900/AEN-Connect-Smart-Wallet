@@ -122,7 +122,7 @@
       </v-dialog>
 
       <!-- New Wallet Dialog -->
-      <v-dialog v-if="dialogWalletAdd" v-model="dialogWalletAdd" persistent max-width="1024px">
+      <v-dialog v-if="dialogWalletAdd === true" v-model="dialogWalletAdd" persistent max-width="1024px">
         <v-toolbar color="primary">
           <v-toolbar-title>{{ $t('wallet.action.add') }}</v-toolbar-title>
 
@@ -151,7 +151,7 @@
       </v-dialog>
 
       <!-- Remove Wallet Dialog -->
-      <v-dialog v-if="dialogRemoveWallet" v-model="dialogRemoveWallet" persistent max-width="600px">
+      <v-dialog v-if="dialogRemoveWallet === true" v-model="dialogRemoveWallet" persistent max-width="600px">
         <v-toolbar color="primary">
           <v-toolbar-title>{{ $t('common.message.are_you_sure') }}</v-toolbar-title>
           <v-spacer />
@@ -306,12 +306,6 @@ export default {
     addressShow(wallet) {
       this.contextWallet = wallet
       this.dialogAddressShow = true
-    },
-    walletShade(wallet) {
-      switch (wallet.type) {
-        case 'aen':
-          return '#00616d'
-      }
     },
     setActiveWallet(wallet) {
       switch (wallet.type) {
