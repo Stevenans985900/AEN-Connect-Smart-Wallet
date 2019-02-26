@@ -11,16 +11,16 @@
         <template slot="items" slot-scope="props">
           <tr @click="props.expanded = !props.expanded">
             <td>
-              <transaction-stringify :transaction="props.item" :display="$t('common.label.date')" />
+              <transaction-stringify :transaction="props.item" display="date" />
             </td>
             <td>
-              <transaction-stringify :wallet="wallet" :transaction="props.item" :display="$t('common.label.direction')" />
+              <transaction-stringify :wallet="wallet" :transaction="props.item" display="direction" />
             </td>
             <td>
-              <transaction-stringify :wallet="wallet" :transaction="props.item" :display="$t('common.label.value')" />
+              <transaction-stringify :wallet="wallet" :transaction="props.item" display="value" />
             </td>
             <td>
-              <transaction-stringify :wallet="wallet" :transaction="props.item" :display="$t('common.label.address')" />
+              <transaction-stringify :wallet="wallet" :transaction="props.item" display="address" />
             </td>
           </tr>
         </template>

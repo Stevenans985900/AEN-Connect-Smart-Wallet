@@ -16,7 +16,7 @@
                 </v-list-tile-avatar>
                 <v-list-tile-content>
                   <v-list-tile-title>{{ wallet.name }}</v-list-tile-title>
-                  <v-list-tile-sub-title>{{ wallet.balance }}</v-list-tile-sub-title>
+                  <v-list-tile-sub-title>USD {{ toMillion(wallet.balance) }}M</v-list-tile-sub-title>
                 </v-list-tile-content>
               </v-list-tile>
             </template>
@@ -26,8 +26,8 @@
     </v-flex>
 
     <!-- Show Wallet Dialog -->
-    <v-dialog v-if="dialogShowWallet" v-model="dialogShowWallet" fullscreen="">
-      <v-toolbar class="primary mb-2">
+    <v-dialog v-if="dialogShowWallet === true" v-model="dialogShowWallet" fullscreen="">
+      <v-toolbar class="primary">
         <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
         <v-btn v-if="contextWallet.onChain === true" @click="dialogMakeTransfer = true">
           Send
@@ -64,7 +64,7 @@
     </v-dialog>
 
     <!-- Remove Wallet Dialog -->
-    <v-dialog v-if="dialogRemoveWallet" v-model="dialogRemoveWallet" persistent max-width="600px">
+    <v-dialog v-if="dialogRemoveWallet === true" v-model="dialogRemoveWallet" persistent max-width="600px">
       <v-toolbar color="primary">
         <v-toolbar-title>Are you sure you want to remove the wallet?</v-toolbar-title>
         <v-spacer />
@@ -108,12 +108,6 @@ import WalletHistory from '~/components/WalletHistory'
 
 function initialDataState() {
   return {
-    colorSchema: {
-      aen: 'rgb(255, 99, 132)',
-      eth: 'rgb(54, 162, 235)',
-      contract: 'rgb(54, 162, 235)',
-      btc: 'rgb(54, 162, 235)'
-    },
     processedWallets: 0,
     totalValue: 0,
     chartTitle: '',
@@ -182,7 +176,6 @@ export default {
             // Calculate the dollar value of the wallet
             const walletValue = walletProcessed.balance * this.$g('exchange.' + walletProcessed.type)
             this.totalValue += walletValue
-            console.log('total value: '+this.totalValue)
             this.graphData[walletProcessed.name] = walletValue
             this.processedWallets++
             this.chartTitle = 'USD ' + this.toMillion(this.totalValue) + 'M'
@@ -192,8 +185,6 @@ export default {
             return err
           })
       }
-
-      console.log('CHART TITLE: ' + this.chartTitle)
     },
     removeWallet() {
       this.dialogRemoveWallet = false
@@ -212,7 +203,6 @@ export default {
       })
     },
     toMillion(input) {
-      console.log('TO MILLION: ' + input)
       return (input / 1000000).toFixed(2)
     },
     transferComplete() {

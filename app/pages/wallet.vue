@@ -87,11 +87,10 @@
                 </div>
                 <v-card>
                   <v-card-text>
-                    <v-btn small @click="refreshHistory">
+                    <v-btn outline fab small @click="refreshHistory">
                       <v-icon>
                         loop
                       </v-icon>
-                      {{ $t('common.action.refresh') }}
                     </v-btn>
                     <testnet-buttons :wallet="wallet" />
                     <wallet-history v-if="wallet.onChain === true" :wallet="wallet" />

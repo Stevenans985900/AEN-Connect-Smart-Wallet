@@ -5,6 +5,7 @@
       small
     >
       {{ $t('network.label.testnet_functions') }}
+      <v-icon>arrow_drop_down</v-icon>
     </v-btn>
     <v-list>
       <v-list-tile

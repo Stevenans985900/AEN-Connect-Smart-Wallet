@@ -24,7 +24,7 @@ export default class Aen extends Generic {
     super.transactionsHistorical(options)
 
     return new Promise((resolve, reject) => {
-      axios.get(options.network.label.etherscan_api_endpoint, {
+      axios.get(options.network.etherscan_api_endpoint, {
         params: {
           module: 'account',
           action: 'txlist',
