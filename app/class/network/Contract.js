@@ -45,7 +45,7 @@ export default class Contract extends Generic {
   transactionsHistorical(options) {
     super.transactionsHistorical(options)
     return new Promise((resolve, reject) => {
-      axios.get(options.wallet.network.etherscan_api_endpoint, {
+      axios.get(options.wallet.network.label.etherscan_api_endpoint, {
         params: {
           module: 'account',
           action: 'txlist',

@@ -114,6 +114,7 @@ module.exports = {
     '@/plugins/addressRender.js',
     '@/plugins/businessCard.js',
     '@/plugins/clipboard.js',
+    '@/plugins/i18n.js',
     {
         src: '@/plugins/localStorage.js',
         ssr: false

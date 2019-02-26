@@ -4,11 +4,11 @@
       <v-icon v-if="showIcon === true">
         security
       </v-icon>
-      Backup Wallet
+      {{ $t('wallet.action.backup') }}
     </v-btn>
     <v-dialog v-model="dialogBackup" max-width="600px">
       <v-toolbar color="primary">
-        <v-toolbar-title>Click a wallet to backup</v-toolbar-title>
+        <v-toolbar-title>{{ $t('backup.action.choose_wallet') }}</v-toolbar-title>
         <v-spacer />
         <v-btn small fab outline @click="dialogBackup = false">
           <v-icon>close</v-icon>
@@ -16,14 +16,8 @@
       </v-toolbar>
       <v-card>
         <v-card-text>
-          <p>
-            When you click a wallet from the list below, two files will be downloaded which will allow you to import them
-            easily back in to the AENConnect smart wallet. One is a plain text file and the other is encoded so that it
-            can only be ready by this application.
-          </p>
-          <p>
-            To later restore a given wallet, choose the import from file option during the add wallet procedure.
-          </p>
+          <p>{{ $t('backup.message.backup_explained') }}</p>
+
           <v-list subheader>
             <v-list-tile
               v-for="contextWallet in wallets"

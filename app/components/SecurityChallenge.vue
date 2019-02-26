@@ -1,9 +1,7 @@
 <template>
   <v-dialog v-if="wallet" v-model="dialog" persistent max-width="400px" class="blocking-overlay">
     <v-toolbar color="primary">
-      <v-toolbar-title>
-        Security Challenge
-      </v-toolbar-title>
+      <v-toolbar-title>{{ $t('common.label.security') }}</v-toolbar-title>
       <v-spacer />
       <v-btn small fab outline @click="validity = 'CANCELLED'">
         <v-icon>close</v-icon>
@@ -13,17 +11,15 @@
     <!-- user is cancelling the challenge -->
     <v-card v-if="validity === 'CANCELLED'">
       <v-card-text>
-        <p>
-          You cannot proceed without authorisation. If you choose to cancell, all app data will be reset. Are you sure?
-        </p>
+        <p>{{ $t('security.message.authenticate_cancel_question') }}</p>
       </v-card-text>
       <v-card-actions>
         <v-spacer />
         <v-btn color="blue darken-1" flat @click="validity = 'CHALLENGE'">
-          Enter Password
+          {{ $t('security.action.password_enter') }}
         </v-btn>
         <v-btn color="blue darken-1" flat @click="appWipe">
-          Wipe Data
+          {{ $t('security.action.wipe_data') }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -31,16 +27,15 @@
     <!-- Display challenge -->
     <v-card v-else>
       <v-card-text>
+
         <p>
-          Enter password for <span class="font-weight-medium">
-            {{ wallet.name }}
-          </span>
+          {{ wallet.name }}: {{ $t('wallet.message.authenticate_to_continue') }}
         </p>
         <v-text-field
           v-model="password"
           :append-icon="showPassword ? 'visibility_off' : 'visibility'"
           :type="showPassword ? 'text' : 'password'"
-          label="Password"
+          :label="$t('common.label.password')"
           @click:append="showPassword = !showPassword"
           @keyup.enter="submitChallenge"
         />
@@ -51,10 +46,10 @@
       <v-card-actions>
         <v-spacer />
         <v-btn color="blue darken-1" flat @click="validity = 'CANCELLED'">
-          Cancel
+          {{ $t('common.action.cancel') }}
         </v-btn>
         <v-btn color="blue darken-1" flat @click="submitChallenge">
-          OK
+          {{ $t('common.action.submit') }}
         </v-btn>
       </v-card-actions>
     </v-card>

@@ -1,98 +1,97 @@
 <template>
-  <v-layout row justify-center align-center>
-    <!-- Contacts table -->
-    <v-flex xs12>
-      <v-toolbar class="primary">
-        <v-toolbar-title>
-          Address Book
-        </v-toolbar-title>
-        <v-spacer />
-        <v-btn color="success" @click="dialogEditContact = true; address = ''">
-          <v-icon>add</v-icon>Add Contact
-        </v-btn>
-      </v-toolbar>
-      <v-card>
-        <v-card-title>
-          <v-text-field
-            v-model="search"
-            append-icon="search"
-            label="Search"
-            single-line
-            hide-details
-          />
-        </v-card-title>
-        <v-data-table :headers="headers" :items="contacts" :search="search">
-          <template slot="items" slot-scope="props">
-            <td><wallet-image :wallet="props.item" /></td>
-            <td>{{ props.item.displayText }}</td>
-            <td>
-              <address-render :address="props.item.address" :use-address-book="false" />
-            </td>
-            <td class="justify-center layout px-0">
-              <v-icon small class="mr-2" @click="editContact(props.item)">
-                edit
-              </v-icon>
-              <v-icon small @click="dialogDeleteContact = true;contact = props.item">
-                delete
-              </v-icon>
-            </td>
-          </template>
-          <v-alert
-            slot="no-results"
-            :value="true"
-            color="error"
-            icon="warning"
-          >
-            Your search for "{{ search }}" found no results.
-          </v-alert>
-        </v-data-table>
-      </v-card>
-    </v-flex>
-
-    <!-- Dialog contact edit form -->
-    <v-dialog v-model="dialogEditContact" persistent max-width="600px">
-      <v-toolbar color="primary">
-        <v-toolbar-title>
-          Contact
-        </v-toolbar-title>
-        <v-spacer />
-        <v-btn small fab outline @click="dialogEditContact = false; address = ''">
-          <v-icon>close</v-icon>
-        </v-btn>
-      </v-toolbar>
-      <contact-edit :address="address" @complete="contactSaved" />
-    </v-dialog>
-
-    <!-- Dialog contact remove confirmation -->
-    <v-dialog v-model="dialogDeleteContact" persistent max-width="600px">
-      <v-toolbar color="primary">
-        <v-toolbar-title>
-          Are you Sure you want to remove {{ contact.displayText }}?
-        </v-toolbar-title>
-        <v-spacer />
-        <v-btn small fab outline @click="dialogDeleteContact = false">
-          <v-icon>close</v-icon>
-        </v-btn>
-      </v-toolbar>
-      <v-card>
-        <v-card-text>
-          <p>
-            If you remove this contact from your address book, you will no longer be able to quickly look them up during
-            operations and where applicable, the long form of their address will be used.
-          </p>
-        </v-card-text>
-        <v-card-actions>
+  <v-container>
+    <v-layout row justify-center align-center>
+      <!-- Contacts table -->
+      <v-flex xs12>
+        <v-toolbar class="primary mb-2">
+          <v-toolbar-title>
+            {{ $t('common.navigation.address_book') }}
+          </v-toolbar-title>
           <v-spacer />
-          <v-btn color="blue darken-1" flat @click="dialogDeleteContact = false">
-            Cancel
+          <v-btn color="success" @click="dialogEditContact = true; address = ''">
+            <v-icon>add</v-icon>{{ $t('contact.action.add') }}
           </v-btn>
-          <v-btn color="blue darken-1" flat @click="deleteContact(contact)">
-            Remove Contact
+        </v-toolbar>
+        <v-card>
+          <v-card-title>
+            <v-text-field
+              v-model="search"
+              append-icon="search"
+              :label="$t('common.label.search')"
+              single-line
+              hide-details
+            />
+          </v-card-title>
+          <v-data-table :headers="headers" :items="contacts" :search="search">
+            <template slot="items" slot-scope="props">
+              <td><wallet-image :wallet="props.item" /></td>
+              <td>{{ props.item.displayText }}</td>
+              <td>
+                <address-render :address="props.item.address" :use-address-book="false" />
+              </td>
+              <td class="justify-center layout px-0">
+                <v-icon small class="mr-2" @click="editContact(props.item)">
+                  {{ $t('common.action.edit') }}
+                </v-icon>
+                <v-icon small @click="dialogDeleteContact = true;contact = props.item">
+                  {{ $t('common.action.remove') }}
+                </v-icon>
+              </td>
+            </template>
+            <v-alert
+              slot="no-results"
+              :value="true"
+              color="error"
+              icon="warning"
+            >
+              {{ $t('common.message.results_empty') }}
+            </v-alert>
+          </v-data-table>
+        </v-card>
+      </v-flex>
+
+      <!-- Dialog contact edit form -->
+      <v-dialog v-model="dialogEditContact" persistent max-width="600px">
+        <v-toolbar color="primary">
+          <v-toolbar-title>
+            {{ $t('contact.label.contact') }}
+          </v-toolbar-title>
+          <v-spacer />
+          <v-btn small fab outline @click="dialogEditContact = false; address = ''">
+            <v-icon>close</v-icon>
           </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-layout>
+        </v-toolbar>
+        <contact-edit :address="address" @complete="contactSaved" />
+      </v-dialog>
+
+      <!-- Dialog contact remove confirmation -->
+      <v-dialog v-model="dialogDeleteContact" persistent max-width="600px">
+        <v-toolbar color="primary">
+          <v-toolbar-title>
+            {{ $t('common.message.are_you_sure') }}
+          </v-toolbar-title>
+          <v-spacer />
+          <v-btn small fab outline @click="dialogDeleteContact = false">
+            <v-icon>close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card>
+          <v-card-text>
+            <span v-html="$t('contact.chunk.removal_warning')" />
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn color="blue darken-1" flat @click="dialogDeleteContact = false">
+              {{ $t('common.action.cancel') }}
+            </v-btn>
+            <v-btn color="blue darken-1" flat @click="deleteContact(contact)">
+              {{ $t('common.action.confirm') }}
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-layout>
+  </v-container>
 </template>
 
 <script>

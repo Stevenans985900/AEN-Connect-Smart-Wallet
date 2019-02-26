@@ -2,16 +2,16 @@
   <v-layout>
     <v-stepper v-model="currentStep" vertical>
       <v-stepper-step :complete="currentStep > 1" editable step="1">
-        How do you want to add your wallet?
+        {{ $t('wallet.message.add_method') }}
       </v-stepper-step>
       <v-stepper-content step="1">
         <v-radio-group v-model="addType">
-          <v-radio label="Create a New Wallet right now" value="new" />
-          <v-radio label="Import an existing wallet from file" value="fileImport" />
-          <v-radio label="Manually enter wallet private key and password" value="manualRecover" />
+          <v-radio :label="$t('wallet.label.create_new_now')" value="new" />
+          <v-radio :label="$t('wallet.label.import_from_file')" value="fileImport" />
+          <v-radio :label="$t('wallet.label.manual_input_existing')" value="manualRecover" />
         </v-radio-group>
         <v-btn color="primary" @click="currentStep = 2">
-          Continue
+          {{ $t('common.action.continue') }}
         </v-btn>
       </v-stepper-content>
 
@@ -44,17 +44,14 @@
       </v-stepper-content>
 
       <v-stepper-step :complete="currentStep > 3" step="3">
-        Review your wallet
+        {{ $t('wallet.label.review') }}
       </v-stepper-step>
       <v-stepper-content step="3">
         <v-layout v-if="wallet">
           <v-flex xs12 md6 lg4>
-            <h2>Wallet Created</h2>
+            <h2>{{ $t('wallet.message.add_success') }}</h2>
             <h3>{{ wallet.name }}</h3>
-            <p>
-              With this wallet, you can now receive and transfer tokens using the AENChain network. Before proceeding,
-              we strongly recommend you create a backup of your wallet using the button below.
-            </p>
+            <p>{{ $t('wallet.message.capabilities') }}</p>
             <span v-if="addType === 'new'">
               <backup-wallet :wallet="wallet" />
               <v-form ref="backupForm" v-model="proceedValid">
@@ -62,19 +59,16 @@
                   v-model="backupAgree"
                   :rules="[rules.basic.required]"
                   required
-                  label="I have backed up my wallet / understand that keeping it safe is my duty"
+                  :label="$t('wallet.label.backup_understand')"
                 />
-                <p>
-                  At the moment, your wallet is not live on the network. It is necessary to perform a transaction using
-                  this address before it has any presence.
-                </p>
+                <p>{{ $t('wallet.message.initial_status') }}</p>
                 <v-btn :disabled="!proceedValid" color="primary" @click="complete">
-                  Complete
+                  {{ $t('common.action.confirm') }}
                 </v-btn>
               </v-form>
             </span>
             <v-btn v-else color="primary" @click="complete">
-              Complete
+              {{ $t('common.action.confirm') }}
             </v-btn>
           </v-flex>
           <v-flex xs12 md6 lg3>

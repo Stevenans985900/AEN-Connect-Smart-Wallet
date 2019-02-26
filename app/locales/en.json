@@ -1,0 +1,206 @@
+{
+  "activation": {
+    "message": {
+      "initial_guidance": "If you have already made a transfer, it is possible the network has not yet processed it. The app will periodically check network status and this message will disappear once verified.",
+      "troubleshooting_guidance": "If you are still getting the message even after being sure a transfer has taken place, please try using the help feature by clicking the question mark in the top right corner to help diagnose the problem.",
+      "wallet_offline": "The wallet is currently offline"
+    }
+  },
+  "aen": {
+    "action": {
+      "service_add": "Add New Service Space"
+    },
+    "label": {
+      "accountPrivateKey": "Account Private Key",
+      "duration": "Duration",
+      "namespace": "Namespace Identifier"
+    }
+  },
+  "backup": {
+    "action": {
+      "choose_wallet": "Choose a wallet to backup"
+    },
+    "label": {
+      "file_choose": "Choose File"
+    },
+    "message": {
+      "import_bad_file": "The uploaded file is invalid",
+      "backup_explained": "When you click a wallet from the list below, two files will be downloaded which will allow you to import them easily back in to the AENConnect smart wallet. One is a plain text file and the other is encoded so that it can only be ready by this application. To later restore a given wallet, choose the import from file option during the add wallet procedure."
+    }
+  },
+  "clipboard": {
+    "message": {
+      "x_copied": " - copied to clipboard"
+    }
+  },
+  "common": {
+    "action": {
+      "cancel": "Cancel",
+      "close": "Close",
+      "confirm": "Confirm",
+      "continue": "Continue",
+      "create": "Create",
+      "disable": "Disable",
+      "edit": "Edit",
+      "receive": "Receive",
+      "refresh": "Refresh",
+      "remove": "Remove",
+      "restore": "Restore",
+      "save": "Save",
+      "send": "Send",
+      "submit": "Submit"
+    },
+    "label": {
+      "actions": "Actions",
+      "address": "Address",
+      "amount": "Amount",
+      "app_name": "AENC Smart Connect",
+      "app_slogan": "Change",
+      "busy": "Busy",
+      "comment": "Comment",
+      "date": "Date",
+      "default": "Default",
+      "direction": "Direction",
+      "features": "Features",
+      "help": "Help",
+      "opportunities": "Investment Opportunities",
+      "na": "NA",
+      "name": "Name",
+      "network": "Network",
+      "optional_message": "Message",
+      "password": "Password",
+      "password_repeat": "Repeat Password",
+      "required": "Required",
+      "question": "Question",
+      "search": "Search",
+      "security": "Security",
+      "value": "Value",
+      "wallets": "Wallets",
+      "wizard": "Wizard"
+    },
+    "message": {
+      "are_you_sure": "Are you sure?",
+      "coming_soon": "Coming Soon",
+      "name_already_used": "Name already in use",
+      "results_empty": "No results found",
+      "something_went_wrong": "Something went wrong"
+    },
+    "navigation": {
+      "address_book": "Address Book",
+      "aen": "AEN Blockchain",
+      "dashboard": "Dashboard",
+      "exchange": "Exchange",
+      "exit": "Exit",
+      "help": "Help",
+      "security": "Security",
+      "wallet_management": "Wallet Management"
+    }
+  },
+  "contact": {
+    "action": {
+      "add": "Add Contact"
+    },
+    "label": {
+      "contact": "Contact",
+      "name": "Contact Name"
+    },
+    "chunk": {
+      "removal_warning": "<p>If you remove this contact from your address book, you will no longer be able to quickly look them up during operations and where applicable, the long form of their address will be used.</p>"
+    }
+  },
+  "eula": {
+    "action": {
+      "agreeEula": "I agree to the <a href=\"http://aencoin.com/eula\"> AEN EULA</a>"
+    },
+    "message": {
+      "introduction": "This is the first community release, please do not use this wallet to store real accounts on! By\n    proceeding, you accept the AEN terms and conditions"
+    }
+  },
+  "feedback": {
+    "label": {
+      "bug_report": "Bug Report",
+      "feature_request": "Feature Request",
+      "feedback": "Feedback",
+      "contact_information": "Contact Information",
+      "type": "Feedback Type"
+    },
+    "message": {
+      "thank_you_message": "Thank you for your message",
+      "sending": "Sending Message"
+    }
+  },
+  "help": {
+    "message": {
+      "click_to_return": "Click here to go back"
+    }
+  },
+  "opportunity": {
+    "label": {
+      "status_ended": "Ended"
+    }
+  },
+  "network": {
+    "action": {
+      "goto_faucet": "Goto Faucet"
+    },
+    "label": {
+      "aen": "AEN",
+      "eth": "Ethereum",
+      "btc": "Bitcoin",
+      "contract": "ERC20 Contract",
+      "testnet_functions": "TestNet Functions"
+    },
+    "message": {
+      "s_until_next_check": "s until next check"
+    }
+  },
+  "security": {
+    "action": {
+      "password_enter": "Enter my password",
+      "wipe_data": "Wipe data"
+    },
+    "label": {
+      "password_app_start": "Password on App Start",
+      "password_transaction_start": "Password on Transaction Start",
+      "password_wallet_open": "Password on Wallet Open"
+    },
+    "message": {
+      "authenticate_to_continue": "You must enter your password to continue",
+      "authenticate_cancel_question": "You cannot proceed without authorisation. If you choose to cancel, all app data will be reset. Are you sure?",
+      "passwords_must_match": "Passwords must match",
+      "profile_remove_confirmation": "If you remove the wallet preset, security options and challenges will revert to using the default / global options"
+    }
+  },
+  "wallet": {
+    "action": {
+      "add": "Add Wallet",
+      "backup": "Backup Wallet"
+    },
+    "label": {
+      "backup_understand": "I have backed up my wallet / understand that keeping it safe is my duty",
+      "create_new_now": "Create New Wallet Now",
+      "import_from_file": "Import from file",
+      "manual_input_existing": "Manually enter wallet details",
+      "name": "Wallet Name",
+      "review": "Review you wallet"
+    },
+    "message": {
+      "add_method": "How do you want to setup your wallet?",
+      "add_success": "Your wallet has been successfully setup",
+      "cannot_exceed_balance": "Cannot exceed more than available balance",
+      "capabilities": "With this wallet, you can now receive and transfer tokens using the AENChain network. Before proceeding, we strongly recommend you create a backup of your wallet using the button below.",
+      "checking_wallet_status": "Checking Wallet Status",
+      "initial_status": "At the moment, your wallet is not live on the network. It is necessary to perform a transaction using this address before it has any presence.",
+      "network_recognise_wallet": "The wallet is recognised on the network",
+      "network_miss_wallet": "The wallet is not yet recognised on the network",
+      "remove_success": "Your wallet has been remove",
+      "transfer_complete": "Your transfer has been successfully dispatched to the network",
+      "transfer_start": "Sending transaction",
+      "updating_balance": "Updating Balance",
+      "updating_history": "Updating History"
+    },
+    "make_transfer_from": "Make a Transfer from ",
+    "remove_instruction": "<p>If you remove the wallet, there will be no way to access it unless you have made a backup.</p>"
+  }
+
+}

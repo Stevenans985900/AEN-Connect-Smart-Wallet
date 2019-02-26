@@ -30,7 +30,7 @@
             :class="{ 'info': isAddressActive('global') }"
             @click="walletAddress = 'global'"
           >
-            Default / Global
+            {{ $t('common.label.default') }}
           </v-btn>
           <v-btn
             v-for="(security, contextWalletAddress) in walletsWithSecurity"
@@ -50,13 +50,13 @@
           v-if="walletAddress !== 'global'"
           @click="dialogRemovePreset = true"
         >
-          Remove preset
+          {{ $t('common.action.remove') }}
         </v-btn>
 
         <!-- Select wizard templates -->
         <v-flex xs12 md3>
           <h3>
-            Wizard
+            {{ $t('common.label.wizard') }}
           </h3>
           <v-radio-group v-model="securityLevel">
             <v-radio
@@ -70,13 +70,13 @@
         </v-flex>
         <v-flex xs12 md9>
           <h3>
-            Features
+            {{ $t('common.label.features') }}
           </h3>
           <!-- Global only options -->
-          <v-checkbox v-if="walletAddress === 'global'" v-model="app_start" label="Password on App Start" />
+          <v-checkbox v-if="walletAddress === 'global'" v-model="app_start" :label="$t('security.label.password_app_start')" />
           <!-- Wallet specific options -->
-          <v-checkbox v-model="transaction_start" label="Password on Transaction" />
-          <v-checkbox v-model="wallet_open" label="Password on wallet" />
+          <v-checkbox v-model="transaction_start" :label="$t('security.label.password_transaction_start')" />
+          <v-checkbox v-model="wallet_open" :label="$t('security.label.password_wallet_open')" />
         </v-flex>
       </v-layout>
     </v-flex>
@@ -84,7 +84,7 @@
     <!-- Remove Wallet Dialog -->
     <v-dialog v-if="dialogRemovePreset" v-model="dialogRemovePreset" persistent max-width="600px">
       <v-toolbar color="primary">
-        <v-toolbar-title>Are you sure you want to remove the wallet preset?</v-toolbar-title>
+        <v-toolbar-title>{{ $t('common.message.are_you_sure') }}</v-toolbar-title>
         <v-spacer />
         <v-btn small fab outline @click="dialogRemovePreset = false">
           <v-icon>close</v-icon>
@@ -95,15 +95,15 @@
           {{ walletFromAddress(walletAddress).name }}
         </v-card-title>
         <v-card-text>
-          <p>If you remove the wallet preset, security options and challenges will revert to using the <strong>default / global</strong> options</p>
+          <p>{{ $t('security.message.profile_remove_confirmation') }}</p>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
           <v-btn color="blue darken-1" flat @click="dialogRemovePreset = false">
-            Cancel
+            {{ $t('common.action.cancel') }}
           </v-btn>
           <v-btn color="blue darken-1" flat @click="removePreset">
-            Remove Wallet
+            {{ $t('common.action.remove') }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -228,7 +228,6 @@ export default {
         } else {
           // Try to get the property from state
           try {
-            console.log('trying to get app_start options for: ' + this.walletAddress)
             return this.$store.state.security.walletPolicies[this.walletAddress].transaction_start
           } catch (e) {
             return false

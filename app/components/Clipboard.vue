@@ -36,7 +36,7 @@
       onCopy() {
         this.$store.commit('showNotification', {
           type: 'success',
-          message: this.data + ' - copied to clipboard'
+          message: this.data + this.$t('clipboard.message.x_copied')
         })
       }
     }

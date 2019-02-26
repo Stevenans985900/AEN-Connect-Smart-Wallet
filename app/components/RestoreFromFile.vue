@@ -1,5 +1,5 @@
 <template>
-  <upload-button :file-changed-callback="fileUploaded" title="Choose file">
+  <upload-button :file-changed-callback="fileUploaded" :title="$t('backup.label.file_choose')">
     <template slot="icon">
       <v-icon>attach_file</v-icon>
     </template>
@@ -56,10 +56,6 @@ export default {
                 walletInformation.credentials,
                 this.$g('salt')
             ).toString(CryptoJS.enc.Utf8))
-
-            console.debug('Information parsed from file')
-            console.debug(walletInformation)
-
             // If prop states wallet is a main, force property in wallet
             if (this.main === true) {
               walletInformation.main = true
@@ -77,7 +73,7 @@ export default {
               console.debug(e)
             this.$store.commit('showNotification', {
               type: 'error',
-              message: 'The file you uploaded appears invalid, please make sure it is a wallet backup'
+              message: this.$t('backup.message.import_bad_file')
             })
           }
         }.bind(this)

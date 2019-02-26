@@ -228,46 +228,50 @@ export default class Aen extends Generic {
    *
    * @param {*} namespaceDefinition
    */
-  registerNamespace(namespaceDefinition) {
-    console.log('F:RN:Register Namespace')
+  registerNamespace(options) {
+    console.debug('AEN Plugin: Register Namespace')
+    console.debug(options)
 
-    const registerNamespaceTransaction = RegisterNamespaceTransaction.createRootNamespace(
-      Deadline.create(),
-      namespaceDefinition.name,
-      UInt64.fromUint(parseInt(namespaceDefinition.duration)),
-      this.$store.state.wallet.network)
-
-    const signedTransaction = this.$store.state.account.sign(registerNamespaceTransaction)
-
-    this.$store.state.services.transactionHttp
-      .announce(signedTransaction)
-      .subscribe((x) => {
-        console.log(x)
-      },
-      (err) => {
-        console.error(err)
+    return new Promise((resolve, reject) => {
+      const transactionHttp = new TransactionHttp(this.apiEndpoint)
+      const account = this.accountLoad({
+        accountPrivateKey: options.credentials.accountPrivateKey,
+        network: options.wallet.network
       })
+      const registerNamespaceTransaction = RegisterNamespaceTransaction.createRootNamespace(
+        Deadline.create(),
+        options.name,
+        UInt64.fromUint(parseInt(options.duration)),
+        this.$store.state.wallet.network)
+
+      const signedTransaction = account.sign(registerNamespaceTransaction)
+
+      transactionHttp
+        .announce(signedTransaction)
+        .subscribe((x) => {
+            resolve(x)
+          },
+          (err) => {
+            reject(err)
+          })
+    })
   }
   /**
    *
    * @param {*} name
    */
   isNamespaceAvailable(name) {
-    console.debug('F:INA:Is Namespace Available with name: ' + name)
-    const namespaceId = new NamespaceId(name)
-    const context = this
-    this.$store.state.services.namespaceHttp
-      .getNamespace(namespaceId)
-      .subscribe(
-        (namespace) => {
-          context.$store.state.namespaceAvailable = false
-          console.log('INA:Result')
-          console.log(namespace)
-        },
-        (err) => {
-          context.$store.state.namespaceAvailable = true
-          console.log(err)
-        }
-      )
+    console.debug('AEN Plugin: Is Namespace Available')
+    console.debug(name)
+
+    return new Promise((resolve) => {
+      const nameSpaceHttp = new NamespaceHttp(this.apiEndpoint)
+      const namespaceId = new NamespaceId(name)
+      nameSpaceHttp.getNamespace(namespaceId)
+        .subscribe(
+          () => { resolve(false) },
+          () => { resolve(true) }
+        )
+    })
   }
 }

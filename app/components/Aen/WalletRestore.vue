@@ -11,7 +11,7 @@
           :items="availableNetworks"
           return-object
           item-text="name"
-          label="Network"
+          :label="$t('common.label.network')"
         />
       </v-flex>
       <v-flex xs12>
@@ -19,7 +19,7 @@
           v-model="walletName"
           :rules="[rules.basic.required, rules.walletName.minLength]"
           :error-messages="walletNameAvailable()"
-          label="Wallet Name"
+          :label="$t('common.label.name')"
           required
         />
       </v-flex>
@@ -29,7 +29,7 @@
           :append-icon="showPassword ? 'visibility_off' : 'visibility'"
           :type="showPassword ? 'text' : 'password'"
           :rules="[rules.basic.required, rules.password.minLength]"
-          label="Wallet Password"
+          :label="$t('common.label.password')"
           required
           counter
           @click:append="showPassword = !showPassword"
@@ -41,7 +41,7 @@
           :append-icon="showKey ? 'visibility_off' : 'visibility'"
           :type="showKey ? 'text' : 'password'"
           :rules="[rules.basic.required, rules.accountPrivateKey.length]"
-          label="Account Private Key"
+          :label="$t('aen.label.accountPrivateKey')"
           counter
           required
           @click:append="showKey = !showKey"
@@ -49,7 +49,7 @@
       </v-flex>
     </v-layout>
     <v-btn color="primary" @click="restoreWallet">
-      Restore
+      {{ $t('common.action.restore') }}
     </v-btn>
   </v-form>
 </template>
@@ -118,12 +118,8 @@
         },
         mounted: function() {
           this.reset()
-          console.log('before mount')
-          console.log(this.multipleNetworks)
           if(!this.multipleNetworks) {
             this.network = this.$store.state.wallet[this.type].network
-            console.log('set network to')
-            console.log(this.network)
           }
         },
         methods: {
@@ -149,10 +145,10 @@
                     })
             },
             passwordsMatch() {
-                return (this.walletPassword === this.password2) ? '' : 'Passwords must match'
+                return (this.walletPassword === this.password2) ? '' : this.$t('security.message.passwords_must_match')
             },
             walletNameAvailable() {
-                return this.$store.getters['wallet/getByName'](this.walletName) ? 'Wallet Name is already in use' : ''
+                return this.$store.getters['wallet/getByName'](this.walletName) ? this.$t('common.message.name_already_used') : ''
             },
             reset() {
                 Object.assign(this.$data, initialDataState())

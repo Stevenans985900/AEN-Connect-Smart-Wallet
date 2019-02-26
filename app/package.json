@@ -11,7 +11,7 @@
     "generate": "nuxt generate",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
     "precommit": "npm run lint",
-    "test": "ava"
+    "test": "mocha"
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.3.6",
@@ -33,6 +33,7 @@
     "rxjs": "^6.4.0",
     "vue-chartjs": "^3.4.0",
     "vue-clipboard2": "^0.2.1",
+    "vue-i18n": "^8.8.2",
     "vue-password-strength-meter": "^1.4.1",
     "vue-recaptcha": "^1.1.1",
     "vue-youtube-embed": "^2.2.1",
@@ -58,6 +59,7 @@
     "eslint-plugin-promise": ">=4.0.1",
     "eslint-plugin-standard": ">=4.0.0",
     "eslint-plugin-vue": "^5.0.0",
+    "mocha": "^6.0.1",
     "nodemon": "^1.18.9",
     "require-extension-hooks": "^0.3.3",
     "require-extension-hooks-babel": "^0.1.1",

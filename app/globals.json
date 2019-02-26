@@ -1,7 +1,7 @@
 {
   "version": "0.0.1",
   "salt": "o/e|6)~AorFA$7y!.IJaD_{c;r.ZS>7v+dr4:LMxiSRFKu|0CICdj0vD#h~ZujU96BA)ya(xMw;pb3T+6f.A1N|_o>+&U)|aa3DD+`aWKz1",
-  "build_number": "",
+  "build_number": "DEV",
   "google_recaptcha_key": "NA",
   "internal": {
     "baseImagePath": "/",
@@ -12,7 +12,8 @@
     "exchangeRateUpdateInterval": 900000
   },
   "userExperience": {
-    "notificationTimeout": 6000
+    "notificationTimeout": 6000,
+    "defaultLocale": "en"
   },
   "aen": {
     "networkVersion": "0.1",
@@ -103,5 +104,10 @@
       "name": "Ropsten Ethereum Faucet",
       "address": "https://faucet.ropsten.be"
     }]
+  },
+  "exchange": {
+    "aen": 15.02,
+    "btc": 3787.99,
+    "eth": 5070.57
   }
 }
