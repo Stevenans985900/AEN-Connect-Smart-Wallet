@@ -3,7 +3,7 @@
     <!-- WALLETS -->
     <v-layout row wrap align-center mb-4>
       <v-flex xs12>
-        <v-toolbar class="primary">
+        <v-toolbar class="primary mb-2">
           <v-toolbar-title>{{ $t('common.label.wallets') }}</v-toolbar-title>
           <v-spacer />
           <v-menu offset-y>
@@ -33,7 +33,7 @@
       <!-- New Wallet Dialog -->
       <v-dialog v-if="dialogWalletAdd" v-model="dialogWalletAdd" persistent max-width="1024px">
         <v-toolbar color="primary">
-          <v-toolbar-title>{{ $t('wallet.action_add') }}</v-toolbar-title>
+          <v-toolbar-title>{{ $t('wallet.action.add') }}</v-toolbar-title>
           <v-spacer />
           <v-btn icon @click="dialogWalletAdd = false">
             <v-icon>close</v-icon>
@@ -49,33 +49,39 @@
 
     <!-- ICOs -->
     <v-layout row wrap>
-      <v-flex xs12 md4>
-        <v-toolbar class="primary">
-          <v-toolbar-title>{{ $t('common.label.icos') }}</v-toolbar-title>
+      <v-flex xs12 md7>
+        <v-toolbar class="primary mb-2 mb-2">
+          <v-toolbar-title>{{ $t('common.label.opportunities') }}</v-toolbar-title>
         </v-toolbar>
-        <v-card v-for="(ico, index) in icos" :key="index" mb-2>
-          <v-card-title v-if="ico.status" class="ribbon ribbon-top-right">
-            <span>{{ $t('ico.label.status_' + ico.status) }}</span>
+        <v-card v-for="(opportunity, index) in opportunities" :key="index" class="mb-2">
+          <v-card-title v-if="opportunity.status == 'ended'" class="ribbon ribbon-top-right">
+            <span>{{ $t('opportunity.label.status_' + opportunity.status) }}</span>
           </v-card-title>
-          <v-card-text>
-            {{ ico.name }} <span v-if="ico.subtitle">
-              : {{ ico.subtitle }}
-            </span>
+          <v-card-text class="pb-0">
+            <v-layout row align-center>
+              <v-flex xs5 md2>
+                {{ opportunity.name }}
+              </v-flex>
+              <v-flex xs3 md6 pr-2>
+                <v-slider
+                  :value="toMillion(opportunity.raised)"
+                  :max="toMillion(opportunity.requested)"
+                  step="0.1"
+                  thumb-label="always"
+                ></v-slider>
+              </v-flex>
+              <v-flex xs4 md4 class="text-xs-center">
+                <v-btn v-if="opportunity.status === 'active'" small outline block>
+                  Click for more info
+                </v-btn>
+                <p>
+                  USD {{ toMillion(opportunity.raised) }}M / {{ toMillion(opportunity.requested) }}M
+                  <span v-if="$vuetify.breakpoint.mdAndUp">&nbsp;raised</span>
+                </p>
+              </v-flex>
+            </v-layout>
+
           </v-card-text>
-          <v-card-actions>
-            <v-list-tile class="grow">
-              <v-list-tile-content>
-                <v-list-tile-title>
-                  <v-icon class="mr-1">
-                    attach_money
-                  </v-icon>
-                  <span class="subheading">
-                    {{ ico.raised }}
-                  </span>
-                </v-list-tile-title>
-              </v-list-tile-content>
-            </v-list-tile>
-          </v-card-actions>
         </v-card>
       </v-flex>
     </v-layout>
@@ -86,7 +92,7 @@
   /* common */
   .ribbon {
     width: 10rem;
-    height: 10rem;
+    height: 6rem;
     overflow: hidden;
     position: absolute;
   }
@@ -102,7 +108,7 @@
     display: block;
     width: 17rem;
     padding: 1rem 0;
-    background-color: #3498db;
+    background-color: #00bcca;
     color: #fff;
     text-transform: uppercase;
     text-align: center;
@@ -127,7 +133,7 @@
   }
   .ribbon-top-right span {
     left: -2rem;
-    top: 2rem;
+    top: 1rem;
     transform: rotate(45deg);
   }
 </style>
@@ -139,20 +145,25 @@ function initialDataState() {
     dialogWalletAdd: false,
     walletType: null,
     wallet: null,
-    icos: [
+    opportunities: [
       {
         name: "AENCoin",
         subtitle: "The first token for investing in and carrying out research on the blockchain",
         status: "ended",
-        raised: "US15M / US22M"
+        raised: "19000000",
+        requested: "22000000"
       },
       {
         name: "Promcoin",
-        raised: "US1M / US5M"
+        raised: "500000",
+        status: "active",
+        requested: "2000000"
       },
       {
         name: "Massive",
-        raised: "US1 / US50M"
+        raised: "100000",
+        status: "active",
+        requested: "200000"
       }
     ]
   }
@@ -202,6 +213,16 @@ export default {
    * METHODS
    */
   methods: {
+    formatMoney(amount) {
+      return amount.toLocaleString('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      })
+    },
+    getPercentage(partial, total) {
+      return Math.floor((100 / total) * partial)
+    },
+    toMillion(input) { return (input / 1000000) },
     walletAdded() {
       this.dialogWalletAdd = false
       this.$store.commit('showNotification', {

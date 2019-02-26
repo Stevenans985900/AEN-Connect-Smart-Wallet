@@ -14,11 +14,11 @@
 
     <v-toolbar>
       <v-img src="/logo.png" contain height="25" max-width="125px" />
-      <v-toolbar-title>Help</v-toolbar-title>
+      <v-toolbar-title>{{ $t('common.label.help') }}</v-toolbar-title>
       <v-spacer />
 
       <v-btn small round outline @click="dialogShow = false">
-        Click again to return to what you were doing &nbsp;&nbsp;<v-icon>help</v-icon>
+        {{ $t('help.message.click_to_return') }}&nbsp;&nbsp;<v-icon>help</v-icon>
       </v-btn>
     </v-toolbar>
     <v-card>
@@ -31,6 +31,7 @@
                 :key="categoryIndex"
                 avatar
                 @click="chooseCategory(categoryIndex)"
+                :color="isActiveCategory(categoryIndex)"
               >
                 <v-list-tile-avatar v-if="faqCategory.icon">
                   <v-icon>
@@ -46,7 +47,6 @@
             </template>
           </v-list>
         </v-flex>
-
         <!-- If one of the categories themselves spin off in to a different component -->
         <v-flex v-if="categoryComponent" xs12 md9>
           <component :is="categoryComponent" />
@@ -60,6 +60,7 @@
                 :key="faqIndex"
                 avatar
                 @click="selectedEntry = faqIndex"
+                :color="isActiveEntry(faqIndex)"
               >
                 <v-list-tile-content>
                   <v-list-tile-title>
@@ -75,7 +76,7 @@
         </v-flex>
 
         <!-- Entry Display -->
-        <v-flex xs12 md6>
+        <v-flex xs12 md6 class="ma-2">
           <component :is="component" v-if="component !== null" />
           <template v-else>
             <youtube v-if="youtubeVideo" :video-id="youtubeVideo" player-width="100%" />
@@ -106,12 +107,11 @@
             'faq': [
               {
                 'title': 'What is Smart Connect Wallet?',
-                'subtitle': 'Find out why this app exists and what you can do with it',
-                'youtubeVideo': '4F7sdy2rZws',
-                'displayText': 'The Smart Wallet allows a person to interact with various blockchain networks, managing '
+                'subtitle': 'Why use the AEN Connect Smart Wallet',
+                'displayText': '<p>The Smart Wallet allows a person to interact with various blockchain networks, managing '
                 + 'multiple wallets at the same time. Primarily though, it is the public gateway for people to interact '
                 + 'with various AEN services. For more information, please visit <a _target="blank" href="https://aencoin.com" '
-                + '>our main website</a> for more information.'
+                + '>our main website</a> for more information.</p>'
               },
               {
                 'title': 'Getting Started',
@@ -120,8 +120,8 @@
               {
                 'title': 'Adding more wallets',
                 'subtitle': 'Adding more AEN, BTC, ETH, ERC20 wallets',
-                'youtubeVideo': 'FjHGZj2IjBk',
-                'displayText': 'Lorem Ipsum'
+                'displayText': 'Wallets can be added from either your dashboard or the wallet management screen by clicking' +
+                  'the "Add Wallet" button and choosing a network from the list.'
               }
             ]
           },
@@ -203,8 +203,9 @@
       chooseCategory(categoryIndex) {
         this.selectedCategory = null
         this.categoryComponent = null
+        this.categoryIndex = categoryIndex
         // If user clicked either the contact or about categories, special handling
-        switch (categoryIndex) {
+        switch (this.categoryIndex) {
           case 'about':
             this.categoryComponent = () => import('./AboutUs')
             break
@@ -212,9 +213,11 @@
             this.categoryComponent = () => import('./ContactUs')
             break
           default:
-            this.selectedCategory = categoryIndex
+            this.selectedCategory = this.categoryIndex
         }
-      }
+      },
+      isActiveCategory(categoryIndex) { return (categoryIndex === this.categoryIndex ? 'primary' : '') },
+      isActiveEntry(entryIndex) { return (entryIndex === this.selectedEntry ? 'primary' : '') }
     }
   }
 </script>

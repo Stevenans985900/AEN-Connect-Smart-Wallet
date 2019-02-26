@@ -104,5 +104,10 @@
       "name": "Ropsten Ethereum Faucet",
       "address": "https://faucet.ropsten.be"
     }]
+  },
+  "exchange": {
+    "aen": 15.02,
+    "btc": 3787.99,
+    "eth": 5070.57
   }
 }

@@ -1,8 +1,8 @@
 <template>
   <v-layout v-if="haveWallet" row>
-    <v-flex xs12 md4 lg3>
+    <v-flex xs12 lg3 class="ml-2">
       <v-progress-circular v-if="loading === true" indeterminate />
-      <doughnut v-else :chartdata="chartdata" />
+      <doughnut v-else :title="chartTitle" :data="graphData"/>
     </v-flex>
     <v-flex xs12 md8 lg9>
       <v-progress-circular v-if="loading === true" indeterminate />
@@ -27,7 +27,7 @@
 
     <!-- Show Wallet Dialog -->
     <v-dialog v-if="dialogShowWallet" v-model="dialogShowWallet" fullscreen="">
-      <v-toolbar class="primary">
+      <v-toolbar class="primary mb-2">
         <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
         <v-btn v-if="contextWallet.onChain === true" @click="dialogMakeTransfer = true">
           Send
@@ -95,9 +95,9 @@
   </v-layout>
   <v-layout v-else row justify-center align-center>
     <v-flex xs12>
-      <v-card>
-        <span>{{ $t('common.message.results_empty') }}</span>
-      </v-card>
+      <v-alert outline type="info" :value="true">
+        {{ $t('common.message.results_empty') }}
+      </v-alert>
     </v-flex>
   </v-layout>
 </template>
@@ -115,17 +115,11 @@ function initialDataState() {
       btc: 'rgb(54, 162, 235)'
     },
     processedWallets: 0,
+    totalValue: 0,
+    chartTitle: '',
+    graphData: {},
     // walletCount: 0,
     loading: true,
-    chartdata: {
-      datasets: [
-        {
-          backgroundColor: [],
-          data: []
-        }
-      ],
-      labels: []
-    },
     contextWallet: {},
     dialogMakeTransfer: false,
     dialogRemoveWallet: false,
@@ -161,6 +155,10 @@ export default {
       } else {
         this.loading = true
       }
+    },
+    wallets: {
+      handler: function() { this.processWallets() },
+      deep: true
     }
   },
   mounted() {
@@ -168,37 +166,34 @@ export default {
   },
   methods: {
     processWallets() {
-      this.reset()
-      let color, walletKey
+
+      this.processedWallets = 0
+      this.totalValue = 0
+      this.chartTitle =''
+      this.graphData = {}
+      let walletKey
       // this.reset()
       for (walletKey in this.wallets) {
         this.$store
           .dispatch('wallet/balance', this.wallets[walletKey])
           .then((walletProcessed) => {
-            switch (walletProcessed.type) {
-              case 'aen':
-                color = this.colorSchema.aen
-                break
-              case 'eth':
-                color = this.colorSchema.eth
-                break
-              case 'btc':
-                color = this.colorSchema.btc
-                break
-              case 'contract':
-                color = this.colorSchema.contract
-                break
-            }
-            this.chartdata.datasets[0].backgroundColor.push(color)
-            this.chartdata.datasets[0].data.push(walletProcessed.balance)
-            // this.chartdata.labels.push(walletProcessed.name)
+
+            // const color = this.colorSchema[walletProcessed.type]
+            // Calculate the dollar value of the wallet
+            const walletValue = walletProcessed.balance * this.$g('exchange.' + walletProcessed.type)
+            this.totalValue += walletValue
+            console.log('total value: '+this.totalValue)
+            this.graphData[walletProcessed.name] = walletValue
             this.processedWallets++
+            this.chartTitle = 'USD ' + this.toMillion(this.totalValue) + 'M'
           })
           .catch((err) => {
             console.error(err)
             return err
           })
       }
+
+      console.log('CHART TITLE: ' + this.chartTitle)
     },
     removeWallet() {
       this.dialogRemoveWallet = false
@@ -215,6 +210,10 @@ export default {
         type: 'success',
         message: this.$t('wallet.message.add_sucess')
       })
+    },
+    toMillion(input) {
+      console.log('TO MILLION: ' + input)
+      return (input / 1000000).toFixed(2)
     },
     transferComplete() {
       this.dialogMakeTransfer = false

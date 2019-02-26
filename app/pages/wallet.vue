@@ -2,7 +2,7 @@
   <v-container>
     <v-layout row justify-center align-center>
       <v-flex xs12>
-        <v-toolbar class="primary">
+        <v-toolbar class="primary mb-2">
           <v-toolbar-title>
             {{ $t('common.navigation.wallet_management') }}
           </v-toolbar-title>
@@ -30,7 +30,7 @@
         </v-toolbar>
         <!-- Wallet Management -->
         <v-card>
-          <v-card-text>
+          <v-card-text v-if="haveWallet">
             <v-expansion-panel>
               <v-expansion-panel-content v-for="(wallet, address) in wallets" :key="address">
                 <div slot="header" :color="walletShade(wallet)" @click="accordionTogglingWallet(wallet)">
@@ -87,7 +87,6 @@
                 </div>
                 <v-card>
                   <v-card-text>
-                    <address-render :address="wallet.address" :use-address-book="false" />
                     <v-btn small @click="refreshHistory">
                       <v-icon>
                         loop
@@ -103,12 +102,17 @@
               </v-expansion-panel-content>
             </v-expansion-panel>
           </v-card-text>
+          <v-card-text v-else>
+            <v-alert outline type="info" :value="true">
+              {{ $t('common.message.results_empty') }}
+            </v-alert>
+          </v-card-text>
         </v-card>
       </v-flex>
 
       <!-- Show Address Dialog -->
       <v-dialog v-if="dialogAddressShow === true" v-model="dialogAddressShow" max-width="500px">
-        <v-toolbar class="primary">
+        <v-toolbar class="primary mb-2">
           <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
           <v-spacer />
           <v-btn small fab outline @click="dialogAddressShow = false">
@@ -254,6 +258,9 @@ export default {
     },
     wallets() {
       return this.$store.state.wallet.wallets
+    },
+    haveWallet() {
+      return (Object.keys(this.wallets).length > 0 ? true : false)
     },
     multipleNetworks() {
       if (this.$g('aen.available_networks').length > 1) {

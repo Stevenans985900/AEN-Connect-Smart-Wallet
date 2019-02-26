@@ -62,7 +62,8 @@
       "default": "Default",
       "direction": "Direction",
       "features": "Features",
-      "icos": "ICOs",
+      "help": "Help",
+      "opportunities": "Investment Opportunities",
       "na": "NA",
       "name": "Name",
       "network": "Network",
@@ -128,7 +129,12 @@
       "sending": "Sending Message"
     }
   },
-  "ico": {
+  "help": {
+    "message": {
+      "click_to_return": "Click here to go back"
+    }
+  },
+  "opportunity": {
     "label": {
       "status_ended": "Ended"
     }

@@ -3,7 +3,7 @@
     <v-layout row justify-center align-center mb-2>
       <!-- Security Options -->
       <v-flex xs12 md12>
-        <v-toolbar class="primary">
+        <v-toolbar class="primary mb-2">
           <v-toolbar-title>
             Security Controls
           </v-toolbar-title>

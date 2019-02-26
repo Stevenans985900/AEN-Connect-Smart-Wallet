@@ -59,7 +59,7 @@
                   v-model="backupAgree"
                   :rules="[rules.basic.required]"
                   required
-                  :label="$t('wallet.labal.backup_understand')"
+                  :label="$t('wallet.label.backup_understand')"
                 />
                 <p>{{ $t('wallet.message.initial_status') }}</p>
                 <v-btn :disabled="!proceedValid" color="primary" @click="complete">

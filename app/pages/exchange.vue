@@ -3,7 +3,7 @@
     <v-layout row justify-center align-center>
       <!-- Contacts table -->
       <v-flex xs12>
-        <v-toolbar class="primary">
+        <v-toolbar class="primary mb-2">
           <v-toolbar-title>
             {{ $t('common.navigation.exchange') }}
           </v-toolbar-title>
