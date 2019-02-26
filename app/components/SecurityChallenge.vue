@@ -29,7 +29,7 @@
       <v-card-text>
 
         <p>
-          {{ wallet.name }}: {{ $t('wallet.message.authenticate_to_continue') }}
+          {{ wallet.name }}: {{ $t('security.message.authenticate_to_continue') }}
         </p>
         <v-text-field
           v-model="password"
