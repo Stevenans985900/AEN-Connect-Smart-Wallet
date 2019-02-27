@@ -1,7 +1,7 @@
 <template>
   <v-app dark>
     <!-- NAV DRAWER -->
-    <v-navigation-drawer :value="true" :mini-variant="minifyDrawer" fixed stateless app>
+    <v-navigation-drawer :value="showNav" :mini-variant="minifyDrawer" fixed stateless app>
       <v-layout column fill-height>
         <v-list>
           <v-list-tile v-for="(item, i) in navigationItems" :key="i" :to="item.to" router exact>
@@ -37,7 +37,7 @@
 
     <!-- TOP BAR -->
     <v-toolbar fixed app>
-      <v-toolbar-side-icon @click="minifyDrawer = !minifyDrawer" />
+      <v-toolbar-side-icon @click="toggleNav" />
       <!--size="24"-->
       <!--<v-avatar >-->
       <v-btn flat active-class="" to="/" :disabled="!showMainNav">
@@ -66,9 +66,7 @@
           </v-btn>
         </v-snackbar>
         <!-- NUXT BEGINNING -->
-        <v-flex v-if="!eulaAgreed" xs12>
-          <end-use-license-agreement />
-        </v-flex>
+        <end-user-license-agreement v-if="!eulaAgreed"/>
         <nuxt />
       </v-container>
     </v-content>
@@ -93,7 +91,7 @@ import Help from '~/components/Help'
 import SecurityChallenge from '~/components/SecurityChallenge'
 import isElectron from 'is-electron'
 import isOnline from 'is-online'
-import EndUseLicenseAgreement from '~/components/EndUserLicenseAgreement'
+import EndUserLicenseAgreement from '~/components/EndUserLicenseAgreement'
 // import childProcess from 'child_process'
 if (isElectron()) {
   // TODO Satisfy linter
@@ -108,7 +106,7 @@ export default {
   components: {
     Busy,
     Development,
-    EndUseLicenseAgreement,
+    EndUserLicenseAgreement,
     Help,
     NetworkDiagnostics,
     SecurityChallenge
@@ -152,6 +150,7 @@ export default {
           to: '/security'
         }
       ],
+      showNav: true,
       title: 'Smart Connect',
       userMenu: false
     }
@@ -229,11 +228,15 @@ export default {
       key: 'environment',
       value: env
     })
-    if(window.innerWidth < 1366) {
-      this.minifyDrawer = true
+
+    if(this.$vuetify.breakpoint.mdAndUp === true) {
+      this.showNav = true
+      this.minifyDrawer = false
     } else {
       this.minifyDrawer = false
+      this.showNav = false
     }
+
     this.$store.commit('setLoading', {
       t: 'global',
       v: true,
@@ -276,7 +279,7 @@ export default {
           this.$store.commit('wallet/setAenProperty', { key: 'network', value: this.$g('aen.available_networks')[0] })
       }
       if (Object.keys(this.$store.state.wallet.btc.network).length === 0) {
-          this.$store.commit('wallet/setBtcProperty', { key: 'network', value: this.$g('bitcoin.available_networks')[0] })
+          this.$store.commit('wallet/setBtcProperty', { key: 'network', value: this.$g('btc.available_networks')[0] })
       }
     if (this.$store.state.wallet.eth.activeApiEndpoint === '') {
       this.$store.commit('wallet/setEthereumProperty', { key: 'network', value: this.$g('eth.available_networks')[0] })
@@ -326,7 +329,16 @@ export default {
         value: result
       })
     },
+    toggleNav() {
+      if(this.$vuetify.breakpoint.mdAndUp === true) {
+        this.showNav = true
+        this.minifyDrawer = !this.minifyDrawer
+      } else {
+        this.minifyDrawer = false
+        this.showNav = !this.showNav
+      }
 
+    },
     exit() {
       console.debug('F:E:Exit')
 

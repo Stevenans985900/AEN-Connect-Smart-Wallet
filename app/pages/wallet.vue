@@ -33,7 +33,7 @@
           <v-card-text v-if="haveWallet">
             <v-expansion-panel>
               <v-expansion-panel-content v-for="(wallet, address) in wallets" :key="address">
-                <div slot="header" :color="walletShade(wallet)" @click="accordionTogglingWallet(wallet)">
+                <div slot="header" @click="accordionTogglingWallet(wallet)">
                   <v-layout row wrap>
                     <v-flex xs2 sm1>
                       <wallet-image :wallet="wallet" />
@@ -77,7 +77,7 @@
                           <v-list-tile @click="addressShow(wallet)">
                             <v-list-tile-title>{{ $t('common.action.receive') }}</v-list-tile-title>
                           </v-list-tile>
-                          <v-list-tile v-if="wallet.address !== mainWallet.address" @click="contextWallet = wallet; dialogRemoveWallet = true">
+                          <v-list-tile v-if="wallet.address !== mainWalletAddress" @click="contextWallet = wallet; dialogRemoveWallet = true">
                             <v-list-tile-title>{{ $t('common.action.disable') }}</v-list-tile-title>
                           </v-list-tile>
                         </v-list>
@@ -321,17 +321,7 @@ export default {
       }
     },
     refreshHistory() {
-      this.$store.commit('setLoading', {
-        t: 'page',
-        v: true,
-        m: 'Refreshing Transaction History'
-      })
-      this.$store.dispatch('wallet/transactionsHistorical', this.contextWallet).then(() => {
-        this.$store.commit('setLoading', {
-          t: 'page',
-          v: false
-        })
-      })
+      this.$store.dispatch('wallet/transactionsHistorical', this.contextWallet)
     },
     removeWallet() {
       this.dialogRemoveWallet = false

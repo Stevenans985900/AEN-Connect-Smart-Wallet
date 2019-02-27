@@ -26,7 +26,7 @@
 export default {
   computed: {
       busy() { return this.$store.state.busy.page },
-      busyMessage() { return this.$store.state.busy.message }
+      busyMessage() { return this.$t(this.$store.state.busy.message) }
   }
 }
 </script>

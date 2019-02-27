@@ -11,12 +11,12 @@
         </v-radio-group>
       </v-flex>
       <v-flex xs12>
-        <v-text-field
+        <v-textarea
+          outline
           v-model="feedbackMessage"
           :rules="[rules.basic.required, rules.feedbackMessage.minLength, rules.feedbackMessage.maxLength]"
-          :label="$t('feedback.label.feedback')"
-          required
-        />
+          :label="$t('common.label.message')"
+        ></v-textarea>
       </v-flex>
       <v-flex xs12>
         <v-text-field

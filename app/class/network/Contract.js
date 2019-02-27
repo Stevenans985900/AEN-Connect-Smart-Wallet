@@ -27,15 +27,15 @@ export default class Contract extends Generic {
   }
 
   erc20PublicMethod(options) {
+    console.debug('Contract Plugin: ERC20 Public Method')
+    console.debug(options)
     return new Promise((resolve, reject) => {
             import('~/class/network/contract/erc20').then((erc20Interface) => {
               const contract = new this.web3.eth.Contract(erc20Interface.abi, options.contractAddress)
-              // TODO Insert parameter handling here
               contract.methods[options.method]().call().then((response) => {
                 resolve(response)
               })
                 .catch((err) => {
-                  console.debug('The contract method does not exist at the remote address')
                   reject(err)
                 })
             })

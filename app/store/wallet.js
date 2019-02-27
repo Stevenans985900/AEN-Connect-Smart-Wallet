@@ -82,7 +82,7 @@ export const getters = {
       case 'aen':
         return new Aen(state.aen.activeApiEndpoint)
       case 'btc':
-        return new Btc(Vue.prototype.$g('bitcoin'))
+        return new Btc(Vue.prototype.$g('btc'))
       case 'contract':
         return new Contract(state.eth.activeApiEndpoint)
       case 'eth':
@@ -112,9 +112,21 @@ export const actions = {
   balance: ({state, commit, rootState}, wallet) => {
     let networkHandler
     return new Promise((resolve, reject) => {
+      // Use cache if offline or wallet not yet recognised on network
       if(rootState.runtime.isOnline === false || wallet.onChain === false) {
         resolve(wallet)
       }
+      // Use cache if function called to recently
+      if((Date.now() - wallet.balanceLastSynced) < Vue.prototype.$g('internal.walletRefreshGraceTime')) {
+        resolve(wallet)
+        return
+      }
+      // Set the page loader going
+      commit('setLoading', {
+        t: 'page',
+        v: true,
+        m: 'wallet.message.updating_balance'
+      }, { root: true })
       switch (wallet.type) {
         case 'aen':
           networkHandler = new Aen(
@@ -123,7 +135,7 @@ export const actions = {
           break
         case 'btc':
           // TODO For this active API endpoint, mixin network selection
-          networkHandler = new Btc(Vue.prototype.$g('bitcoin'))
+          networkHandler = new Btc(Vue.prototype.$g('btc'))
           break
         case 'contract':
           // TODO For this active API endpoint, mixin network selection
@@ -146,9 +158,22 @@ export const actions = {
             key: 'balance',
             value: response
           })
+          commit('setWalletProperty', {
+            address: wallet.address,
+            key: 'balanceLastSynced',
+            value: Date.now()
+          })
+          commit('setLoading', {
+            t: 'page',
+            v: false
+          }, { root: true })
           resolve(wallet)
         })
         .catch((err) => {
+          commit('setLoading', {
+            t: 'page',
+            v: false
+          }, { root: true })
           reject(err)
         })
     })
@@ -156,9 +181,20 @@ export const actions = {
   transactionsHistorical({state, commit, rootState}, wallet) {
     let networkHandler
     return new Promise((resolve) => {
-      if(rootState.runtime.isOnline === false) {
+      // Use cache if offline or wallet not yet recognised on network
+      if(rootState.runtime.isOnline === false || wallet.onChain === false) {
         resolve(wallet)
       }
+      // Use cache if function called to recently
+      if((Date.now() - wallet.transactionsLastSynced) < Vue.prototype.$g('internal.walletRefreshGraceTime')) {
+        resolve(wallet)
+        return
+      }
+      commit('setLoading', {
+        t: 'page',
+        v: true,
+        m: 'wallet.message.updating_history'
+      }, { root: true })
       switch (wallet.type) {
         case 'aen':
           networkHandler = new Aen(
@@ -167,7 +203,7 @@ export const actions = {
           break
         case 'btc':
           // TODO For this active API endpoint, mixin network selection
-          networkHandler = new Btc(Vue.prototype.$g('bitcoin'))
+          networkHandler = new Btc(Vue.prototype.$g('btc'))
 
           break
         case 'contract':
@@ -187,42 +223,72 @@ export const actions = {
           key: 'transactions',
           value: transactions
         })
+        commit('setWalletProperty', {
+          address: wallet.address,
+          key: 'transactionsLastSynced',
+          value: Date.now()
+        })
+        commit('setLoading', {
+          t: 'page',
+          v: false
+        }, { root: true })
         resolve(wallet)
       })
     })
 
   },
-  getLiveWallet(context, wallet) {
+  getLiveWallet({commit, state }, wallet) {
     let networkHandler
     return new Promise((resolve) => {
+      commit('setLoading', {
+        t: 'page',
+        v: true,
+        m: 'wallet.message.checking_wallet_status'
+      }, { root: true })
       switch (wallet.type) {
         case 'aen':
           networkHandler = new Aen(
-            context.state.aen.activeApiEndpoint
+            state.aen.activeApiEndpoint
           )
           networkHandler.getLiveWallet(wallet).then((response) => {
+            commit('setLoading', {
+              t: 'page',
+              v: false
+            }, { root: true })
             resolve(response)
           })
           break
         case 'btc':
-          networkHandler = new Btc(Vue.prototype.$g('bitcoin'))
+          networkHandler = new Btc(Vue.prototype.$g('btc'))
           networkHandler.getLiveWallet(wallet).then((response) => {
+            commit('setLoading', {
+              t: 'page',
+              v: false
+            }, { root: true })
             resolve(response)
           })
           break
         case 'contract':
           networkHandler = new Contract(
-            context.state.eth.activeApiEndpoint
+            state.eth.activeApiEndpoint
           )
           networkHandler.getLiveWallet(wallet).then((response) => {
+            commit('setLoading', {
+              t: 'page',
+              v: false
+            }, { root: true })
             resolve(response)
           })
           break
         case 'eth':
           networkHandler = new Ethereum(
-            context.state.eth.activeApiEndpoint
+            state.eth.activeApiEndpoint
           )
           networkHandler.getLiveWallet(wallet).then((response) => {
+            commit('setLoading', {
+              t: 'page',
+              v: false
+            }, { root: true })
             resolve(response)
           })
           break
@@ -333,7 +399,7 @@ export const actions = {
           })
           break
         case 'btc':
-          networkHandler = new Btc(Vue.prototype.$g('bitcoin'))
+          networkHandler = new Btc(Vue.prototype.$g('btc'))
           networkHandler.walletNew(options).then((walletObject) => {
             Object.assign(wallet, walletObject)
             dispatch('security/monitorWallet', wallet, {root:true})
@@ -357,7 +423,7 @@ export const actions = {
       }
     })
   },
-  transfer(context, options) {
+  transfer({commit, state}, options) {
     return new Promise((resolve) => {
       let networkHandler
 
@@ -365,34 +431,55 @@ export const actions = {
       if (typeof options.destination.address === 'object' && options.destination.address !== null) {
         options.destination.address = options.destination.address.address
       }
+      commit('setLoading', {
+        t: 'page',
+        v: true,
+        m: 'wallet.message.updating_balance'
+      }, { root: true })
       switch (options.source.type) {
         case 'aen':
           networkHandler = new Aen(
-            context.state.aen.activeApiEndpoint
+            state.aen.activeApiEndpoint
           )
           networkHandler.transfer(options).then((transfer) => {
+            commit('setLoading', {
+              t: 'page',
+              v: false
+            }, { root: true })
             resolve(transfer)
           })
           break
         case 'btc':
-          networkHandler = new Btc(Vue.prototype.$g('bitcoin'))
+          networkHandler = new Btc(Vue.prototype.$g('btc'))
           networkHandler.transfer(options).then((transfer) => {
+            commit('setLoading', {
+              t: 'page',
+              v: false
+            }, { root: true })
             resolve(transfer)
           })
           break
         case 'contract':
           networkHandler = new Contract(
-            context.state.eth.activeApiEndpoint
+            state.eth.activeApiEndpoint
           )
           networkHandler.transfer(options).then((transfer) => {
+            commit('setLoading', {
+              t: 'page',
+              v: false
+            }, { root: true })
             resolve(transfer)
           })
           break
         case 'eth':
           networkHandler = new Ethereum(
-            context.state.eth.activeApiEndpoint
+            state.eth.activeApiEndpoint
           )
           networkHandler.transfer(options).then((transfer) => {
+            commit('setLoading', {
+              t: 'page',
+              v: false
+            }, { root: true })
             resolve(transfer)
           })
           break
@@ -405,19 +492,17 @@ export const actions = {
      *
      * @param {*} context
      */
-  rankApiNodes(context) {
-    console.debug('Vuex: Rank API Nodes')
+  rankApiNodes({ commit, state }) {
+    console.debug('Wallet Store: Rank API Nodes')
+
     const apiEndpoints = Vue.prototype.$g('aen.api_endpoints')
-    const stateContext = context
+    const apiCount = apiEndpoints.length
 
     // Test function encapsulate for variable scoping and asynchronous calling
     const check = function (currentRound) {
       const position = currentRound
-      const thisAddress =
-                apiEndpoints[position].address +
-                Vue.prototype.$g('aen.api_endpoint_test_uri')
+      const thisAddress = apiEndpoints[position].address + Vue.prototype.$g('aen.api_endpoint_test_uri')
       apiEndpoints[position].scanStart = new Date()
-      let lowestPing = 9999
 
       // Perform the actual call
       this.$axios
@@ -425,24 +510,18 @@ export const actions = {
         .then(() => {
           // Calculate ping time, output the response when in debug mode to satisfy linter
           apiEndpoints[position].scanEnd = new Date()
-          apiEndpoints[position].scanTime =
-                        apiEndpoints[position].scanEnd -
-                        apiEndpoints[position].scanStart
+          apiEndpoints[position].scanTime = apiEndpoints[position].scanEnd - apiEndpoints[position].scanStart
 
           // If the test beats current score, set as endpoint to use
-          if (apiEndpoints[position].scanTime < lowestPing) {
-            console.debug(
-              'Updating AEN API endpoint to: ' +
-                                apiEndpoints[position].address
-            )
-            lowestPing = apiEndpoints[position].scanTime
-            stateContext.commit('setAenProperty', {
+          if (apiEndpoints[position].scanTime < state.aen.activeApiPing) {
+            console.debug('Updating AEN API endpoint to: ' + apiEndpoints[position].address)
+            commit('setAenProperty', {
               key: 'activeApiEndpoint',
               value: apiEndpoints[position].address
             })
-            stateContext.commit('setAenProperty', {
+            commit('setAenProperty', {
               key: 'activeApiPing',
-              value: lowestPing
+              value: apiEndpoints[position].scanTime
             })
           }
         })
@@ -454,7 +533,7 @@ export const actions = {
     // Start performing the checks asynchronously
     for (
       let currentRound = 0;
-      apiEndpoints.length > currentRound;
+      apiCount > currentRound;
       currentRound++
     ) {
       check(currentRound)

@@ -20,8 +20,8 @@
               <v-list-tile @click="walletType = 'btc'; dialogWalletAdd = true">
                 <v-list-tile-title>{{ $t('network.label.btc') }}</v-list-tile-title>
               </v-list-tile>
-              <v-list-tile v-if="haveEthereumWallet" @click="walletType = 'contract'; dialogWalletAdd = true">
-                <v-list-tile-title>{{ $t('network.contract') }}</v-list-tile-title>
+              <v-list-tile v-if="haveEthereumWallet === true" @click="walletType = 'contract'; dialogWalletAdd = true">
+                <v-list-tile-title>{{ $t('network.label.contract') }}</v-list-tile-title>
               </v-list-tile>
             </v-list>
           </v-menu>
@@ -49,7 +49,7 @@
 
     <!-- ICOs -->
     <v-layout row wrap>
-      <v-flex xs12 md7>
+      <v-flex xs12>
         <v-toolbar class="primary mb-2 mb-2">
           <v-toolbar-title>{{ $t('common.label.opportunities') }}</v-toolbar-title>
         </v-toolbar>
@@ -189,9 +189,7 @@ export default {
     }
   },
   computed: {
-    haveEthereumWallet() {
-      return this.$store.getters["wallet/haveWalletType"]('ethereum')
-    }
+    haveEthereumWallet() { return this.$store.getters["wallet/haveWalletType"]('eth') }
   },
   /**
    * MOUNTED

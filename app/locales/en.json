@@ -33,6 +33,17 @@
       "x_copied": " - copied to clipboard"
     }
   },
+  "contract": {
+    "label": {
+      "contract_address": "Contract Address",
+      "managing_wallet": "Managing Wallet"
+    },
+    "message": {
+      "checking_contract": "Checking Contract",
+      "contract_found": "The contract has been found, please review details below",
+      "contract_not_found": "The contract could not be found, please check the address and / or network of the managing wallet"
+    }
+  },
   "common": {
     "action": {
       "cancel": "Cancel",
@@ -63,10 +74,11 @@
       "direction": "Direction",
       "features": "Features",
       "help": "Help",
-      "opportunities": "Investment Opportunities",
+      "message": "Message",
       "na": "NA",
       "name": "Name",
       "network": "Network",
+      "opportunities": "Investment Opportunities",
       "optional_message": "Message",
       "password": "Password",
       "password_repeat": "Repeat Password",
@@ -74,6 +86,7 @@
       "question": "Question",
       "search": "Search",
       "security": "Security",
+      "send_message": "Send Message",
       "value": "Value",
       "wallets": "Wallets",
       "wizard": "Wizard"
@@ -110,17 +123,16 @@
   },
   "eula": {
     "action": {
-      "agreeEula": "I agree to the <a href=\"http://aencoin.com/eula\"> AEN EULA</a>"
+      "agreeEula": "I agree to the AEN EULA"
     },
     "message": {
-      "introduction": "This is the first community release, please do not use this wallet to store real accounts on! By\n    proceeding, you accept the AEN terms and conditions"
+      "introduction": "<p>This is the first community release, please do not use this wallet to store real accounts on!</p><p>By proceeding, you accept the <a href=\"http://aencoin.com/eula\" target=\"_blank\">AEN end user license agreement</a></p>"
     }
   },
   "feedback": {
     "label": {
       "bug_report": "Bug Report",
       "feature_request": "Feature Request",
-      "feedback": "Feedback",
       "contact_information": "Contact Information",
       "type": "Feedback Type"
     },
@@ -151,7 +163,8 @@
       "testnet_functions": "TestNet Functions"
     },
     "message": {
-      "s_until_next_check": "s until next check"
+      "s_until_next_check": "s until next check",
+      "checking_best_api": "Ranking API destinations"
     }
   },
   "security": {
