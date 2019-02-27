@@ -11210,6 +11210,13 @@ vue-style-loader@^4.1.0:
     hash-sum "^1.0.2"
     loader-utils "^1.0.2"
 
+vue-tawk@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/vue-tawk/-/vue-tawk-1.0.1.tgz#b80038a34519316de657cb1f0ee625478f5cfd73"
+  integrity sha512-ewta7slPTNdcxMRfqWLZq/28G6fJR0JzUA3SAtTVH1APSTPReUqh1UFtouTVsKONBXsKJvsb9Zhfkcxjys6X+A==
+  dependencies:
+    vue "^2.5.16"
+
 vue-template-compiler@^2.5.17, vue-template-compiler@^2.5.22:
   version "2.6.6"
   resolved "https://registry.yarnpkg.com/vue-template-compiler/-/vue-template-compiler-2.6.6.tgz#a807acbf3d51971d3721d75ecb1b927b517c1a02"
@@ -11227,6 +11234,11 @@ vue-youtube-embed@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/vue-youtube-embed/-/vue-youtube-embed-2.2.1.tgz#a3be445d2c8e647be2608c90993d5e8791107207"
   integrity sha512-XNV6X5QAVU/w2JUwvvBf+6LdV6WF/bsacPo/qCJ0TLkn5YI7Yk0dxWTQAyBW/v97e/EsqgLygkW/qi074jtAHA==
+
+vue@^2.5.16:
+  version "2.6.7"
+  resolved "https://registry.yarnpkg.com/vue/-/vue-2.6.7.tgz#254f188e7621d2d19ee28d0c0442c6d21b53ae2d"
+  integrity sha512-g7ADfQ82QU+j6F/bVDioVQf2ccIMYLuR4E8ev+RsDBlmwRkhGO3HhgF4PF9vpwjdPpxyb1zzLur2nQ2oIMAMEg==
 
 vue@^2.5.22:
   version "2.6.6"

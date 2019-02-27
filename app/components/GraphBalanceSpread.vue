@@ -2,11 +2,11 @@
   <v-layout v-if="haveWallet" row>
     <v-flex xs12 lg3 class="ml-2">
       <v-progress-circular v-if="loading === true" indeterminate />
-      <doughnut v-else :title="chartTitle" :data="graphData"/>
+      <doughnut v-else :title="chartTitle" :data="graphData" />
     </v-flex>
     <v-flex xs12 md8 lg9>
       <v-progress-circular v-if="loading === true" indeterminate />
-      <v-card flat v-else>
+      <v-card v-else flat>
         <v-card-text>
           <v-list>
             <template v-for="(wallet, address) in wallets">
@@ -16,7 +16,7 @@
                 </v-list-tile-avatar>
                 <v-list-tile-content>
                   <v-list-tile-title>{{ wallet.name }}</v-list-tile-title>
-                  <v-list-tile-sub-title>USD {{ toMillion(wallet.balance) }}M</v-list-tile-sub-title>
+                  <v-list-tile-sub-title>{{ toCurrency(wallet.balance, wallet.type) }}</v-list-tile-sub-title>
                 </v-list-tile-content>
               </v-list-tile>
             </template>
@@ -29,16 +29,17 @@
     <v-dialog v-if="dialogShowWallet === true" v-model="dialogShowWallet" fullscreen="">
       <v-toolbar class="primary">
         <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
-        <v-btn v-if="contextWallet.onChain === true" @click="dialogMakeTransfer = true">
+        <v-btn v-if="contextWallet.onChain === true" @click="dialogMakeTransfer = true" small outline>
           Send
         </v-btn>
-        <v-btn @click="addressShow(contextWallet)">
+        <v-btn @click="addressShow(contextWallet)" small outline>
           Receive
         </v-btn>
-        <v-btn v-if="contextWallet.address !== mainWalletAddress" @click="dialogRemoveWallet = true">
+        <v-btn v-if="contextWallet.address !== mainWalletAddress" @click="dialogRemoveWallet = true" small outline>
           Disable
         </v-btn>
         <v-spacer />
+        <busy />
         <v-btn small fab outline @click="dialogShowWallet = false">
           <v-icon>close</v-icon>
         </v-btn>
@@ -105,7 +106,7 @@
 <script>
 import Doughnut from '~/components/Doughnut'
 import WalletHistory from '~/components/WalletHistory'
-
+import Busy from '~/components/Busy'
 function initialDataState() {
   return {
     processedWallets: 0,
@@ -117,11 +118,13 @@ function initialDataState() {
     contextWallet: {},
     dialogMakeTransfer: false,
     dialogRemoveWallet: false,
-    dialogShowWallet: false
+    dialogShowWallet: false,
+    balanceCheckInterval: null
   }
 }
 export default {
   components: {
+    Busy,
     Doughnut,
     WalletHistory
   },
@@ -149,18 +152,22 @@ export default {
       } else {
         this.loading = true
       }
-    },
-    wallets: {
-      handler: function() { this.processWallets() },
-      deep: true
     }
   },
   mounted() {
     this.processWallets()
+
+    this.balanceCheckInterval = setInterval(
+      function () {
+        // Create a wallet index map to control accordion with
+        this.processWallets()
+      }.bind(this),
+      this.$g('internal.walletCheckInterval')
+    )
+
   },
   methods: {
     processWallets() {
-
       this.processedWallets = 0
       this.totalValue = 0
       this.chartTitle =''
@@ -171,7 +178,6 @@ export default {
         this.$store
           .dispatch('wallet/balance', this.wallets[walletKey])
           .then((walletProcessed) => {
-
             // const color = this.colorSchema[walletProcessed.type]
             // Calculate the dollar value of the wallet
             const walletValue = walletProcessed.balance * this.$g('exchange.' + walletProcessed.type)
@@ -195,12 +201,28 @@ export default {
         message: this.$t('wallet.message.remove_sucess')
       })
     },
+    toCurrency(amount, target) { return 'USD ' + this.toSmallestDenomination((amount * this.$g('exchange.' + target))) },
     walletAdded() {
       this.dialogWalletAdd = false
       this.$store.commit('showNotification', {
         type: 'success',
         message: this.$t('wallet.message.add_sucess')
       })
+    },
+    toSmallestDenomination(input) {
+      let answer = input
+      let suffix = ''
+      // If over million, format that way
+      if(input > 1000000) {
+        answer = input / 1000000
+        suffix = 'M'
+      } else if ( input > 1000) {
+        answer = input / 1000
+        suffix = 'K'
+      }
+      // If over thousand
+      return answer.toFixed(2) + suffix
+
     },
     toMillion(input) {
       return (input / 1000000).toFixed(2)
@@ -211,6 +233,9 @@ export default {
     reset() {
       Object.assign(this.$data, initialDataState())
     }
+  },
+  beforeDestroy() {
+    clearInterval(this.balanceCheckInterval)
   }
 }
 </script>

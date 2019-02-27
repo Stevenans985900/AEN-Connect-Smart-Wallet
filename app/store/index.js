@@ -55,6 +55,12 @@ export const getters = {
   environment: (state) => {
     return state.runtime.environment
   },
+  functionalityDisabled: (state) => {
+    if(state.runtime.isOnline === false || state.user.eulaAgree === false) {
+      return true
+    }
+    return false
+  },
   busy: (state) => {
     return state.busy.page
   },

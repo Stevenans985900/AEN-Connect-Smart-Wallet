@@ -30,7 +30,7 @@ export default {
   },
   computed: {
     faucet() {
-      return this.$g('bitcoin.faucets')[0]
+      return this.$g('btc.faucets')[0]
     },
     testnet() {
       if (this.wallet.network.hasOwnProperty('testing')) {

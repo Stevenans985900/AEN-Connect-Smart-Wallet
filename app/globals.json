@@ -7,9 +7,10 @@
     "baseImagePath": "/",
     "controllerPollReadyInterval": 1000,
     "commonTasksInterval": 900000,
-    "apiEndpointPingInterval": 450000,
+    "apiEndpointPingInterval": 10000,
     "walletCheckInterval": 600000,
-    "exchangeRateUpdateInterval": 900000
+    "exchangeRateUpdateInterval": 900000,
+    "walletRefreshGraceTime": 600000
   },
   "userExperience": {
     "notificationTimeout": 6000,
@@ -50,7 +51,7 @@
       "btc": "ETHUSDC"
     }
   },
-  "bitcoin": {
+  "btc": {
     "api_endpoint_test_uri": "",
     "block_cypher": {
       "api_endpoint": "http://api.blockcypher.com/v1/btc/"
