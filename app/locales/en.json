@@ -123,7 +123,8 @@
   },
   "eula": {
     "action": {
-      "agreeEula": "I agree to the AEN EULA"
+      "agreeEula": "I agree to the AEN EULA",
+      "run_setup_wizard": "Run Setup wizard"
     },
     "message": {
       "introduction": "<p>This is the first community release, please do not use this wallet to store real accounts on!</p><p>By proceeding, you accept the <a href=\"http://aencoin.com/eula\" target=\"_blank\">AEN end user license agreement</a></p>"

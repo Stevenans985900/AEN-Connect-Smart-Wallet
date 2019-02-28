@@ -68,7 +68,8 @@
                   :max="toMillion(opportunity.requested)"
                   step="0.1"
                   thumb-label="always"
-                ></v-slider>
+                  readonly
+                />
               </v-flex>
               <v-flex xs4 md4 class="text-xs-center">
                 <v-btn v-if="opportunity.status === 'active'" small outline block>
@@ -76,11 +77,12 @@
                 </v-btn>
                 <p>
                   USD {{ toMillion(opportunity.raised) }}M / {{ toMillion(opportunity.requested) }}M
-                  <span v-if="$vuetify.breakpoint.mdAndUp">&nbsp;raised</span>
+                  <span v-if="$vuetify.breakpoint.mdAndUp">
+                    &nbsp;raised
+                  </span>
                 </p>
               </v-flex>
             </v-layout>
-
           </v-card-text>
         </v-card>
       </v-flex>

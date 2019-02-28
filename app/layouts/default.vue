@@ -66,7 +66,7 @@
           </v-btn>
         </v-snackbar>
         <!-- NUXT BEGINNING -->
-        <end-user-license-agreement v-if="!eulaAgreed"/>
+        <end-user-license-agreement v-if="!eulaAgreed && $nuxt.$route.name !== 'setup-wizard'" />
         <nuxt />
       </v-container>
     </v-content>

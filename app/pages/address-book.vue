@@ -77,7 +77,9 @@
         </v-toolbar>
         <v-card>
           <v-card-text>
-            <span v-html="$t('contact.chunk.removal_warning')" />
+            <span>
+              {{ $t('contact.chunk.removal_warning') }}
+            </span>
           </v-card-text>
           <v-card-actions>
             <v-spacer />

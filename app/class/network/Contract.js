@@ -142,4 +142,5 @@ export default class Contract extends Generic {
   getWeb3() {
     return this.web3
   }
+  web3() { return this.web3 }
 }

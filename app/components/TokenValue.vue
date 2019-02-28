@@ -11,6 +11,7 @@ export default {
       default: ''
     },
     value: {
+      type: [String, Number],
       default: 0
     }
   },
@@ -31,9 +32,11 @@ export default {
   },
   computed: {
     amount() {
-      if(this.value === 0) { return 0 }
-      if(this.symbolDivisibility[this.symbol] === 0) { return this.value }
-      return (this.value / this.symbolDivisibility[this.symbol])
+      // Make sure amount is cast to number
+      const numeric = Number(this.value)
+      if(numeric === 0) { return 0 }
+      if(this.symbolDivisibility[this.symbol] === 0) { return numeric }
+      return (numeric / this.symbolDivisibility[this.symbol])
     },
     symbolShow() {
       return this.symbol.toUpperCase()

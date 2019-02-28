@@ -1,16 +1,17 @@
 <template>
-  <v-container >
+  <v-container>
     <v-layout row>
       <v-flex xs12>
         <v-alert
           :value="true"
         >
           <span v-html="$t('eula.message.introduction')" />
-          <v-checkbox v-model="eulaAgree">
-            <span slot="label">
-              {{ $t('eula.action.agreeEula') }}
-            </span>
-          </v-checkbox>
+          <v-btn to="/setup-wizard">
+            {{ $t('eula.action.run_setup_wizard') }}
+          </v-btn>
+          <v-btn @click="eulaAgree = true">
+            {{ $t('eula.action.agreeEula') }}
+          </v-btn>
         </v-alert>
       </v-flex>
     </v-layout>

@@ -30,8 +30,8 @@
               <v-list-tile
                 :key="categoryIndex"
                 avatar
-                @click="chooseCategory(categoryIndex)"
                 :color="isActiveCategory(categoryIndex)"
+                @click="chooseCategory(categoryIndex)"
               >
                 <v-list-tile-avatar v-if="faqCategory.icon">
                   <v-icon>
@@ -59,8 +59,8 @@
               <v-list-tile
                 :key="faqIndex"
                 avatar
-                @click="selectedEntry = faqIndex"
                 :color="isActiveEntry(faqIndex)"
+                @click="selectedEntry = faqIndex"
               >
                 <v-list-tile-content>
                   <v-list-tile-title>
@@ -82,7 +82,9 @@
               <component :is="component" v-if="component !== null" />
               <template v-else>
                 <youtube v-if="youtubeVideo" :video-id="youtubeVideo" player-width="100%" />
-                <span v-html="displayText" />
+                <span>
+                  {{ displayText }}
+                </span>
               </template>
             </v-flex>
           </v-layout>

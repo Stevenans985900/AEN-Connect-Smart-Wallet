@@ -29,13 +29,13 @@
     <v-dialog v-if="dialogShowWallet === true" v-model="dialogShowWallet" fullscreen="">
       <v-toolbar class="primary">
         <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
-        <v-btn v-if="contextWallet.onChain === true" @click="dialogMakeTransfer = true" small outline>
+        <v-btn v-if="contextWallet.onChain === true" small outline @click="dialogMakeTransfer = true">
           Send
         </v-btn>
-        <v-btn @click="addressShow(contextWallet)" small outline>
+        <v-btn small outline @click="addressShow(contextWallet)">
           Receive
         </v-btn>
-        <v-btn v-if="contextWallet.address !== mainWalletAddress" @click="dialogRemoveWallet = true" small outline>
+        <v-btn v-if="contextWallet.address !== mainWalletAddress" small outline @click="dialogRemoveWallet = true">
           Disable
         </v-btn>
         <v-spacer />
@@ -166,6 +166,9 @@ export default {
     )
 
   },
+  beforeDestroy() {
+    clearInterval(this.balanceCheckInterval)
+  },
   methods: {
     processWallets() {
       this.processedWallets = 0
@@ -233,9 +236,6 @@ export default {
     reset() {
       Object.assign(this.$data, initialDataState())
     }
-  },
-  beforeDestroy() {
-    clearInterval(this.balanceCheckInterval)
   }
 }
 </script>

@@ -8,11 +8,45 @@
         <v-list-tile @click="dialogWalletControl = true">
           <v-list-tile-title>Wallet Control</v-list-tile-title>
         </v-list-tile>
+        <v-list-tile @click="dialogDeployContract= true">
+          <v-list-tile-title>Deploy test contract</v-list-tile-title>
+        </v-list-tile>
         <v-list-tile @click="dialogSecurity = true">
           <v-list-tile-title>Security</v-list-tile-title>
         </v-list-tile>
       </v-list>
     </v-menu>
+
+    <v-dialog v-if="dialogDeployContract" v-model="dialogDeployContract">
+      <v-toolbar color="primary">
+        <v-toolbar-title>Deploy Test Contract to Ethereum wallet</v-toolbar-title>
+        <v-spacer />
+        <v-btn small fab outline @click="dialogDeployContract = false">
+          <v-icon>close</v-icon>
+        </v-btn>
+      </v-toolbar>
+      <v-card>
+        <v-card-text>
+          <v-layout row wrap>
+            <v-flex xs12>
+              {{ debug }}
+              <v-select
+                v-model="wallet"
+                :items="ethereumWallets"
+                return-object
+                item-text="name"
+                label="Select an Ethereum wallet to deploy the contract from"
+              />
+            </v-flex>
+            <v-flex xs12>
+              <v-btn @click="deployTestContract()">
+                Deploy Test Ticket
+              </v-btn>
+            </v-flex>
+          </v-layout>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
 
     <v-dialog v-if="dialogSecurity" v-model="dialogSecurity" fullscreen>
       <v-toolbar color="primary">
@@ -108,7 +142,10 @@ export default {
      */
   data() {
     return {
+      debug: null,
       walletAddress: 'global',
+      wallet: null,
+      dialogDeployContract: false,
       dialogWalletControl: false,
       dialogSecurity: false,
       search: '',
@@ -144,6 +181,9 @@ export default {
      * COMPUTED
      */
   computed: {
+    ethereumWallets() {
+      return this.$store.getters['wallet/walletsByType']('eth')
+    },
     walletsWithSecurity() {
       return this.$store.state.security.walletPolicies
     },
@@ -280,6 +320,37 @@ export default {
      * METHODS
      */
   methods: {
+    deployTestContract() {
+      console.debug('Development: Deploying test contract')
+
+      import('~/class/network/contract/test.json').then((jsonInterface) => {
+        const web3 = this.$store.getters["wallet/networkHandler"]("contract").web3
+        let contract = new web3.eth.Contract(jsonInterface.abi)
+        console.log('contract')
+        console.log(contract)
+        let processed = contract.deploy({
+          data: jsonInterface.abi
+        })
+        console.log('processed')
+        console.log(processed)
+        // prepare transaction
+        let transactionOptions = {
+          to  : this.wallet.address,
+          data: processed.encodeABI(),
+          gas : 1500000
+        }
+        console.log('transaction options')
+        console.log(transactionOptions)
+        this.$store.dispatch('security/getCredentials', this.wallet.address).then((credentials) => {
+          console.log(credentials)
+          web3.eth.accounts.signTransaction(transactionOptions, credentials.privateKey).then((signedTransaction) => {
+            console.log('transaction signed')
+            console.log(signedTransaction)
+             this.debug = web3.eth.sendSignedTransaction(signedTransaction.rawTransaction)
+          })
+        })
+      })
+    },
     removeSecurityPolicy(wallet) {
       console.log('removing wallet policy')
       console.log(wallet)

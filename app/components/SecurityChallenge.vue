@@ -27,7 +27,6 @@
     <!-- Display challenge -->
     <v-card v-else>
       <v-card-text>
-
         <p>
           {{ wallet.name }}: {{ $t('security.message.authenticate_to_continue') }}
         </p>

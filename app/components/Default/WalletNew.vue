@@ -20,8 +20,8 @@
           :rules="[rules.basic.required, rules.walletName.minLength]"
           :error-messages="walletNameAvailable()"
           :label="$t('wallet.label.name')"
-          @keyup.enter="createWallet"
           required
+          @keyup.enter="createWallet"
         />
       </v-flex>
       <v-flex xs12>

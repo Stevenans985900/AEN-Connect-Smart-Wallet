@@ -164,7 +164,9 @@
             {{ contextWallet.name }}
           </v-card-title>
           <v-card-text>
-            <span v-html="$t('wallet.remove_instruction')" />
+            <span>
+              {{ $t('wallet.remove_instruction') }}
+            </span>
             <backup-wallet :wallet="contextWallet" />
           </v-card-text>
           <v-card-actions>

@@ -121,4 +121,6 @@ export default class Aen extends Generic {
       resolve(walletObject)
     })
   }
+
+  web3() { return this.web3 }
 }
