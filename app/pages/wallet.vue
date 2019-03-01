@@ -33,12 +33,12 @@
           <v-card-text v-if="haveWallet">
             <v-expansion-panel>
               <v-expansion-panel-content v-for="(wallet, address) in wallets" :key="address">
+                <!-- Main Table Row -->
                 <div slot="header" @click="accordionTogglingWallet(wallet)">
                   <v-layout row wrap>
                     <v-flex xs2 sm1>
                       <wallet-image :wallet="wallet" />
                     </v-flex>
-
                     <v-flex xs7 sm5 class="text-truncate">
                       <v-layout row wrap>
                         <v-flex xs12 sm6>
@@ -49,7 +49,7 @@
                         </v-flex>
                       </v-layout>
                     </v-flex>
-
+                    <!-- Wallet Controls -->
                     <v-flex v-if="$vuetify.breakpoint.mdAndUp" xs3 sm6 class="text-xs-right">
                       <v-btn v-if="wallet.onChain === true" outline small @click="contextWallet = wallet; dialogMakeTransfer = true">
                         {{ $t('common.action.send') }}
@@ -61,6 +61,7 @@
                         {{ $t('common.action.disable') }}
                       </v-btn>
                     </v-flex>
+                    <!-- Mobile Button -->
                     <v-flex v-else xs3 sm6 class="text-xs-right">
                       <v-menu offset-y>
                         <v-btn
@@ -87,12 +88,13 @@
                 </div>
                 <v-card>
                   <v-card-text>
-                    <v-btn outline fab small @click="refreshHistory">
+                    <v-btn outline icon small @click="refreshHistory">
                       <v-icon>
                         loop
                       </v-icon>
                     </v-btn>
                     <testnet-buttons :wallet="wallet" />
+                    <address-render :address="wallet.address" :use-address-book="false" />
                     <wallet-history v-if="wallet.onChain === true" :wallet="wallet" />
                     <activation v-else :wallet="wallet" />
                     <hr>
@@ -111,10 +113,10 @@
 
       <!-- Show Address Dialog -->
       <v-dialog v-if="dialogAddressShow === true" v-model="dialogAddressShow" max-width="500px">
-        <v-toolbar class="primary mb-2">
+        <v-toolbar class="primary">
           <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
           <v-spacer />
-          <v-btn small fab outline @click="dialogAddressShow = false">
+          <v-btn small icon outline @click="dialogAddressShow = false">
             <v-icon>close</v-icon>
           </v-btn>
         </v-toolbar>
@@ -143,7 +145,7 @@
         <v-toolbar color="primary">
           <v-toolbar-title>{{ $t('wallet.make_transfer_from') }}{{ contextWallet.name }}</v-toolbar-title>
           <v-spacer />
-          <v-btn small fab outline @click="dialogMakeTransfer = false">
+          <v-btn small icon outline @click="dialogMakeTransfer = false">
             <v-icon>close</v-icon>
           </v-btn>
         </v-toolbar>
@@ -155,7 +157,7 @@
         <v-toolbar color="primary">
           <v-toolbar-title>{{ $t('common.message.are_you_sure') }}</v-toolbar-title>
           <v-spacer />
-          <v-btn small fab outline @click="dialogRemoveWallet = false">
+          <v-btn small icon outline @click="dialogRemoveWallet = false">
             <v-icon>close</v-icon>
           </v-btn>
         </v-toolbar>
@@ -323,7 +325,11 @@ export default {
       }
     },
     refreshHistory() {
+      console.log('refreshing history')
+      this.$store.commit('CACHE_SKIP', true)
       this.$store.dispatch('wallet/transactionsHistorical', this.contextWallet)
+      this.$store.commit('CACHE_SKIP', true)
+      this.$store.dispatch('wallet/balance', this.contextWallet)
     },
     removeWallet() {
       this.dialogRemoveWallet = false

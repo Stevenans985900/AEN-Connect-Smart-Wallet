@@ -12,7 +12,7 @@
       </v-icon>
     </span>
     <span v-if="display === 'all' || display === 'value'" :class="direction">
-      {{ value }}
+      <token-value :symbol="symbol" :value="transaction.value" :type="wallet.type" />
     </span>
     <span v-if="display === 'all' || display === 'address'">
       <address-render :address="address" show-add />
@@ -34,9 +34,11 @@
 
 <script>
 import { format } from 'date-fns'
+import TokenValue from '~/components/TokenValue'
 // import Web3 from 'web3'
 
 export default {
+  components: { TokenValue },
   props: {
     display: {
       type: String,
@@ -81,11 +83,7 @@ export default {
     date() {
       return format(this.transaction.timeStamp * 1000, 'YYYY-MM-DD HH:mm')
     },
-    value() {
-      console.log(this.transaction)
-      if (!this.transaction.hasOwnProperty('value')) return ''
-      return this.transaction.value
-    }
+    symbol() { return this.$store.state.wallet.eth.displaySymbol }
   },
   created() {}
 }

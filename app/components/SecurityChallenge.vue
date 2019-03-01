@@ -3,7 +3,7 @@
     <v-toolbar color="primary">
       <v-toolbar-title>{{ $t('common.label.security') }}</v-toolbar-title>
       <v-spacer />
-      <v-btn small fab outline @click="validity = 'CANCELLED'">
+      <v-btn small icon outline @click="validity = 'CANCELLED'">
         <v-icon>close</v-icon>
       </v-btn>
     </v-toolbar>

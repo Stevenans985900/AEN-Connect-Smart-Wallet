@@ -21,7 +21,7 @@
       <v-toolbar color="primary">
         <v-toolbar-title>Deploy Test Contract to Ethereum wallet</v-toolbar-title>
         <v-spacer />
-        <v-btn small fab outline @click="dialogDeployContract = false">
+        <v-btn small icon outline @click="dialogDeployContract = false">
           <v-icon>close</v-icon>
         </v-btn>
       </v-toolbar>
@@ -50,7 +50,7 @@
 
     <v-dialog v-if="dialogSecurity" v-model="dialogSecurity" fullscreen>
       <v-toolbar color="primary">
-        <v-btn small fab outline @click="dialogSecurity = false">
+        <v-btn small icon outline @click="dialogSecurity = false">
           <v-icon>arrow_back</v-icon>
         </v-btn>
         <v-toolbar-title>Security Controls</v-toolbar-title>
@@ -78,7 +78,7 @@
 
     <v-dialog v-if="dialogWalletControl" v-model="dialogWalletControl" fullscreen>
       <v-toolbar color="primary">
-        <v-btn small fab outline @click="dialogWalletControl = false">
+        <v-btn small icon outline @click="dialogWalletControl = false">
           <v-icon>arrow_back</v-icon>
         </v-btn>
         <v-toolbar-title>Wallet Development Controls</v-toolbar-title>

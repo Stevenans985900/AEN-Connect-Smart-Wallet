@@ -57,7 +57,7 @@
             {{ $t('contact.label.contact') }}
           </v-toolbar-title>
           <v-spacer />
-          <v-btn small fab outline @click="dialogEditContact = false; address = ''">
+          <v-btn small icon outline @click="dialogEditContact = false; address = ''">
             <v-icon>close</v-icon>
           </v-btn>
         </v-toolbar>
@@ -71,7 +71,7 @@
             {{ $t('common.message.are_you_sure') }}
           </v-toolbar-title>
           <v-spacer />
-          <v-btn small fab outline @click="dialogDeleteContact = false">
+          <v-btn small icon outline @click="dialogDeleteContact = false">
             <v-icon>close</v-icon>
           </v-btn>
         </v-toolbar>

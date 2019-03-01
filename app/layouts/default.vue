@@ -222,6 +222,7 @@ export default {
    */
   beforeMount() {
     this.$store.commit('security/resetAttemptCount')
+    this.$store.commit('CACHE_SKIP', false)
     this.$store.commit('setAppMode', 'web')
     const env = process.env.NODE_ENV || 'dev'
     this.$store.commit('setRuntimeProperty', {

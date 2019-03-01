@@ -14,8 +14,7 @@ export default class Aen extends Generic {
     Generic.prototype.balance.call(this, options)
     return new Promise((resolve) => {
       this.web3.eth.getBalance(options.address).then((wei) => {
-        const eth = this.web3.utils.fromWei(wei, 'ether')
-        resolve(eth)
+        resolve(wei)
       })
     })
   }

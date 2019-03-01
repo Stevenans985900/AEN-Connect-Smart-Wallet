@@ -28,9 +28,7 @@ export default {
   },
   watch: {
     wallet: function () {
-      console.log('before')
       this.updateComponent()
-      console.log('after')
     }
   },
   mounted: function () {

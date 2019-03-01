@@ -15,7 +15,8 @@ export const initialState = {
     mode: 'web',
     environment: 'production',
     isOnline: false,
-    intervalTimers: {}
+    intervalTimers: {},
+    skipCacheNextOp: false
   },
   // When running as a desktop app
   electron: {
@@ -28,10 +29,6 @@ export const initialState = {
     router: true,
     page: false,
     message: ''
-  },
-  // User options for security
-  security: {
-
   },
   // Shared user preferences
   user: {
@@ -204,6 +201,9 @@ export const mutations = {
   },
   dismissNotification(state) {
     state.notification.show = false
+  },
+  CACHE_SKIP(state, boolean) {
+    state.runtime.skipCacheNextOp = boolean
   },
   showNotification(state, inputObject) {
     inputObject.show = true

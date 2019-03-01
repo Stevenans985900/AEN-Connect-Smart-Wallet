@@ -40,7 +40,7 @@
         </v-btn>
         <v-spacer />
         <busy />
-        <v-btn small fab outline @click="dialogShowWallet = false">
+        <v-btn small icon outline @click="dialogShowWallet = false">
           <v-icon>close</v-icon>
         </v-btn>
       </v-toolbar>
@@ -57,7 +57,7 @@
       <v-toolbar color="primary">
         <v-toolbar-title>{{ $t('wallet.make_transfer_from') }}{{ contextWallet.name }}</v-toolbar-title>
         <v-spacer />
-        <v-btn small fab outline @click="dialogMakeTransfer = false">
+        <v-btn small icon outline @click="dialogMakeTransfer = false">
           <v-icon>close</v-icon>
         </v-btn>
       </v-toolbar>
@@ -69,7 +69,7 @@
       <v-toolbar color="primary">
         <v-toolbar-title>Are you sure you want to remove the wallet?</v-toolbar-title>
         <v-spacer />
-        <v-btn small fab outline @click="dialogRemoveWallet = false">
+        <v-btn small icon outline @click="dialogRemoveWallet = false">
           <v-icon>close</v-icon>
         </v-btn>
       </v-toolbar>

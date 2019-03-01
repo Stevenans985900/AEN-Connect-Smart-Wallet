@@ -14,19 +14,19 @@ export const initialState = {
     blockHeight: 0,
     blockScore: 0,
     network: {},
-    symbol: 'aen'
+    displaySymbol: 'default'
   },
   btc: {
     activeApiEndpoint: '',
     activeApiPing: 9999,
     network: {},
-    symbol: 'btc'
+    displaySymbol: 'default'
   },
   eth: {
     activeApiEndpoint: '',
     activeApiPing: 9999,
     network: {},
-    symbol: 'wei'
+    displaySymbol: 'default'
   },
   internal: {
     walletCheckInterval: 10000,
@@ -118,8 +118,14 @@ export const actions = {
       }
       // Use cache if function called to recently
       if((Date.now() - wallet.balanceLastSynced) < Vue.prototype.$g('internal.walletRefreshGraceTime')) {
-        resolve(wallet)
-        return
+        if(rootState.runtime.skipCacheNextOp === true) {
+          console.debug('Skipping cache')
+          commit('CACHE_SKIP', false, { root: true})
+        } else {
+          console.debug('Balance: Using cache')
+          resolve(wallet)
+          return
+        }
       }
       // Set the page loader going
       commit('setLoading', {
@@ -186,9 +192,16 @@ export const actions = {
         resolve(wallet)
       }
       // Use cache if function called to recently
+
       if((Date.now() - wallet.transactionsLastSynced) < Vue.prototype.$g('internal.walletRefreshGraceTime')) {
-        resolve(wallet)
-        return
+        if(rootState.runtime.skipCacheNextOp === true) {
+          console.debug('Skipping cache')
+          commit('CACHE_SKIP', false, { root: true})
+        } else {
+          console.debug('Transactions Historical: Using cache')
+          resolve(wallet)
+          return
+        }
       }
       commit('setLoading', {
         t: 'page',
@@ -583,6 +596,7 @@ export const mutations = {
   deleteContact(state, contact) {
     Vue.delete(state.contacts, contact.address)
   },
+
   setContact(state, contact) {
     state.contacts[contact.address] = contact
   },

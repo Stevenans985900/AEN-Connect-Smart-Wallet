@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-menu v-model="netStatus" :close-on-content-click="false" offset-y>
-      <v-btn slot="activator" fab flat small>
+      <v-btn slot="activator" icon flat>
         <v-avatar size="24">
           <v-icon :color="color" v-text="connectionStrengthIcon" />
         </v-avatar>

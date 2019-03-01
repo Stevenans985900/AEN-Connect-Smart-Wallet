@@ -9,7 +9,7 @@
       <v-toolbar color="primary">
         <v-toolbar-title>{{ $t('contact.action.add') }}</v-toolbar-title>
         <v-spacer />
-        <v-btn small fab outline @click="dialog = false">
+        <v-btn small icon outline @click="dialog = false">
           <v-icon>close</v-icon>
         </v-btn>
       </v-toolbar>
