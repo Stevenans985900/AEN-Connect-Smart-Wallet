@@ -62,6 +62,7 @@
       "submit": "Submit"
     },
     "label": {
+      "accounts": "Accounts",
       "actions": "Actions",
       "address": "Address",
       "amount": "Amount",
@@ -124,10 +125,11 @@
   "eula": {
     "action": {
       "agreeEula": "I agree to the AEN EULA",
+      "read_eula": "Read EULA",
       "run_setup_wizard": "Run Setup wizard"
     },
     "message": {
-      "introduction": "<p>This is the first community release, please do not use this wallet to store real accounts on!</p><p>By proceeding, you accept the <a href=\"http://aencoin.com/eula\" target=\"_blank\">AEN end user license agreement</a></p>"
+      "introduction": "This is a first community release and should be treated as preview. {lease do not use this wallet to store real accounts on."
     }
   },
   "feedback": {
@@ -158,9 +160,14 @@
     },
     "label": {
       "aen": "AEN",
-      "eth": "Ethereum",
+      "api_endpoint": "API Endpoint",
       "btc": "Bitcoin",
+      "connection_status": "Connection Status",
       "contract": "ERC20 Contract",
+      "current_api_endpoint": "Current API Endpoint",
+      "eth": "Ethereum",
+      "offline": "Offline",
+      "online": "Online",
       "testnet_functions": "TestNet Functions"
     },
     "message": {
@@ -204,6 +211,7 @@
       "cannot_exceed_balance": "Cannot exceed more than available balance",
       "capabilities": "With this wallet, you can now receive and transfer tokens using the AENChain network. Before proceeding, we strongly recommend you create a backup of your wallet using the button below.",
       "checking_wallet_status": "Checking Wallet Status",
+      "blocked_until_transaction": "This component will auto-update once a transaction has been made",
       "initial_status": "At the moment, your wallet is not live on the network. It is necessary to perform a transaction using this address before it has any presence.",
       "network_recognise_wallet": "The wallet is recognised on the network",
       "network_miss_wallet": "The wallet is not yet recognised on the network",

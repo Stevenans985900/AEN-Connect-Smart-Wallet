@@ -52,10 +52,12 @@ export default {
             } else {
               walletInformation = JSON.parse(walletData.data)
             }
+            console.log(walletInformation)
             walletInformation.credentials = JSON.parse(CryptoJS.AES.decrypt(
                 walletInformation.credentials,
                 this.$g('salt')
             ).toString(CryptoJS.enc.Utf8))
+              console.log(walletInformation)
             // If prop states wallet is a main, force property in wallet
             if (this.main === true) {
               walletInformation.main = true

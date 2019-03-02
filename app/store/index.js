@@ -1,7 +1,3 @@
-import {
-  BlockchainHttp
-} from 'chain-js-sdk'
-
 export const initialState = {
   // Snackbar Controls
   notification: {
@@ -67,32 +63,6 @@ export const getters = {
             state.busy.router === true) {
       return true
     }
-  }
-}
-
-export const actions = {
-  /**
-     * Gets some generic (non wallet specific) related blockchain information
-     *
-     * @param {*} context
-     */
-  updateGenericNetworkInformation(context) {
-    console.debug('Index Store: Update Generic Network Information')
-    const apiEndpoint = context.state.wallet.aen.activeApiEndpoint
-    if (!apiEndpoint) {
-      return
-    }
-    const blockchainHttp = new BlockchainHttp(apiEndpoint)
-    // Get the network height
-    blockchainHttp.getBlockchainHeight()
-      .subscribe((height) => {
-        if (height.lower !== context.state.wallet.aen.blockHeight) {
-          context.commit('wallet/setAenProperty', {
-            key: 'blockHeight',
-            value: height.lower
-          })
-        }
-      })
   }
 }
 
@@ -182,7 +152,7 @@ export const mutations = {
     state.internal.activeApiEndpoint = value
   },
   setPingTime(state, value) {
-    state.internal.activeApiPing = value
+    state.internal.apiPing = value
   },
   setPreferredNode(state, address) {
     state.internal.preferredNode = address

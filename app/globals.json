@@ -18,7 +18,7 @@
   },
   "aen": {
     "networkVersion": "0.1",
-    "api_endpoint_test_uri": "/block/1",
+    "api_endpoint_height": "/chain/height",
     "api_endpoints": [{
         "alias": "API-2",
         "address": "http://api-2.aencoin.io:3000"
@@ -52,9 +52,9 @@
     }
   },
   "btc": {
-    "api_endpoint_test_uri": "",
     "block_cypher": {
-      "api_endpoint": "http://api.blockcypher.com/v1/btc/"
+      "api_endpoint": "http://api.blockcypher.com/v1/btc/",
+      "api_endpoint_height": ""
     },
     "blockchain_info": {
       "api_endpoint": "https://testnet.blockchain.info/"
@@ -82,14 +82,19 @@
   },
   "eth": {
     "etherscan": {
-      "api_key": "IJQ88ERU7QH9HQNV2NX46G2XJAIEZ6EBPB"
+      "api_key": "IJQ88ERU7QH9HQNV2NX46G2XJAIEZ6EBPB",
+      "api_endpoint": "http://api-###NETWORK_IDENTIFIER###.etherscan.io/api",
+      "api_endpoint_height": ""
+    },
+    "infura": {
+      "api_endpoint": "https://###NETWORK_IDENTIFIER###.infura.io/0HIuuP4qCjvv8DMGjvPm",
+      "api_endpoint_height": ""
     },
     "available_networks": [
       {
         "name": "Ropsten",
+        "identifier": "ropsten",
         "network_id": 3,
-        "etherscan_api_endpoint": "http://api-ropsten.etherscan.io/api",
-        "infura_api_endpoint": "https://ropsten.infura.io/0HIuuP4qCjvv8DMGjvPm",
         "testing": true,
         "gasPrice": {
           "normal": 5000000000,
@@ -109,6 +114,6 @@
   "exchange": {
     "aen": 15.02,
     "btc": 3787.99,
-    "eth": 5070.57
+    "eth": 1070.57
   }
 }

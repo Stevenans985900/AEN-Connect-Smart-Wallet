@@ -5,7 +5,7 @@
   >
     <v-btn
       slot="activator"
-      small round outline icon
+      flat icon
     >
       <v-icon>
         help
@@ -16,7 +16,7 @@
       <v-img src="/logo.png" contain height="25" max-width="125px" />
       <v-toolbar-title>{{ $t('common.label.help') }}</v-toolbar-title>
       <v-spacer />
-
+      <network-diagnostics />
       <v-btn small round outline @click="dialogShow = false">
         {{ $t('help.message.click_to_return') }}&nbsp;&nbsp;<v-icon>help</v-icon>
       </v-btn>
@@ -96,8 +96,9 @@
 
 <script>
   import FeedbackForm from '~/components/FeedbackForm'
+  import NetworkDiagnostics from '~/components/NetworkDiagnostics'
   export default {
-    components: { FeedbackForm },
+    components: { FeedbackForm, NetworkDiagnostics },
     data() {
       return {
         categoryComponent: null,
@@ -278,6 +279,12 @@
         }
       }
     },
+      mounted() {
+        // Get up to date status for each network
+        this.$store.dispatch('wallet/queryApiNode', 'aen')
+        this.$store.dispatch('wallet/queryApiNode', 'btc')
+        // this.$store.dispatch('wallet/queryApiNode', 'eth')
+      },
     methods: {
       chooseCategory(categoryIndex) {
         this.selectedCategory = null

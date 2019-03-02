@@ -23,11 +23,11 @@ export default class Btc extends Generic {
    * START OF COMMON METHODS
    */
 
-  constructor(btcConfig) {
+  constructor(apiEndpoint, config) {
     super()
-    this.blockchainInfoEndpoint = btcConfig.blockchain_info.api_endpoint
-    this.blockCypherEndpoint = btcConfig.block_cypher.api_endpoint
-    this.bitapsEndpoint = btcConfig.bitaps.api_endpoint
+    this.config = config
+    this.apiEndpoint = apiEndpoint
+    this.context = null
     this.pluginName = 'Btc'
   }
   /**
@@ -45,6 +45,17 @@ export default class Btc extends Generic {
         .catch(function (error) {
           reject(error)
         })
+    })
+  }
+  setContext(context) { this.context = context }
+  getHeight() {
+    return new Promise((resolve, reject) => {
+      axios.get(this.config.block_cypher.api_endpoint + this.context.block_cypher_id)
+          .then((response) => {
+            console.log(response)
+              resolve(response.data.height)
+          })
+          .catch((err) => { reject(err) })
     })
   }
   /**

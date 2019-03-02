@@ -78,19 +78,12 @@
                         Accept End User License Agreement
                       </h2>
                     </div>
-                    <p v-if="testnet">
-                      This wallet is on a testing network which means, you can receive some free coins to get started by visiting our faucet.
-                      Click the button below to visit the Faucet.
-                    </p>
                     <p>
                       Click the accept button to agree to the <a href="http://aencoin.com/eula">
                         End User License Agreement
                       </a>
                       and go to your wallet management screen.
                     </p>
-                    <v-btn v-if="testnet" @click="goToFaucet">
-                      Go to Faucet
-                    </v-btn>
                     <v-btn color="primary" @click="acceptAndProceed">
                       Accept EULA and proceed
                     </v-btn>

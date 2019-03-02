@@ -1,5 +1,5 @@
 <template>
-  <v-layout row justify-center>
+  <v-layout row justify-center pa-2>
     <v-flex xs12>
       <!-- For selecting / adding security scopes -->
       <v-toolbar v-if="globalSecurityOnly === false">

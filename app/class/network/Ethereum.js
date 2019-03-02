@@ -70,6 +70,13 @@ export default class Aen extends Generic {
     })
   }
 
+  getHeight() {
+    return new Promise((resolve) => {
+      this.web3.eth.getBlockNumber().then((height) => {
+        resolve(height)
+      })
+    })
+  }
   /**
      * For Ethereum, check the balance of the account to determine whether or not it is live
      * @param options

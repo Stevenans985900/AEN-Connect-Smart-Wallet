@@ -2,6 +2,7 @@ import {
   Account,
   AccountHttp,
   Address,
+  BlockchainHttp,
   Deadline,
   MosaicHttp,
   MosaicService,
@@ -25,9 +26,16 @@ import {
 import Generic from './Generic.js'
 
 export default class Aen extends Generic {
-  constructor(apiEndpoint) {
+
+  /**
+   *
+   * @param apiEndpoint Network reachable address to use for communication
+   * @param config The AEN globals configuration object
+   */
+  constructor(apiEndpoint, config) {
     super()
     this.apiEndpoint = apiEndpoint
+    this.config = config
     this.pluginName = 'AEN'
   }
   accountLoad(options) {
@@ -77,6 +85,21 @@ export default class Aen extends Generic {
       )
     })
   }
+
+  /**
+   * Get the reported height of the blockchain at the current API point
+   */
+  getHeight() {
+    return new Promise((resolve) => {
+      const blockchainHttp = new BlockchainHttp(this.apiEndpoint)
+      // Get the network height
+      blockchainHttp.getBlockchainHeight()
+        .subscribe((height) => {
+          resolve(height.lower)
+        })
+    })
+  }
+
   /**
      * @param options
      */

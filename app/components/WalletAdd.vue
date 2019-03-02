@@ -80,6 +80,11 @@
   </v-layout>
 </template>
 
+<style scoped>
+  .v-stepper {
+    box-shadow: none;
+  }
+</style>
 <script>
   import BackupWallet from '~/components/BackupWallet'
   import RestoreFromFile from '~/components/RestoreFromFile'

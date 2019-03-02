@@ -88,11 +88,8 @@
                 </div>
                 <v-card>
                   <v-card-text>
-                    <v-btn outline icon small @click="refreshHistory">
-                      <v-icon>
-                        loop
-                      </v-icon>
-                    </v-btn>
+                    <refresh-wallet :wallet="wallet" />
+
                     <testnet-buttons :wallet="wallet" />
                     <address-render :address="wallet.address" :use-address-book="false" />
                     <wallet-history v-if="wallet.onChain === true" :wallet="wallet" />
@@ -190,6 +187,7 @@
 import Activation from '~/components/Activation'
 import Balance from '~/components/Balance'
 import BackupWallet from '~/components/BackupWallet'
+import RefreshWallet from '~/components/RefreshWallet'
 // import VueRecaptcha from 'vue-recaptcha'
 import WalletHistory from '~/components/WalletHistory'
 import MakeTransfer from '~/components/MakeTransfer'
@@ -238,6 +236,7 @@ export default {
     BackupWallet,
     Balance,
     MakeTransfer,
+    RefreshWallet,
     TestnetButtons,
     WalletAdd,
     WalletHistory
@@ -323,13 +322,6 @@ export default {
           this.$store.commit('setActiveWallet', wallet)
           break
       }
-    },
-    refreshHistory() {
-      console.log('refreshing history')
-      this.$store.commit('CACHE_SKIP', true)
-      this.$store.dispatch('wallet/transactionsHistorical', this.contextWallet)
-      this.$store.commit('CACHE_SKIP', true)
-      this.$store.dispatch('wallet/balance', this.contextWallet)
     },
     removeWallet() {
       this.dialogRemoveWallet = false

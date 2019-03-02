@@ -51,7 +51,6 @@
         <busy />
       </no-ssr>
       <development v-if="environment === 'development'" />
-      <network-diagnostics />
       <help />
     </v-toolbar>
 
@@ -83,10 +82,9 @@
 </template>
 
 <script>
-
+import { mapActions } from 'vuex'
 import Busy from '~/components/Busy'
 import Development from '~/components/Development'
-import NetworkDiagnostics from '~/components/NetworkDiagnostics'
 import Help from '~/components/Help'
 import SecurityChallenge from '~/components/SecurityChallenge'
 import isElectron from 'is-electron'
@@ -108,7 +106,6 @@ export default {
     Development,
     EndUserLicenseAgreement,
     Help,
-    NetworkDiagnostics,
     SecurityChallenge
   },
   /**
@@ -282,26 +279,23 @@ export default {
       if (Object.keys(this.$store.state.wallet.btc.network).length === 0) {
           this.$store.commit('wallet/setBtcProperty', { key: 'network', value: this.$g('btc.available_networks')[0] })
       }
-    if (this.$store.state.wallet.eth.activeApiEndpoint === '') {
-      this.$store.commit('wallet/setEthereumProperty', { key: 'network', value: this.$g('eth.available_networks')[0] })
-      this.$store.commit('wallet/setEthereumProperty', { key: 'activeApiEndpoint', value: this.$g('eth.available_networks')[0].infura_api_endpoint })
+    if (!this.$store.state.wallet.eth.activeApiEndpoint) {
+        console.log('identified withouot api')
+      this.$store.commit('wallet/setEthProperty', { key: 'network', value: this.$g('eth.available_networks')[0] })
     }
 
-    this.$store.dispatch('wallet/rankApiNodes')
+    this.rankApiNodes()
     setInterval(
       function () {
-        this.$store.dispatch('wallet/rankApiNodes')
+          this.rankApiNodes()
       }.bind(this),
       this.$g('internal.apiEndpointPingInterval')
     )
 
-    this.$store.dispatch('updateGenericNetworkInformation')
-    setInterval(
-      function () {
-        this.$store.dispatch('updateGenericNetworkInformation')
-      }.bind(this),
-      this.$g('internal.commonTasksInterval')
-    )
+    // Perform an initial investigation in to state of each network
+    //   this.$store.dispatch('wallet/queryApiNode', 'aen')
+    //   this.$store.dispatch('wallet/queryApiNode', 'btc')
+    //   this.$store.dispatch('wallet/queryApiNode', 'eth')
 
     // TODO Update currency exchange rates from binance. Due to CORS restriction, investigate web account or use proxy
     // this.$store.dispatch('exchange/updateRates')
@@ -320,6 +314,9 @@ export default {
     }
   },
   methods: {
+      ...mapActions({
+          rankApiNodes: 'wallet/rankApiNodes'
+      }),
     /**
      * Shutdown procedure
      */

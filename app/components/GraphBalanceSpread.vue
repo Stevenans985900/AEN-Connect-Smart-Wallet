@@ -1,10 +1,15 @@
 <template>
-  <v-layout v-if="haveWallet" row>
-    <v-flex xs12 lg3 class="ml-2">
+  <v-layout v-if="haveWallet" row align-center>
+    <v-flex xs12 sm4 lg3 pa-2>
       <v-progress-circular v-if="loading === true" indeterminate />
-      <doughnut v-else :title="chartTitle" :data="graphData" />
+      <v-card v-else flat>
+        <doughnut v-if="totalValue > 0" :title="chartTitle" :data="graphData" />
+        <p v-else>
+          {{ $t('wallet.message.blocked_until_transaction') }}
+        </p>
+      </v-card>
     </v-flex>
-    <v-flex xs12 md8 lg9>
+    <v-flex xs12 sm8 lg9>
       <v-progress-circular v-if="loading === true" indeterminate />
       <v-card v-else flat>
         <v-card-text>
@@ -28,11 +33,14 @@
     <!-- Show Wallet Dialog -->
     <v-dialog v-if="dialogShowWallet === true" v-model="dialogShowWallet" fullscreen="">
       <v-toolbar class="primary">
+        <v-btn small icon outline @click="dialogShowWallet = false">
+          <v-icon>arrow_back</v-icon>
+        </v-btn>
         <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
         <v-btn v-if="contextWallet.onChain === true" small outline @click="dialogMakeTransfer = true">
           Send
         </v-btn>
-        <v-btn small outline @click="addressShow(contextWallet)">
+        <v-btn small outline @click="dialogAddressShow = true">
           Receive
         </v-btn>
         <v-btn v-if="contextWallet.address !== mainWalletAddress" small outline @click="dialogRemoveWallet = true">
@@ -40,16 +48,26 @@
         </v-btn>
         <v-spacer />
         <busy />
-        <v-btn small icon outline @click="dialogShowWallet = false">
-          <v-icon>close</v-icon>
-        </v-btn>
       </v-toolbar>
       <v-card>
         <v-card-text>
+          <refresh-wallet :wallet="contextWallet" />
           <address-render :address="contextWallet.address" :use-address-book="false" />
           <wallet-history :wallet="contextWallet" />
         </v-card-text>
       </v-card>
+    </v-dialog>
+
+    <!-- Show Address Dialog -->
+    <v-dialog v-if="dialogAddressShow === true" v-model="dialogAddressShow" max-width="500px">
+      <v-toolbar class="primary">
+        <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
+        <v-spacer />
+        <v-btn small icon outline @click="dialogAddressShow = false">
+          <v-icon>close</v-icon>
+        </v-btn>
+      </v-toolbar>
+      <business-card :wallet="contextWallet" :use-address-book="false" />
     </v-dialog>
 
     <!-- Make Transfer Dialog -->
@@ -107,6 +125,7 @@
 import Doughnut from '~/components/Doughnut'
 import WalletHistory from '~/components/WalletHistory'
 import Busy from '~/components/Busy'
+import RefreshWallet from '~/components/RefreshWallet'
 function initialDataState() {
   return {
     processedWallets: 0,
@@ -116,6 +135,7 @@ function initialDataState() {
     // walletCount: 0,
     loading: true,
     contextWallet: {},
+    dialogAddressShow: false,
     dialogMakeTransfer: false,
     dialogRemoveWallet: false,
     dialogShowWallet: false,
@@ -126,6 +146,7 @@ export default {
   components: {
     Busy,
     Doughnut,
+    RefreshWallet,
     WalletHistory
   },
   data() { return initialDataState() },
