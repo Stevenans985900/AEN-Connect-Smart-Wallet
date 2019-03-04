@@ -62,12 +62,14 @@ export default {
         return 0
       }
 
+      let first = true
       // If not displaying currency in any particular manner, try to use the smallest to show
       if (this.symbol === 'default') {
         const typeKeys = Object.keys(this.symbolDivisibility[this.type])
         for (let index = 0; index < typeKeys.length; index++) {
           let divider = this.symbolDivisibility[this.type][typeKeys[index]]
-          if(divider <= 0) {
+          if(first === true) {
+            first = false
             this.displayAmount = numeric.toFixed(2)
             this.displaySymbol = typeKeys[index]
             continue
@@ -78,6 +80,7 @@ export default {
           } else {
             break
           }
+
         }
       } else {
         this.displaySymbol = this.symbol

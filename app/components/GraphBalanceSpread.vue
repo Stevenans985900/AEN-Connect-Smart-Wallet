@@ -204,7 +204,7 @@ export default {
           .then((walletProcessed) => {
             // const color = this.colorSchema[walletProcessed.type]
             // Calculate the dollar value of the wallet
-            const walletValue = walletProcessed.balance * this.$g('exchange.' + walletProcessed.type)
+            const walletValue = (walletProcessed.balance ? walletProcessed.balance * Number(this.$g('exchange.' + walletProcessed.type)) : 0)
             this.totalValue += walletValue
             this.graphData[walletProcessed.name] = walletValue
             this.processedWallets++
@@ -225,7 +225,11 @@ export default {
         message: this.$t('wallet.message.remove_sucess')
       })
     },
-    toCurrency(amount, target) { return 'USD ' + this.toSmallestDenomination((amount * this.$g('exchange.' + target))) },
+    toCurrency(amount, target) {
+      return 'USD ' + this.toSmallestDenomination(
+        (amount ? amount * Number(this.$g('exchange.' + target)) : 0 )
+      )
+    },
     walletAdded() {
       this.dialogWalletAdd = false
       this.$store.commit('showNotification', {

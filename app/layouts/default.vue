@@ -73,7 +73,9 @@
     <!-- FOOTER AREA -->
     <v-footer app height="auto" color="primary">
       <v-toolbar dense>
-        <v-toolbar-title>&copy; {{ new Date().getFullYear() }} Aenco Solutions Ltd - Global Health Blockchain Financial Solutions</v-toolbar-title>
+        <v-toolbar-title>
+          &copy; {{ new Date().getFullYear() }} {{ $t('common.message.footer_text') }}
+        </v-toolbar-title>
         <v-spacer />
         {{ version }}#{{ buildNumber }}
       </v-toolbar>

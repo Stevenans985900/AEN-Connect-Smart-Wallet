@@ -5,6 +5,9 @@
       <v-container grid-list-md>
         <v-layout wrap>
           <v-flex xs12>
+            {{ $t('wallet.label.balance') }}: <token-value :symbol="symbol" :type="wallet.type" :value="wallet.balance" />
+          </v-flex>
+          <v-flex xs12>
             <v-combobox
               v-model="address"
               :items="contacts"
@@ -50,7 +53,9 @@
 </template>
 
 <script>
+  import TokenValue from "~/components/TokenValue"
   export default {
+    components: { TokenValue },
     props: {
       wallet: {
         type: Object,
@@ -70,7 +75,8 @@
         priorityTransfer: false,
         maximumGas: 0,
         normalGas: 0,
-        priorityGas: 0
+        priorityGas: 0,
+        transferValid: false
       }
     },
     computed: {
@@ -89,6 +95,9 @@
       gasPriceGwei: {
         get: function () { return this.gasPrice / 1000000000 },
         set: function (val) { this.gasPrice = val * 1000000000 }
+      },
+      symbol() {
+        return this.$store.state.wallet.eth.displaySymbol
       }
     },
     watch: {

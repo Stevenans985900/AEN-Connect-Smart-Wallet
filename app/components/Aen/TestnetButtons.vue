@@ -3,6 +3,7 @@
     <v-btn
       slot="activator"
       small
+      outline
     >
       {{ $t('network.label.testnet_functions') }}
       <v-icon>arrow_drop_down</v-icon>

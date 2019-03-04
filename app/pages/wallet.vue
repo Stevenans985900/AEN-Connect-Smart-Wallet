@@ -89,7 +89,6 @@
                 <v-card>
                   <v-card-text>
                     <refresh-wallet :wallet="wallet" />
-
                     <testnet-buttons :wallet="wallet" />
                     <address-render :address="wallet.address" :use-address-book="false" />
                     <wallet-history v-if="wallet.onChain === true" :wallet="wallet" />
@@ -140,7 +139,7 @@
       <!-- Make Transfer Dialog -->
       <v-dialog v-if="dialogMakeTransfer === true" v-model="dialogMakeTransfer" persistent max-width="450px">
         <v-toolbar color="primary">
-          <v-toolbar-title>{{ $t('wallet.make_transfer_from') }}{{ contextWallet.name }}</v-toolbar-title>
+          <v-toolbar-title>{{ $t('wallet.label.transfer_from') }}{{ contextWallet.name }}</v-toolbar-title>
           <v-spacer />
           <v-btn small icon outline @click="dialogMakeTransfer = false">
             <v-icon>close</v-icon>
@@ -163,9 +162,9 @@
             {{ contextWallet.name }}
           </v-card-title>
           <v-card-text>
-            <span>
-              {{ $t('wallet.remove_instruction') }}
-            </span>
+            <p>
+              {{ $t('wallet.message.remove_warning') }}
+            </p>
             <backup-wallet :wallet="contextWallet" />
           </v-card-text>
           <v-card-actions>

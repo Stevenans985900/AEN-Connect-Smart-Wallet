@@ -18,7 +18,7 @@
       <v-spacer />
       <network-diagnostics />
       <v-btn small round outline @click="dialogShow = false">
-        {{ $t('help.message.click_to_return') }}&nbsp;&nbsp;<v-icon>help</v-icon>
+        <v-icon>help</v-icon>&nbsp;{{ $t('help.message.click_to_return') }}
       </v-btn>
     </v-toolbar>
     <v-card>

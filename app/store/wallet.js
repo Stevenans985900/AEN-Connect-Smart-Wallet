@@ -315,9 +315,9 @@ export const actions = {
     })
   },
   load({state, commit, dispatch}, options) {
-    console.debug('Wallet Service:Load ' + options.type)
+    console.debug('Wallet Store: Load')
     // var vm = this
-
+    const typeRef = options.type[0].toUpperCase() + options.type.slice(1)
     return new Promise((resolve) => {
       const wallet = {
         onChain: false,
@@ -330,13 +330,12 @@ export const actions = {
       }
 
       let networkHandler
-      switch (options.type) {
-        case 'aen':
+      switch (typeRef) {
+        case 'Aen':
           networkHandler = new Aen(
               state.aen.activeApiEndpoint,
               Vue.prototype.$g('aen')
           )
-          // Do behind the scenes work
           networkHandler.accountLoad(options).then((accountObject) => {
             options.account = accountObject
             networkHandler
@@ -345,7 +344,7 @@ export const actions = {
                 Object.assign(wallet, walletObject)
                 // wallet.onChain = networkHandler.getLiveWallet(options)
                 if(options.main === true) {
-                  commit('setAenProperty', {
+                  commit('set'+typeRef+'Property', {
                     key: 'mainAddress',
                     value: wallet.address
                   })

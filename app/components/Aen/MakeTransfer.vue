@@ -9,10 +9,13 @@
         <v-container grid-list-md>
           <v-layout wrap>
             <v-flex xs12>
+              {{ $t('wallet.label.balance') }}: <token-value :symbol="symbol" :type="wallet.type" :value="wallet.balance" />
+            </v-flex>
+            <v-flex xs12>
               <v-text-field
                 v-model="destination.amount"
                 :label="$t('common.label.amount')"
-                :suffix="symbol"
+                suffix="AEN"
                 :error-messages="lessThanBalance()"
                 required
               />
@@ -47,7 +50,9 @@
 </template>
 
 <script>
+  import TokenValue from "~/components/TokenValue"
 export default {
+    components: { TokenValue },
   props: {
     wallet: {
       type: Object,
@@ -68,7 +73,7 @@ export default {
   },
   computed: {
     symbol() {
-      return this.$store.state.wallet.aen.symbol.toUpperCase()
+      return this.$store.state.wallet.aen.displaySymbol
     },
     contacts() {
       return this.$store.getters['wallet/contactsByWallet'](this.wallet)

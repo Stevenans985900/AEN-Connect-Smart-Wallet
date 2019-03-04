@@ -325,28 +325,30 @@ export default {
 
       import('~/class/network/contract/test.json').then((jsonInterface) => {
         const web3 = this.$store.getters["wallet/networkHandler"]("contract").web3
-        let contract = new web3.eth.Contract(jsonInterface.abi)
-        console.log('contract')
-        console.log(contract)
-        let processed = contract.deploy({
-          data: jsonInterface.abi
-        })
-        console.log('processed')
-        console.log(processed)
-        // prepare transaction
-        let transactionOptions = {
-          to  : this.wallet.address,
-          data: processed.encodeABI(),
-          gas : 1500000
-        }
-        console.log('transaction options')
-        console.log(transactionOptions)
+        // let contract = new web3.eth.Contract(jsonInterface.abi)
+
         this.$store.dispatch('security/getCredentials', this.wallet.address).then((credentials) => {
-          console.log(credentials)
-          web3.eth.accounts.signTransaction(transactionOptions, credentials.privateKey).then((signedTransaction) => {
-            console.log('transaction signed')
+          this.$store.commit('setLoading', {
+            t: 'page',
+            v: true,
+            m: 'development.label.deploy_contract'
+          })
+          // prepare transaction
+          web3.eth.accounts.signTransaction({
+            from: this.wallet.address,
+            data: jsonInterface.bin,
+            gas: 1500000,
+            chainId: this.wallet.network.network_id
+          }, credentials.privateKey).then((signedTransaction) => {
             console.log(signedTransaction)
-             this.debug = web3.eth.sendSignedTransaction(signedTransaction.rawTransaction)
+            web3.eth.sendSignedTransaction(signedTransaction.rawTransaction)
+              .on('receipt', function(receipt) {
+                console.debug(receipt)
+                this.$store.commit('setLoading', {
+                  t: 'page',
+                  v: false })
+
+                })
           })
         })
       })

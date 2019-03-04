@@ -21,7 +21,7 @@
       "choose_wallet": "Choose a wallet to backup"
     },
     "label": {
-      "file_choose": "Choose File"
+      "file_choose": "Choose or drag a file here"
     },
     "message": {
       "import_bad_file": "The uploaded file is invalid",
@@ -95,6 +95,7 @@
     "message": {
       "are_you_sure": "Are you sure?",
       "coming_soon": "Coming Soon",
+      "footer_text": "Aenco Solutions Ltd",
       "name_already_used": "Name already in use",
       "results_empty": "No results found",
       "something_went_wrong": "Something went wrong"
@@ -120,6 +121,11 @@
     },
     "chunk": {
       "removal_warning": "<p>If you remove this contact from your address book, you will no longer be able to quickly look them up during operations and where applicable, the long form of their address will be used.</p>"
+    }
+  },
+  "development": {
+    "label": {
+      "deploy_contract": "Deploy Contract"
     }
   },
   "eula": {
@@ -199,11 +205,13 @@
     },
     "label": {
       "backup_understand": "I have backed up my wallet / understand that keeping it safe is my duty",
+      "balance": "Balance",
       "create_new_now": "Create New Wallet Now",
       "import_from_file": "Import from file",
       "manual_input_existing": "Manually enter wallet details",
       "name": "Wallet Name",
-      "review": "Review you wallet"
+      "review": "Review you wallet",
+      "transfer_from": "Make a Transfer from "
     },
     "message": {
       "add_method": "How do you want to setup your wallet?",
@@ -216,13 +224,12 @@
       "network_recognise_wallet": "The wallet is recognised on the network",
       "network_miss_wallet": "The wallet is not yet recognised on the network",
       "remove_success": "Your wallet has been remove",
+      "remove_warning": "If you remove the wallet, there will be no way to access it unless you have made a backup.",
       "transfer_complete": "Your transfer has been successfully dispatched to the network",
       "transfer_start": "Sending transaction",
       "updating_balance": "Updating Balance",
       "updating_history": "Updating History"
-    },
-    "make_transfer_from": "Make a Transfer from ",
-    "remove_instruction": "<p>If you remove the wallet, there will be no way to access it unless you have made a backup.</p>"
+    }
   }
 
 }
