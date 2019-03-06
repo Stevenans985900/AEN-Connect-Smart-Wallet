@@ -12,6 +12,9 @@ export const initialState = {
     environment: 'production',
     isOnline: false,
     intervalTimers: {},
+    // Even though Vue is reactive, some of the deep components use calculations along with computed properties. This
+    // counter provides a simple way to watch for such events firing removing the need to watch deep
+    renderCounter: 0,
     skipCacheNextOp: false
   },
   // When running as a desktop app
@@ -67,6 +70,12 @@ export const getters = {
 }
 
 export const mutations = {
+  setRenderCounter(state, value) {
+    state.runtime.renderCounter = value
+  },
+  emitRenderEvent(state) {
+    state.runtime.renderCounter += 1
+  },
   reset(state) {
     Object.assign(state, initialState)
   },

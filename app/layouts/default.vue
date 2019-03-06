@@ -15,7 +15,7 @@
         </v-list>
         <v-spacer />
         <v-list>
-          <v-list-tile router exact>
+          <v-list-tile @click="dialogHelp = true">
             <v-list-tile-action>
               <v-icon>help</v-icon>
             </v-list-tile-action>
@@ -23,14 +23,14 @@
               {{ $t('common.navigation.help') }}
             </v-list-tile-content>
           </v-list-tile>
-          <v-list-tile router exact>
-            <v-list-tile-action>
-              <v-icon>exit_to_app</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-content>
-              {{ $t('common.navigation.exit') }}
-            </v-list-tile-content>
-          </v-list-tile>
+          <!--<v-list-tile router exact>-->
+            <!--<v-list-tile-action @click="dialogExit = true">-->
+              <!--<v-icon>exit_to_app</v-icon>-->
+            <!--</v-list-tile-action>-->
+            <!--<v-list-tile-content>-->
+              <!--{{ $t('common.navigation.exit') }}-->
+            <!--</v-list-tile-content>-->
+          <!--</v-list-tile>-->
         </v-list>
       </v-layout>
     </v-navigation-drawer>
@@ -69,6 +69,21 @@
         <nuxt />
       </v-container>
     </v-content>
+
+    <!-- Exit Dialog -->
+    <!--<v-dialog v-if="dialogExit === true" v-model="dialogExit" persistent max-width="450px">-->
+      <!--<v-toolbar color="primary">-->
+        <!--<v-toolbar-title>{{ $t('common.message.are_you_sure') }}</v-toolbar-title>-->
+        <!--<v-spacer />-->
+        <!--<v-btn small icon outline @click="dialogExit = false">-->
+          <!--<v-icon>close</v-icon>-->
+        <!--</v-btn>-->
+      <!--</v-toolbar>-->
+      <!--<p>-->
+        <!---->
+      <!--</p>-->
+      <!--<make-transfer :wallet="contextWallet" @complete="transferComplete()" />-->
+    <!--</v-dialog>-->
 
     <!-- FOOTER AREA -->
     <v-footer app height="auto" color="primary">
@@ -115,6 +130,7 @@ export default {
    */
   data() {
     return {
+      dialogExit: false,
       minifyDrawer: false,
       hydrated: false,
       navigationItems: [
@@ -158,7 +174,7 @@ export default {
    * COMPUTED
    */
   computed: {
-    dialogHelpShow: {
+    dialogHelp: {
       get: function () { return this.$store.state.user.help },
       set: function (val) { this.$store.commit('setUserProperty', {key: 'help', value: val}) }
     },

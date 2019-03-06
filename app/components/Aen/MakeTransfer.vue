@@ -65,10 +65,10 @@ export default {
     return {
       destination: {
         address: '',
-        amount: 0,
-        message: '',
-        transferValid: false
-      }
+        amount: '',
+        message: ''
+      },
+      transferValid: false
     }
   },
   computed: {

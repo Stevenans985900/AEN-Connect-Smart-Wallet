@@ -71,7 +71,7 @@
               {{ $t('common.action.confirm') }}
             </v-btn>
           </v-flex>
-          <v-flex xs12 md6 lg3>
+          <v-flex xs12 md6>
             <business-card :wallet="wallet" :include-private-key="true" :use-address-book="false" />
           </v-flex>
         </v-layout>

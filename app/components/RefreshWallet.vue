@@ -1,14 +1,18 @@
 <template>
-  <v-btn outline small @click="refreshHistory">
+  <v-btn v-if="wallet.onChain === true" outline small @click="refresh">
     <v-icon>
       loop
     </v-icon>
-    Synced {{ lastSynced }}
+    {{ $t('common.label.synced') }} {{ lastSynced }}
   </v-btn>
+  <wallet-check-on-chain v-else :wallet="wallet" />
 </template>
 <script>
+  import WalletCheckOnChain from "~/components/WalletCheckOnChain"
+
   import { format } from 'date-fns'
   export default {
+      components: { WalletCheckOnChain },
       props: {
           wallet: {
               type: Object,
@@ -17,15 +21,21 @@
       },
       computed:
       {
-        lastSynced() { return format(this.wallet.balanceLastSynced, 'Do MMM HH:mm') }
+        lastSynced() {
+            if(this.wallet.balanceLastSynced === false) {
+                return this.$t('common.label.never')
+            } else {
+                return format(this.wallet.balanceLastSynced, 'Do MMM HH:mm')
+            }
+        }
       },
       methods: {
-          refreshHistory() {
-              this.$store.commit('CACHE_SKIP', true)
-              this.$store.dispatch('wallet/transactionsHistorical', this.wallet)
-              this.$store.commit('CACHE_SKIP', true)
-              this.$store.dispatch('wallet/balance', this.wallet)
-          }
+          refresh() {
+            this.$store.commit('CACHE_SKIP', true)
+            this.$store.dispatch('wallet/transactionsHistorical', this.wallet)
+            this.$store.commit('CACHE_SKIP', true)
+            this.$store.dispatch('wallet/balance', this.wallet)
+        }
       }
   }
 </script>

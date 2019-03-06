@@ -79,6 +79,7 @@
       "na": "NA",
       "name": "Name",
       "network": "Network",
+      "never": "Never",
       "opportunities": "Investment Opportunities",
       "optional_message": "Message",
       "password": "Password",
@@ -88,6 +89,7 @@
       "search": "Search",
       "security": "Security",
       "send_message": "Send Message",
+      "synced": "Synced",
       "value": "Value",
       "wallets": "Wallets",
       "wizard": "Wizard"

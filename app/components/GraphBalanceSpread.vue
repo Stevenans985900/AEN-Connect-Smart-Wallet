@@ -14,8 +14,8 @@
       <v-card v-else flat>
         <v-card-text>
           <v-list>
-            <template v-for="(wallet, address) in wallets">
-              <v-list-tile :key="address" @click="contextWallet = wallet; dialogShowWallet = true">
+            <template v-for="(wallet) in wallets">
+              <v-list-tile :key="wallet.address" @click="contextWallet = wallet; dialogShowWallet = true">
                 <v-list-tile-avatar>
                   <wallet-image :wallet="wallet" />
                 </v-list-tile-avatar>
@@ -149,6 +149,12 @@ export default {
     RefreshWallet,
     WalletHistory
   },
+  props: {
+      renderWatch: {
+          type: Number,
+          default: 0
+      }
+  },
   data() { return initialDataState() },
   computed: {
     haveWallet() {
@@ -173,6 +179,10 @@ export default {
       } else {
         this.loading = true
       }
+    },
+    renderWatch: function () {
+        console.log('render watch triggered')
+        this.processWallets()
     }
   },
   mounted() {

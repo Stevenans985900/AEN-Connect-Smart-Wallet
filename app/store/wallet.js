@@ -173,19 +173,15 @@ export const actions = {
             key: 'balanceLastSynced',
             value: Date.now()
           })
-          commit('setLoading', {
-            t: 'page',
-            v: false
-          }, { root: true })
           resolve(wallet)
         })
         .catch((err) => {
-          commit('setLoading', {
-            t: 'page',
-            v: false
-          }, { root: true })
           reject(err)
         })
+        .finally(() => { commit('setLoading', {
+          t: 'page',
+          v: false
+        }, { root: true }) })
     })
   },
   transactionsHistorical({state, commit, rootState}, wallet) {
@@ -270,46 +266,46 @@ export const actions = {
               Vue.prototype.$g('aen')
           )
           networkHandler.getLiveWallet(wallet).then((response) => {
-            commit('setLoading', {
-              t: 'page',
-              v: false
-            }, { root: true })
             resolve(response)
           })
+          .finally(() => { commit('setLoading', {
+            t: 'page',
+            v: false
+          }, { root: true }) })
           break
         case 'btc':
           networkHandler = new Btc(state.btc.activeApiEndpoint, Vue.prototype.$g('btc'))
           networkHandler.getLiveWallet(wallet).then((response) => {
-            commit('setLoading', {
-              t: 'page',
-              v: false
-            }, { root: true })
             resolve(response)
           })
+              .finally(() => { commit('setLoading', {
+                t: 'page',
+                v: false
+              }, { root: true }) })
           break
         case 'contract':
           networkHandler = new Contract(
             state.eth.activeApiEndpoint
           )
           networkHandler.getLiveWallet(wallet).then((response) => {
-            commit('setLoading', {
-              t: 'page',
-              v: false
-            }, { root: true })
             resolve(response)
           })
+              .finally(() => { commit('setLoading', {
+                t: 'page',
+                v: false
+              }, { root: true }) })
           break
         case 'eth':
           networkHandler = new Ethereum(
             state.eth.activeApiEndpoint
           )
           networkHandler.getLiveWallet(wallet).then((response) => {
-            commit('setLoading', {
-              t: 'page',
-              v: false
-            }, { root: true })
             resolve(response)
           })
+              .finally(() => { commit('setLoading', {
+                t: 'page',
+                v: false
+              }, { root: true }) })
           break
       }
     })
@@ -465,46 +461,46 @@ export const actions = {
               Vue.prototype.$g('aen')
           )
           networkHandler.transfer(options).then((transfer) => {
-            commit('setLoading', {
-              t: 'page',
-              v: false
-            }, { root: true })
             resolve(transfer)
           })
+              .finally(() => { commit('setLoading', {
+                t: 'page',
+                v: false
+              }, { root: true }) })
           break
         case 'btc':
           networkHandler = new Btc(state.btc.activeApiEndpoint, Vue.prototype.$g('btc'))
           networkHandler.transfer(options).then((transfer) => {
-            commit('setLoading', {
-              t: 'page',
-              v: false
-            }, { root: true })
             resolve(transfer)
           })
+              .finally(() => { commit('setLoading', {
+                t: 'page',
+                v: false
+              }, { root: true }) })
           break
         case 'contract':
           networkHandler = new Contract(
             state.eth.activeApiEndpoint
           )
           networkHandler.transfer(options).then((transfer) => {
-            commit('setLoading', {
-              t: 'page',
-              v: false
-            }, { root: true })
             resolve(transfer)
           })
+              .finally(() => { commit('setLoading', {
+                t: 'page',
+                v: false
+              }, { root: true }) })
           break
         case 'eth':
           networkHandler = new Ethereum(
             state.eth.activeApiEndpoint
           )
           networkHandler.transfer(options).then((transfer) => {
-            commit('setLoading', {
-              t: 'page',
-              v: false
-            }, { root: true })
             resolve(transfer)
           })
+              .finally(() => { commit('setLoading', {
+                t: 'page',
+                v: false
+              }, { root: true }) })
           break
       }
     })

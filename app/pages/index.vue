@@ -27,7 +27,7 @@
           </v-menu>
         </v-toolbar>
         <v-card flat>
-          <graph-balance-spread />
+          <graph-balance-spread :render-watch="renderWatch"/>
         </v-card>
       </v-flex>
       <!-- New Wallet Dialog -->
@@ -191,6 +191,14 @@ export default {
     }
   },
   computed: {
+      renderWatch: {
+          get: function () {
+              return this.$store.state.runtime.renderCounter
+          },
+          set: function (val) {
+              this.$store.commit('setRenderCounter', val)
+          }
+      },
     haveEthereumWallet() { return this.$store.getters["wallet/haveWalletType"]('eth') }
   },
   /**

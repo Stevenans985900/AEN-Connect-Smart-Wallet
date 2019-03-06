@@ -144,6 +144,7 @@
               this.currentStep--
             },
             complete(wallet) {
+                this.$forceUpdate()
                 this.$emit('complete', wallet)
                 this.reset()
             },
