@@ -322,40 +322,67 @@ export default {
   methods: {
     deployTestContract() {
       console.debug('Development: Deploying test contract')
-
       import('~/class/network/contract/test.json').then((jsonInterface) => {
         const web3 = this.$store.getters["wallet/networkHandler"]("contract").web3
-        // let contract = new web3.eth.Contract(jsonInterface.abi)
-
         this.$store.dispatch('security/getCredentials', this.wallet.address).then((credentials) => {
           this.$store.commit('setLoading', {
             t: 'page',
             v: true,
             m: 'development.label.deploy_contract'
           })
-          // prepare transaction
-          web3.eth.accounts.signTransaction({
-            from: this.wallet.address,
-            data: jsonInterface.bin,
-            gas: 1500000,
-            chainId: this.wallet.network.network_id
-          }, credentials.privateKey).then((signedTransaction) => {
-            console.log(signedTransaction)
-            web3.eth.sendSignedTransaction(signedTransaction.rawTransaction)
-              .on('receipt', function(receipt) {
-                console.debug(receipt)
-                this.$store.commit('setLoading', {
-                  t: 'page',
-                  v: false })
 
-                })
+          web3.eth.estimateGas({
+            from: this.wallet.address,
+            data: jsonInterface.bin
           })
+            .then((gas) => {
+              web3.eth.accounts.signTransaction({
+                from: this.wallet.address,
+                gas: gas,
+                gasPrice:  50000000000,
+                data: jsonInterface.bin
+              }, credentials.privateKey)
+                .then((signedTx) => {
+                  web3.eth.sendSignedTransaction(signedTx.rawTransaction)
+                    .then(() => {
+                      console.debug('Contract has been pushed out to the network')
+                      this.dialogDeployContract = false
+                    })
+                })
+                .catch((err) => {
+                  console.log('something went wrong when sending a transaction')
+                  console.error(err)
+                })
+                .finally(() => {
+                  this.$store.commit('setLoading', {
+                    t: 'page',
+                    v: false })
+                })
+              // console.debug(receipt)
+
+
+            })
         })
       })
     },
     removeSecurityPolicy(wallet) {
       console.log('removing wallet policy')
       console.log(wallet)
+    },
+    simpleSleep() { return new Promise(resolve => setTimeout(resolve, 3000))},
+    async waitContract(contract) {
+      const web3 = this.$store.getters["wallet/networkHandler"]("contract").web3
+      const truthy = true
+      while (truthy) {
+        let receipt = web3.eth.getTransactionReceipt(contract.transactionHash);
+        if (receipt && receipt.contractAddress) {
+          console.log("Your contract has been deployed at http://testnet.etherscan.io/address/" + receipt.contractAddress);
+          console.log("Note that it might take 30 - 90 sceonds for the block to propagate befor it's visible in etherscan.io");
+          break;
+        }
+        console.log("Waiting a mined block to include your contract... currently in block " + web3.eth.blockNumber);
+        await this.simpleSleep(4000);
+      }
     },
     switchOnChainStatus(wallet) {
       const newCondition = !wallet.onChain

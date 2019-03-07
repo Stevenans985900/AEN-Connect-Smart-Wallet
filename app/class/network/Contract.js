@@ -19,27 +19,52 @@ export default class Contract extends Generic {
           resolve(response.balance)
         })
           .catch((err) => {
-            console.debug('The contract method does not exist at the remote address')
             reject(err)
           })
       })
     })
   }
 
-  erc20PublicMethod(options) {
+  async erc20PublicMethod(options) {
     console.debug('Contract Plugin: ERC20 Public Method')
     console.debug(options)
-    return new Promise((resolve, reject) => {
-            import('~/class/network/contract/erc20').then((erc20Interface) => {
-              const contract = new this.web3.eth.Contract(erc20Interface.abi, options.contractAddress)
-              contract.methods[options.method]().call().then((response) => {
-                resolve(response)
-              })
-                .catch((err) => {
-                  reject(err)
-                })
-            })
+    import('~/class/network/contract/erc20').then((erc20Interface) => {
+      const contract = new this.web3.eth.Contract(erc20Interface.abi, options.contractAddress)
+      contract.methods[options.method]().call().then((response) => {
+        return response
+      })
+      .catch((err) => {
+        throw new Error(err)
+      })
     })
+  }
+  /**
+   * Get the details of a contract on the wire
+   *
+   * @param address
+   * @returns {Promise<void>}
+   */
+  async contractDetails(address) {
+    console.debug('Contract Plugin: Contract Details')
+    console.debug(address)
+    let contractDetails = {}
+    try {
+      contractDetails.symbol = await this.erc20PublicMethod({
+        contractAddress: address,
+        method: 'symbol'
+      })
+    } catch (e) {
+      throw new Error('Contract at address ('+address+') does not exist')
+    }
+    contractDetails.name = await this.erc20PublicMethod({
+      contractAddress: address,
+      method: 'name'
+    })
+    contractDetails.decimals = await this.erc20PublicMethod({
+      contractAddress: address,
+      method: 'decimals'
+    })
+    return contractDetails
   }
 
   transactionsHistorical(options) {
@@ -76,7 +101,7 @@ export default class Contract extends Generic {
 
   transfer(options) {
     Generic.prototype.transfer.call(this, options)
-    return new Promise((resolve) => {
+    return new Promise(({resolve, reject}) => {
       let transaction
             // TODO Add in the flexibility to handle meta contracts if there is a proxy transfer method
             import('~/class/network/contract/erc20').then((erc20Interface) => {
@@ -96,6 +121,7 @@ export default class Contract extends Generic {
                 .catch((err) => {
                   console.log('something went wrong when sending a transaction')
                   console.error(err)
+                  reject(err)
                 })
             })
     })

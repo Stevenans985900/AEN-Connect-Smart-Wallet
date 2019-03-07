@@ -29,7 +29,9 @@
                     item-value="address"
                     :label="$t('network.label.current_api_endpoint')"
                   />
-                  <v-btn @click="refreshAenApiEndpoint">Find best API Server</v-btn>
+                  <v-btn @click="refreshAenApiEndpoint">
+                    Find best API Server
+                  </v-btn>
                   <p>Block Height: {{ aenHeight }}</p>
                 </v-card-text>
               </v-card>

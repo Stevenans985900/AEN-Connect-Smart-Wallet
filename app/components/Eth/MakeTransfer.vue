@@ -117,32 +117,54 @@
     },
     methods: {
       initiateTransfer() {
-        this.$store.commit("setLoading", { t: "page", v: true })
-        let transactionOptions = {
-          source: this.wallet,
-          transfer: {
-            gasPrice: this.gasPrice, // Cost per litre of gas (1 GWei = 1,000,000,000 Wei)
-            gas: this.$g("eth.available_networks")[0].gas.transfer, // litre of gas, mileage
-            gasLimit: this.$g("eth.available_networks")[0].gas.transfer + 4000 // full tank
-          },
-          destination: {
-            address: this.address,
-            amount: this.amount
-          }
-        }
-        console.log('initiating transfer')
-        this.$store.dispatch('wallet/transfer', transactionOptions)
-        .then((transfer) => {
-          this.$store.commit('setLoading', { t: 'page', v: false })
-          console.debug(transfer)
-          this.$store.commit('showNotification', {
-            type: 'success',
-            message:
-              'Your transfer has been successfully dispatched to the network'
+
+        this.$store.dispatch('security/getCredentials', this.wallet.address).then((credentials) => {
+          this.$store.commit('setLoading', {
+            t: 'page',
+            v: true,
+            m: this.$t('wallet.message.transfer_start')
           })
-          this.$emit('complete')
+          this.$store.dispatch('wallet/transfer', {
+            credentials: credentials,
+            source: this.wallet,
+            transfer: {
+              gasPrice: this.gasPrice, // Cost per litre of gas (1 GWei = 1,000,000,000 Wei)
+              gas: this.$g("eth.available_networks")[0].gas.transfer, // litre of gas, mileage
+              gasLimit: this.$g("eth.available_networks")[0].gas.transfer + 4000 // full tank
+            },
+            destination: {
+              address: this.address,
+              amount: this.amount.toString()
+            }
+          }).then((receipt) => {
+            console.log('receipt from the transaction')
+            console.log(receipt)
+
+            const networkHandler = this.$store.getters['wallet/networkHandler']('eth')
+            const transactionWatcherInterval = setInterval(() => {
+              networkHandler.receipt().then((result) => {
+                if(result === true) {
+                  this.$store.commit('showNotification', {
+                    type: 'success',
+                    message: this.$t('wallet.message.transfer_complete')
+                  })
+                  clearInterval(transactionWatcherInterval)
+                }
+              })
+
+
+            }, 5000)
+
+            // Subscribe to trasnfer event and only stop loading once a receipt has been had
+            this.$store.commit('setLoading', {
+              t: 'page',
+              v: false
+            })
+
+            this.$emit('complete')
+          })
         })
+      }
     }
   }
-}
 </script>

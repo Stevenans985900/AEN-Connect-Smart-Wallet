@@ -102,7 +102,7 @@
           "maximum": 50000000000
         },
         "gas": {
-          "transfer": 21000
+          "transfer": 210000
         }
       }
     ],

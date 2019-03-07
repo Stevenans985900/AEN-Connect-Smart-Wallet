@@ -2,20 +2,21 @@
 
 
 <template>
-  <vue-dropzone ref="myVueDropzone" id="dropzone"
-    @vdropzone-file-added="fileUploaded"
-    :options="dropzoneOptions"
-    :duplicateCheck="true"
-    :useCustomSlot="true">
+  <vue-dropzone id="dropzone" ref="myVueDropzone"
+                :options="dropzoneOptions"
+                :duplicate-check="true"
+                :use-custom-slot="true"
+                @vdropzone-file-added="fileUploaded"
+  >
     <v-btn>
       <v-icon>attach_file</v-icon>
       {{ $t('backup.label.file_choose') }}
     </v-btn>
   </vue-dropzone>
   <!--<upload-button :file-changed-callback="fileUploaded" :title="$t('backup.label.file_choose')">-->
-    <!--<template slot="icon">-->
-      <!--<v-icon>attach_file</v-icon>-->
-    <!--</template>-->
+  <!--<template slot="icon">-->
+  <!--<v-icon>attach_file</v-icon>-->
+  <!--</template>-->
   <!--</upload-button>-->
 </template>
 

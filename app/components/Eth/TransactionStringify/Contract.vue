@@ -12,7 +12,7 @@
       {{ date }}
     </span>
     <span v-if="display === 'all' || display === 'value'">
-      {{ totalGas }}
+      {{ controlledTokens }}
     </span>
     <span v-if="display === 'all' || display === 'title'">
       {{ title }}
@@ -91,10 +91,40 @@ export default {
     this.fetchContractInfo()
   },
   methods: {
-    fetchContractInfo() {
+    async fetchContractInfo() {
       const networkHandler = this.$store.getters['wallet/networkHandler']('contract')
-      console.log('fetching transaction info for contract')
-      console.log(this.transaction)
+
+      // Check whether a wallet record exists for handling the contract
+      if(!this.$store.state.wallet.wallets.hasOwnProperty(this.transaction.contractAddress)) {
+        console.log('no reference in wallets to contract located')
+
+        let walletOptions = {
+          type: 'contract',
+          address: this.transaction.contractAddress,
+          network: this.wallet.network,
+          managerWalletAddress: this.wallet.address
+        }
+        // Try and get details of the contract from file definition if available
+        import('~/class/network/contract/' + this.transaction.contractAddress).then((erc20Interface) => {
+          walletOptions.contractName = erc20Interface.name
+          walletOptions.decimals = erc20Interface.decimals
+          walletOptions.symbol = erc20Interface.symbol
+          this.addWallet(walletOptions)
+        })
+        // If app is not aware of the contract specification, try and get details from the wire. this is quite likely
+        .catch(async () => {
+          try {
+            const contractDetails = await networkHandler.contractDetails(this.transaction.contractAddress)
+            walletOptions.contractName = contractDetails.name
+            walletOptions.decimals = contractDetails.decimals
+            walletOptions.symbol = contractDetails.symbol
+            this.addWallet(walletOptions)
+          } catch (e) {
+            this.contractFound = false
+          }
+        })
+      }
+
       networkHandler
         .balance({
           managerWalletAddress: this.wallet.address,
@@ -102,9 +132,6 @@ export default {
         })
         .then((response) => {
           this.controlledTokens = response
-        })
-        .catch(function () {
-          console.log('caught bad return from balance')
         })
 
       networkHandler
@@ -119,6 +146,19 @@ export default {
               console.debug('This contract does not really exist...')
             })
 
+    },
+    addWallet(walletOptions) {
+      console.log('ADDING')
+      console.debug('Going to try adding Contract as Wallet')
+      console.debug(walletOptions)
+
+      this.$store.dispatch('wallet/load', walletOptions)
+      .then((wallet) => {
+        this.$store.commit('showNotification', {
+          type: 'success',
+          message: this.$t('wallet.message.contract_added' + ': ' + wallet.name)
+        })
+      })
     }
   }
 }

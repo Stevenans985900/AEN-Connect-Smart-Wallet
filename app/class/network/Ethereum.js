@@ -19,6 +19,15 @@ export default class Aen extends Generic {
     })
   }
 
+  receipt(address) {
+    console.debug('Ethereum Plugin: Receipt')
+    return new Promise((resolve, reject) => {
+      this.web3.eth.getTransactionReceipt(address)
+        .then((receipt) => { resolve(receipt) })
+        .catch((err) => { reject(err) })
+    })
+  }
+
   transactionsHistorical(options) {
     super.transactionsHistorical(options)
 
@@ -59,7 +68,7 @@ export default class Aen extends Generic {
                 "chainId": options.source.network.network_id
             }
 
-      this.web3.eth.accounts.signTransaction(transaction, options.source.privateKey)
+      this.web3.eth.accounts.signTransaction(transaction, options.credentials.privateKey)
         .then(signedTx => this.web3.eth.sendSignedTransaction(signedTx.rawTransaction))
         .then((receipt) => {
           resolve(receipt)

@@ -27,7 +27,7 @@
           </v-menu>
         </v-toolbar>
         <v-card flat>
-          <graph-balance-spread :render-watch="renderWatch"/>
+          <graph-balance-spread :render-watch="renderWatch" />
         </v-card>
       </v-flex>
       <!-- New Wallet Dialog -->
