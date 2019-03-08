@@ -86,7 +86,8 @@
                     </v-flex>
                   </v-layout>
                 </div>
-                <v-card>
+                <!-- Wallet expansion details. Only try to render the section if selected to avoid unnecessary proc -->
+                <v-card v-if="selectedWalletAddress == address">
                   <v-card-text>
                     <refresh-wallet :wallet="wallet" />
                     <testnet-buttons :wallet="wallet" />
@@ -208,6 +209,7 @@ function initialDataState() {
     newAccount: false,
     existingAccount: false,
     walletCreated: false,
+    selectedWalletAddress: null,
     showPassword: false,
     walletName: '',
     walletPassword: '',
@@ -285,6 +287,7 @@ export default {
   methods: {
     accordionTogglingWallet(wallet) {
       this.contextWallet = wallet
+      this.selectedWalletAddress = wallet.address
       // Check whether the user security is ok
       if(this.contextWallet.onChain === false) {
         const walletLiveCheckInterval = setInterval(

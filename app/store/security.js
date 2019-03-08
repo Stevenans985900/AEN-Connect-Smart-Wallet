@@ -91,7 +91,6 @@ export const actions = {
         challenge: 'transaction_start',
         address: address
       }).then(() => {
-        console.log('passed auth from get credentials')
         const credentials = JSON.parse(CryptoJS.AES.decrypt(
             state.wallets[address].credentials,
             Vue.prototype.$g('salt'))

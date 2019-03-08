@@ -26,47 +26,17 @@ export default class Contract extends Generic {
   }
 
   async erc20PublicMethod(options) {
-    console.debug('Contract Plugin: ERC20 Public Method')
-    console.debug(options)
-    import('~/class/network/contract/erc20').then((erc20Interface) => {
-      const contract = new this.web3.eth.Contract(erc20Interface.abi, options.contractAddress)
-      contract.methods[options.method]().call().then((response) => {
-        return response
-      })
-      .catch((err) => {
-        throw new Error(err)
+    console.debug('Contract Store: ERC20 Method ('+ options.method + ')')
+    return new Promise((resolve) => {
+      import('~/class/network/contract/erc20').then((erc20Interface) => {
+        const contract = new this.web3.eth.Contract(erc20Interface.abi, options.contractAddress)
+        contract.methods[options.method]().call().then((response) => {
+          console.debug('Contract Store: ERC20 Method Result '+ options.method + ' = ' + response)
+          resolve(response)
+        })
       })
     })
   }
-  /**
-   * Get the details of a contract on the wire
-   *
-   * @param address
-   * @returns {Promise<void>}
-   */
-  async contractDetails(address) {
-    console.debug('Contract Plugin: Contract Details')
-    console.debug(address)
-    let contractDetails = {}
-    try {
-      contractDetails.symbol = await this.erc20PublicMethod({
-        contractAddress: address,
-        method: 'symbol'
-      })
-    } catch (e) {
-      throw new Error('Contract at address ('+address+') does not exist')
-    }
-    contractDetails.name = await this.erc20PublicMethod({
-      contractAddress: address,
-      method: 'name'
-    })
-    contractDetails.decimals = await this.erc20PublicMethod({
-      contractAddress: address,
-      method: 'decimals'
-    })
-    return contractDetails
-  }
-
   transactionsHistorical(options) {
     super.transactionsHistorical(options)
     return new Promise((resolve, reject) => {
