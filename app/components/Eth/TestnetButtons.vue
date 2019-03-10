@@ -1,6 +1,10 @@
 <template>
   <v-menu v-if="testnet" offset-y>
-    <v-btn slot="activator">
+    <v-btn
+      slot="activator"
+      small
+      outline
+    >
       TestNet Functions
     </v-btn>
     <v-list>

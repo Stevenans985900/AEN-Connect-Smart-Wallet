@@ -3,7 +3,7 @@
     <v-flex xs12 md6 class="mt-4">
       <v-img src="/logo-800.png" contain />
       <h1>AENCo Smart Connect Wallet</h1>
-      <h2>Version: {{ version }}#Build-{{ build }}</h2>
+      <h2>Version: {{ version }}#{{ build }}</h2>
       <p>
         Aenco is a "one stop shop" for the delivery of cutting edge institutional financing, prime brokerage, and smart capital solutions for the HealthTech industry, as well as a research and collaboration hub for healthcare companies and projects involved in the field of blockchain development.
       </p>

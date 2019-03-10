@@ -15,7 +15,7 @@
         </v-list>
         <v-spacer />
         <v-list>
-          <v-list-tile router exact>
+          <v-list-tile @click="dialogHelp = true">
             <v-list-tile-action>
               <v-icon>help</v-icon>
             </v-list-tile-action>
@@ -23,14 +23,14 @@
               {{ $t('common.navigation.help') }}
             </v-list-tile-content>
           </v-list-tile>
-          <v-list-tile router exact>
-            <v-list-tile-action>
-              <v-icon>exit_to_app</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-content>
-              {{ $t('common.navigation.exit') }}
-            </v-list-tile-content>
-          </v-list-tile>
+          <!--<v-list-tile router exact>-->
+          <!--<v-list-tile-action @click="dialogExit = true">-->
+          <!--<v-icon>exit_to_app</v-icon>-->
+          <!--</v-list-tile-action>-->
+          <!--<v-list-tile-content>-->
+          <!--{{ $t('common.navigation.exit') }}-->
+          <!--</v-list-tile-content>-->
+          <!--</v-list-tile>-->
         </v-list>
       </v-layout>
     </v-navigation-drawer>
@@ -51,7 +51,6 @@
         <busy />
       </no-ssr>
       <development v-if="environment === 'development'" />
-      <network-diagnostics />
       <help />
     </v-toolbar>
 
@@ -66,15 +65,32 @@
           </v-btn>
         </v-snackbar>
         <!-- NUXT BEGINNING -->
-        <end-user-license-agreement v-if="!eulaAgreed"/>
+        <end-user-license-agreement v-if="!eulaAgreed && $nuxt.$route.name !== 'setup-wizard'" />
         <nuxt />
       </v-container>
     </v-content>
 
+    <!-- Exit Dialog -->
+    <!--<v-dialog v-if="dialogExit === true" v-model="dialogExit" persistent max-width="450px">-->
+    <!--<v-toolbar color="primary">-->
+    <!--<v-toolbar-title>{{ $t('common.message.are_you_sure') }}</v-toolbar-title>-->
+    <!--<v-spacer />-->
+    <!--<v-btn small icon outline @click="dialogExit = false">-->
+    <!--<v-icon>close</v-icon>-->
+    <!--</v-btn>-->
+    <!--</v-toolbar>-->
+    <!--<p>-->
+    <!---->
+    <!--</p>-->
+    <!--<make-transfer :wallet="contextWallet" @complete="transferComplete()" />-->
+    <!--</v-dialog>-->
+
     <!-- FOOTER AREA -->
     <v-footer app height="auto" color="primary">
       <v-toolbar dense>
-        <v-toolbar-title>&copy; {{ new Date().getFullYear() }} Aenco Solutions Ltd - Global Health Blockchain Financial Solutions</v-toolbar-title>
+        <v-toolbar-title>
+          &copy; {{ new Date().getFullYear() }} {{ $t('common.message.footer_text') }}
+        </v-toolbar-title>
         <v-spacer />
         {{ version }}#{{ buildNumber }}
       </v-toolbar>
@@ -83,10 +99,9 @@
 </template>
 
 <script>
-
+import { mapActions } from 'vuex'
 import Busy from '~/components/Busy'
 import Development from '~/components/Development'
-import NetworkDiagnostics from '~/components/NetworkDiagnostics'
 import Help from '~/components/Help'
 import SecurityChallenge from '~/components/SecurityChallenge'
 import isElectron from 'is-electron'
@@ -108,7 +123,6 @@ export default {
     Development,
     EndUserLicenseAgreement,
     Help,
-    NetworkDiagnostics,
     SecurityChallenge
   },
   /**
@@ -116,6 +130,7 @@ export default {
    */
   data() {
     return {
+      dialogExit: false,
       minifyDrawer: false,
       hydrated: false,
       navigationItems: [
@@ -159,7 +174,7 @@ export default {
    * COMPUTED
    */
   computed: {
-    dialogHelpShow: {
+    dialogHelp: {
       get: function () { return this.$store.state.user.help },
       set: function (val) { this.$store.commit('setUserProperty', {key: 'help', value: val}) }
     },
@@ -171,15 +186,6 @@ export default {
         return false
       },
       set : function () {}
-    },
-    developmentAgreed: {
-      get: function () { return !this.$store.state.user.developmentAgreed },
-      set: function (val) {
-        this.$store.commit('setUserProperty', {
-          key: 'developmentAgreed',
-          value: val
-        })
-      }
     },
     eulaAgreed() { return this.$store.state.user.eulaAgree },
     isOnline() { return this.$store.state.runtime.isOnline },
@@ -221,14 +227,13 @@ export default {
    *
    */
   beforeMount() {
-    this.$store.commit('security/resetAttemptCount')
+    // Ensure some global variables are clean for start
+    this.$store.commit('CACHE_SKIP', false)
     this.$store.commit('setAppMode', 'web')
     const env = process.env.NODE_ENV || 'dev'
-    this.$store.commit('setRuntimeProperty', {
-      key: 'environment',
-      value: env
-    })
+    this.$store.commit('setRuntimeProperty', { key: 'environment', value: env })
 
+    // Determine how to handle main navigation by default depending on device size
     if(this.$vuetify.breakpoint.mdAndUp === true) {
       this.showNav = true
       this.minifyDrawer = false
@@ -275,32 +280,33 @@ export default {
 
     // Check network settings and create a set of defaults based from first available
     // TODO Abstract this defaulting to a component of it's own which can pickup a "wallets available" setting
+      this.$store.commit('wallet/setAenProperty', { key: 'activeApiEndpoint', value: this.$g('aen.api_endpoints')[0].address })
+      this.$store.commit('wallet/setBtcProperty', { key: 'activeApiEndpoint', value: this.$g('btc.api_endpoints')[0].address })
+      this.$store.commit('wallet/setEthProperty', { key: 'activeApiEndpoint', value: this.$g('eth.api_endpoints')[0].address })
+
       if (Object.keys(this.$store.state.wallet.aen.network).length === 0) {
           this.$store.commit('wallet/setAenProperty', { key: 'network', value: this.$g('aen.available_networks')[0] })
       }
       if (Object.keys(this.$store.state.wallet.btc.network).length === 0) {
           this.$store.commit('wallet/setBtcProperty', { key: 'network', value: this.$g('btc.available_networks')[0] })
-      }
-    if (this.$store.state.wallet.eth.activeApiEndpoint === '') {
-      this.$store.commit('wallet/setEthereumProperty', { key: 'network', value: this.$g('eth.available_networks')[0] })
-      this.$store.commit('wallet/setEthereumProperty', { key: 'activeApiEndpoint', value: this.$g('eth.available_networks')[0].infura_api_endpoint })
-    }
 
-    this.$store.dispatch('wallet/rankApiNodes')
+      }
+      if (Object.keys(this.$store.state.wallet.eth.network).length === 0) {
+        this.$store.commit('wallet/setEthProperty', { key: 'network', value: this.$g('eth.available_networks')[0] })
+      }
+
+    this.rankApiNodes()
     setInterval(
       function () {
-        this.$store.dispatch('wallet/rankApiNodes')
+          this.rankApiNodes()
       }.bind(this),
       this.$g('internal.apiEndpointPingInterval')
     )
 
-    this.$store.dispatch('updateGenericNetworkInformation')
-    setInterval(
-      function () {
-        this.$store.dispatch('updateGenericNetworkInformation')
-      }.bind(this),
-      this.$g('internal.commonTasksInterval')
-    )
+    // Perform an initial investigation in to state of each network
+    //   this.$store.dispatch('wallet/queryApiNode', 'aen')
+    //   this.$store.dispatch('wallet/queryApiNode', 'btc')
+    //   this.$store.dispatch('wallet/queryApiNode', 'eth')
 
     // TODO Update currency exchange rates from binance. Due to CORS restriction, investigate web account or use proxy
     // this.$store.dispatch('exchange/updateRates')
@@ -319,6 +325,9 @@ export default {
     }
   },
   methods: {
+      ...mapActions({
+          rankApiNodes: 'wallet/rankApiNodes'
+      }),
     /**
      * Shutdown procedure
      */

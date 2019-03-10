@@ -1,30 +1,40 @@
 import Web3 from 'web3'
 import axios from 'axios'
 import Generic from './Generic.js'
-import Vue from 'vue'
 
 export default class Aen extends Generic {
-  constructor(apiEndpoint) {
+  constructor(apiEndpoint, config) {
     super()
     this.pluginName = 'ETH'
+    this.config = config
     this.web3 = new Web3(apiEndpoint)
   }
-
   balance(options) {
-    Generic.prototype.balance.call(this, options)
+    super.balance(options)
     return new Promise((resolve) => {
+      console.log('goes wrong here')
       this.web3.eth.getBalance(options.address).then((wei) => {
-        const eth = this.web3.utils.fromWei(wei, 'ether')
-        resolve(eth)
+        console.log('BALANCE from network: ' + wei)
+        resolve(wei)
       })
+    })
+  }
+
+  receipt(address) {
+    console.debug('Ethereum Plugin: Receipt')
+    return new Promise((resolve, reject) => {
+      this.web3.eth.getTransactionReceipt(address)
+        .then((receipt) => { resolve(receipt) })
+        .catch((err) => { reject(err) })
     })
   }
 
   transactionsHistorical(options) {
     super.transactionsHistorical(options)
 
+    const apiEndpoint = this.config.etherscan.api_endpoint.replace('###NETWORK_IDENTIFIER###', options.network.identifier)
     return new Promise((resolve, reject) => {
-      axios.get(options.network.etherscan_api_endpoint, {
+      axios.get(apiEndpoint, {
         params: {
           module: 'account',
           action: 'txlist',
@@ -32,7 +42,7 @@ export default class Aen extends Generic {
           startblock: 0,
           endblock: 99999999,
           sort: 'desc',
-          apikey: Vue.prototype.$g('eth.etherscan.api_key')
+          apikey: this.config.etherscan.api_key
         }
       })
         .then(function (response) {
@@ -49,8 +59,7 @@ export default class Aen extends Generic {
         Generic.prototype.transfer.call(this, options)
         return new Promise((resolve, reject) => {
 
-            let transaction
-            transaction = {
+            const transaction = {
                 "from": options.source.address,
                 "to": options.destination.address,
                 "value": this.web3.utils.toHex(this.web3.utils.toWei(options.destination.amount, "ether")),
@@ -60,7 +69,7 @@ export default class Aen extends Generic {
                 "chainId": options.source.network.network_id
             }
 
-      this.web3.eth.accounts.signTransaction(transaction, options.source.privateKey)
+      this.web3.eth.accounts.signTransaction(transaction, options.credentials.privateKey)
         .then(signedTx => this.web3.eth.sendSignedTransaction(signedTx.rawTransaction))
         .then((receipt) => {
           resolve(receipt)
@@ -71,6 +80,13 @@ export default class Aen extends Generic {
     })
   }
 
+  getHeight() {
+    return new Promise((resolve) => {
+      this.web3.eth.getBlockNumber().then((height) => {
+        resolve(height)
+      })
+    })
+  }
   /**
      * For Ethereum, check the balance of the account to determine whether or not it is live
      * @param options
@@ -121,4 +137,6 @@ export default class Aen extends Generic {
       resolve(walletObject)
     })
   }
+  setProvider(endpoint) { this.web3.setProvider(endpoint) }
+  web3() { return this.web3 }
 }

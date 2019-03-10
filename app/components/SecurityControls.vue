@@ -1,5 +1,5 @@
 <template>
-  <v-layout row justify-center>
+  <v-layout row justify-center pa-2>
     <v-flex xs12>
       <!-- For selecting / adding security scopes -->
       <v-toolbar v-if="globalSecurityOnly === false">
@@ -8,7 +8,7 @@
             <v-btn
               v-if="Object.keys(walletsWithoutSecurity).length > 0"
               slot="activator"
-              fab outline small
+              icon outline small
             >
               <v-icon>
                 add
@@ -86,7 +86,7 @@
       <v-toolbar color="primary">
         <v-toolbar-title>{{ $t('common.message.are_you_sure') }}</v-toolbar-title>
         <v-spacer />
-        <v-btn small fab outline @click="dialogRemovePreset = false">
+        <v-btn small icon outline @click="dialogRemovePreset = false">
           <v-icon>close</v-icon>
         </v-btn>
       </v-toolbar>

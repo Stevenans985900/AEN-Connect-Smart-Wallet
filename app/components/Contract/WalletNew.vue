@@ -129,62 +129,36 @@ export default {
       })
 
       this.contractFound = false
-        import('~/class/network/contract/' + this.contractAddress).then((erc20Interface) => {
-          this.contractFound = true
-          this.contractName = erc20Interface.title
-          this.decimals = erc20Interface.decimals
-          this.symbol = erc20Interface.symbol
-          this.$store.commit('setLoading', {
-            t: 'page',
-            v: false
-          })
+      // Check if there is a contract interface definition within the wallet
+      import('~/class/network/contract/' + this.contractAddress).then((erc20Interface) => {
+        this.contractFound = true
+        this.contractName = erc20Interface.title
+        this.decimals = erc20Interface.decimals
+        this.symbol = erc20Interface.symbol
+        this.$store.commit('setLoading', {
+          t: 'page',
+          v: false
         })
-          .catch(() => {
-            // Use the abstract and lookup details of the contract
+        // If app is not aware of the contract specification. This is very likely
+          .catch(async () => {
             this.loading = true
-            // this.$store.dispatch('wallet/getLiveWallet', {
-            //     type: 'contract',
-            //     address: this.contractAddress
-            //   }
-            // ).then((wallet) => {
-            //   this.wallet = wallet
-            //   this.currentStep++
-            //   this.startLiveListener(wallet)
-            // })
-            const networkHandler = this.$store.getters['wallet/networkHandler']('contract')
-            // TODO Combine these in to batch actions
-            networkHandler.erc20PublicMethod({
-              contractAddress: this.contractAddress,
-              method: 'name'
-            }).then((contractName) => {
-              this.contractSpidered = true
-              this.loading = false
+            try {
+              const networkHandler = this.$store.getters['wallet/networkHandler']('contract')
+              const contractDetails = await networkHandler.contractDetails(this.contractAddress)
               this.contractFound = true
-              this.contractName = contractName
-            })
-              .catch(() => {
-                this.contractSpidered = true
-                this.loading = false
-              })
-            networkHandler.erc20PublicMethod({
-              contractAddress: this.contractAddress,
-              method: 'symbol'
-            }).then((contractSymbol) => {
-              this.symbol = contractSymbol
-            })
-            networkHandler.erc20PublicMethod({
-              contractAddress: this.contractAddress,
-              method: 'decimals'
-            }).then((decimals) => {
-              console.log('from decimal')
-              console.log(decimals)
-              this.decimals = decimals
-            })
+              this.contractName = contractDetails.name
+              this.decimals = contractDetails.decimals
+              this.symbol = contractDetails.symbol
+            } catch (e) {
+              this.contractFound = false
+            }
             this.$store.commit('setLoading', {
               t: 'page',
               v: false
             })
           })
+      })
+
     }, 1000),
     /**
      * Add the contract to the wallet stack

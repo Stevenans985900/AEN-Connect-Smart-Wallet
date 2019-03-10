@@ -8,15 +8,49 @@
         <v-list-tile @click="dialogWalletControl = true">
           <v-list-tile-title>Wallet Control</v-list-tile-title>
         </v-list-tile>
+        <v-list-tile @click="dialogDeployContract= true">
+          <v-list-tile-title>Deploy test contract</v-list-tile-title>
+        </v-list-tile>
         <v-list-tile @click="dialogSecurity = true">
           <v-list-tile-title>Security</v-list-tile-title>
         </v-list-tile>
       </v-list>
     </v-menu>
 
+    <v-dialog v-if="dialogDeployContract" v-model="dialogDeployContract">
+      <v-toolbar color="primary">
+        <v-toolbar-title>Deploy Test Contract to Ethereum wallet</v-toolbar-title>
+        <v-spacer />
+        <v-btn small icon outline @click="dialogDeployContract = false">
+          <v-icon>close</v-icon>
+        </v-btn>
+      </v-toolbar>
+      <v-card>
+        <v-card-text>
+          <v-layout row wrap>
+            <v-flex xs12>
+              {{ debug }}
+              <v-select
+                v-model="wallet"
+                :items="ethereumWallets"
+                return-object
+                item-text="name"
+                label="Select an Ethereum wallet to deploy the contract from"
+              />
+            </v-flex>
+            <v-flex xs12>
+              <v-btn @click="deployTestContract()">
+                Deploy Test Ticket
+              </v-btn>
+            </v-flex>
+          </v-layout>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
     <v-dialog v-if="dialogSecurity" v-model="dialogSecurity" fullscreen>
       <v-toolbar color="primary">
-        <v-btn small fab outline @click="dialogSecurity = false">
+        <v-btn small icon outline @click="dialogSecurity = false">
           <v-icon>arrow_back</v-icon>
         </v-btn>
         <v-toolbar-title>Security Controls</v-toolbar-title>
@@ -44,7 +78,7 @@
 
     <v-dialog v-if="dialogWalletControl" v-model="dialogWalletControl" fullscreen>
       <v-toolbar color="primary">
-        <v-btn small fab outline @click="dialogWalletControl = false">
+        <v-btn small icon outline @click="dialogWalletControl = false">
           <v-icon>arrow_back</v-icon>
         </v-btn>
         <v-toolbar-title>Wallet Development Controls</v-toolbar-title>
@@ -108,7 +142,10 @@ export default {
      */
   data() {
     return {
+      debug: null,
       walletAddress: 'global',
+      wallet: null,
+      dialogDeployContract: false,
       dialogWalletControl: false,
       dialogSecurity: false,
       search: '',
@@ -144,6 +181,9 @@ export default {
      * COMPUTED
      */
   computed: {
+    ethereumWallets() {
+      return this.$store.getters['wallet/walletsByType']('eth')
+    },
     walletsWithSecurity() {
       return this.$store.state.security.walletPolicies
     },
@@ -280,9 +320,67 @@ export default {
      * METHODS
      */
   methods: {
+    deployTestContract() {
+      console.debug('Development: Deploying test contract')
+      import('~/class/network/contract/test.json').then((jsonInterface) => {
+        const web3 = this.$store.getters["wallet/networkHandler"]("contract").web3
+        const apiEndpoint = this.$store.state.wallet.eth.activeApiEndpoint
+            .replace('###NETWORK_IDENTIFIER###', this.wallet.network.identifier)
+        web3.setProvider(apiEndpoint)
+        this.$store.dispatch('security/getCredentials', this.wallet.address).then((credentials) => {
+          this.$store.commit('setLoading', {
+            t: 'page',
+            v: true,
+            m: 'development.label.deploy_contract'
+          })
+
+          web3.eth.estimateGas({
+            from: this.wallet.address,
+            data: jsonInterface.bin
+          })
+            .then((gas) => {
+              web3.eth.accounts.signTransaction({
+                from: this.wallet.address,
+                gas: gas,
+                gasPrice:  50000000000,
+                data: jsonInterface.bin
+              }, credentials.privateKey)
+                .then((signedTx) => {
+                  web3.eth.sendSignedTransaction(signedTx.rawTransaction)
+                    .then(() => {
+                        this.$store.commit('setLoading', {
+                          t: 'page',
+                          v: false })
+                        console.debug('Contract has been pushed out to the network')
+                      this.dialogDeployContract = false
+                    })
+                })
+                .catch((err) => {
+                  console.log('something went wrong when sending a transaction')
+                  console.error(err)
+                })
+            })
+        })
+      })
+    },
     removeSecurityPolicy(wallet) {
       console.log('removing wallet policy')
       console.log(wallet)
+    },
+    simpleSleep() { return new Promise(resolve => setTimeout(resolve, 3000))},
+    async waitContract(contract) {
+      const web3 = this.$store.getters["wallet/networkHandler"]("contract").web3
+      const truthy = true
+      while (truthy) {
+        let receipt = web3.eth.getTransactionReceipt(contract.transactionHash);
+        if (receipt && receipt.contractAddress) {
+          console.log("Your contract has been deployed at http://testnet.etherscan.io/address/" + receipt.contractAddress);
+          console.log("Note that it might take 30 - 90 sceonds for the block to propagate befor it's visible in etherscan.io");
+          break;
+        }
+        console.log("Waiting a mined block to include your contract... currently in block " + web3.eth.blockNumber);
+        await this.simpleSleep(4000);
+      }
     },
     switchOnChainStatus(wallet) {
       const newCondition = !wallet.onChain

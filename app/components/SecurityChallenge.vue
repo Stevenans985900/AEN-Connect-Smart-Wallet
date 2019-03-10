@@ -3,7 +3,7 @@
     <v-toolbar color="primary">
       <v-toolbar-title>{{ $t('common.label.security') }}</v-toolbar-title>
       <v-spacer />
-      <v-btn small fab outline @click="validity = 'CANCELLED'">
+      <v-btn small icon outline @click="validity = 'CANCELLED'">
         <v-icon>close</v-icon>
       </v-btn>
     </v-toolbar>
@@ -27,7 +27,6 @@
     <!-- Display challenge -->
     <v-card v-else>
       <v-card-text>
-
         <p>
           {{ wallet.name }}: {{ $t('security.message.authenticate_to_continue') }}
         </p>
@@ -88,8 +87,6 @@ export default {
         if(this.validity !== 'VALID') { return true }
         return false
       } else {
-        console.log('checking if dialog should be shown')
-        console.log(this.validity.indexOf('VALID', 'CANCELLED'))
         if(['VALID', 'CANCELLED'].indexOf(this.validity) === -1) {
           return true
         }
@@ -99,7 +96,6 @@ export default {
   },
   methods: {
     appWipe() {
-      console.log('reset all data here')
       this.$store.commit("reset")
       this.$store.commit("security/reset")
       this.$store.commit("wallet/reset")
@@ -109,7 +105,6 @@ export default {
       Object.assign(this.$data, initialDataState())
     },
     submitChallenge() {
-      console.log('submitting the security challenge')
       this.$store.dispatch('security/checkPassword', this.password).then(() => {
         this.reset()
       })
@@ -127,7 +122,6 @@ export default {
 
           // Clear the message after a short time
           setTimeout(function() {
-            console.log('clearing the message')
             this.message = null
           }.bind(this), 5000)
         })

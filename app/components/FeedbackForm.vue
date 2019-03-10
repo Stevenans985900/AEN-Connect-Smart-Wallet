@@ -12,11 +12,11 @@
       </v-flex>
       <v-flex xs12>
         <v-textarea
-          outline
           v-model="feedbackMessage"
+          outline
           :rules="[rules.basic.required, rules.feedbackMessage.minLength, rules.feedbackMessage.maxLength]"
           :label="$t('common.label.message')"
-        ></v-textarea>
+        />
       </v-flex>
       <v-flex xs12>
         <v-text-field

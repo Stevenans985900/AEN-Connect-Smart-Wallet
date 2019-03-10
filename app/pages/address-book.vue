@@ -30,12 +30,12 @@
                 <address-render :address="props.item.address" :use-address-book="false" />
               </td>
               <td class="justify-center layout px-0">
-                <v-icon small class="mr-2" @click="editContact(props.item)">
+                <v-btn outline small @click="editContact(props.item)">
                   {{ $t('common.action.edit') }}
-                </v-icon>
-                <v-icon small @click="dialogDeleteContact = true;contact = props.item">
+                </v-btn>
+                <v-btn outline small @click="dialogDeleteContact = true;contact = props.item">
                   {{ $t('common.action.remove') }}
-                </v-icon>
+                </v-btn>
               </td>
             </template>
             <v-alert
@@ -57,7 +57,7 @@
             {{ $t('contact.label.contact') }}
           </v-toolbar-title>
           <v-spacer />
-          <v-btn small fab outline @click="dialogEditContact = false; address = ''">
+          <v-btn small icon outline @click="dialogEditContact = false; address = ''">
             <v-icon>close</v-icon>
           </v-btn>
         </v-toolbar>
@@ -71,13 +71,15 @@
             {{ $t('common.message.are_you_sure') }}
           </v-toolbar-title>
           <v-spacer />
-          <v-btn small fab outline @click="dialogDeleteContact = false">
+          <v-btn small icon outline @click="dialogDeleteContact = false">
             <v-icon>close</v-icon>
           </v-btn>
         </v-toolbar>
         <v-card>
           <v-card-text>
-            <span v-html="$t('contact.chunk.removal_warning')" />
+            <span>
+              {{ $t('contact.chunk.removal_warning') }}
+            </span>
           </v-card-text>
           <v-card-actions>
             <v-spacer />

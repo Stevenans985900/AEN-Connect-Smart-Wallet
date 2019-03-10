@@ -5,7 +5,7 @@
   >
     <v-btn
       slot="activator"
-      small round outline icon
+      flat icon
     >
       <v-icon>
         help
@@ -16,9 +16,9 @@
       <v-img src="/logo.png" contain height="25" max-width="125px" />
       <v-toolbar-title>{{ $t('common.label.help') }}</v-toolbar-title>
       <v-spacer />
-
+      <network-diagnostics />
       <v-btn small round outline @click="dialogShow = false">
-        {{ $t('help.message.click_to_return') }}&nbsp;&nbsp;<v-icon>help</v-icon>
+        <v-icon>help</v-icon>&nbsp;{{ $t('help.message.click_to_return') }}
       </v-btn>
     </v-toolbar>
     <v-card>
@@ -30,8 +30,8 @@
               <v-list-tile
                 :key="categoryIndex"
                 avatar
-                @click="chooseCategory(categoryIndex)"
                 :color="isActiveCategory(categoryIndex)"
+                @click="chooseCategory(categoryIndex)"
               >
                 <v-list-tile-avatar v-if="faqCategory.icon">
                   <v-icon>
@@ -59,8 +59,8 @@
               <v-list-tile
                 :key="faqIndex"
                 avatar
-                @click="selectedEntry = faqIndex"
                 :color="isActiveEntry(faqIndex)"
+                @click="selectedEntry = faqIndex"
               >
                 <v-list-tile-content>
                   <v-list-tile-title>
@@ -94,8 +94,9 @@
 
 <script>
   import FeedbackForm from '~/components/FeedbackForm'
+  import NetworkDiagnostics from '~/components/NetworkDiagnostics'
   export default {
-    components: { FeedbackForm },
+    components: { FeedbackForm, NetworkDiagnostics },
     data() {
       return {
         categoryComponent: null,
@@ -256,10 +257,6 @@
         this.displayText = null
         this.youtubeVideo = null
 
-        if(!this.help.hasOwnProperty(this.selectedCategory)) {
-          console.debug('Help could not find category definition for: ' + this.selectedCategory)
-          return false
-        }
         // Check to see whether there is a template associated with this help entry
         let entry = this.help[this.selectedCategory].faq[this.selectedEntry]
         console.log(entry)
@@ -276,9 +273,16 @@
         }
       }
     },
+      mounted() {
+        // Get up to date status for each network
+        // this.$store.dispatch('wallet/queryApiNode', 'aen')
+        // this.$store.dispatch('wallet/queryApiNode', 'btc')
+        // this.$store.dispatch('wallet/queryApiNode', 'eth')
+      },
     methods: {
       chooseCategory(categoryIndex) {
         this.selectedCategory = null
+        this.selectedEntry = null
         this.categoryComponent = null
         this.categoryIndex = categoryIndex
         // If user clicked either the contact or about categories, special handling

@@ -1,7 +1,7 @@
 <template>
   <v-progress-circular v-if="loading" indeterminate />
   <span v-else>
-    <token-value :symbol="symbol" :value="balance" />
+    <token-value :symbol="symbol" :value="balance" :type="wallet.type" />
   </span>
 </template>
 
@@ -30,11 +30,13 @@ export default {
     symbol() {
       switch(this.wallet.type) {
         case 'aen':
-          return this.$store.state.wallet.aen.symbol
+          return this.$store.state.wallet.aen.displaySymbol
         case 'btc':
-          return this.$store.state.wallet.btc.symbol
+          return this.$store.state.wallet.btc.displaySymbol
+        case 'contract':
+          return this.wallet.symbol
         case 'eth':
-          return this.$store.state.wallet.eth.symbol
+          return this.$store.state.wallet.eth.displaySymbol
       }
       return 'NA'
     }

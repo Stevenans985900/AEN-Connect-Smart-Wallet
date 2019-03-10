@@ -5,22 +5,25 @@
       <v-container grid-list-md>
         <v-layout wrap>
           <v-flex xs12>
-            <p>Current gas price: {{ gasPrice }}</p>
-          </v-flex>
-          <v-flex xs12>
-            <v-combobox
-              v-model="address"
-              :items="contacts"
-              item-text="displayText"
-              label="To"
-              prepend-icon="contacts"
-            />
+            {{ $t('wallet.label.balance') }}: <token-value :symbol="wallet.symbol" :type="wallet.type" :value="wallet.balance" />
           </v-flex>
           <v-flex xs12>
             <v-text-field
-              v-model="amount"
-              :suffix="wallet.symbol"
-              label="Amount"
+                    v-model="amount"
+                    :label="$t('common.label.amount')"
+                    :suffix="wallet.symbol"
+                    :error-messages="lessThanBalance()"
+                    required
+            />
+          </v-flex>
+          <v-flex xs12>
+            <v-combobox
+                    v-model="address"
+                    :items="contacts"
+                    item-text="displayText"
+                    :label="$t('common.label.address')"
+                    prepend-icon="contacts"
+                    required
             />
           </v-flex>
           <v-flex xs12 md6>
@@ -55,7 +58,9 @@
 </template>
 
 <script>
+    import TokenValue from "~/components/TokenValue"
 export default {
+  components: { TokenValue },
   props: {
     wallet: {
       type: Object,
@@ -68,14 +73,15 @@ export default {
     return {
       web3: {},
       gasPrice: 0,
-      gas: 0,
+      gas: '',
       address: '',
-      amount: 0,
+      amount: '',
       message: '',
       priorityTransfer: false,
       maximumGas: 0,
       normalGas: 0,
-      priorityGas: 0
+      priorityGas: 0,
+      parentWallet: null
     }
   },
   computed: {
@@ -88,49 +94,61 @@ export default {
       return 'amber'
     },
     contacts() {
-      // TODO Replace these with getter from state machine
-      return Object.values(this.$store.state.wallet.contacts)
+        return this.$store.getters['wallet/contactsByWallet'](this.parentWallet)
+    },
+    gasPriceGwei: {
+        get: function () { return this.gasPrice / 1000000000 },
+        set: function (val) { this.gasPrice = val * 1000000000 }
     }
   },
   watch: {
     priorityTransfer: function (val) {
       if (val === true) {
-        this.gasPrice = this.wallet.network.gasPrices.priority
+        this.gasPrice = this.parentWallet.network.gasPrice.priority
       } else {
-        this.gasPrice = this.wallet.network.gasPrices.normal
+        this.gasPrice = this.parentWallet.network.gasPrice.normal
       }
     }
   },
   created() {
-    this.normalGas = this.wallet.network.gasPrices.normal
-    this.priorityGas = this.wallet.network.gasPrices.priority
-    this.maximumGas = this.wallet.network.gasPrices.maximum
+    this.parentWallet = this.$store.state.wallet.wallets[this.wallet.managerWalletAddress]
+    this.normalGas = this.parentWallet.network.gasPrice.normal
+    this.priorityGas = this.parentWallet.network.gasPrice.priority
+    this.maximumGas = this.parentWallet.network.gasPrice.maximum
   },
   methods: {
+    lessThanBalance() {
+        return (this.amount < this.wallet.balance) ? '' : this.$t('wallet.message.cannot_exceed_balance')
+    },
     initiateTransfer() {
       this.$store.commit('setLoading', { t: 'page', v: true })
-      const transactionOptions = {
-        source: this.wallet,
-        transfer: {
-          gasPrice: this.gasPrice,
-          gasLimit: (this.gas + 10000),
-          managerWallet: this.$store.state.wallet.wallets[this.wallet.managerWalletAddress]
-        },
-        destination: {
-          address: this.address,
-          amount: this.amount
-        }
-      }
-      console.log('initiating transfer')
-      this.$store.dispatch('wallet/transfer', transactionOptions)
-        .then((transfer) => {
-          this.$store.commit('setLoading', { t: 'page', v: false })
-          console.debug(transfer)
-          this.$store.commit('showNotification', {
-            type: 'success',
-            message: 'Your transfer has been successfully dispatched to the network'
-          })
-          this.$emit('complete')
+        this.$store.dispatch('security/getCredentials', this.parentWallet.address).then((credentials) => {
+
+            const transactionOptions = {
+                source: this.wallet,
+                transfer: {
+                    gasPrice: this.gasPrice,
+                    gas: this.$g("eth.available_networks")[0].gas.transfer, // litre of gas, mileage
+                    gasLimit: this.$g("eth.available_networks")[0].gas.transfer + 4000,
+                    managerWallet: this.parentWallet,
+                    credentials: credentials
+                },
+                destination: {
+                    address: this.address,
+                    amount: this.amount
+                }
+            }
+            console.log('initiating transfer')
+            this.$store.dispatch('wallet/transfer', transactionOptions)
+                .then((transfer) => {
+                    this.$store.commit('setLoading', {t: 'page', v: false})
+                    console.debug(transfer)
+                    this.$store.commit('showNotification', {
+                        type: 'success',
+                        message: 'Your transfer has been successfully dispatched to the network'
+                    })
+                    this.$emit('complete')
+                })
         })
     }
   }

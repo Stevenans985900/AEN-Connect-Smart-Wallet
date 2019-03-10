@@ -10,7 +10,7 @@
       <v-toolbar color="primary">
         <v-toolbar-title>{{ $t('backup.action.choose_wallet') }}</v-toolbar-title>
         <v-spacer />
-        <v-btn small fab outline @click="dialogBackup = false">
+        <v-btn small icon outline @click="dialogBackup = false">
           <v-icon>close</v-icon>
         </v-btn>
       </v-toolbar>

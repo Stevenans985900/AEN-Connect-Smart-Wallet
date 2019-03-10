@@ -12,7 +12,7 @@
       {{ date }}
     </span>
     <span v-if="display === 'all' || display === 'value'" :class="direction">
-      <token-value :symbol="symbol" :value="value" />
+      <token-value :symbol="symbol" :value="value" :type="wallet.type" />
     </span>
     <span v-if="display === 'all' || display === 'address'">
       <address-render :address="address" show-add />
@@ -53,7 +53,7 @@ export default {
     }
   },
   computed: {
-    symbol() { return this.$store.state.wallet.aen.symbol },
+    symbol() { return this.$store.state.wallet.aen.displaySymbol },
     address() {
       if (this.direction === 'incoming') {
         return this.data.signer.address.address

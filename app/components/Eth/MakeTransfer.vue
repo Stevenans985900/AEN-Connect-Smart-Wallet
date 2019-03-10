@@ -5,6 +5,9 @@
       <v-container grid-list-md>
         <v-layout wrap>
           <v-flex xs12>
+            {{ $t('wallet.label.balance') }}: <token-value :symbol="symbol" :type="wallet.type" :value="wallet.balance" />
+          </v-flex>
+          <v-flex xs12>
             <v-combobox
               v-model="address"
               :items="contacts"
@@ -17,11 +20,14 @@
             <v-text-field v-model="amount" label="Amount" suffix="ETH" />
           </v-flex>
           <v-flex xs-12>
-            <v-layout>
-              <v-flex xs4>
+            <v-layout row wrap>
+              <v-flex xs6>
                 <v-text-field v-model="gasPriceGwei" label="Gas Price" suffix="Gwei" />
               </v-flex>
-              <v-flex xs8>
+              <v-flex xs6>
+                <v-checkbox v-model="priorityTransfer" label="Priority Transfer" />
+              </v-flex>
+              <v-flex xs12>
                 <v-slider
                   v-model="gasPrice"
                   :color="color"
@@ -31,9 +37,6 @@
                   thumb-label
                   ticks
                 />
-              </v-flex>
-              <v-flex>
-                <v-checkbox v-model="priorityTransfer" label="Priority Transfer" />
               </v-flex>
             </v-layout>
           </v-flex>
@@ -50,7 +53,9 @@
 </template>
 
 <script>
+  import TokenValue from "~/components/TokenValue"
   export default {
+    components: { TokenValue },
     props: {
       wallet: {
         type: Object,
@@ -70,7 +75,8 @@
         priorityTransfer: false,
         maximumGas: 0,
         normalGas: 0,
-        priorityGas: 0
+        priorityGas: 0,
+        transferValid: false
       }
     },
     computed: {
@@ -89,6 +95,9 @@
       gasPriceGwei: {
         get: function () { return this.gasPrice / 1000000000 },
         set: function (val) { this.gasPrice = val * 1000000000 }
+      },
+      symbol() {
+        return this.$store.state.wallet.eth.displaySymbol
       }
     },
     watch: {
@@ -102,38 +111,64 @@
     },
     created() {
       this.normalGas = this.$g("eth.available_networks")[0].gasPrice.normal
+      this.gas = this.normalGas
       // this.normalGas = this.wallet.network.gasPrices.normal
       this.priorityGas = this.$g("eth.available_networks")[0].gasPrice.priority
       this.maximumGas = this.$g("eth.available_networks")[0].gasPrice.maximum
     },
     methods: {
       initiateTransfer() {
-        this.$store.commit("setLoading", { t: "page", v: true })
-        let transactionOptions = {
-          source: this.wallet,
-          transfer: {
-            gasPrice: this.gasPrice, // Cost per litre of gas (1 GWei = 1,000,000,000 Wei)
-            gas: this.$g("eth.available_networks")[0].gas.transfer, // litre of gas, mileage
-            gasLimit: this.$g("eth.available_networks")[0].gas.transfer + 4000 // full tank
-          },
-          destination: {
-            address: this.address,
-            amount: this.amount
-          }
-        }
-        console.log('initiating transfer')
-        this.$store.dispatch('wallet/transfer', transactionOptions)
-        .then((transfer) => {
-          this.$store.commit('setLoading', { t: 'page', v: false })
-          console.debug(transfer)
-          this.$store.commit('showNotification', {
-            type: 'success',
-            message:
-              'Your transfer has been successfully dispatched to the network'
+
+        this.$store.dispatch('security/getCredentials', this.wallet.address).then((credentials) => {
+          this.$store.commit('setLoading', {
+            t: 'page',
+            v: true,
+            m: this.$t('wallet.message.transfer_start')
           })
-          this.$emit('complete')
+          this.$store.dispatch('wallet/transfer', {
+            credentials: credentials,
+            source: this.wallet,
+            transfer: {
+              gasPrice: this.gasPrice, // Cost per litre of gas (1 GWei = 1,000,000,000 Wei)
+              gas: this.$g("eth.available_networks")[0].gas.transfer, // litre of gas, mileage
+              gasLimit: this.$g("eth.available_networks")[0].gas.transfer + 4000 // full tank
+            },
+            destination: {
+              address: this.address,
+              amount: this.amount.toString()
+            }
+          }).then((receipt) => {
+            console.log('receipt from the transaction')
+            console.log(receipt)
+
+            const networkHandler = this.$store.getters['wallet/networkHandler']('eth')
+            const apiEndpoint = this.$store.state.wallet.eth.activeApiEndpoint
+                .replace('###NETWORK_IDENTIFIER###', this.wallet.network.identifier)
+            networkHandler.setProvider(apiEndpoint)
+            const transactionWatcherInterval = setInterval(() => {
+              networkHandler.receipt().then((result) => {
+                if(result === true) {
+                  this.$store.commit('showNotification', {
+                    type: 'success',
+                    message: this.$t('wallet.message.transfer_complete')
+                  })
+                  clearInterval(transactionWatcherInterval)
+                }
+              })
+
+
+            }, 5000)
+
+            // Subscribe to trasnfer event and only stop loading once a receipt has been had
+            this.$store.commit('setLoading', {
+              t: 'page',
+              v: false
+            })
+
+            this.$emit('complete')
+          })
         })
+      }
     }
   }
-}
 </script>

@@ -9,10 +9,13 @@
         <v-container grid-list-md>
           <v-layout wrap>
             <v-flex xs12>
+              {{ $t('wallet.label.balance') }}: <token-value :symbol="symbol" :type="wallet.type" :value="wallet.balance" />
+            </v-flex>
+            <v-flex xs12>
               <v-text-field
                 v-model="destination.amount"
                 :label="$t('common.label.amount')"
-                :suffix="symbol"
+                suffix="AEN"
                 :error-messages="lessThanBalance()"
                 required
               />
@@ -47,7 +50,9 @@
 </template>
 
 <script>
+  import TokenValue from "~/components/TokenValue"
 export default {
+    components: { TokenValue },
   props: {
     wallet: {
       type: Object,
@@ -60,15 +65,15 @@ export default {
     return {
       destination: {
         address: '',
-        amount: 0,
-        message: '',
-        transferValid: false
-      }
+        amount: '',
+        message: ''
+      },
+      transferValid: false
     }
   },
   computed: {
     symbol() {
-      return this.$store.state.wallet.aen.symbol.toUpperCase()
+      return this.$store.state.wallet.aen.displaySymbol
     },
     contacts() {
       return this.$store.getters['wallet/contactsByWallet'](this.wallet)
@@ -82,27 +87,28 @@ export default {
       if (!this.$refs.makeTransferForm.validate()) {
         return false
       }
-      this.$store.commit('setLoading', {
-        t: 'page',
-        v: true,
-        m: this.$t('wallet.message.transfer_start')
-      })
+
         this.$store.dispatch('security/getCredentials', this.wallet.address).then((credentials) => {
-            this.$store.dispatch('wallet/transfer', {
-                credentials: credentials,
-                source: this.wallet,
-                destination: this.destination
-            }).then(() => {
-              this.$store.commit('setLoading', {
-                t: 'page',
-                v: false
-              })
-                this.$store.commit('showNotification', {
-                    type: 'success',
-                    message: this.$t('wallet.message.transfer_complete')
-                })
-                this.$emit('complete')
+          this.$store.commit('setLoading', {
+            t: 'page',
+            v: true,
+            m: this.$t('wallet.message.transfer_start')
+          })
+          this.$store.dispatch('wallet/transfer', {
+              credentials: credentials,
+              source: this.wallet,
+              destination: this.destination
+          }).then(() => {
+            this.$store.commit('setLoading', {
+              t: 'page',
+              v: false
             })
+              this.$store.commit('showNotification', {
+                  type: 'success',
+                  message: this.$t('wallet.message.transfer_complete')
+              })
+              this.$emit('complete')
+          })
         })
 
 

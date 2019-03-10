@@ -1,16 +1,21 @@
 <template>
-  <v-layout v-if="haveWallet" row>
-    <v-flex xs12 lg3 class="ml-2">
+  <v-layout v-if="haveWallet" row align-center>
+    <v-flex xs12 sm4 lg3 pa-2>
       <v-progress-circular v-if="loading === true" indeterminate />
-      <doughnut v-else :title="chartTitle" :data="graphData" />
+      <v-card v-else flat>
+        <doughnut v-if="totalValue > 0" :title="chartTitle" :data="graphData" />
+        <p v-else>
+          {{ $t('wallet.message.blocked_until_transaction') }}
+        </p>
+      </v-card>
     </v-flex>
-    <v-flex xs12 md8 lg9>
+    <v-flex xs12 sm8 lg9>
       <v-progress-circular v-if="loading === true" indeterminate />
       <v-card v-else flat>
         <v-card-text>
           <v-list>
-            <template v-for="(wallet, address) in wallets">
-              <v-list-tile :key="address" @click="contextWallet = wallet; dialogShowWallet = true">
+            <template v-for="(wallet) in wallets">
+              <v-list-tile :key="wallet.address" @click="contextWallet = wallet; dialogShowWallet = true">
                 <v-list-tile-avatar>
                   <wallet-image :wallet="wallet" />
                 </v-list-tile-avatar>
@@ -28,28 +33,41 @@
     <!-- Show Wallet Dialog -->
     <v-dialog v-if="dialogShowWallet === true" v-model="dialogShowWallet" fullscreen="">
       <v-toolbar class="primary">
+        <v-btn small icon outline @click="dialogShowWallet = false">
+          <v-icon>arrow_back</v-icon>
+        </v-btn>
         <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
-        <v-btn v-if="contextWallet.onChain === true" @click="dialogMakeTransfer = true" small outline>
+        <v-btn v-if="contextWallet.onChain === true" small outline @click="dialogMakeTransfer = true">
           Send
         </v-btn>
-        <v-btn @click="addressShow(contextWallet)" small outline>
+        <v-btn small outline @click="dialogAddressShow = true">
           Receive
         </v-btn>
-        <v-btn v-if="contextWallet.address !== mainWalletAddress" @click="dialogRemoveWallet = true" small outline>
+        <v-btn v-if="contextWallet.address !== mainWalletAddress" small outline @click="dialogRemoveWallet = true">
           Disable
         </v-btn>
         <v-spacer />
         <busy />
-        <v-btn small fab outline @click="dialogShowWallet = false">
-          <v-icon>close</v-icon>
-        </v-btn>
       </v-toolbar>
       <v-card>
         <v-card-text>
+          <refresh-wallet :wallet="contextWallet" />
           <address-render :address="contextWallet.address" :use-address-book="false" />
           <wallet-history :wallet="contextWallet" />
         </v-card-text>
       </v-card>
+    </v-dialog>
+
+    <!-- Show Address Dialog -->
+    <v-dialog v-if="dialogAddressShow === true" v-model="dialogAddressShow" max-width="500px">
+      <v-toolbar class="primary">
+        <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
+        <v-spacer />
+        <v-btn small icon outline @click="dialogAddressShow = false">
+          <v-icon>close</v-icon>
+        </v-btn>
+      </v-toolbar>
+      <business-card :wallet="contextWallet" :use-address-book="false" />
     </v-dialog>
 
     <!-- Make Transfer Dialog -->
@@ -57,7 +75,7 @@
       <v-toolbar color="primary">
         <v-toolbar-title>{{ $t('wallet.make_transfer_from') }}{{ contextWallet.name }}</v-toolbar-title>
         <v-spacer />
-        <v-btn small fab outline @click="dialogMakeTransfer = false">
+        <v-btn small icon outline @click="dialogMakeTransfer = false">
           <v-icon>close</v-icon>
         </v-btn>
       </v-toolbar>
@@ -69,7 +87,7 @@
       <v-toolbar color="primary">
         <v-toolbar-title>Are you sure you want to remove the wallet?</v-toolbar-title>
         <v-spacer />
-        <v-btn small fab outline @click="dialogRemoveWallet = false">
+        <v-btn small icon outline @click="dialogRemoveWallet = false">
           <v-icon>close</v-icon>
         </v-btn>
       </v-toolbar>
@@ -107,6 +125,7 @@
 import Doughnut from '~/components/Doughnut'
 import WalletHistory from '~/components/WalletHistory'
 import Busy from '~/components/Busy'
+import RefreshWallet from '~/components/RefreshWallet'
 function initialDataState() {
   return {
     processedWallets: 0,
@@ -116,6 +135,7 @@ function initialDataState() {
     // walletCount: 0,
     loading: true,
     contextWallet: {},
+    dialogAddressShow: false,
     dialogMakeTransfer: false,
     dialogRemoveWallet: false,
     dialogShowWallet: false,
@@ -126,7 +146,14 @@ export default {
   components: {
     Busy,
     Doughnut,
+    RefreshWallet,
     WalletHistory
+  },
+  props: {
+      renderWatch: {
+          type: Number,
+          default: 0
+      }
   },
   data() { return initialDataState() },
   computed: {
@@ -152,6 +179,10 @@ export default {
       } else {
         this.loading = true
       }
+    },
+    renderWatch: function () {
+        console.log('render watch triggered')
+        this.processWallets()
     }
   },
   mounted() {
@@ -165,6 +196,9 @@ export default {
       this.$g('internal.walletCheckInterval')
     )
 
+  },
+  beforeDestroy() {
+    clearInterval(this.balanceCheckInterval)
   },
   methods: {
     processWallets() {
@@ -180,7 +214,7 @@ export default {
           .then((walletProcessed) => {
             // const color = this.colorSchema[walletProcessed.type]
             // Calculate the dollar value of the wallet
-            const walletValue = walletProcessed.balance * this.$g('exchange.' + walletProcessed.type)
+            const walletValue = (walletProcessed.balance ? walletProcessed.balance * Number(this.$g('exchange.' + walletProcessed.type)) : 0)
             this.totalValue += walletValue
             this.graphData[walletProcessed.name] = walletValue
             this.processedWallets++
@@ -201,7 +235,11 @@ export default {
         message: this.$t('wallet.message.remove_sucess')
       })
     },
-    toCurrency(amount, target) { return 'USD ' + this.toSmallestDenomination((amount * this.$g('exchange.' + target))) },
+    toCurrency(amount, target) {
+      return 'USD ' + this.toSmallestDenomination(
+        (amount ? amount * Number(this.$g('exchange.' + target)) : 0 )
+      )
+    },
     walletAdded() {
       this.dialogWalletAdd = false
       this.$store.commit('showNotification', {
@@ -233,9 +271,6 @@ export default {
     reset() {
       Object.assign(this.$data, initialDataState())
     }
-  },
-  beforeDestroy() {
-    clearInterval(this.balanceCheckInterval)
   }
 }
 </script>

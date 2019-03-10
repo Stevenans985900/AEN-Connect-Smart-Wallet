@@ -12,7 +12,7 @@
       {{ date }}
     </span>
     <span v-if="display === 'all' || display === 'value'" :class="direction">
-      {{ value }}
+      <token-value :symbol="symbol" :value="transaction.value" :type="wallet.type" />
     </span>
   </span>
 </template>
@@ -28,7 +28,9 @@
 
 <script>
 import { format } from 'date-fns'
+import TokenValue from '~/components/TokenValue'
 export default {
+  components: { TokenValue },
   props: {
     display: {
       type: String,
@@ -57,8 +59,8 @@ export default {
       }
       return 'outgoing'
     },
-    value() {
-      return this.transaction.value
+    symbol() {
+      return this.$store.state.wallet.btc.displaySymbol
     }
   }
 }

@@ -4,7 +4,8 @@
       <p>
         Smart Connect currently supports AEN, Bitcoin, Ethereum, and Ethereum Smart Contracts. It supports multiple networks
         for each protocol, not limited to working on just the MainNet or TestNet but support for multiple networks is
-        dependant on the deployment configuration of this wallet.</p>
+        dependant on the deployment configuration of this wallet.
+      </p>
       <p>
         For this build of Smart Connect, the following networks are supported:
       </p>

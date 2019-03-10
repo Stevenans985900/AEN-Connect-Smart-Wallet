@@ -2,7 +2,7 @@
   "activation": {
     "message": {
       "initial_guidance": "If you have already made a transfer, it is possible the network has not yet processed it. The app will periodically check network status and this message will disappear once verified.",
-      "troubleshooting_guidance": "If you are still getting the message even after being sure a transfer has taken place, please try using the help feature by clicking the question mark in the top right corner to help diagnose the problem.",
+      "troubleshooting_guidance": "If you are not sure how to proceed, check the help section by clicking the question mark in the top right corner to help diagnose the problem.",
       "wallet_offline": "The wallet is currently offline"
     }
   },
@@ -21,7 +21,7 @@
       "choose_wallet": "Choose a wallet to backup"
     },
     "label": {
-      "file_choose": "Choose File"
+      "file_choose": "Choose or drag a file here"
     },
     "message": {
       "import_bad_file": "The uploaded file is invalid",
@@ -62,6 +62,7 @@
       "submit": "Submit"
     },
     "label": {
+      "accounts": "Accounts",
       "actions": "Actions",
       "address": "Address",
       "amount": "Amount",
@@ -78,6 +79,7 @@
       "na": "NA",
       "name": "Name",
       "network": "Network",
+      "never": "Never",
       "opportunities": "Investment Opportunities",
       "optional_message": "Message",
       "password": "Password",
@@ -87,6 +89,7 @@
       "search": "Search",
       "security": "Security",
       "send_message": "Send Message",
+      "synced": "Synced",
       "value": "Value",
       "wallets": "Wallets",
       "wizard": "Wizard"
@@ -94,6 +97,7 @@
     "message": {
       "are_you_sure": "Are you sure?",
       "coming_soon": "Coming Soon",
+      "footer_text": "Aenco Solutions Ltd",
       "name_already_used": "Name already in use",
       "results_empty": "No results found",
       "something_went_wrong": "Something went wrong"
@@ -118,15 +122,27 @@
       "name": "Contact Name"
     },
     "chunk": {
-      "removal_warning": "<p>If you remove this contact from your address book, you will no longer be able to quickly look them up during operations and where applicable, the long form of their address will be used.</p>"
+      "removal_warning": "If you remove this contact from your address book, you will no longer be able to quickly look them up during operations and where applicable, the long form of their address will be used."
+    }
+  },
+  "development": {
+    "label": {
+      "deploy_contract": "Deploy Contract"
+    }
+  },
+  "ethereum": {
+    "message": {
+      "contract_history_not_supported": "Transaction history for ERC20 contracts is not currently supported"
     }
   },
   "eula": {
     "action": {
-      "agreeEula": "I agree to the AEN EULA"
+      "agreeEula": "I agree to the AEN EULA",
+      "read_eula": "Read EULA",
+      "run_setup_wizard": "Run Setup wizard"
     },
     "message": {
-      "introduction": "<p>This is the first community release, please do not use this wallet to store real accounts on!</p><p>By proceeding, you accept the <a href=\"http://aencoin.com/eula\" target=\"_blank\">AEN end user license agreement</a></p>"
+      "introduction": "This is a first community release and should be treated as preview. {lease do not use this wallet to store real accounts on."
     }
   },
   "feedback": {
@@ -157,9 +173,14 @@
     },
     "label": {
       "aen": "AEN",
-      "eth": "Ethereum",
+      "api_endpoint": "API Endpoint",
       "btc": "Bitcoin",
+      "connection_status": "Connection Status",
       "contract": "ERC20 Contract",
+      "current_api_endpoint": "Current API Endpoint",
+      "eth": "Ethereum",
+      "offline": "Offline",
+      "online": "Online",
       "testnet_functions": "TestNet Functions"
     },
     "message": {
@@ -191,11 +212,13 @@
     },
     "label": {
       "backup_understand": "I have backed up my wallet / understand that keeping it safe is my duty",
+      "balance": "Balance",
       "create_new_now": "Create New Wallet Now",
       "import_from_file": "Import from file",
       "manual_input_existing": "Manually enter wallet details",
       "name": "Wallet Name",
-      "review": "Review you wallet"
+      "review": "Review you wallet",
+      "transfer_from": "Make a Transfer from "
     },
     "message": {
       "add_method": "How do you want to setup your wallet?",
@@ -203,17 +226,18 @@
       "cannot_exceed_balance": "Cannot exceed more than available balance",
       "capabilities": "With this wallet, you can now receive and transfer tokens using the AENChain network. Before proceeding, we strongly recommend you create a backup of your wallet using the button below.",
       "checking_wallet_status": "Checking Wallet Status",
+      "contract_added": "Management of the following contract has been added to the wallet",
+      "blocked_until_transaction": "This component will auto-update once a transaction has been made",
       "initial_status": "At the moment, your wallet is not live on the network. It is necessary to perform a transaction using this address before it has any presence.",
       "network_recognise_wallet": "The wallet is recognised on the network",
       "network_miss_wallet": "The wallet is not yet recognised on the network",
       "remove_success": "Your wallet has been remove",
+      "remove_warning": "If you remove the wallet, there will be no way to access it unless you have made a backup.",
       "transfer_complete": "Your transfer has been successfully dispatched to the network",
       "transfer_start": "Sending transaction",
       "updating_balance": "Updating Balance",
       "updating_history": "Updating History"
-    },
-    "make_transfer_from": "Make a Transfer from ",
-    "remove_instruction": "<p>If you remove the wallet, there will be no way to access it unless you have made a backup.</p>"
+    }
   }
 
 }

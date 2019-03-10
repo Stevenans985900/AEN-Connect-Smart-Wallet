@@ -1,10 +1,11 @@
 <template>
-  <span>
-    <v-btn @click="manualCheck()">
-      {{ $t('common.action.refresh') }}
-    </v-btn>
+  <v-btn outline small @click="manualCheck()">
+    <v-icon>
+      cloud_off
+    </v-icon>
     {{ timeToCheck }}{{ $t('network.message.s_until_next_check') }}
-  </span>
+  </v-btn>
+
 </template>
 
 <script>
@@ -53,17 +54,8 @@
                 this.checkOnline()
             },
             checkOnline: function () {
-                this.$store.commit('setLoading', {
-                    t: 'page',
-                    v: true,
-                    m: this.$t('wallet.message.checking_wallet_status')
-                })
                 this.$store.dispatch('wallet/getLiveWallet', this.wallet).then((response) => {
-                    this.$store.commit('setLoading', {
-                        t: 'page',
-                        v: false
-                    })
-                    if (response !== false) {
+                   if (response !== false) {
                         if(this.walletOnlineCheckInterval)  { clearInterval(this.walletOnlineCheckInterval) }
 
                         if(this.$store.state.wallet.wallets[this.wallet.address].onChain === false) {
@@ -73,27 +65,10 @@
                                 value: true
                             })
                         }
-                        // Update the balance for first time
-                        this.$store.commit('setLoading', {
-                          t: 'page',
-                          v: true,
-                          m: this.$t('wallet.message.updating_balance')
-                        })
-                        this.$store.dispatch('wallet/balance', this.wallet).then(() => {
-                          this.$store.commit('setLoading', {
-                            t: 'page',
-                            v: false
-                          })
-                        })
-
+                        this.$store.dispatch('wallet/balance', this.wallet)
                     }
                 })
-                    .catch(() => {
-                        this.$store.commit('setLoading', {
-                            t: 'page',
-                            v: false
-                        })
-                    })
+
             }
         }
     }

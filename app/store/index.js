@@ -1,7 +1,3 @@
-import {
-  BlockchainHttp
-} from 'chain-js-sdk'
-
 export const initialState = {
   // Snackbar Controls
   notification: {
@@ -15,7 +11,11 @@ export const initialState = {
     mode: 'web',
     environment: 'production',
     isOnline: false,
-    intervalTimers: {}
+    intervalTimers: {},
+    // Even though Vue is reactive, some of the deep components use calculations along with computed properties. This
+    // counter provides a simple way to watch for such events firing removing the need to watch deep
+    renderCounter: 0,
+    skipCacheNextOp: false
   },
   // When running as a desktop app
   electron: {
@@ -28,10 +28,6 @@ export const initialState = {
     router: true,
     page: false,
     message: ''
-  },
-  // User options for security
-  security: {
-
   },
   // Shared user preferences
   user: {
@@ -73,33 +69,13 @@ export const getters = {
   }
 }
 
-export const actions = {
-  /**
-     * Gets some generic (non wallet specific) related blockchain information
-     *
-     * @param {*} context
-     */
-  updateGenericNetworkInformation(context) {
-    console.debug('Index Store: Update Generic Network Information')
-    const apiEndpoint = context.state.wallet.aen.activeApiEndpoint
-    if (!apiEndpoint) {
-      return
-    }
-    const blockchainHttp = new BlockchainHttp(apiEndpoint)
-    // Get the network height
-    blockchainHttp.getBlockchainHeight()
-      .subscribe((height) => {
-        if (height.lower !== context.state.wallet.aen.blockHeight) {
-          context.commit('wallet/setAenProperty', {
-            key: 'blockHeight',
-            value: height.lower
-          })
-        }
-      })
-  }
-}
-
 export const mutations = {
+  setRenderCounter(state, value) {
+    state.runtime.renderCounter = value
+  },
+  emitRenderEvent(state) {
+    state.runtime.renderCounter += 1
+  },
   reset(state) {
     Object.assign(state, initialState)
   },
@@ -185,7 +161,7 @@ export const mutations = {
     state.internal.activeApiEndpoint = value
   },
   setPingTime(state, value) {
-    state.internal.activeApiPing = value
+    state.internal.apiPing = value
   },
   setPreferredNode(state, address) {
     state.internal.preferredNode = address
@@ -204,6 +180,9 @@ export const mutations = {
   },
   dismissNotification(state) {
     state.notification.show = false
+  },
+  CACHE_SKIP(state, boolean) {
+    state.runtime.skipCacheNextOp = boolean
   },
   showNotification(state, inputObject) {
     inputObject.show = true

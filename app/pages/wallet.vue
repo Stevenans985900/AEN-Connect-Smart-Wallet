@@ -33,12 +33,12 @@
           <v-card-text v-if="haveWallet">
             <v-expansion-panel>
               <v-expansion-panel-content v-for="(wallet, address) in wallets" :key="address">
+                <!-- Main Table Row -->
                 <div slot="header" @click="accordionTogglingWallet(wallet)">
                   <v-layout row wrap>
                     <v-flex xs2 sm1>
                       <wallet-image :wallet="wallet" />
                     </v-flex>
-
                     <v-flex xs7 sm5 class="text-truncate">
                       <v-layout row wrap>
                         <v-flex xs12 sm6>
@@ -49,7 +49,7 @@
                         </v-flex>
                       </v-layout>
                     </v-flex>
-
+                    <!-- Wallet Controls -->
                     <v-flex v-if="$vuetify.breakpoint.mdAndUp" xs3 sm6 class="text-xs-right">
                       <v-btn v-if="wallet.onChain === true" outline small @click="contextWallet = wallet; dialogMakeTransfer = true">
                         {{ $t('common.action.send') }}
@@ -61,6 +61,7 @@
                         {{ $t('common.action.disable') }}
                       </v-btn>
                     </v-flex>
+                    <!-- Mobile Button -->
                     <v-flex v-else xs3 sm6 class="text-xs-right">
                       <v-menu offset-y>
                         <v-btn
@@ -85,14 +86,12 @@
                     </v-flex>
                   </v-layout>
                 </div>
-                <v-card>
+                <!-- Wallet expansion details. Only try to render the section if selected to avoid unnecessary proc -->
+                <v-card v-if="selectedWalletAddress == address">
                   <v-card-text>
-                    <v-btn outline fab small @click="refreshHistory">
-                      <v-icon>
-                        loop
-                      </v-icon>
-                    </v-btn>
+                    <refresh-wallet :wallet="wallet" />
                     <testnet-buttons :wallet="wallet" />
+                    <address-render :address="wallet.address" :use-address-book="false" />
                     <wallet-history v-if="wallet.onChain === true" :wallet="wallet" />
                     <activation v-else :wallet="wallet" />
                     <hr>
@@ -111,10 +110,10 @@
 
       <!-- Show Address Dialog -->
       <v-dialog v-if="dialogAddressShow === true" v-model="dialogAddressShow" max-width="500px">
-        <v-toolbar class="primary mb-2">
+        <v-toolbar class="primary">
           <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
           <v-spacer />
-          <v-btn small fab outline @click="dialogAddressShow = false">
+          <v-btn small icon outline @click="dialogAddressShow = false">
             <v-icon>close</v-icon>
           </v-btn>
         </v-toolbar>
@@ -141,9 +140,9 @@
       <!-- Make Transfer Dialog -->
       <v-dialog v-if="dialogMakeTransfer === true" v-model="dialogMakeTransfer" persistent max-width="450px">
         <v-toolbar color="primary">
-          <v-toolbar-title>{{ $t('wallet.make_transfer_from') }}{{ contextWallet.name }}</v-toolbar-title>
+          <v-toolbar-title>{{ $t('wallet.label.transfer_from') }}{{ contextWallet.name }}</v-toolbar-title>
           <v-spacer />
-          <v-btn small fab outline @click="dialogMakeTransfer = false">
+          <v-btn small icon outline @click="dialogMakeTransfer = false">
             <v-icon>close</v-icon>
           </v-btn>
         </v-toolbar>
@@ -155,7 +154,7 @@
         <v-toolbar color="primary">
           <v-toolbar-title>{{ $t('common.message.are_you_sure') }}</v-toolbar-title>
           <v-spacer />
-          <v-btn small fab outline @click="dialogRemoveWallet = false">
+          <v-btn small icon outline @click="dialogRemoveWallet = false">
             <v-icon>close</v-icon>
           </v-btn>
         </v-toolbar>
@@ -164,7 +163,9 @@
             {{ contextWallet.name }}
           </v-card-title>
           <v-card-text>
-            <span v-html="$t('wallet.remove_instruction')" />
+            <p>
+              {{ $t('wallet.message.remove_warning') }}
+            </p>
             <backup-wallet :wallet="contextWallet" />
           </v-card-text>
           <v-card-actions>
@@ -186,6 +187,7 @@
 import Activation from '~/components/Activation'
 import Balance from '~/components/Balance'
 import BackupWallet from '~/components/BackupWallet'
+import RefreshWallet from '~/components/RefreshWallet'
 // import VueRecaptcha from 'vue-recaptcha'
 import WalletHistory from '~/components/WalletHistory'
 import MakeTransfer from '~/components/MakeTransfer'
@@ -207,6 +209,7 @@ function initialDataState() {
     newAccount: false,
     existingAccount: false,
     walletCreated: false,
+    selectedWalletAddress: null,
     showPassword: false,
     walletName: '',
     walletPassword: '',
@@ -234,6 +237,7 @@ export default {
     BackupWallet,
     Balance,
     MakeTransfer,
+    RefreshWallet,
     TestnetButtons,
     WalletAdd,
     WalletHistory
@@ -283,6 +287,10 @@ export default {
   methods: {
     accordionTogglingWallet(wallet) {
       this.contextWallet = wallet
+      this.selectedWalletAddress = wallet.address
+        console.log('toggled accordion')
+        console.log(this.contextWallet)
+        console.log(this.selectedWalletAddress)
       // Check whether the user security is ok
       if(this.contextWallet.onChain === false) {
         const walletLiveCheckInterval = setInterval(
@@ -306,22 +314,6 @@ export default {
     addressShow(wallet) {
       this.contextWallet = wallet
       this.dialogAddressShow = true
-    },
-    setActiveWallet(wallet) {
-      switch (wallet.type) {
-        case 'aen':
-          this.$walletService.walletLoad('aen', wallet)
-          this.$store.commit('setAccountProperty', {
-            key: 'accountPrivateKey',
-            value: this.$walletService.$store.state.account.privateKey
-          })
-          this.$store.commit('setAccount', this.$walletService.$store.state.account)
-          this.$store.commit('setActiveWallet', wallet)
-          break
-      }
-    },
-    refreshHistory() {
-      this.$store.dispatch('wallet/transactionsHistorical', this.contextWallet)
     },
     removeWallet() {
       this.dialogRemoveWallet = false
