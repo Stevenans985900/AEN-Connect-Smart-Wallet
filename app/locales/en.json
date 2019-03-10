@@ -2,7 +2,7 @@
   "activation": {
     "message": {
       "initial_guidance": "If you have already made a transfer, it is possible the network has not yet processed it. The app will periodically check network status and this message will disappear once verified.",
-      "troubleshooting_guidance": "If you are still getting the message even after being sure a transfer has taken place, please try using the help feature by clicking the question mark in the top right corner to help diagnose the problem.",
+      "troubleshooting_guidance": "If you are not sure how to proceed, check the help section by clicking the question mark in the top right corner to help diagnose the problem.",
       "wallet_offline": "The wallet is currently offline"
     }
   },
@@ -122,12 +122,17 @@
       "name": "Contact Name"
     },
     "chunk": {
-      "removal_warning": "<p>If you remove this contact from your address book, you will no longer be able to quickly look them up during operations and where applicable, the long form of their address will be used.</p>"
+      "removal_warning": "If you remove this contact from your address book, you will no longer be able to quickly look them up during operations and where applicable, the long form of their address will be used."
     }
   },
   "development": {
     "label": {
       "deploy_contract": "Deploy Contract"
+    }
+  },
+  "ethereum": {
+    "message": {
+      "contract_history_not_supported": "Transaction history for ERC20 contracts is not currently supported"
     }
   },
   "eula": {

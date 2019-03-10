@@ -1,5 +1,5 @@
 {
-  "version": "0.0.1",
+  "version": "0.1.0",
   "salt": "o/e|6)~AorFA$7y!.IJaD_{c;r.ZS>7v+dr4:LMxiSRFKu|0CICdj0vD#h~ZujU96BA)ya(xMw;pb3T+6f.A1N|_o>+&U)|aa3DD+`aWKz1",
   "build_number": "DEV",
   "google_recaptcha_key": "NA",
@@ -52,9 +52,14 @@
     }
   },
   "btc": {
+    "api_endpoints": [
+      {
+        "alias": "Block Cypher",
+        "address": "http://api.blockcypher.com/v1/btc/"
+      }
+    ],
     "block_cypher": {
-      "api_endpoint": "http://api.blockcypher.com/v1/btc/",
-      "api_endpoint_height": ""
+      "api_token": "bbeaa842133f474f9cdff8f15c62d980"
     },
     "blockchain_info": {
       "api_endpoint": "https://testnet.blockchain.info/"
@@ -81,14 +86,16 @@
       }]
   },
   "eth": {
+    "api_endpoint_height": "",
+    "api_endpoints": [
+      {
+        "alias": "Infura",
+        "address": "https://###NETWORK_IDENTIFIER###.infura.io/0HIuuP4qCjvv8DMGjvPm"
+      }
+    ],
     "etherscan": {
       "api_key": "IJQ88ERU7QH9HQNV2NX46G2XJAIEZ6EBPB",
-      "api_endpoint": "http://api-###NETWORK_IDENTIFIER###.etherscan.io/api",
-      "api_endpoint_height": ""
-    },
-    "infura": {
-      "api_endpoint": "https://###NETWORK_IDENTIFIER###.infura.io/0HIuuP4qCjvv8DMGjvPm",
-      "api_endpoint_height": ""
+      "api_endpoint": "http://api-###NETWORK_IDENTIFIER###.etherscan.io/api"
     },
     "available_networks": [
       {

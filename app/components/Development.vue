@@ -324,6 +324,9 @@ export default {
       console.debug('Development: Deploying test contract')
       import('~/class/network/contract/test.json').then((jsonInterface) => {
         const web3 = this.$store.getters["wallet/networkHandler"]("contract").web3
+        const apiEndpoint = this.$store.state.wallet.eth.activeApiEndpoint
+            .replace('###NETWORK_IDENTIFIER###', this.wallet.network.identifier)
+        web3.setProvider(apiEndpoint)
         this.$store.dispatch('security/getCredentials', this.wallet.address).then((credentials) => {
           this.$store.commit('setLoading', {
             t: 'page',
@@ -345,7 +348,10 @@ export default {
                 .then((signedTx) => {
                   web3.eth.sendSignedTransaction(signedTx.rawTransaction)
                     .then(() => {
-                      console.debug('Contract has been pushed out to the network')
+                        this.$store.commit('setLoading', {
+                          t: 'page',
+                          v: false })
+                        console.debug('Contract has been pushed out to the network')
                       this.dialogDeployContract = false
                     })
                 })
@@ -353,14 +359,6 @@ export default {
                   console.log('something went wrong when sending a transaction')
                   console.error(err)
                 })
-                .finally(() => {
-                  this.$store.commit('setLoading', {
-                    t: 'page',
-                    v: false })
-                })
-              // console.debug(receipt)
-
-
             })
         })
       })

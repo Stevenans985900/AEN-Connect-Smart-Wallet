@@ -288,6 +288,9 @@ export default {
     accordionTogglingWallet(wallet) {
       this.contextWallet = wallet
       this.selectedWalletAddress = wallet.address
+        console.log('toggled accordion')
+        console.log(this.contextWallet)
+        console.log(this.selectedWalletAddress)
       // Check whether the user security is ok
       if(this.contextWallet.onChain === false) {
         const walletLiveCheckInterval = setInterval(
@@ -311,19 +314,6 @@ export default {
     addressShow(wallet) {
       this.contextWallet = wallet
       this.dialogAddressShow = true
-    },
-    setActiveWallet(wallet) {
-      switch (wallet.type) {
-        case 'aen':
-          this.$walletService.walletLoad('aen', wallet)
-          this.$store.commit('setAccountProperty', {
-            key: 'accountPrivateKey',
-            value: this.$walletService.$store.state.account.privateKey
-          })
-          this.$store.commit('setAccount', this.$walletService.$store.state.account)
-          this.$store.commit('setActiveWallet', wallet)
-          break
-      }
     },
     removeWallet() {
       this.dialogRemoveWallet = false

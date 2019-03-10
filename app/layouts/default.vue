@@ -187,15 +187,6 @@ export default {
       },
       set : function () {}
     },
-    developmentAgreed: {
-      get: function () { return !this.$store.state.user.developmentAgreed },
-      set: function (val) {
-        this.$store.commit('setUserProperty', {
-          key: 'developmentAgreed',
-          value: val
-        })
-      }
-    },
     eulaAgreed() { return this.$store.state.user.eulaAgree },
     isOnline() { return this.$store.state.runtime.isOnline },
     buildNumber() { return this.$g('build_number') },
@@ -236,15 +227,13 @@ export default {
    *
    */
   beforeMount() {
-    this.$store.commit('security/resetAttemptCount')
+    // Ensure some global variables are clean for start
     this.$store.commit('CACHE_SKIP', false)
     this.$store.commit('setAppMode', 'web')
     const env = process.env.NODE_ENV || 'dev'
-    this.$store.commit('setRuntimeProperty', {
-      key: 'environment',
-      value: env
-    })
+    this.$store.commit('setRuntimeProperty', { key: 'environment', value: env })
 
+    // Determine how to handle main navigation by default depending on device size
     if(this.$vuetify.breakpoint.mdAndUp === true) {
       this.showNav = true
       this.minifyDrawer = false
@@ -291,16 +280,20 @@ export default {
 
     // Check network settings and create a set of defaults based from first available
     // TODO Abstract this defaulting to a component of it's own which can pickup a "wallets available" setting
+      this.$store.commit('wallet/setAenProperty', { key: 'activeApiEndpoint', value: this.$g('aen.api_endpoints')[0].address })
+      this.$store.commit('wallet/setBtcProperty', { key: 'activeApiEndpoint', value: this.$g('btc.api_endpoints')[0].address })
+      this.$store.commit('wallet/setEthProperty', { key: 'activeApiEndpoint', value: this.$g('eth.api_endpoints')[0].address })
+
       if (Object.keys(this.$store.state.wallet.aen.network).length === 0) {
           this.$store.commit('wallet/setAenProperty', { key: 'network', value: this.$g('aen.available_networks')[0] })
       }
       if (Object.keys(this.$store.state.wallet.btc.network).length === 0) {
           this.$store.commit('wallet/setBtcProperty', { key: 'network', value: this.$g('btc.available_networks')[0] })
+
       }
-    if (!this.$store.state.wallet.eth.activeApiEndpoint) {
-        console.log('identified withouot api')
-      this.$store.commit('wallet/setEthProperty', { key: 'network', value: this.$g('eth.available_networks')[0] })
-    }
+      if (Object.keys(this.$store.state.wallet.eth.network).length === 0) {
+        this.$store.commit('wallet/setEthProperty', { key: 'network', value: this.$g('eth.available_networks')[0] })
+      }
 
     this.rankApiNodes()
     setInterval(

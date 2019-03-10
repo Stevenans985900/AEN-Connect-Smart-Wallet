@@ -10,7 +10,11 @@
         <template slot="items" slot-scope="props">
           <tr @click="props.expanded = !props.expanded">
             <td>
-              <transaction-stringify :transaction="props.item" display="date" />
+              <transaction-stringify
+                :wallet="wallet"
+                :transaction="props.item"
+                display="date"
+              />
             </td>
             <td>
               <transaction-stringify

@@ -1,10 +1,11 @@
 <template>
-  <span>
-    <v-btn @click="manualCheck()">
-      {{ $t('common.action.refresh') }}
-    </v-btn>
+  <v-btn outline small @click="manualCheck()">
+    <v-icon>
+      cloud_off
+    </v-icon>
     {{ timeToCheck }}{{ $t('network.message.s_until_next_check') }}
-  </span>
+  </v-btn>
+
 </template>
 
 <script>

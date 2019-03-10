@@ -82,9 +82,7 @@
               <component :is="component" v-if="component !== null" />
               <template v-else>
                 <youtube v-if="youtubeVideo" :video-id="youtubeVideo" player-width="100%" />
-                <span>
-                  {{ displayText }}
-                </span>
+                <span v-html="displayText" />
               </template>
             </v-flex>
           </v-layout>
@@ -259,10 +257,6 @@
         this.displayText = null
         this.youtubeVideo = null
 
-        if(!this.help.hasOwnProperty(this.selectedCategory)) {
-          console.debug('Help could not find category definition for: ' + this.selectedCategory)
-          return false
-        }
         // Check to see whether there is a template associated with this help entry
         let entry = this.help[this.selectedCategory].faq[this.selectedEntry]
         console.log(entry)
@@ -281,13 +275,14 @@
     },
       mounted() {
         // Get up to date status for each network
-        this.$store.dispatch('wallet/queryApiNode', 'aen')
-        this.$store.dispatch('wallet/queryApiNode', 'btc')
+        // this.$store.dispatch('wallet/queryApiNode', 'aen')
+        // this.$store.dispatch('wallet/queryApiNode', 'btc')
         // this.$store.dispatch('wallet/queryApiNode', 'eth')
       },
     methods: {
       chooseCategory(categoryIndex) {
         this.selectedCategory = null
+        this.selectedEntry = null
         this.categoryComponent = null
         this.categoryIndex = categoryIndex
         // If user clicked either the contact or about categories, special handling

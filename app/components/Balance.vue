@@ -33,6 +33,8 @@ export default {
           return this.$store.state.wallet.aen.displaySymbol
         case 'btc':
           return this.$store.state.wallet.btc.displaySymbol
+        case 'contract':
+          return this.wallet.symbol
         case 'eth':
           return this.$store.state.wallet.eth.displaySymbol
       }

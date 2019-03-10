@@ -20,11 +20,14 @@
             <v-text-field v-model="amount" label="Amount" suffix="ETH" />
           </v-flex>
           <v-flex xs-12>
-            <v-layout>
-              <v-flex xs4>
+            <v-layout row wrap>
+              <v-flex xs6>
                 <v-text-field v-model="gasPriceGwei" label="Gas Price" suffix="Gwei" />
               </v-flex>
-              <v-flex xs8>
+              <v-flex xs6>
+                <v-checkbox v-model="priorityTransfer" label="Priority Transfer" />
+              </v-flex>
+              <v-flex xs12>
                 <v-slider
                   v-model="gasPrice"
                   :color="color"
@@ -34,9 +37,6 @@
                   thumb-label
                   ticks
                 />
-              </v-flex>
-              <v-flex>
-                <v-checkbox v-model="priorityTransfer" label="Priority Transfer" />
               </v-flex>
             </v-layout>
           </v-flex>
@@ -111,6 +111,7 @@
     },
     created() {
       this.normalGas = this.$g("eth.available_networks")[0].gasPrice.normal
+      this.gas = this.normalGas
       // this.normalGas = this.wallet.network.gasPrices.normal
       this.priorityGas = this.$g("eth.available_networks")[0].gasPrice.priority
       this.maximumGas = this.$g("eth.available_networks")[0].gasPrice.maximum
@@ -141,6 +142,9 @@
             console.log(receipt)
 
             const networkHandler = this.$store.getters['wallet/networkHandler']('eth')
+            const apiEndpoint = this.$store.state.wallet.eth.activeApiEndpoint
+                .replace('###NETWORK_IDENTIFIER###', this.wallet.network.identifier)
+            networkHandler.setProvider(apiEndpoint)
             const transactionWatcherInterval = setInterval(() => {
               networkHandler.receipt().then((result) => {
                 if(result === true) {

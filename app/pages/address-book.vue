@@ -30,12 +30,12 @@
                 <address-render :address="props.item.address" :use-address-book="false" />
               </td>
               <td class="justify-center layout px-0">
-                <v-icon small class="mr-2" @click="editContact(props.item)">
+                <v-btn outline small @click="editContact(props.item)">
                   {{ $t('common.action.edit') }}
-                </v-icon>
-                <v-icon small @click="dialogDeleteContact = true;contact = props.item">
+                </v-btn>
+                <v-btn outline small @click="dialogDeleteContact = true;contact = props.item">
                   {{ $t('common.action.remove') }}
-                </v-icon>
+                </v-btn>
               </td>
             </template>
             <v-alert

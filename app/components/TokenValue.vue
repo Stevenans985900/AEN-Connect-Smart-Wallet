@@ -84,7 +84,11 @@ export default {
         }
       } else {
         this.displaySymbol = this.symbol
-        this.displayAmount = (numeric / this.symbolDivisibility[this.type][this.symbol]).toFixed(2)
+        if(this.type === 'contract') {
+            this.displayAmount = numeric
+        } else {
+            this.displayAmount = (numeric / this.symbolDivisibility[this.type][this.symbol]).toFixed(2)
+        }
       }
     }
   }

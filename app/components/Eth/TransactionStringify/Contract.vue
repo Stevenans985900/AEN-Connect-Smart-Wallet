@@ -85,6 +85,11 @@ export default {
   methods: {
     fetchContractInfo() {
       const networkHandler = this.$store.getters['wallet/networkHandler']('contract')
+        console.log(this.wallet)
+      const apiEndpoint = this.$store.state.wallet.eth.activeApiEndpoint
+          .replace('###NETWORK_IDENTIFIER###', this.wallet.network.identifier)
+        console.log(networkHandler)
+      networkHandler.setProvider(apiEndpoint)
 
       // Check whether a wallet record exists for handling the contract
       if(!this.$store.state.wallet.wallets.hasOwnProperty(this.transaction.contractAddress)) {
@@ -118,7 +123,7 @@ export default {
               contractAddress: this.transaction.contractAddress,
               method: 'symbol'
             })
-            console.log('passed getting the contract options', walletOptions)
+            this.addWallet(walletOptions)
 
           } catch (e) {
             this.contractFound = false
@@ -152,13 +157,13 @@ export default {
       console.debug('Contract: Adding wallet from token value')
       console.debug(walletOptions)
 
-      // this.$store.dispatch('wallet/load', walletOptions)
-      // .then((wallet) => {
-      //   this.$store.commit('showNotification', {
-      //     type: 'success',
-      //     message: this.$t('wallet.message.contract_added' + ': ' + wallet.name)
-      //   })
-      // })
+      this.$store.dispatch('wallet/load', walletOptions)
+      .then((wallet) => {
+        this.$store.commit('showNotification', {
+          type: 'success',
+          message: this.$t('wallet.message.contract_added' + ': ' + wallet.name)
+        })
+      })
     }
   }
 }

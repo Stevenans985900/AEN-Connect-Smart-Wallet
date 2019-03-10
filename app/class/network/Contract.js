@@ -3,9 +3,10 @@ import axios from 'axios'
 import Web3 from 'web3'
 
 export default class Contract extends Generic {
-  constructor(apiEndpoint) {
+  constructor(apiEndpoint, config) {
     super()
     this.pluginName = 'contract'
+    this.config = config
     this.web3 = new Web3(apiEndpoint)
   }
 
@@ -39,16 +40,17 @@ export default class Contract extends Generic {
   }
   transactionsHistorical(options) {
     super.transactionsHistorical(options)
+    const apiEndpoint = this.config.etherscan.api_endpoint.replace('###NETWORK_IDENTIFIER###', options.network.identifier)
     return new Promise((resolve, reject) => {
-      axios.get(options.wallet.network.label.etherscan_api_endpoint, {
+      axios.get(apiEndpoint, {
         params: {
           module: 'account',
           action: 'txlist',
-          address: options.wallet.managerWalletAddress,
+          address: options.address,
           startblock: 0,
           endblock: 99999999,
           sort: 'desc',
-          apikey: options.etherscan.api_key
+          apikey: this.config.etherscan.api_key
         }
       })
         .then(function (response) {
@@ -70,18 +72,20 @@ export default class Contract extends Generic {
   }
 
   transfer(options) {
-    Generic.prototype.transfer.call(this, options)
+    super.transfer(options)
     return new Promise(({resolve, reject}) => {
       let transaction
             // TODO Add in the flexibility to handle meta contracts if there is a proxy transfer method
             import('~/class/network/contract/erc20').then((erc20Interface) => {
               const contract = new this.web3.eth.Contract(erc20Interface.abi, options.source.address)
-              transaction = contract.methods.transfer(options.destination.address, options.destination.amount)
-              transaction.chainId = options.source.network.network_id
-              transaction.gas = options.transfer.gasPrice
-              transaction.gasLimit = options.transfer.gasLimit
 
-              this.web3.eth.accounts.signTransaction(transaction, options.transfer.managerWallet.privateKey)
+              transaction = contract.methods.transfer(options.destination.address, options.destination.amount)
+              transaction.chainId = options.transfer.managerWallet.network.network_id
+              transaction.gasPrice = this.web3.utils.toHex(options.transfer.gasPrice)
+              transaction.gas = this.web3.utils.toHex(options.transfer.gas)
+              transaction.gasLimit = this.web3.utils.toHex(options.transfer.gasLimit)
+
+              this.web3.eth.accounts.signTransaction(transaction, options.transfer.credentials.privateKey)
                 .then(signedTx => this.web3.eth.sendSignedTransaction(signedTx.rawTransaction))
                 .then((receipt) => {
                   console.log(receipt)
@@ -123,10 +127,17 @@ export default class Contract extends Generic {
      * @returns {Promise<any>}
      */
   walletLoad(options) {
-    Generic.prototype.walletLoad.call(this, options)
+    super.walletLoad(options)
 
     return new Promise((resolve) => {
-      resolve(options)
+      resolve({
+        name: options.contractName,
+        address: options.address,
+        onChain: true,
+        managerWalletAddress: options.managerWalletAddress,
+        symbol: options.symbol,
+        decimals: options.decimals
+      })
     })
   }
 
@@ -138,5 +149,6 @@ export default class Contract extends Generic {
   getWeb3() {
     return this.web3
   }
+  setProvider(endpoint) { this.web3.setProvider(endpoint) }
   web3() { return this.web3 }
 }
