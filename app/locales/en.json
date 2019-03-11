@@ -142,7 +142,7 @@
       "run_setup_wizard": "Run Setup wizard"
     },
     "message": {
-      "introduction": "This is a first community release and should be treated as preview. {lease do not use this wallet to store real accounts on."
+      "introduction": "This is a first community release and should be treated as preview. Please do not use this wallet to store real accounts on."
     }
   },
   "feedback": {
@@ -185,7 +185,8 @@
     },
     "message": {
       "s_until_next_check": "s until next check",
-      "checking_best_api": "Ranking API destinations"
+      "checking_best_api": "Ranking API destinations",
+      "broadcasting_please_wait": "Broadcasting to network, please wait"
     }
   },
   "security": {

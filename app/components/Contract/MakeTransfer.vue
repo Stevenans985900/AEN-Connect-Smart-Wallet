@@ -9,21 +9,21 @@
           </v-flex>
           <v-flex xs12>
             <v-text-field
-                    v-model="amount"
-                    :label="$t('common.label.amount')"
-                    :suffix="wallet.symbol"
-                    :error-messages="lessThanBalance()"
-                    required
+              v-model="amount"
+              :label="$t('common.label.amount')"
+              :suffix="wallet.symbol"
+              :error-messages="lessThanBalance()"
+              required
             />
           </v-flex>
           <v-flex xs12>
             <v-combobox
-                    v-model="address"
-                    :items="contacts"
-                    item-text="displayText"
-                    :label="$t('common.label.address')"
-                    prepend-icon="contacts"
-                    required
+              v-model="address"
+              :items="contacts"
+              item-text="displayText"
+              :label="$t('common.label.address')"
+              prepend-icon="contacts"
+              required
             />
           </v-flex>
           <v-flex xs12 md6>

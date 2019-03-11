@@ -374,6 +374,17 @@ export const actions = {
           })
           break
 
+        case 'Btc':
+          networkHandler = new Btc(state.btc.activeApiEndpoint, Vue.prototype.$g('btc'))
+          networkHandler.walletLoad(options).then((walletObject) => {
+            Object.assign(wallet, walletObject)
+            dispatch('security/monitorWallet', wallet, {root:true})
+            delete wallet.credentials
+            commit('setWallet', wallet)
+            resolve(wallet)
+          })
+          break
+
         case 'Contract':
           networkHandler = new Contract(
             state.eth.activeApiEndpoint

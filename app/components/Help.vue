@@ -115,10 +115,8 @@
                 'subtitle': 'Why use the AEN Connect Smart Wallet',
                 'displayText': '<p>Smart Connect allows a person to interact with various blockchain networks, managing '
                 + 'multiple wallets at the same time. Primarily though, it is the public gateway for people to interact '
-                + 'with various AEN services. For more information, please visit <a _target="blank" href="https://aencoin.com" '
-                + '>our main website</a> for more information.</p><p>When comparing The Smart Wallet to an alternative to'
-                + ' a wallet such as trust, you would want to choose Smart Connect in the event you need to interact with' +
-                  ' AEN services.</p>'
+                + 'with various AEN services. For more information, please visit <a target="_blank" href="https://aencoin.com" '
+                + '>our main website</a> for more information.</p>'
               },
               {
                 'title': 'Getting Started',
@@ -131,7 +129,7 @@
                   'the "Add Wallet" button and choosing a network from the list. By default, you are able to add AEN, Bitcoin,' +
                   ' Ethereum, and Smart Contracts (Ethereum ERC20/223) as wallets to this app. In the case of adding Smart Contracts' +
                   'manually , it is necessary to add an Ethereum wallet before the option unlocks in order to act as the managing wallet.' +
-                  'If you already own an Ethereum wallet which has control of smart contracts, they should be automatically imported as wallets' +
+                  'If you already own an Ethereum wallet which has control of smart contracts, they will be automatically imported as wallets' +
                   'during wallet history update.'
               }
             ]
@@ -143,7 +141,6 @@
               {
                 'title': 'Summary',
                 "subtitle": "What can you do from the dashboard?",
-                'youtubeVideo': 'l3ty4tdSZMY',
                 'displayText': 'The dashboard is your landing area which provides a high level look at all your managed' +
                   'wallets, providing a real world currency evaluation along the way, and a gateway to various AEN services' +
                   ' including the Exchange, Investment opportunities, The Service runner platform, and security centre'
@@ -222,7 +219,8 @@
                   "to the network (which is almost everything) is disabled to prevent both errors and confusion. If you " +
                   "can't make any transfers, it is possible that the app believes itself to be offline. If this is the " +
                   "case, then the network icon in the top right of your toolbar will display as a red wifi graph with a " +
-                  "line through it"
+                  "line through it. There have been reported cases where the wallet fails to work over a VPN but, this is " +
+                  "due to restrictions on the connection so, please make sure you are connected to the internet."
               }
             ]
 

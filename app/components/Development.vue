@@ -39,9 +39,16 @@
               />
             </v-flex>
             <v-flex xs12>
-              <v-btn @click="deployTestContract()">
-                Deploy Test Ticket
+              <v-btn :disabled="busy == true" color="blue darken-1" flat @click="deployTestContract">
+                Deploy Test Contract
               </v-btn>
+              <v-btn v-if="busy == true" flat disabled>
+                <v-progress-circular
+                  indeterminate
+                ></v-progress-circular>
+                {{ $t('network.message.broadcasting_please_wait') }}
+              </v-btn>
+
             </v-flex>
           </v-layout>
         </v-card-text>
@@ -135,6 +142,7 @@
 
 <script>
 import Balance from '~/components/Balance'
+import { mapGetters } from 'vuex'
 export default {
   components: { Balance },
   /**
@@ -181,6 +189,9 @@ export default {
      * COMPUTED
      */
   computed: {
+    ...mapGetters([
+      'busy'
+    ]),
     ethereumWallets() {
       return this.$store.getters['wallet/walletsByType']('eth')
     },

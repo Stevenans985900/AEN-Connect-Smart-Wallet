@@ -1,59 +1,71 @@
 <template>
   <!-- New transfer -->
   <v-card>
-    <v-card-text>
-      <v-container grid-list-md>
-        <v-layout wrap>
-          <v-flex xs12>
-            {{ $t('wallet.label.balance') }}: <token-value :symbol="symbol" :type="wallet.type" :value="wallet.balance" />
-          </v-flex>
-          <v-flex xs12>
-            <v-combobox
-              v-model="address"
-              :items="contacts"
-              item-text="displayText"
-              label="To"
-              prepend-icon="contacts"
-            />
-          </v-flex>
-          <v-flex xs12>
-            <v-text-field v-model="amount" label="Amount" suffix="ETH" />
-          </v-flex>
-          <v-flex xs-12>
-            <v-layout row wrap>
-              <v-flex xs6>
-                <v-text-field v-model="gasPriceGwei" label="Gas Price" suffix="Gwei" />
-              </v-flex>
-              <v-flex xs6>
-                <v-checkbox v-model="priorityTransfer" label="Priority Transfer" />
-              </v-flex>
-              <v-flex xs12>
-                <v-slider
-                  v-model="gasPrice"
-                  :color="color"
-                  :max="50000000000"
-                  step="2500000000"
-                  min="5000000000"
-                  thumb-label
-                  ticks
-                />
-              </v-flex>
-            </v-layout>
-          </v-flex>
-        </v-layout>
-      </v-container>
-    </v-card-text>
-    <v-card-actions>
-      <v-spacer />
-      <v-btn color="blue darken-1" flat @click="initiateTransfer">
-        Initiate
-      </v-btn>
-    </v-card-actions>
+    <v-form
+      ref="makeTransferForm"
+      v-model="transferValid"
+    >
+      <v-card-text>
+        <v-container grid-list-md>
+          <v-layout wrap>
+            <v-flex xs12>
+              {{ $t('wallet.label.balance') }}: <token-value :symbol="symbol" :type="wallet.type" :value="wallet.balance" />
+            </v-flex>
+            <v-flex xs12>
+              <v-combobox
+                v-model="address"
+                :items="contacts"
+                item-text="displayText"
+                label="To"
+                prepend-icon="contacts"
+              />
+            </v-flex>
+            <v-flex xs12>
+              <v-text-field v-model="amount" label="Amount" suffix="ETH" />
+            </v-flex>
+            <v-flex xs-12>
+              <v-layout row wrap>
+                <v-flex xs6>
+                  <v-text-field v-model="gasPriceGwei" label="Gas Price" suffix="Gwei" />
+                </v-flex>
+                <v-flex xs6>
+                  <v-checkbox v-model="priorityTransfer" label="Priority Transfer" />
+                </v-flex>
+                <v-flex xs12>
+                  <v-slider
+                    v-model="gasPrice"
+                    :color="color"
+                    :max="50000000000"
+                    step="2500000000"
+                    min="5000000000"
+                    thumb-label
+                    ticks
+                  />
+                </v-flex>
+              </v-layout>
+            </v-flex>
+          </v-layout>
+        </v-container>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn v-if="busy == true" flat disabled>
+          <v-progress-circular
+            indeterminate
+          ></v-progress-circular>
+          {{ $t('network.message.broadcasting_please_wait') }}
+        </v-btn>
+        <v-spacer />
+        <v-btn :disabled="!transferValid || busy == true" color="blue darken-1" flat @click="initiateTransfer">
+          {{ $t('common.action.send') }}
+        </v-btn>
+      </v-card-actions>
+    </v-form>
   </v-card>
 </template>
 
 <script>
   import TokenValue from "~/components/TokenValue"
+  import { mapGetters } from 'vuex'
   export default {
     components: { TokenValue },
     props: {
@@ -80,6 +92,9 @@
       }
     },
     computed: {
+      ...mapGetters([
+        'busy'
+      ]),
       color () {
         if(this.gasPrice < (this.normalGas / 2)) return 'red'
         if(this.gasPrice < (this.normalGas)) return 'amber'
@@ -89,7 +104,7 @@
         return 'amber'
       },
       contacts() {
-        return Object.values(this.$store.state.wallet.contacts)
+        return this.$store.getters['wallet/contactsByWallet'](this.wallet)
       },
       // Used to convert nice number for frontend use
       gasPriceGwei: {
@@ -103,18 +118,18 @@
     watch: {
       priorityTransfer: function(val) {
         if(val === true) {
-          this.gasPrice = this.$g("eth.available_networks")[0].gasPrice.priority
+          this.gasPrice = this.wallet.network.gasPrice.priority
         } else {
-          this.gasPrice = this.$g("eth.available_networks")[0].gasPrice.normal
+          this.gasPrice = this.wallet.network.gasPrice.normal
         }
       }
     },
-    created() {
-      this.normalGas = this.$g("eth.available_networks")[0].gasPrice.normal
+    mounted() {
+      this.normalGas = this.wallet.network.gasPrice.normal
       this.gas = this.normalGas
-      // this.normalGas = this.wallet.network.gasPrices.normal
-      this.priorityGas = this.$g("eth.available_networks")[0].gasPrice.priority
-      this.maximumGas = this.$g("eth.available_networks")[0].gasPrice.maximum
+      this.gasPrice = this.normalGas
+      this.priorityGas = this.wallet.network.gasPrice.priority
+      this.maximumGas = this.wallet.network.gasPrice.maximum
     },
     methods: {
       initiateTransfer() {

@@ -40,8 +40,14 @@
         </v-container>
       </v-card-text>
       <v-card-actions>
+        <v-btn v-if="busy == true" flat disabled>
+          <v-progress-circular
+            indeterminate
+          ></v-progress-circular>
+          {{ $t('network.message.broadcasting_please_wait') }}
+        </v-btn>
         <v-spacer />
-        <v-btn :disabled="!transferValid" color="blue darken-1" flat @click="initiateTransfer">
+        <v-btn :disabled="!transferValid || busy == true" color="blue darken-1" flat @click="initiateTransfer">
           {{ $t('common.action.send') }}
         </v-btn>
       </v-card-actions>
@@ -51,6 +57,7 @@
 
 <script>
   import TokenValue from "~/components/TokenValue"
+  import { mapGetters } from 'vuex'
 export default {
     components: { TokenValue },
   props: {
@@ -72,6 +79,9 @@ export default {
     }
   },
   computed: {
+    ...mapGetters([
+      'busy'
+    ]),
     symbol() {
       return this.$store.state.wallet.aen.displaySymbol
     },
@@ -87,8 +97,8 @@ export default {
       if (!this.$refs.makeTransferForm.validate()) {
         return false
       }
-
         this.$store.dispatch('security/getCredentials', this.wallet.address).then((credentials) => {
+
           this.$store.commit('setLoading', {
             t: 'page',
             v: true,

@@ -69,7 +69,7 @@
                           outline
                           small
                         >
-                          {{ $t('common.actions') }}
+                          {{ $t('common.label.actions') }}
                         </v-btn>
                         <v-list>
                           <v-list-tile v-if="wallet.onChain === true" @click="contextWallet = wallet; dialogMakeTransfer = true">

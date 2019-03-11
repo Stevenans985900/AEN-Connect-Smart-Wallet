@@ -3,15 +3,17 @@
     <v-btn
       slot="activator"
       small
+      outline
     >
-      TestNet Functions
+      {{ $t('network.label.testnet_functions') }}
+      <v-icon>arrow_drop_down</v-icon>
     </v-btn>
     <v-list>
       <v-list-tile
         :href="faucet.address"
         target="_blank"
       >
-        <v-list-tile-title>Visit Faucet</v-list-tile-title>
+        <v-list-tile-title>{{ $t('network.action.goto_faucet') }}</v-list-tile-title>
       </v-list-tile>
     </v-list>
   </v-menu>
