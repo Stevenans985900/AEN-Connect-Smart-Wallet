@@ -50,6 +50,7 @@
       <no-ssr>
         <busy />
       </no-ssr>
+      <token-display-options />
       <development v-if="environment === 'development'" />
       <help />
     </v-toolbar>
@@ -104,6 +105,7 @@ import Busy from '~/components/Busy'
 import Development from '~/components/Development'
 import Help from '~/components/Help'
 import SecurityChallenge from '~/components/SecurityChallenge'
+import TokenDisplayOptions from '~/components/TokenDisplayOptions'
 import isElectron from 'is-electron'
 import isOnline from 'is-online'
 import EndUserLicenseAgreement from '~/components/EndUserLicenseAgreement'
@@ -123,7 +125,8 @@ export default {
     Development,
     EndUserLicenseAgreement,
     Help,
-    SecurityChallenge
+    SecurityChallenge,
+    TokenDisplayOptions
   },
   /**
    * DATA
