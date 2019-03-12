@@ -337,12 +337,12 @@ export const actions = {
     console.debug('Wallet Store: Load (' + typeRef + ')')
     return new Promise((resolve) => {
       const wallet = {
-        onChain: false,
+        onChain: options.onChain,
         name: options.name,
-        balance: 0,
-        balanceLastSynced: false,
-        transactions: [],
-        transactionsLastSynced: false,
+        balance: options.balance,
+        balanceLastSynced: options.balanceLastSynced,
+        transactions: options.transactions,
+        transactionsLastSynced: options.transactionsLastSynced,
         type: options.type
       }
 
@@ -371,6 +371,17 @@ export const actions = {
                 commit('setWallet', wallet)
                 resolve(wallet)
               })
+          })
+          break
+
+        case 'Btc':
+          networkHandler = new Btc(state.btc.activeApiEndpoint, Vue.prototype.$g('btc'))
+          networkHandler.walletLoad(options).then((walletObject) => {
+            Object.assign(wallet, walletObject)
+            dispatch('security/monitorWallet', wallet, {root:true})
+            delete wallet.credentials
+            commit('setWallet', wallet)
+            resolve(wallet)
           })
           break
 

@@ -23,34 +23,18 @@ export default {
     return {
       displayAmount: 0,
       displaySymbol: '',
-      symbolDivisibility: {
-        "aen": {
-          "aen": 0
-        },
-        "btc": {
-          "bit": -100,
-          "sat": 0,
-          "btc": 10000000
-        },
-        "eth": {
-          'wei': 0,
-          'kwei': 1000,
-          'mwei': 1000000,
-          'gwei': 1000000000,
-          'microether': 1000000000000,
-          'milliether': 1000000000000000,
-          'ether': 1000000000000000000
-        }
-      }
+
     }
   },
   computed: {
     symbolShow() {
       return this.displaySymbol.toUpperCase()
-    }
+    },
+    forceRefresh() { return this.$store.state.runtime.renderCounter }
   },
   watch: {
-    value() { this.calculateValues() }
+    value() { this.calculateValues() },
+    forceRefresh() { console.log('picking up render force'); this.calculateValues() }
   },
   mounted() { this.calculateValues() },
   methods: {
@@ -61,14 +45,14 @@ export default {
       if (numeric === 0) {
         return 0
       }
-
       let first = true
+      const divisibilityOptions = this.$g('exchange.divisibility')[this.type]
       // If not displaying currency in any particular manner, try to use the smallest to show
       if (this.symbol === 'default') {
-        const typeKeys = Object.keys(this.symbolDivisibility[this.type])
+        const typeKeys = Object.keys(divisibilityOptions)
         for (let index = 0; index < typeKeys.length; index++) {
-          let divider = this.symbolDivisibility[this.type][typeKeys[index]]
-          if(first === true) {
+          let divider = divisibilityOptions[typeKeys[index]]
+          if(first === true || divider === 0) {
             first = false
             this.displayAmount = numeric.toFixed(2)
             this.displaySymbol = typeKeys[index]
@@ -84,10 +68,15 @@ export default {
         }
       } else {
         this.displaySymbol = this.symbol
+
         if(this.type === 'contract') {
             this.displayAmount = numeric
         } else {
-            this.displayAmount = (numeric / this.symbolDivisibility[this.type][this.symbol]).toFixed(2)
+            if(divisibilityOptions[this.symbol] === 0) {
+              this.displayAmount = numeric.toFixed(2)
+            } else {
+              this.displayAmount = (numeric / divisibilityOptions[this.symbol]).toFixed(2)
+            }
         }
       }
     }

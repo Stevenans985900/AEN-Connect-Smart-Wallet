@@ -40,38 +40,6 @@ export default {
       }
       return false
     }
-  },
-  methods: {
-    getLiveWallet(wallet) {
-      this.$store.commit('setLoading', {
-        t: 'page',
-        v: true,
-        m: this.$t('wallet.message.checking_wallet_status')
-      })
-      this.$store.dispatch('wallet/getLiveWallet', wallet).then((response) => {
-        if(response !== false) { response = true }
-        this.$store.commit('setLoading', {
-          t: 'page',
-          v: false
-        })
-        this.$store.commit('wallet/setProperty', {
-          address: wallet.address,
-          key: 'onChain',
-          value: response
-        })
-        if (response === true) {
-          this.$store.commit('showNotification', {
-            type: 'success',
-            message: this.$t('wallet.message.network_recognise_wallet')
-          })
-        } else {
-          this.$store.commit('showNotification', {
-            type: 'info',
-            message: this.$t('wallet.message.network_miss_wallet')
-          })
-        }
-      })
-    }
   }
 }
 </script>

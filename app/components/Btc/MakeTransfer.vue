@@ -13,11 +13,11 @@
             </v-flex>
             <v-flex xs12>
               <v-text-field
-                      v-model="amount"
-                      :label="$t('common.label.amount')"
-                      suffix="AEN"
-                      :error-messages="lessThanBalance()"
-                      required
+                v-model="amount"
+                :label="$t('common.label.amount')"
+                suffix="AEN"
+                :error-messages="lessThanBalance()"
+                required
               />
             </v-flex>
             <v-flex xs12>
@@ -34,8 +34,14 @@
         </v-container>
       </v-card-text>
       <v-card-actions>
+        <v-btn v-if="busy == true" flat disabled>
+          <v-progress-circular
+            indeterminate
+          ></v-progress-circular>
+          {{ $t('network.message.broadcasting_please_wait') }}
+        </v-btn>
         <v-spacer />
-        <v-btn :disabled="!transferValid" color="blue darken-1" flat @click="initiateTransfer">
+        <v-btn :disabled="!transferValid || busy == true" color="blue darken-1" flat @click="initiateTransfer">
           {{ $t('common.action.send') }}
         </v-btn>
       </v-card-actions>
@@ -45,6 +51,7 @@
 
 <script>
 import TokenValue from "~/components/TokenValue"
+import { mapGetters } from 'vuex'
 function initialDataState() {
   return {
     transferValid: false,
@@ -64,6 +71,9 @@ export default {
   },
   data() { return initialDataState() },
   computed: {
+    ...mapGetters([
+      'busy'
+    ]),
     contacts() {
       return this.$store.getters['wallet/contactsByWallet'](this.wallet)
     },

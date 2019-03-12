@@ -28,17 +28,11 @@ export default {
       return this.$store.state.wallet.wallets[this.wallet.address].balance
     },
     symbol() {
-      switch(this.wallet.type) {
-        case 'aen':
-          return this.$store.state.wallet.aen.displaySymbol
-        case 'btc':
-          return this.$store.state.wallet.btc.displaySymbol
-        case 'contract':
-          return this.wallet.symbol
-        case 'eth':
-          return this.$store.state.wallet.eth.displaySymbol
+      try {
+        return this.$store.state.wallet[this.wallet.type].displaySymbol
+      } catch (e) {
+        return this.wallet.symbol
       }
-      return 'NA'
     }
   },
   watch: {

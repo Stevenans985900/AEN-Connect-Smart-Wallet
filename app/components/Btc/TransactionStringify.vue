@@ -14,6 +14,9 @@
     <span v-if="display === 'all' || display === 'value'" :class="direction">
       <token-value :symbol="symbol" :value="transaction.value" :type="wallet.type" />
     </span>
+    <span v-if="display === 'all' || display === 'address'">
+      <address-render :address="address" show-add />
+    </span>
   </span>
 </template>
 
@@ -47,6 +50,22 @@ export default {
       default: function () {
         return {}
       }
+    }
+  },
+  data() {
+    return {
+      address: null
+    }
+  },
+  mounted() {
+    if(this.display === 'all' || this.display === 'address') {
+      const networkHandler = this.$store.getters['wallet/networkHandler']('btc')
+      networkHandler.transactionInfo({
+        hash: this.transaction.tx_hash,
+        network: this.wallet.network
+      }).then((transactionInformation) => {
+        this.address = transactionInformation.addresses[0]
+      })
     }
   },
   computed: {

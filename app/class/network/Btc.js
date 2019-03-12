@@ -100,7 +100,24 @@ export default class Btc extends Generic {
    * @returns {SimpleWallet}
    */
   walletLoad(options) {
+    console.log('in wallet load')
     super.walletLoad(options)
+    return new Promise((resolve) => {
+
+      // Regenerate the wallet from the wallet import format
+      const keyPair = bitcoin.ECPair.fromWIF(options.walletImportFormat, bitcoin.networks[options.network.identifier])
+      const {address} = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey, network: bitcoin.networks[options.network.identifier] })
+
+      resolve({
+        network: options.network,
+        address: address,
+        publicKey: keyPair.publicKey,
+        credentials: {
+          password: options.password,
+          walletImportFormat: keyPair.toWIF()
+        }
+      })
+    })
   }
   /**
    *
@@ -117,6 +134,21 @@ export default class Btc extends Generic {
         })
         .catch(function (error) {
           reject(error)
+        })
+    })
+  }
+
+  /**
+   * Transaction Information
+   * Gets detailed information about a given transaction seeing as the transaction listing itself is quite light
+   */
+  transactionInfo(options) {
+    console.debug('BTC Plugin: Transaction Info', options)
+    return new Promise((resolve) => {
+      const address = this.apiEndpoint + options.network.block_cypher_id + '/txs/' + options.hash
+      axios.get(address)
+        .then((response) => {
+          resolve(response.data)
         })
     })
   }

@@ -11,13 +11,16 @@
         <template slot="items" slot-scope="props">
           <tr @click="props.expanded = !props.expanded">
             <td>
-              <transaction-stringify :transaction="props.item" display="date" />
+              <transaction-stringify :wallet="wallet" :transaction="props.item" display="date" />
             </td>
             <td>
               <transaction-stringify :wallet="wallet" :transaction="props.item" display="direction" />
             </td>
             <td>
               <transaction-stringify :wallet="wallet" :transaction="props.item" display="value" />
+            </td>
+            <td>
+              <transaction-stringify :wallet="wallet" :transaction="props.item" display="address" />
             </td>
           </tr>
         </template>
@@ -59,7 +62,8 @@ export default {
       headers: [
         { text: 'Date', sortable: false, value: '' },
         { text: 'Direction', sortable: false, value: '' },
-        { text: 'Amount', sortable: false, value: '' }
+        { text: 'Amount', sortable: false, value: '' },
+        { text: 'Address', sortable: false, value: '' }
       ]
     }
   },
