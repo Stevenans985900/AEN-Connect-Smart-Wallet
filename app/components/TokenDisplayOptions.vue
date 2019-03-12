@@ -4,7 +4,7 @@
       <v-icon>
         local_atm
       </v-icon>
-      Token Denomination
+      {{ $t('network.label.token_denomination') }}
     </v-btn>
 
     <v-menu
@@ -21,7 +21,7 @@
             <v-select
               v-model="aenDisplaySymbol"
               :items="aenSymbols"
-              label="AEN Token"
+              :label="$t('network.label.aen')"
             />
           </v-list-tile-action>
         </v-list-tile>
@@ -30,7 +30,7 @@
             <v-select
               v-model="btcDisplaySymbol"
               :items="btcSymbols"
-              label="Bitcoin"
+              :label="$t('network.label.btc')"
             />
           </v-list-tile-action>
         </v-list-tile>
@@ -39,7 +39,7 @@
             <v-select
               v-model="ethDisplaySymbol"
               :items="ethSymbols"
-              label="Ethereum"
+              :label="$t('network.label.eth')"
             />
           </v-list-tile-action>
         </v-list-tile>

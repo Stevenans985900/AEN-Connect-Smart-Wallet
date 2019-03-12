@@ -181,7 +181,8 @@
       "eth": "Ethereum",
       "offline": "Offline",
       "online": "Online",
-      "testnet_functions": "TestNet Functions"
+      "testnet_functions": "TestNet Functions",
+      "token_denomination": "Token Denominations"
     },
     "message": {
       "s_until_next_check": "s until next check",
