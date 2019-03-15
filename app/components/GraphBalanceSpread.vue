@@ -96,17 +96,18 @@
           {{ contextWallet.name }}
         </v-card-title>
         <v-card-text>
-          <p>If you remove the wallet, there will be no way to access it unless you have made a backup. Click the button below to remove </p>
-          <p>If you would like to make a backup, you can do so now by clicking the button below</p>
+          <p>
+            {{ $t('wallet.message.remove_warning') }}
+          </p>
           <backup-wallet :wallet="contextWallet" />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
           <v-btn color="blue darken-1" flat @click="dialogRemoveWallet = false">
-            Cancel
+            {{ $t('common.action.cancel') }}
           </v-btn>
           <v-btn color="blue darken-1" flat @click="removeWallet">
-            Remove Wallet
+            {{ $t('common.action.confirm') }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -123,6 +124,7 @@
 
 <script>
 import Doughnut from '~/components/Doughnut'
+import BackupWallet from '~/components/BackupWallet'
 import WalletHistory from '~/components/WalletHistory'
 import Busy from '~/components/Busy'
 import RefreshWallet from '~/components/RefreshWallet'
@@ -144,6 +146,7 @@ function initialDataState() {
 }
 export default {
   components: {
+    BackupWallet,
     Busy,
     Doughnut,
     RefreshWallet,
@@ -228,11 +231,11 @@ export default {
     },
     removeWallet() {
       this.dialogRemoveWallet = false
-      this.walletView = false
+      this.dialogShowWallet = false
       this.$store.commit('wallet/removeWallet', this.contextWallet)
       this.$store.commit('showNotification', {
         type: 'success',
-        message: this.$t('wallet.message.remove_sucess')
+        message: this.$t('wallet.message.remove_success')
       })
     },
     toCurrency(amount, target) {

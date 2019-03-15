@@ -15,7 +15,7 @@
               <v-text-field
                 v-model="amount"
                 :label="$t('common.label.amount')"
-                suffix="AEN"
+                :suffix="symbol.toUpperCase()"
                 :error-messages="lessThanBalance()"
                 required
               />

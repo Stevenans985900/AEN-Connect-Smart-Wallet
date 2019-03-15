@@ -1,5 +1,12 @@
 <template>
-  <component :is="component" v-if="component" :wallet="wallet" :use-address-book="useAddressBook" :include-private-key="includePrivateKey" />
+  <component
+    :is="component"
+    v-if="component"
+    :wallet="wallet"
+    :use-address-book="useAddressBook"
+    :include-private-key="includePrivateKey"
+    :private-key-property="privateKeyProperty"
+  />
 </template>
 
 <script>
@@ -18,6 +25,10 @@ export default {
     includePrivateKey: {
       type: Boolean,
       default: false
+    },
+    privateKeyProperty: {
+      type: String,
+      default: ''
     }
   },
   data() {

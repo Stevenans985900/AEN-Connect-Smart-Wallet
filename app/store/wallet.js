@@ -337,12 +337,12 @@ export const actions = {
     console.debug('Wallet Store: Load (' + typeRef + ')')
     return new Promise((resolve) => {
       const wallet = {
-        onChain: options.onChain,
+        onChain: options.onChain || false,
         name: options.name,
-        balance: options.balance,
-        balanceLastSynced: options.balanceLastSynced,
-        transactions: options.transactions,
-        transactionsLastSynced: options.transactionsLastSynced,
+        balance: options.balance || 0,
+        balanceLastSynced: options.balanceLastSynced || 1,
+        transactions: options.transactions || [],
+        transactionsLastSynced: options.transactionsLastSynced || 1,
         type: options.type
       }
 

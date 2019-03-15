@@ -125,11 +125,11 @@
               {
                 'title': 'Adding more wallets',
                 'subtitle': 'AEN, BTC, ETH, ERC20 wallets',
-                'displayText': 'Wallets can be added from either your dashboard or the wallet management screen by clicking' +
-                  'the "Add Wallet" button and choosing a network from the list. By default, you are able to add AEN, Bitcoin,' +
-                  ' Ethereum, and Smart Contracts (Ethereum ERC20/223) as wallets to this app. In the case of adding Smart Contracts' +
+                'displayText': 'Wallets can be added from either your dashboard or the wallet management screen by clicking ' +
+                  'the "Add Wallet" button and choosing a network from the list. By default, you are able to add AEN, Bitcoin, ' +
+                  'Ethereum, and Smart Contracts (Ethereum ERC20/223) as wallets to this app. In the case of adding Smart Contracts ' +
                   'manually , it is necessary to add an Ethereum wallet before the option unlocks in order to act as the managing wallet.' +
-                  'If you already own an Ethereum wallet which has control of smart contracts, they will be automatically imported as wallets' +
+                  'If you already own an Ethereum wallet which has control of smart contracts, they will be automatically imported as wallets ' +
                   'during wallet history update.'
               }
             ]
@@ -141,9 +141,9 @@
               {
                 'title': 'Summary',
                 "subtitle": "What can you do from the dashboard?",
-                'displayText': 'The dashboard is your landing area which provides a high level look at all your managed' +
-                  'wallets, providing a real world currency evaluation along the way, and a gateway to various AEN services' +
-                  ' including the Exchange, Investment opportunities, The Service runner platform, and security centre'
+                'displayText': 'The dashboard is your landing area which provides a high level look at all your managed ' +
+                  'wallets, providing a real world currency evaluation along the way, and a gateway to various AEN services ' +
+                  'including the Exchange, Investment opportunities, The Service runner platform, and security centre'
               }
             ]
           },
