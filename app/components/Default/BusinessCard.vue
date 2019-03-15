@@ -4,8 +4,8 @@
       <h4>{{ $t('common.label.address') }}</h4>
       <address-render :address="wallet.address" :use-address-book="useAddressBook" />
       <v-text-field
-        v-if="includePrivateKey == true && privateKey !== false"
-        v-model="privateKey"
+        v-if="includePrivateKey == true && privateProperty !== false"
+        v-model="privateProperty"
         :append-icon="showPrivateKey ? 'visibility_off' : 'visibility'"
         :type="showPrivateKey ? 'text' : 'password'"
         label="Private Key, click the eye to reveal"
@@ -34,6 +34,10 @@ export default {
     includePrivateKey: {
       type: Boolean,
       default: false
+    },
+    privatePropertyProperty: {
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -43,13 +47,22 @@ export default {
     }
   },
     computed: {
-      privateKey() {
-        const key = this.$store.getters['security/secureProperty']({
-          key: 'privateKey',
+      privateProperty() {
+        let walletKey
+        switch (this.wallet.type) {
+          case 'aen':
+            walletKey = 'accountPrivateKey'
+            break
+          case 'btc':
+            walletKey = 'walletImportFormat'
+            break
+          default:
+            walletKey = 'privateKey'
+        }
+        return this.$store.getters['security/secureProperty']({
+          key: walletKey,
           address: this.wallet.address
         })
-        if(key == null) { return false }
-        return key
       }
     },
   watch: {

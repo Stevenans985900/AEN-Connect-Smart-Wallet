@@ -11,7 +11,7 @@
           :items="availableNetworks"
           return-object
           item-text="name"
-          label="Network"
+          :label="$t('common.label.network')"
         />
       </v-flex>
       <v-flex xs12>
@@ -19,7 +19,7 @@
           v-model="walletName"
           :rules="[rules.basic.required, rules.walletName.minLength]"
           :error-messages="walletNameAvailable()"
-          label="Wallet Name"
+          :label="$t('common.label.name')"
           required
         />
       </v-flex>
@@ -29,7 +29,7 @@
           :append-icon="showPassword ? 'visibility_off' : 'visibility'"
           :type="showPassword ? 'text' : 'password'"
           :rules="[rules.basic.required, rules.password.minLength]"
-          label="Wallet Password"
+          :label="$t('common.label.password')"
           required
           counter
           @click:append="showPassword = !showPassword"
@@ -37,11 +37,11 @@
       </v-flex>
       <v-flex xs12>
         <v-text-field
-          v-model="privateKey"
+          v-model="walletImportFormat"
           :append-icon="showKey ? 'visibility_off' : 'visibility'"
           :type="showKey ? 'text' : 'password'"
-          :rules="[rules.basic.required]"
-          label="Private Key"
+          :rules="[rules.basic.required, rules.walletImportFormat.length]"
+          :label="$t('aen.label.walletImportFormat')"
           counter
           required
           @click:append="showKey = !showKey"
@@ -49,7 +49,7 @@
       </v-flex>
     </v-layout>
     <v-btn color="primary" @click="restoreWallet">
-      Restore
+      {{ $t('common.action.restore') }}
     </v-btn>
   </v-form>
 </template>
@@ -63,7 +63,7 @@
             walletPassword: '',
             password2: '',
             network: {},
-            privateKey: '',
+            walletImportFormat: '',
             proceedValid: false,
             showKey: false,
             showPassword: false,
@@ -80,6 +80,9 @@
                 },
                 password: {
                     minLength: v => v.length >= 8 || 'Min 8 characters'
+                },
+                walletImportFormat: {
+                    length: v => v.length === 52 || 'Length is 52 Characters'
                 }
             }
         }
@@ -113,29 +116,13 @@
                 return false
             }
         },
-        watch: {
-          type: function () {
-            if(!this.multipleNetworks) {
-              this.network = this.$g(this.type + '.available_networks')[0]
-            }
-          }
-        },
-        mounted: function () {
+        mounted: function() {
+          this.reset()
           if(!this.multipleNetworks) {
-            this.network = this.$g(this.type + '.available_networks')[0]
+            this.network = this.$store.state.wallet[this.type].network
           }
         },
         methods: {
-            /**
-             * Make sure the data is clean for adding a new wallet before trying to render the HTML.
-             * @param file
-             */
-            beforeMount() {
-                this.reset()
-                if(!this.multipleNetworks) {
-                    this.network = this.$store.state[this.type].defaultNetwork
-                }
-            },
             complete(wallet) {
                 this.$emit('complete', wallet)
                 this.reset()
@@ -149,7 +136,7 @@
                     network: this.network,
                     name: this.walletName,
                     password: this.walletPassword,
-                    privateKey: this.privateKey,
+                    walletImportFormat: this.walletImportFormat,
                     main: this.main
                 }
                 this.$store.dispatch('wallet/load', walletOptions)
@@ -158,10 +145,10 @@
                     })
             },
             passwordsMatch() {
-                return (this.walletPassword === this.password2) ? '' : 'Passwords must match'
+                return (this.walletPassword === this.password2) ? '' : this.$t('security.message.passwords_must_match')
             },
             walletNameAvailable() {
-                return this.$store.getters['wallet/getByName'](this.walletName) ? 'Wallet Name is already in use' : ''
+                return this.$store.getters['wallet/getByName'](this.walletName) ? this.$t('common.message.name_already_used') : ''
             },
             reset() {
                 Object.assign(this.$data, initialDataState())
