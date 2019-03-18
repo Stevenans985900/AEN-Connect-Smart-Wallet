@@ -16,6 +16,8 @@
   "dependencies": {
     "@nuxtjs/axios": "^5.3.6",
     "add": "^2.0.6",
+    "bip32": "^1.0.2",
+    "bip39": "^2.5.0",
     "bitcoinjs-lib": "^4.0.3",
     "chain-js-sdk": "^0.1.0",
     "chart.js": "^2.7.3",
@@ -55,6 +57,7 @@
     "ava": "^1.0.1",
     "babel-eslint": "^8.2.1",
     "browser-env": "^3.2.5",
+    "createjs": "^1.0.1",
     "eslint": "^5.0.1",
     "eslint-config-standard": ">=12.0.0",
     "eslint-loader": "^2.0.0",

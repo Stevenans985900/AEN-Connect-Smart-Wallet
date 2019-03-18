@@ -1,6 +1,8 @@
 import bitcoin from 'bitcoinjs-lib'
 import axios from 'axios'
 import Generic from './Generic.js'
+import bip32 from 'bip32'
+import bip39 from 'bip39'
 
 export default class Btc extends Generic {
   /**
@@ -80,16 +82,41 @@ export default class Btc extends Generic {
   }
   walletNew(options) {
     super.walletNew(options)
-    return new Promise((resolve) => {
-      const keyPair = bitcoin.ECPair.makeRandom({ network: bitcoin.networks[options.network.identifier] })
-      const { address } = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey, network: bitcoin.networks[options.network.identifier] })
+    return new Promise(({resolve, reject}) => {
+      // Generate a mnemonic to use
+      const mnemonic = bip39.generateMnemonic()
+      if(bip39.validateMnemonic(mnemonic) === false) {
+        reject('MNEMONIC_GENERATE_ERROR')
+      }
+      const seed = bip39.mnemonicToSeed(mnemonic)
+      const root = bip32.fromSeed(seed)
+
+      // Work out the coin index to use when deriving an address
+      let coinIndex = '1'
+      if(options.network.hasOwnProperty('testing')) {
+        coinIndex = '2'
+      }
+      const path = "m/44'/" + coinIndex + "'/0'/0/0"
+      const child = root.derivePath(path)
+
+      const address = bitcoin.payments.p2pkh({ pubkey: child.publicKey, network }).address
+
+
+
+
+
+      const { address } = bitcoin.payments.p2sh({
+        redeem: bitcoin.payments.p2wpkh({ pubkey: child.publicKey, network: bitcoin.networks[options.network.identifier]}),
+        network: bitcoin.networks.testnet
+      })
+
+
       const walletObject = {
         network: options.network,
-        address: address,
-        publicKey: keyPair.publicKey,
+        currentBipIndex: 0,
         credentials: {
           password: options.password,
-          walletImportFormat: keyPair.toWIF(),
+          mnemonic: mnemonic,
         }
       }
       resolve(walletObject)
