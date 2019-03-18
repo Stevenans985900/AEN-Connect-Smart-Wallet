@@ -99,21 +99,17 @@ export default class Btc extends Generic {
       const path = "m/44'/" + coinIndex + "'/0'/0/0"
       const child = root.derivePath(path)
 
-      const address = bitcoin.payments.p2pkh({ pubkey: child.publicKey, network }).address
-
-
-
-
-
-      const { address } = bitcoin.payments.p2sh({
-        redeem: bitcoin.payments.p2wpkh({ pubkey: child.publicKey, network: bitcoin.networks[options.network.identifier]}),
-        network: bitcoin.networks.testnet
-      })
-
+      const rootAddress = bitcoin.payments.p2pkh({
+        pubkey: child.publicKey,
+        network: bitcoin.networks[options.network.identifier] }
+      ).address
 
       const walletObject = {
         network: options.network,
+        address: rootAddress,
         currentBipIndex: 0,
+        rootAddress: rootAddress,
+        managedAddressesWithTokens: [],
         credentials: {
           password: options.password,
           mnemonic: mnemonic,

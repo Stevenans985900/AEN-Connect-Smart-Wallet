@@ -1,7 +1,5 @@
 <template>
-  <span>
-    <component :is="component" v-if="component" :wallet="wallet" />
-  </span>
+  <component :is="component" v-if="component" :wallet="wallet" />
 </template>
 
 <script>
