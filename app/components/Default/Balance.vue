@@ -13,9 +13,7 @@
     props: {
       wallet: {
         type: Object,
-        default: function () {
-          return {}
-        }
+        required: true
       }
     },
     data() {
@@ -35,18 +33,18 @@
         }
       }
     },
-    watch: {
-      wallet: {
-        handler: function() {
-          if(this.wallet.onChain === true) {
-            this.startListener()
-          }
-        },
-        deep: true
-      }
-    },
+    // watch: {
+    //   wallet: {
+    //     handler: function() {
+    //       if(this.wallet.onChain === true) {
+    //         this.startListener()
+    //       }
+    //     },
+    //     deep: true
+    //   }
+    // },
     created() {
-      console.log('using the default balance component')
+      console.log(this.wallet)
       if(this.wallet.onChain === true) {
         this.startListener()
       } else {

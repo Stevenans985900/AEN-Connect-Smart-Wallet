@@ -32,9 +32,11 @@
       methods: {
           refresh() {
             this.$store.commit('CACHE_SKIP', true)
-            this.$store.dispatch('wallet/transactionsHistorical', this.wallet)
-            this.$store.commit('CACHE_SKIP', true)
-            this.$store.dispatch('wallet/balance', this.wallet)
+            this.$store.dispatch('wallet/transactionsHistorical', this.wallet).then(() => {
+                this.$store.commit('CACHE_SKIP', true)
+                this.$store.dispatch('wallet/balance', this.wallet)
+            })
+
         }
       }
   }

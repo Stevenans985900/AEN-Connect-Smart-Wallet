@@ -91,7 +91,7 @@
                   <v-card-text>
                     <refresh-wallet :wallet="wallet" />
                     <testnet-buttons :wallet="wallet" />
-                    <address-render :address="wallet.address" :use-address-book="false" />
+                    <address-render :address="wallet.address" :use-address-book="false" :use-receiver-address="true"/>
                     <wallet-history v-if="wallet.onChain === true" :wallet="wallet" />
                     <activation v-else :wallet="wallet" />
                     <hr>
@@ -117,7 +117,7 @@
             <v-icon>close</v-icon>
           </v-btn>
         </v-toolbar>
-        <business-card :wallet="contextWallet" :use-address-book="false" :include-private-key="true"/>
+        <business-card :wallet="contextWallet" :use-address-book="false" :include-private-key="true" />
       </v-dialog>
 
       <!-- New Wallet Dialog -->

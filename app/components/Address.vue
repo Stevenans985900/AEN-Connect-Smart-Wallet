@@ -35,6 +35,10 @@ export default {
     useAddressBook: {
       type: Boolean,
       default: true
+    },
+    useReceiverAddress: {
+        type: Boolean,
+        default: false
     }
   },
   data() {
@@ -43,6 +47,12 @@ export default {
     }
   },
   computed: {
+    processedAddress() {
+      if(this.useReceiverAddress) {
+          return this.$store.state.wallet.wallets[this.address].receiverAddress
+      }
+      return this.address
+    },
     contacts() { return this.$store.state.wallet.contacts },
     haveContact() {
       if (this.contacts.hasOwnProperty(this.address)) {
@@ -55,7 +65,7 @@ export default {
       if (this.haveContact && this.useAddressBook === true) {
         return this.contacts[this.address].displayText
       } else {
-        return this.address
+        return this.processedAddress
       }
     }
   },

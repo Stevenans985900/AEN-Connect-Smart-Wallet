@@ -73,7 +73,7 @@ export default {
       return format(this.transaction.confirmed, 'YYYY-MM-DD HH:mm')
     },
     direction() {
-      if(this.transaction.spent === false) {
+      if(this.transaction.tx_input_n === -1) {
         return 'incoming'
       }
       return 'outgoing'

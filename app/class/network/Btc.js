@@ -5,6 +5,12 @@ import bip32 from 'bip32'
 import bip39 from 'bip39'
 import { format } from 'date-fns'
 
+async function asyncForEach(input, callback) {
+  for (let key in input) {
+    await callback(key, key, input);
+  }
+}
+
 export default class Btc extends Generic {
   /**
    * START OF CUSTOM METHODS
@@ -33,25 +39,53 @@ export default class Btc extends Generic {
     this.context = null
     this.pluginName = 'Btc'
   }
-  receieverAddress(wallet) {
+  receieverAddress(options) {
+    console.debug('BTC Plugin: Receiver Address')
+    console.debug(options)
+    return new Promise((resolve, reject) => {
+      if (bip39.validateMnemonic(options.mnemonic) === false) {
+        reject('MNEMONIC_GENERATE_ERROR')
+      }
+      const seed = bip39.mnemonicToSeed(options.mnemonic)
+      const root = bip32.fromSeed(seed)
 
+      // Work out the coin index to use when deriving an address
+      let coinIndex = '1'
+      if (options.wallet.network.hasOwnProperty('testing')) {
+        coinIndex = '2'
+      }
+      const path = "m/44'/" + coinIndex + "'/0'/0/" + options.wallet.currentBipIndex
+      const child = root.derivePath(path)
+
+      const rootAddress = bitcoin.payments.p2pkh({
+            pubkey: child.publicKey,
+            network: bitcoin.networks[options.wallet.network.identifier]
+          }
+      ).address
+      resolve(rootAddress)
+    })
   }
   /**
    * @param options
    * @returns {Subscription}
    */
-  balance(options) {
+  async balance(options) {
     super.balance(options)
-    return new Promise((resolve, reject) => {
-      const address = this.apiEndpoint + options.network.block_cypher_id + '/addrs/' + options.address + '/balance'
-      axios.get(address)
-        .then(function (response) {
-          resolve(response.data.balance)
-        })
-        .catch(function (error) {
-          reject(error)
-        })
+
+    const output = {
+      wallets: {},
+      balance: 0
+    }
+    await asyncForEach(options.managedAddressesWithTokens, async (address) => {
+      let { data } = await axios.get(
+          this.apiEndpoint + options.network.block_cypher_id + '/addrs/' + address + '/balance'
+      )
+      console.log('upping balance by: ' + data.balance)
+      output.balance += data.balance
+      output.wallets[address] = data.balance
     })
+    console.log('returning', output)
+    return output
   }
   setContext(context) { this.context = context }
   getHeight() {
@@ -108,12 +142,20 @@ export default class Btc extends Generic {
         network: bitcoin.networks[options.network.identifier] }
       ).address
 
+      const receiverPath = "m/44'/" + coinIndex + "'/0'/0/1"
+      const receiverChild = root.derivePath(receiverPath)
+
+      const receiverAddress = bitcoin.payments.p2pkh({
+        pubkey: receiverChild.publicKey,
+        network: bitcoin.networks[options.network.identifier] }
+      ).address
+
       const walletObject = {
         network: options.network,
         address: rootAddress,
-        currentBipIndex: 0,
-        rootAddress: rootAddress,
-        managedAddressesWithTokens: [],
+        currentBipIndex: 1,
+        receiverAddress: receiverAddress,
+        managedAddressesWithTokens: {},
         credentials: {
           password: options.password,
           mnemonic: mnemonic,
@@ -127,21 +169,18 @@ export default class Btc extends Generic {
    * @returns {SimpleWallet}
    */
   walletLoad(options) {
-    console.log('in wallet load')
     super.walletLoad(options)
     return new Promise((resolve) => {
 
-      // Regenerate the wallet from the wallet import format
-      const keyPair = bitcoin.ECPair.fromWIF(options.walletImportFormat, bitcoin.networks[options.network.identifier])
-      const {address} = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey, network: bitcoin.networks[options.network.identifier] })
-
       resolve({
         network: options.network,
-        address: address,
-        publicKey: keyPair.publicKey,
+        address: options.address,
+        currentBipIndex: options.currentBipIndex,
+        managedAddressesWithTokens: options.managedAddressesWithTokens,
+        receiverAddress: options.receiverAddress,
         credentials: {
           password: options.password,
-          walletImportFormat: keyPair.toWIF()
+          mnemonic: options.mnemonic
         }
       })
     })

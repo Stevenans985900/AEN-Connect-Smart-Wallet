@@ -2,7 +2,7 @@
   <v-card flat>
     <v-card-text class="text-xs-center">
       <h4>{{ $t('common.label.address') }}</h4>
-      <address-render :address="wallet.address" :use-address-book="useAddressBook" />
+      <address-render :address="effectiveAddress" :use-address-book="useAddressBook" />
       <v-text-field
         v-if="includePrivateKey == true && privateProperty !== false"
         v-model="privateProperty"
@@ -47,6 +47,14 @@ export default {
     }
   },
     computed: {
+      effectiveAddress() {
+          if(this.wallet.type === 'btc') {
+              return this.wallet.receiverAddress
+          }
+          else {
+              return this.wallet.address
+          }
+      },
       privateProperty() {
         let walletKey
         switch (this.wallet.type) {
@@ -75,12 +83,10 @@ export default {
   },
   methods: {
     processWallet() {
-      if (this.wallet.hasOwnProperty('address')) {
-        const qr = qrCodeGenerator(0, 'M')
-        qr.addData(this.wallet.address)
-        qr.make()
-        this.imageData = qr.createDataURL(5)
-      }
+      const qr = qrCodeGenerator(0, 'M')
+      qr.addData(this.effectiveAddress)
+      qr.make()
+      this.imageData = qr.createDataURL(5)
     }
   }
 }
