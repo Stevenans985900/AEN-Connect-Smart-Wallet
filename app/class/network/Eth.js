@@ -1,6 +1,7 @@
 import Web3 from 'web3'
 import axios from 'axios'
 import Generic from './Generic.js'
+import {format} from "date-fns";
 
 export default class Aen extends Generic {
   constructor(apiEndpoint, config) {
@@ -46,7 +47,16 @@ export default class Aen extends Generic {
         }
       })
         .then(function (response) {
-          resolve(response.data.result)
+
+          let transactionsWorkingObject = {}
+          let currentTransaction, timeKey
+          const transactions = response.data.result
+          for(let transactionCount = 0; transactionCount < transactions.length; transactionCount++) {
+            currentTransaction = transactions[transactionCount]
+            timeKey = format((currentTransaction.timeStamp * 1000), 'YYYY-MM-DD HH:mm')
+            transactionsWorkingObject[timeKey] = currentTransaction
+          }
+          resolve(transactionsWorkingObject)
         })
         .catch(function (error) {
           console.debug(error)

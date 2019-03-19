@@ -3,6 +3,7 @@ import axios from 'axios'
 import Generic from './Generic.js'
 import bip32 from 'bip32'
 import bip39 from 'bip39'
+import { format } from 'date-fns'
 
 export default class Btc extends Generic {
   /**
@@ -31,6 +32,9 @@ export default class Btc extends Generic {
     this.apiEndpoint = apiEndpoint
     this.context = null
     this.pluginName = 'Btc'
+  }
+  receieverAddress(wallet) {
+
   }
   /**
    * @param options
@@ -82,7 +86,7 @@ export default class Btc extends Generic {
   }
   walletNew(options) {
     super.walletNew(options)
-    return new Promise(({resolve, reject}) => {
+    return new Promise((resolve, reject) => {
       // Generate a mnemonic to use
       const mnemonic = bip39.generateMnemonic()
       if(bip39.validateMnemonic(mnemonic) === false) {
@@ -152,8 +156,14 @@ export default class Btc extends Generic {
       const address = this.apiEndpoint + options.network.block_cypher_id + '/addrs/' + options.address
       axios.get(address)
         .then(function (response) {
-          console.log(response)
-          resolve(response.data.txrefs)
+          let transactions = {}
+          let currentTransaction, timeKey
+          for(let transactionCount = 0; transactionCount < response.data.txrefs.length; transactionCount++) {
+            currentTransaction = response.data.txrefs[transactionCount]
+            timeKey = format(currentTransaction.confirmed, 'YYYY-MM-DD HH:mm')
+            transactions[timeKey] = currentTransaction
+          }
+          resolve(transactions)
         })
         .catch(function (error) {
           reject(error)

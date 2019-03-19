@@ -54,7 +54,7 @@ export default {
             walletKey = 'accountPrivateKey'
             break
           case 'btc':
-            walletKey = 'walletImportFormat'
+            walletKey = 'mnemonic'
             break
           default:
             walletKey = 'privateKey'

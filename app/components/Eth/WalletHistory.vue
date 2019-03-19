@@ -76,7 +76,7 @@ export default {
   },
     computed: {
         transactions() {
-            return this.$store.state.wallet.wallets[this.wallet.address].transactions
+            return Object.values(this.wallet.transactions)
         }
     },
     mounted() {

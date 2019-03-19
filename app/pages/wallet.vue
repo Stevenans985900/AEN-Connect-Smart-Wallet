@@ -117,7 +117,7 @@
             <v-icon>close</v-icon>
           </v-btn>
         </v-toolbar>
-        <business-card :wallet="contextWallet" :use-address-book="false" />
+        <business-card :wallet="contextWallet" :use-address-book="false" :include-private-key="true"/>
       </v-dialog>
 
       <!-- New Wallet Dialog -->

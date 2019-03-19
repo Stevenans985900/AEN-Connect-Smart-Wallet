@@ -253,7 +253,9 @@ export const actions = {
           break
       }
       // Do behind the scenes work
-      networkHandler.transactionsHistorical(wallet).then((transactions) => {
+      networkHandler.transactionsHistorical(wallet).then((headTransactions) => {
+        // Create a new transaction array
+        const transactions = Object.assign({}, wallet.transactions, headTransactions)
         commit('setWalletProperty', {
           address: wallet.address,
           key: 'transactions',
@@ -341,7 +343,7 @@ export const actions = {
         name: options.name,
         balance: options.balance || 0,
         balanceLastSynced: options.balanceLastSynced || 1,
-        transactions: options.transactions || [],
+        transactions: options.transactions || {},
         transactionsLastSynced: options.transactionsLastSynced || 1,
         type: options.type
       }
@@ -419,7 +421,7 @@ export const actions = {
         name: options.name,
         balance: 0,
         balanceLastSynced: false,
-        transactions: [],
+        transactions: {},
         transactionsLastSynced: false,
         type: options.type
       }
