@@ -56,6 +56,10 @@
       {
         "alias": "Block Cypher",
         "address": "http://api.blockcypher.com/v1/btc/"
+      },
+      {
+        "alias": "AEN Proxy",
+        "address": "https://openapi.aencoin.io/v1/btc/"
       }
     ],
     "block_cypher": {
@@ -90,7 +94,7 @@
     "api_endpoints": [
       {
         "alias": "Infura",
-        "address": "https://###NETWORK_IDENTIFIER###.infura.io/0HIuuP4qCjvv8DMGjvPm"
+        "address": "https://###NETWORK_IDENTIFIER###.infura.io/v3/9a666ac7a44747428586ff05020f91fc"
       }
     ],
     "etherscan": {

@@ -25,7 +25,7 @@
             if(this.wallet.balanceLastSynced === false) {
                 return this.$t('common.label.never')
             } else {
-                return format(this.wallet.balanceLastSynced, 'Do MMM HH:mm')
+                return format(this.wallet.balanceLastSynced, 'D/M HH:mm')
             }
         }
       },

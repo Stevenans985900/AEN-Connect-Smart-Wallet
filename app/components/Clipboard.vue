@@ -1,7 +1,5 @@
 <template>
-  <v-btn v-clipboard:copy="data" v-clipboard:success="onCopy" flat small text-truncate
-         class="smaller-font"
-  >
+  <v-btn v-clipboard:copy="data" v-clipboard:success="onCopy" :outline="showOutline" flat small>
     <v-icon small>
       file_copy
     </v-icon>&nbsp;&nbsp;{{ display }}
@@ -9,9 +7,13 @@
 </template>
 
 <style scoped>
-  .smaller-font {
+  .v-btn {
     font-size: 0.8rem;
-    width: 20rem;
+    max-width: 100%;
+    overflow:hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    justify-content: start;
   }
 </style>
 
@@ -25,6 +27,10 @@
       displayText: {
         type: String,
         default: ''
+      },
+      showOutline: {
+        type: Boolean,
+        default: true
       }
     },
     computed: {

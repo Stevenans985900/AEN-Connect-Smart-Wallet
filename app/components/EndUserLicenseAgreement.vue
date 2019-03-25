@@ -3,17 +3,12 @@
     <v-layout row>
       <v-flex xs12>
         <v-card>
-          <v-card-text>
-            {{ $t('eula.message.introduction') }}
-          </v-card-text>
+          <v-card-text v-html="$t('eula.message.introduction')" />
           <v-card-actions>
-            <v-btn to="/setup-wizard">
-              {{ $t('eula.action.run_setup_wizard') }}
+            <v-btn to="/setup-wizard" small>
+              {{ $t('eula.action.setup_wizard') }}
             </v-btn>
-            <v-btn target="_blank" href="https://aencoin.com">
-              {{ $t('eula.action.read_eula') }}
-            </v-btn>
-            <v-btn @click="eulaAgree = true">
+            <v-btn @click="eulaAgree = true" small>
               {{ $t('eula.action.agreeEula') }}
             </v-btn>
           </v-card-actions>

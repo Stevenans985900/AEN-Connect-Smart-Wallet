@@ -1,10 +1,12 @@
 <template>
   <span>
-    <v-btn outline small @click="menuToggle">
+    <v-btn :outline="$vuetify.breakpoint.mdAndUp" small @click="menuToggle" :icon="$vuetify.breakpoint.smAndDown">
       <v-icon>
         local_atm
       </v-icon>
-      {{ $t('network.label.token_denomination') }}
+      <span v-if="$vuetify.breakpoint.mdAndUp">
+        {{ $t('network.label.token_denomination') }}
+      </span>
     </v-btn>
 
     <v-menu
@@ -16,6 +18,9 @@
       offset-y
     >
       <v-list class="pa-4">
+        <v-subheader v-if="$vuetify.breakpoint.smAndDown">
+          {{ $t('network.label.token_denomination') }}
+        </v-subheader>
         <v-list-tile>
           <v-list-tile-action>
             <v-select

@@ -1,7 +1,7 @@
 <template>
   <v-app dark>
     <!-- NAV DRAWER -->
-    <v-navigation-drawer :value="showNav" :mini-variant="minifyDrawer" fixed stateless app>
+    <v-navigation-drawer :mini-variant="minifyDrawer" v-model="cDrawerOpen" stateless app>
       <v-layout column fill-height>
         <v-list>
           <v-list-tile v-for="(item, i) in navigationItems" :key="i" :to="item.to" router exact>
@@ -38,9 +38,11 @@
     <!-- TOP BAR -->
     <v-toolbar fixed app>
       <v-toolbar-side-icon @click="toggleNav" />
+      <v-btn>{{minifyDrawer}}</v-btn>
+      <v-btn>{{cDrawerOpen}}</v-btn>
       <!--size="24"-->
       <!--<v-avatar >-->
-      <v-btn flat active-class="" to="/" :disabled="!showMainNav">
+      <v-btn flat active-class="" to="/" >
         <v-img src="/logo.png" contain height="25" max-width="125px" />
       </v-btn>
       <!--</v-avatar>-->
@@ -135,6 +137,7 @@ export default {
     return {
       dialogExit: false,
       minifyDrawer: false,
+      drawerOpen: false,
       hydrated: false,
       navigationItems: [
         {
@@ -168,7 +171,6 @@ export default {
           to: '/security'
         }
       ],
-      showNav: true,
       title: 'Smart Connect',
       userMenu: false
     }
@@ -177,18 +179,19 @@ export default {
    * COMPUTED
    */
   computed: {
+    cDrawerOpen: {
+      get: function() {
+        if (this.$vuetify.breakpoint.mdAndUp === true) {
+          return true
+        } else {
+          return this.drawerOpen
+        }
+      },
+      set: function (val) { this.drawerOpen = val }
+    },
     dialogHelp: {
       get: function () { return this.$store.state.user.help },
       set: function (val) { this.$store.commit('setUserProperty', {key: 'help', value: val}) }
-    },
-    showMainNav: {
-      get: function () {
-        if (this.$store.state.wallet.aen.mainAddress !== '' && this.$store.state.user.eulaAgree === true) {
-          return true
-        }
-        return false
-      },
-      set : function () {}
     },
     eulaAgreed() { return this.$store.state.user.eulaAgree },
     isOnline() { return this.$store.state.runtime.isOnline },
@@ -238,11 +241,11 @@ export default {
 
     // Determine how to handle main navigation by default depending on device size
     if(this.$vuetify.breakpoint.mdAndUp === true) {
-      this.showNav = true
-      this.minifyDrawer = false
+      this.drawerOpen = true
+      this.minifyDrawer = true
     } else {
       this.minifyDrawer = false
-      this.showNav = false
+      this.drawerOpen = false
     }
 
     this.$store.commit('setLoading', {
@@ -343,11 +346,9 @@ export default {
     },
     toggleNav() {
       if(this.$vuetify.breakpoint.mdAndUp === true) {
-        this.showNav = true
         this.minifyDrawer = !this.minifyDrawer
       } else {
-        this.minifyDrawer = false
-        this.showNav = !this.showNav
+        this.drawerOpen = true
       }
 
     },

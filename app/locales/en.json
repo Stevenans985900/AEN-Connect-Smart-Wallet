@@ -75,6 +75,7 @@
       "direction": "Direction",
       "features": "Features",
       "help": "Help",
+      "information": "Information",
       "message": "Message",
       "na": "NA",
       "name": "Name",
@@ -138,11 +139,11 @@
   "eula": {
     "action": {
       "agreeEula": "I agree to the AEN EULA",
-      "read_eula": "Read EULA",
-      "run_setup_wizard": "Run Setup wizard"
+      "eula": "EULA",
+      "setup_wizard": "Setup wizard"
     },
     "message": {
-      "introduction": "This is a first community release and should be treated as preview. Please do not use this wallet to store real accounts on."
+      "introduction": "This is a first community release and should be treated as preview. Please do not use this wallet to store real accounts on. By continuing to use this application, you agree to the <a href='https://aencoin.com', target='_blank'>AEN Terms and Conditions</a>; certain functionality will be disabled until agreed"
     }
   },
   "feedback": {
@@ -164,6 +165,7 @@
   },
   "opportunity": {
     "label": {
+      "raised": "Raised",
       "status_ended": "Ended"
     }
   },
@@ -182,7 +184,7 @@
       "offline": "Offline",
       "online": "Online",
       "testnet_functions": "TestNet Functions",
-      "token_denomination": "Token Denominations"
+      "token_denomination": "Denominations"
     },
     "message": {
       "s_until_next_check": "s until next check",

@@ -2,7 +2,10 @@
   <div>
     <v-menu v-model="netStatus" :close-on-content-click="false" offset-y>
       <v-btn slot="activator" :class="color" round small>
-        {{ $t('network.label.connection_status') }} {{ connectionStatus }}
+        <span v-if="$vuetify.breakpoint.mdAndUp">
+          {{ $t('network.label.connection_status') }}
+        </span>
+        {{ connectionStatus }}
       </v-btn>
 
       <v-card max-width="400px">

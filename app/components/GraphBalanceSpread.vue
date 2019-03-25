@@ -1,6 +1,6 @@
 <template>
-  <v-layout v-if="haveWallet" row align-center>
-    <v-flex xs12 sm4 lg3 pa-2>
+  <v-layout v-if="haveWallet" row wrap align-center>
+    <v-flex xs12 md4 lg3 pa-2>
       <v-progress-circular v-if="loading === true" indeterminate />
       <v-card v-else flat>
         <doughnut v-if="totalValue > 0" :title="chartTitle" :data="graphData" />
@@ -9,7 +9,7 @@
         </p>
       </v-card>
     </v-flex>
-    <v-flex xs12 sm8 lg9>
+    <v-flex xs12 md8 lg9>
       <v-progress-circular v-if="loading === true" indeterminate />
       <v-card v-else flat>
         <v-card-text>

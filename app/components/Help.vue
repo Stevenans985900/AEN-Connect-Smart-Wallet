@@ -17,8 +17,13 @@
       <v-toolbar-title>{{ $t('common.label.help') }}</v-toolbar-title>
       <v-spacer />
       <network-diagnostics />
-      <v-btn small round outline @click="dialogShow = false">
-        <v-icon>help</v-icon>&nbsp;{{ $t('help.message.click_to_return') }}
+      <v-btn small round outline @click="dialogShow = false" :icon="$vuetify.breakpoint.smAndDown">
+        <v-icon>
+          arrow_back
+        </v-icon>
+        <span v-if="$vuetify.breakpoint.mdAndUp">
+          {{ $t('help.message.click_to_return') }}
+        </span>
       </v-btn>
     </v-toolbar>
     <v-card>
@@ -47,6 +52,11 @@
             </template>
           </v-list>
         </v-flex>
+
+        <v-flex v-if="$vuetify.breakpoint.smAndDown === true" xs12>
+          <v-divider  />
+        </v-flex>
+
         <!-- If one of the categories themselves spin off in to a different component -->
         <v-flex v-if="categoryComponent" xs12 md9>
           <component :is="categoryComponent" />

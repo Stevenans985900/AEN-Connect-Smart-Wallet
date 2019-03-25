@@ -6,8 +6,8 @@
         <v-toolbar class="primary mb-2">
           <v-toolbar-title>{{ $t('common.label.wallets') }}</v-toolbar-title>
           <v-spacer />
-          <v-menu offset-y>
-            <v-btn slot="activator" color="success">
+          <v-menu offset-y :disabled="!agreedToEula">
+            <v-btn slot="activator" color="success"  :disabled="!agreedToEula">
               <v-icon>add</v-icon>{{ $t('wallet.action.add') }}
             </v-btn>
             <v-list>
@@ -59,7 +59,7 @@
           </v-card-title>
           <v-card-text class="pb-0">
             <v-layout row align-center>
-              <v-flex xs5 md2>
+              <v-flex xs3 md2>
                 {{ opportunity.name }}
               </v-flex>
               <v-flex xs3 md6 pr-2>
@@ -71,14 +71,14 @@
                   readonly
                 />
               </v-flex>
-              <v-flex xs4 md4 class="text-xs-center">
+              <v-flex xs6 md4 class="text-xs-center">
                 <v-btn v-if="opportunity.status === 'active'" small outline block>
-                  Click for more info
+                  {{ $t('common.label.information') }}
                 </v-btn>
                 <p>
                   USD {{ toMillion(opportunity.raised) }}M / {{ toMillion(opportunity.requested) }}M
                   <span v-if="$vuetify.breakpoint.mdAndUp">
-                    &nbsp;raised
+                    {{ $t('opportunity.label.raised') }}
                   </span>
                 </p>
               </v-flex>
@@ -191,14 +191,16 @@ export default {
     }
   },
   computed: {
-      renderWatch: {
-          get: function () {
-              return this.$store.state.runtime.renderCounter
-          },
-          set: function (val) {
-              this.$store.commit('setRenderCounter', val)
-          }
-      },
+    online() { return this.$store.state.runtime.isOnline },
+    agreedToEula() { return this.$store.state.user.eulaAgree },
+    renderWatch: {
+        get: function () {
+            return this.$store.state.runtime.renderCounter
+        },
+        set: function (val) {
+            this.$store.commit('setRenderCounter', val)
+        }
+    },
     haveEthereumWallet() { return this.$store.getters["wallet/haveWalletType"]('eth') }
   },
   /**

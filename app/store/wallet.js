@@ -361,7 +361,6 @@ export const actions = {
                 })
               }
             }
-
             // Create a new transaction array
             const transactions = Object.assign({}, wallet.transactions, headTransactions)
 

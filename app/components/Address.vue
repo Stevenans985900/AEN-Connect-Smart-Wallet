@@ -1,6 +1,8 @@
 <template>
-  <span>
-    <clipboard :data="address" :display-text="displayText" />
+  <v-layout row wrap>
+    <v-flex xs12>
+      <clipboard :data="address" :display-text="displayText" />
+    </v-flex>
     <!-- New transfer -->
     <v-dialog v-if="haveContact === false && showAdd === true" v-model="dialog" persistent max-width="600px">
       <v-btn slot="activator" outline small>
@@ -15,7 +17,7 @@
       </v-toolbar>
       <contact-edit :display-text="displayText" :address="address" @complete="contactAdded" />
     </v-dialog>
-  </span>
+  </v-layout>
 </template>
 
 <script>
