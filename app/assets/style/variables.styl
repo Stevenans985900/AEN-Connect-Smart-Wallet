@@ -1,10 +1,10 @@
 @require '~vuetify/src/stylus/settings/_variables.styl'
 
 $aen = {
-  primary: #00BCCA,
-  secondary: #003840,
-  secondarydark: #042a31,
-  secondarylight: #00616d
+  primary: #00B7ce,
+  primary-dark-1: #002d35,
+  primary-light-1: #003740,
+  primary-light-2: #004954
 }
 
 $material-dark = {
@@ -12,11 +12,11 @@ $material-dark = {
     regular: $shades.black,
     lights-out: rgba($shades.black, .2)
   },
-  app-bar: $shades.black,
-  background: $aen.secondary,
-  cards: $aen.secondarydark,
+  app-bar: $aen.primary-light-2,
+  background: $aen.primary-light-1,
+  cards: $aen.primary-light-2,
   chips: {
-    background: $aen.secondarylight,
+    background: $aen.primary-dark-1,
     color: $shades.white
   },
   dividers: rgba($shades.white, .12),
@@ -48,7 +48,7 @@ $material-dark = {
     pressed: rgba(#ccc, .25)
   },
   expansion-panels: {
-    focus: $aen.secondarylight
+    focus: $aen.primary-light-2
   },
   selection-controls: {
     thumb: {
@@ -83,15 +83,15 @@ $material-dark = {
   },
   table: {
     active: #505050
-    hover: $aen.secondary
+    hover: $aen.primary-light-2
   },
   picker: {
     body: $grey.darken-3,
-    clock: $aen.secondary,
+    clock: $aen.primary,
     indeterminateTime: $grey.darken-1,
-    title: $aen.secondary
+    title: $aen.primary-light-2
   },
-  bg-color: $aen.secondarydark
+  bg-color: $aen.primary-dark-1
   fg-color: $shades.white
   text-color: $shades.white
   primary-text-percent: 1

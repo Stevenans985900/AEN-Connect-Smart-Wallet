@@ -3,7 +3,7 @@
     <v-menu v-model="netStatus" :close-on-content-click="false" offset-y>
       <v-btn slot="activator" :class="color" round small>
         <span v-if="$vuetify.breakpoint.mdAndUp">
-          {{ $t('network.label.connection_status') }}
+          {{ $t('network.label.connection_status') }}&nbsp;
         </span>
         {{ connectionStatus }}
       </v-btn>

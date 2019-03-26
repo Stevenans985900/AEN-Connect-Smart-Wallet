@@ -29,7 +29,7 @@
         <v-card v-if="addType == 'fileImport'">
           <v-card-text>
             <v-layout row wrap>
-              <restore-from-file :type="type" @complete="walletRestoredFromFile" />
+              <restore-from-file :type="type" :main="main" @complete="walletRestoredFromFile" />
             </v-layout>
           </v-card-text>
         </v-card>
@@ -110,7 +110,7 @@ export default {
       BackupWallet,
       RestoreFromFile
     },
-    props: {
+  props: {
     main: {
       type: Boolean,
       default: false

@@ -20,9 +20,9 @@
                 <v-list-tile @click="walletType = 'eth'; dialogWalletAdd = true">
                   <v-list-tile-title>{{ $t('network.label.eth') }}</v-list-tile-title>
                 </v-list-tile>
-                <v-list-tile @click="walletType = 'btc'; dialogWalletAdd = true">
-                  <v-list-tile-title>{{ $t('network.label.btc') }}</v-list-tile-title>
-                </v-list-tile>
+                <!--<v-list-tile @click="walletType = 'btc'; dialogWalletAdd = true">-->
+                  <!--<v-list-tile-title>{{ $t('network.label.btc') }}</v-list-tile-title>-->
+                <!--</v-list-tile>-->
                 <v-list-tile v-if="haveEthereumWallet" @click="walletType = 'contract'; dialogWalletAdd = true">
                   <v-list-tile-title>{{ $t('network.contract') }}</v-list-tile-title>
                 </v-list-tile>
@@ -51,9 +51,9 @@
                 <v-list-tile @click="walletType = 'eth'; dialogWalletAdd = true">
                   <v-list-tile-title>{{ $t('network.label.eth') }}</v-list-tile-title>
                 </v-list-tile>
-                <v-list-tile @click="walletType = 'btc'; dialogWalletAdd = true">
-                  <v-list-tile-title>{{ $t('network.label.btc') }}</v-list-tile-title>
-                </v-list-tile>
+                <!--<v-list-tile @click="walletType = 'btc'; dialogWalletAdd = true">-->
+                  <!--<v-list-tile-title>{{ $t('network.label.btc') }}</v-list-tile-title>-->
+                <!--</v-list-tile>-->
                 <v-list-tile v-if="haveEthereumWallet" @click="walletType = 'contract'; dialogWalletAdd = true">
                   <v-list-tile-title>{{ $t('network.contract') }}</v-list-tile-title>
                 </v-list-tile>
@@ -62,8 +62,8 @@
           </v-menu>
         </v-toolbar>
         <!-- Wallet Management -->
-        <v-card>
-          <v-card-text v-if="haveWallet">
+        <v-card v-bar>
+          <v-card-text v-if="haveWallet" style="max-height: 60vh;">
             <v-expansion-panel>
               <v-expansion-panel-content v-for="(wallet, address) in wallets" :key="address">
                 <!-- Main Table Row -->

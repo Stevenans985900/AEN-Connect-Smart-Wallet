@@ -1,7 +1,7 @@
 <template>
   <v-app dark>
     <!-- NAV DRAWER -->
-    <v-navigation-drawer :mini-variant="minifyDrawer" v-model="cDrawerOpen" stateless app>
+    <v-navigation-drawer v-model="cDrawerOpen" :mini-variant="minifyDrawer" v-if="showNav" stateless app>
       <v-layout column fill-height>
         <v-list>
           <v-list-tile v-for="(item, i) in navigationItems" :key="i" :to="item.to" router exact>
@@ -15,44 +15,30 @@
         </v-list>
         <v-spacer />
         <v-list>
-          <v-list-tile @click="dialogHelp = true">
+          <v-list-tile to="/settings">
             <v-list-tile-action>
-              <v-icon>help</v-icon>
+              <v-icon>settings</v-icon>
             </v-list-tile-action>
             <v-list-tile-content>
-              {{ $t('common.navigation.help') }}
+              {{ $t('common.navigation.settings') }}
             </v-list-tile-content>
           </v-list-tile>
-          <!--<v-list-tile router exact>-->
-          <!--<v-list-tile-action @click="dialogExit = true">-->
-          <!--<v-icon>exit_to_app</v-icon>-->
-          <!--</v-list-tile-action>-->
-          <!--<v-list-tile-content>-->
-          <!--{{ $t('common.navigation.exit') }}-->
-          <!--</v-list-tile-content>-->
-          <!--</v-list-tile>-->
         </v-list>
       </v-layout>
     </v-navigation-drawer>
 
     <!-- TOP BAR -->
     <v-toolbar fixed app>
-      <v-toolbar-side-icon @click="toggleNav" />
-      <v-btn>{{minifyDrawer}}</v-btn>
-      <v-btn>{{cDrawerOpen}}</v-btn>
-      <!--size="24"-->
-      <!--<v-avatar >-->
-      <v-btn flat active-class="" to="/" >
+      <v-toolbar-side-icon @click="toggleNav" v-if="showNav" />
+      <v-btn flat to="/">
         <v-img src="/logo.png" contain height="25" max-width="125px" />
       </v-btn>
-      <!--</v-avatar>-->
       <v-toolbar-title class="hidden-sm-and-down text-xs-left" v-text="title" />
       <v-spacer />
       <!-- Environment -->
       <no-ssr>
         <busy />
       </no-ssr>
-      <token-display-options />
       <development v-if="environment === 'development'" />
       <help />
     </v-toolbar>
@@ -67,8 +53,6 @@
             Close
           </v-btn>
         </v-snackbar>
-        <!-- NUXT BEGINNING -->
-        <end-user-license-agreement v-if="!eulaAgreed && $nuxt.$route.name !== 'setup-wizard'" />
         <nuxt />
       </v-container>
     </v-content>
@@ -107,10 +91,8 @@ import Busy from '~/components/Busy'
 import Development from '~/components/Development'
 import Help from '~/components/Help'
 import SecurityChallenge from '~/components/SecurityChallenge'
-import TokenDisplayOptions from '~/components/TokenDisplayOptions'
 import isElectron from 'is-electron'
 import isOnline from 'is-online'
-import EndUserLicenseAgreement from '~/components/EndUserLicenseAgreement'
 // import childProcess from 'child_process'
 if (isElectron()) {
   // TODO Satisfy linter
@@ -125,10 +107,8 @@ export default {
   components: {
     Busy,
     Development,
-    EndUserLicenseAgreement,
     Help,
-    SecurityChallenge,
-    TokenDisplayOptions
+    SecurityChallenge
   },
   /**
    * DATA
@@ -143,7 +123,7 @@ export default {
         {
           icon: 'apps',
           key: 'dashboard',
-          to: '/'
+          to: '/dashboard'
         },
         {
           icon: 'settings_system_daydream',
@@ -164,11 +144,6 @@ export default {
           icon: 'contacts',
           key: 'address_book',
           to: '/address-book'
-        },
-        {
-          icon: 'lock_open',
-          key: 'security',
-          to: '/security'
         }
       ],
       title: 'Smart Connect',
@@ -210,6 +185,7 @@ export default {
         })
       }
     },
+    showNav() { return this.$store.state.user.eulaAgree },
     // notification details
     showNotification: {
       get: function () {

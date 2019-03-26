@@ -525,9 +525,7 @@ export default {
     // Forcee imported wallet to be considered main AEN wallet
     main: {
       type: Boolean,
-      default: function () {
-        return false
-      }
+      default: false
     }
   },
   data() {

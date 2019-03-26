@@ -785,24 +785,25 @@ export const mutations = {
     state.meta.wallet_present = status
   },
   setWallet(state, wallet) {
-    state.wallets[wallet.address] = wallet
+
+    Vue.set(state.wallets, wallet.address, wallet)
     if (wallet.type === 'aen') {
       state.aen.haveWallet = true
     }
-    state.contacts[wallet.address] = {
+    Vue.set(state.contacts, wallet.address, {
       displayText: wallet.name,
       type: wallet.type,
       address: wallet.address
-    }
+    })
   },
   setAenProperty(state, options) {
-    state.aen[options.key] = options.value
+    Vue.set(state.aen, options.key, options.value)
   },
   setBtcProperty(state, options) {
-    state.btc[options.key] = options.value
+    Vue.set(state.btc, options.key, options.value)
   },
   setEthProperty(state, options) {
-    state.eth[options.key] = options.value
+    Vue.set(state.eth, options.key, options.value)
   },
   setWalletProperty(state, options) {
     state.wallets[options.address][options.key] = options.value
@@ -816,9 +817,8 @@ export const mutations = {
   deleteContact(state, contact) {
     Vue.delete(state.contacts, contact.address)
   },
-
   setContact(state, contact) {
-    state.contacts[contact.address] = contact
+    Vue.set(state.contacts, contact.address, contact)
   },
   setPreferredNode(state, address) {
     state.internal.preferredNode = address

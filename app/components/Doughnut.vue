@@ -140,10 +140,12 @@ export default {
       this.renderChart({
         datasets: [{
           "backgroundColor": colors,
+          "borderWidth": 0,
           "data": data
         }],
         labels: labels
       }, {
+        cutoutPercentage: 60,
         legend: {
           display: false
         },
@@ -153,7 +155,7 @@ export default {
           }
         },
         responsive: true,
-        maintainAspectRatio: false
+        maintainAspectRatio: true
       })
     }
   }

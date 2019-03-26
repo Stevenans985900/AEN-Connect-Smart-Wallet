@@ -105,144 +105,147 @@
 <script>
   import FeedbackForm from '~/components/FeedbackForm'
   import NetworkDiagnostics from '~/components/NetworkDiagnostics'
-  export default {
-    components: { FeedbackForm, NetworkDiagnostics },
-    data() {
-      return {
-        categoryComponent: null,
-        component: null,
-        displayText: null,
-        youtubeVideo: null,
-        selectedCategory: null,
-        selectedEntry: null,
-        help: {
-          'getting-started': {
-            'title': 'Introduction',
-            'icon': 'flash_on',
-            'faq': [
-              {
-                'title': 'Summary',
-                'subtitle': 'Why use the AEN Connect Smart Wallet',
-                'displayText': '<p>Smart Connect allows a person to interact with various blockchain networks, managing '
+
+  function initialDataState() {
+    return {
+      categoryComponent: null,
+      component: null,
+      displayText: null,
+      youtubeVideo: null,
+      selectedCategory: 'getting-started',
+      selectedEntry: null,
+      help: {
+        'getting-started': {
+          'title': 'Introduction',
+          'icon': 'flash_on',
+          'faq': [
+            {
+              'title': 'Summary',
+              'subtitle': 'Why use the AEN Connect Smart Wallet',
+              'displayText': '<p>Smart Connect allows a person to interact with various blockchain networks, managing '
                 + 'multiple wallets at the same time. Primarily though, it is the public gateway for people to interact '
                 + 'with various AEN services. For more information, please visit <a target="_blank" href="https://aencoin.com" '
                 + '>our main website</a> for more information.</p>'
-              },
-              {
-                'title': 'Getting Started',
-                'template': 'getting-started'
-              },
-              {
-                'title': 'Adding more wallets',
-                'subtitle': 'AEN, BTC, ETH, ERC20 wallets',
-                'displayText': 'Wallets can be added from either your dashboard or the wallet management screen by clicking ' +
-                  'the "Add Wallet" button and choosing a network from the list. By default, you are able to add AEN, Bitcoin, ' +
-                  'Ethereum, and Smart Contracts (Ethereum ERC20/223) as wallets to this app. In the case of adding Smart Contracts ' +
-                  'manually , it is necessary to add an Ethereum wallet before the option unlocks in order to act as the managing wallet.' +
-                  'If you already own an Ethereum wallet which has control of smart contracts, they will be automatically imported as wallets ' +
-                  'during wallet history update.'
-              }
-            ]
-          },
-          'dashboard': {
-            'title': 'The Dashboard',
-            "icon": "apps",
-            'faq': [
-              {
-                'title': 'Summary',
-                "subtitle": "What can you do from the dashboard?",
-                'displayText': 'The dashboard is your landing area which provides a high level look at all your managed ' +
-                  'wallets, providing a real world currency evaluation along the way, and a gateway to various AEN services ' +
-                  'including the Exchange, Investment opportunities, The Service runner platform, and security centre'
-              }
-            ]
-          },
-          'wallet': {
-            'title': 'Wallet Management',
-            "icon": "settings_system_daydream",
-            "faq": [
-              {
-                "title": "What networks are supported?",
-                "template": "supported-networks"
-              },
-              {
-                "title": "Where are my tokens stored?",
-                "displayText": "Your tokens are stored on the blockchain network. Using this wallet as an interface and " +
-                  "the private keys for each wallet, transactions and operations are carried out on the tokens through " +
-                  "an external API which acts as an ingress to the blockchain network"
-              },
-              {
-                "title": "Backing up a wallet",
-                "displayText": "Wallet backups are created from the wallet management screen. Once clicking the backup " +
-                  "wallet button, you will be asked which wallets you want to backup. After clicking on a wallet, two " +
-                  "files will be downloaded: A plaintext JSON file and an encrypted version of the same file that can " +
-                  "only be opened using this wallet. The credentials part of this backup are encrypted for your security."
-              },
-              {
-                "title": "Restoring a wallet",
-                "displayText": "The option to choose restoring a wallet from file is available whenever you click the add " +
-                  "wallet button from either the dashboard or wallet management screen. In step one of adding a wallet, " +
-                  "you are asked how you would like to setup your wallet. At this point, choose the 'import from file' " +
-                  "option, then during part 2, simply choose the file from your device and it will be imported."
-              }
-            ]
-          },
-          'contacts': {
-            'title': 'Address Book',
-            "icon": "contacts",
-            "faq": [
-              {
-                "title": "Summary",
-                "subtitle": "What's the purpose of the address book?",
-                "displayText": "Addresses used on the various blockchain networks are long and complicated, often over 40 " +
-                  "characters long. The address book provides a way of defining aliases for each address so, when it comes " +
-                  "to reviewing transaction histories or making a transaction yourself, the source / destination can quickly " +
-                  "be identified."
-              }
-            ]
-          },
-          'security': {
-            'title': 'Security',
-            "icon": "lock_open",
-            "faq": [
-              {
-                "title": "Summary",
-                "subtitle": "Overview of how you are kept safe",
-                "displayText": "Encryoted cookie store, extra encryption on top of credentials, one way password hashes, " +
-                  "user challenges depending on action, master password"
-              }
-            ]
-          },
-          'network': {
-            'title': 'Connectivity',
-            "icon": "network_check",
-            "faq": [
-              {
-                "title": "Summary",
-                "subtitle": "Communicating with multiple networks",
-                "displayText": "Speak to API points only when need to, if offline will return cached results, connectivity " +
-                  "indicator in top toolbar, automatic API rotation choosing device with best response times"
-              },
-              {
-                "title": "I can't make any transfers",
-                "displayText": "This app works both offline and online. When offline however, all functionality tied " +
-                  "to the network (which is almost everything) is disabled to prevent both errors and confusion. If you " +
-                  "can't make any transfers, it is possible that the app believes itself to be offline. If this is the " +
-                  "case, then the network icon in the top right of your toolbar will display as a red wifi graph with a " +
-                  "line through it. There have been reported cases where the wallet fails to work over a VPN but, this is " +
-                  "due to restrictions on the connection so, please make sure you are connected to the internet."
-              }
-            ]
-
-          },
-          'about': {
-            'title': 'About',
-            "icon": "face"
-          }
+            },
+            {
+              'title': 'Getting Started',
+              'template': 'getting-started'
+            },
+            {
+              'title': 'Adding more wallets',
+              'subtitle': 'AEN, BTC, ETH, ERC20 wallets',
+              'displayText': 'Wallets can be added from either your dashboard or the wallet management screen by clicking ' +
+                'the "Add Wallet" button and choosing a network from the list. By default, you are able to add AEN, Bitcoin, ' +
+                'Ethereum, and Smart Contracts (Ethereum ERC20/223) as wallets to this app. In the case of adding Smart Contracts ' +
+                'manually , it is necessary to add an Ethereum wallet before the option unlocks in order to act as the managing wallet.' +
+                'If you already own an Ethereum wallet which has control of smart contracts, they will be automatically imported as wallets ' +
+                'during wallet history update.'
+            }
+          ]
         },
-        routeName: ''
-      }
-    },
+        'dashboard': {
+          'title': 'The Dashboard',
+          "icon": "apps",
+          'faq': [
+            {
+              'title': 'Summary',
+              "subtitle": "What can you do from the dashboard?",
+              'displayText': 'The dashboard is your landing area which provides a high level look at all your managed ' +
+                'wallets, providing a real world currency evaluation along the way, and a gateway to various AEN services ' +
+                'including the Exchange, Investment opportunities, The Service runner platform, and security centre'
+            }
+          ]
+        },
+        'wallet': {
+          'title': 'Wallet Management',
+          "icon": "settings_system_daydream",
+          "faq": [
+            {
+              "title": "What networks are supported?",
+              "template": "supported-networks"
+            },
+            {
+              "title": "Where are my tokens stored?",
+              "displayText": "Your tokens are stored on the blockchain network. Using this wallet as an interface and " +
+                "the private keys for each wallet, transactions and operations are carried out on the tokens through " +
+                "an external API which acts as an ingress to the blockchain network"
+            },
+            {
+              "title": "Backing up a wallet",
+              "displayText": "Wallet backups are created from the wallet management screen. Once clicking the backup " +
+                "wallet button, you will be asked which wallets you want to backup. After clicking on a wallet, two " +
+                "files will be downloaded: A plaintext JSON file and an encrypted version of the same file that can " +
+                "only be opened using this wallet. The credentials part of this backup are encrypted for your security."
+            },
+            {
+              "title": "Restoring a wallet",
+              "displayText": "The option to choose restoring a wallet from file is available whenever you click the add " +
+                "wallet button from either the dashboard or wallet management screen. In step one of adding a wallet, " +
+                "you are asked how you would like to setup your wallet. At this point, choose the 'import from file' " +
+                "option, then during part 2, simply choose the file from your device and it will be imported."
+            }
+          ]
+        },
+        'contacts': {
+          'title': 'Address Book',
+          "icon": "contacts",
+          "faq": [
+            {
+              "title": "Summary",
+              "subtitle": "What's the purpose of the address book?",
+              "displayText": "Addresses used on the various blockchain networks are long and complicated, often over 40 " +
+                "characters long. The address book provides a way of defining aliases for each address so, when it comes " +
+                "to reviewing transaction histories or making a transaction yourself, the source / destination can quickly " +
+                "be identified."
+            }
+          ]
+        },
+        'security': {
+          'title': 'Security',
+          "icon": "lock_open",
+          "faq": [
+            {
+              "title": "Summary",
+              "subtitle": "Overview of how you are kept safe",
+              "displayText": "Encryoted cookie store, extra encryption on top of credentials, one way password hashes, " +
+                "user challenges depending on action, master password"
+            }
+          ]
+        },
+        'network': {
+          'title': 'Connectivity',
+          "icon": "network_check",
+          "faq": [
+            {
+              "title": "Summary",
+              "subtitle": "Communicating with multiple networks",
+              "displayText": "Speak to API points only when need to, if offline will return cached results, connectivity " +
+                "indicator in top toolbar, automatic API rotation choosing device with best response times"
+            },
+            {
+              "title": "I can't make any transfers",
+              "displayText": "This app works both offline and online. When offline however, all functionality tied " +
+                "to the network (which is almost everything) is disabled to prevent both errors and confusion. If you " +
+                "can't make any transfers, it is possible that the app believes itself to be offline. If this is the " +
+                "case, then the network icon in the top right of your toolbar will display as a red wifi graph with a " +
+                "line through it. There have been reported cases where the wallet fails to work over a VPN but, this is " +
+                "due to restrictions on the connection so, please make sure you are connected to the internet."
+            }
+          ]
+
+        },
+        'about': {
+          'title': 'About',
+          "icon": "face"
+        }
+      },
+      routeName: ''
+    }
+  }
+
+  export default {
+    components: { FeedbackForm, NetworkDiagnostics },
+    data() { return initialDataState() },
     computed: {
       dialogShow: {
         get: function () { return this.$store.state.user.help },

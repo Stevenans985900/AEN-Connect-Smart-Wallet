@@ -138,7 +138,7 @@
   },
   "eula": {
     "action": {
-      "agreeEula": "I agree to the AEN EULA",
+      "agree_eula": "I agree to the AEN EULA",
       "eula": "EULA",
       "setup_wizard": "Setup wizard"
     },
@@ -161,6 +161,18 @@
   "help": {
     "message": {
       "click_to_return": "Click here to go back"
+    }
+  },
+  "index": {
+    "label": {
+      "accept_end_user_license_agreement": "Accept End User License Agreement",
+      "security_features": "Security Features",
+      "wallet_creation": "Wallet Creation",
+      "welcome": "Welcome"
+    },
+    "message": {
+      "introduction": "This Smart wallet allows you to generate and manage multiple accounts on the <a href='https://aencoin.com/', target='_blank'>AENChain network</a>, Ethereum Network, Smart Contracts, and Bitcoin networks.",
+      "instruction": "Before proceeding, you need to have an AEN wallet setup on this device, Please following the instructions\n                  below to get started. If you need help at any point, you can click the question icon in the top right of your screen to get both contextual and general help."
     }
   },
   "opportunity": {
@@ -205,8 +217,17 @@
     "message": {
       "authenticate_to_continue": "You must enter your password to continue",
       "authenticate_cancel_question": "You cannot proceed without authorisation. If you choose to cancel, all app data will be reset. Are you sure?",
+      "instructions": "Choose from the list below security features you would like to use to protect your wallets",
       "passwords_must_match": "Passwords must match",
       "profile_remove_confirmation": "If you remove the wallet preset, security options and challenges will revert to using the default / global options"
+    }
+  },
+  "settings": {
+    "label": {
+      "denominations": "Token Denominations"
+    },
+    "message": {
+      "denominations": "By default, the app will try to use the largest denomination available to display token values. If you would like to force display in a set denomination, please choose and option from the dropdown's below for each network."
     }
   },
   "wallet": {

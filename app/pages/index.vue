@@ -1,86 +1,77 @@
 <template>
   <v-container>
-    <!-- WALLETS -->
-    <v-layout row wrap align-center mb-4>
+    <v-layout row justify-center align-center>
       <v-flex xs12>
-        <v-toolbar class="primary mb-2">
-          <v-toolbar-title>{{ $t('common.label.wallets') }}</v-toolbar-title>
-          <v-spacer />
-          <v-menu offset-y :disabled="!agreedToEula">
-            <v-btn slot="activator" color="success"  :disabled="!agreedToEula">
-              <v-icon>add</v-icon>{{ $t('wallet.action.add') }}
-            </v-btn>
-            <v-list>
-              <v-list-tile @click="walletType = 'aen'; dialogWalletAdd = true">
-                <v-list-tile-title>{{ $t('network.label.aen') }}</v-list-tile-title>
-              </v-list-tile>
-              <v-list-tile @click="walletType = 'eth'; dialogWalletAdd = true">
-                <v-list-tile-title>{{ $t('network.label.eth') }}</v-list-tile-title>
-              </v-list-tile>
-              <v-list-tile @click="walletType = 'btc'; dialogWalletAdd = true">
-                <v-list-tile-title>{{ $t('network.label.btc') }}</v-list-tile-title>
-              </v-list-tile>
-              <v-list-tile v-if="haveEthereumWallet === true" @click="walletType = 'contract'; dialogWalletAdd = true">
-                <v-list-tile-title>{{ $t('network.label.contract') }}</v-list-tile-title>
-              </v-list-tile>
-            </v-list>
-          </v-menu>
-        </v-toolbar>
-        <v-card flat>
-          <graph-balance-spread :render-watch="renderWatch" />
-        </v-card>
-      </v-flex>
-      <!-- New Wallet Dialog -->
-      <v-dialog v-if="dialogWalletAdd" v-model="dialogWalletAdd" persistent max-width="1024px">
-        <v-toolbar color="primary">
-          <v-toolbar-title>{{ $t('wallet.action.add') }}</v-toolbar-title>
-          <v-spacer />
-          <v-btn icon @click="dialogWalletAdd = false">
-            <v-icon>close</v-icon>
-          </v-btn>
-        </v-toolbar>
-        <v-card>
+        <v-card class="mb-4">
           <v-card-text>
-            <wallet-add :type="walletType" @complete="walletAdded()" />
+            <v-layout row align-center>
+              <v-flex xs12 md6>
+                <!-- Initial setup -->
+                <h1>
+                  {{ $t('index.label.welcome') }}
+                </h1>
+                <p v-html="$t('index.message.introduction')" />
+                <p v-html="$t('index.message.instruction')" />
+              </v-flex>
+              <v-flex md6>
+                <v-img src="/logo-800.png" contain />
+              </v-flex>
+            </v-layout>
           </v-card-text>
         </v-card>
-      </v-dialog>
+      </v-flex>
     </v-layout>
 
-    <!-- ICOs -->
-    <v-layout row wrap>
+    <v-layout row justify-center align-center>
       <v-flex xs12>
-        <v-toolbar class="primary mb-2 mb-2">
-          <v-toolbar-title>{{ $t('common.label.opportunities') }}</v-toolbar-title>
-        </v-toolbar>
-        <v-card v-for="(opportunity, index) in opportunities" :key="index" class="mb-2">
-          <v-card-title v-if="opportunity.status == 'ended'" class="ribbon ribbon-top-right">
-            <span>{{ $t('opportunity.label.status_' + opportunity.status) }}</span>
-          </v-card-title>
-          <v-card-text class="pb-0">
-            <v-layout row align-center>
-              <v-flex xs3 md2>
-                {{ opportunity.name }}
-              </v-flex>
-              <v-flex xs3 md6 pr-2>
-                <v-slider
-                  :value="toMillion(opportunity.raised)"
-                  :max="toMillion(opportunity.requested)"
-                  step="0.1"
-                  thumb-label="always"
+        <v-card>
+          <v-card-text>
+            <v-layout>
+              <v-flex xs12>
+                <v-expansion-panel
+                  v-model="panel"
                   readonly
-                />
-              </v-flex>
-              <v-flex xs6 md4 class="text-xs-center">
-                <v-btn v-if="opportunity.status === 'active'" small outline block>
-                  {{ $t('common.label.information') }}
-                </v-btn>
-                <p>
-                  USD {{ toMillion(opportunity.raised) }}M / {{ toMillion(opportunity.requested) }}M
-                  <span v-if="$vuetify.breakpoint.mdAndUp">
-                    {{ $t('opportunity.label.raised') }}
-                  </span>
-                </p>
+                  expand
+                >
+                  <!-- Initial wallet creation screen -->
+                  <v-expansion-panel-content>
+                    <div slot="header">
+                      <h2>
+                        {{ $t('index.label.wallet_creation') }}
+                      </h2>
+                    </div>
+                    <wallet-add v-if="!wallet" type="aen" :main="true" @complete="walletCreated" />
+                  </v-expansion-panel-content>
+
+                  <!-- Security configuration -->
+                  <v-expansion-panel-content>
+                    <div slot="header">
+                      <h2>
+                        {{ $t('index.label.security_features') }}
+                      </h2>
+                    </div>
+                    <p>
+                      {{ $t('security.message.instructions') }}
+                    </p>
+                    <security-controls />
+                    <v-btn @click="panel = [false,false,true]" class="primary">
+                      {{ $t('common.action.continue') }}
+                    </v-btn>
+                  </v-expansion-panel-content>
+
+                  <!-- License agreement -->
+                  <v-expansion-panel-content>
+                    <div slot="header">
+                      <h2>
+                        {{ $t('index.label.accept_end_user_license_agreement') }}
+                      </h2>
+                    </div>
+                    <p v-html="$t('eula.message.introduction')" class="pa-2" />
+                    <v-btn color="primary" @click="acceptAndProceed">
+                      {{ $t('eula.action.agree_eula') }}
+                    </v-btn>
+                  </v-expansion-panel-content>
+                </v-expansion-panel>
               </v-flex>
             </v-layout>
           </v-card-text>
@@ -90,83 +81,20 @@
   </v-container>
 </template>
 
-<style scoped>
-  /* common */
-  .ribbon {
-    width: 10rem;
-    height: 6rem;
-    overflow: hidden;
-    position: absolute;
-  }
-  .ribbon::before,
-  .ribbon::after {
-    position: absolute;
-    z-index: -1;
-    content: '';
-    display: block;
-  }
-  .ribbon span {
-    position: absolute;
-    display: block;
-    width: 17rem;
-    padding: 1rem 0;
-    background-color: #00bcca;
-    color: #fff;
-    text-transform: uppercase;
-    text-align: center;
-  }
-  /* top right*/
-  .ribbon-top-right {
-    top: 0;
-    right: 0;
-  }
-  .ribbon-top-right::before,
-  .ribbon-top-right::after {
-    border-top-color: transparent;
-    border-right-color: transparent;
-  }
-  .ribbon-top-right::before {
-    top: 0;
-    left: 0;
-  }
-  .ribbon-top-right::after {
-    bottom: 0;
-    right: 0;
-  }
-  .ribbon-top-right span {
-    left: -2rem;
-    top: 1rem;
-    transform: rotate(45deg);
-  }
-</style>
 <script>
-import GraphBalanceSpread from '../components/GraphBalanceSpread'
-import WalletAdd from '../components/WalletAdd'
+import SecurityControls from '~/components/SecurityControls'
+import WalletAdd from '~/components/WalletAdd'
+
 function initialDataState() {
   return {
-    dialogWalletAdd: false,
-    walletType: null,
+    panel: [true, false, false],
+    dialogEulaAgree: false,
     wallet: null,
-    opportunities: [
-      {
-        name: "AENCoin",
-        subtitle: "The first token for investing in and carrying out research on the blockchain",
-        status: "ended",
-        raised: "19000000",
-        requested: "22000000"
-      },
-      {
-        name: "Promcoin",
-        raised: "500000",
-        status: "active",
-        requested: "2000000"
-      },
-      {
-        name: "Massive",
-        raised: "100000",
-        status: "active",
-        requested: "200000"
-      }
+    seasons: [
+      'Winter',
+      'Spring',
+      'Summer',
+      'Fall'
     ]
   }
 }
@@ -175,7 +103,7 @@ export default {
    * COMPONENTS
    */
   components: {
-    GraphBalanceSpread,
+    SecurityControls,
     WalletAdd
   },
   /**
@@ -190,18 +118,20 @@ export default {
       ]
     }
   },
+  /**
+   * COMPUTED
+   */
   computed: {
-    online() { return this.$store.state.runtime.isOnline },
-    agreedToEula() { return this.$store.state.user.eulaAgree },
-    renderWatch: {
-        get: function () {
-            return this.$store.state.runtime.renderCounter
-        },
-        set: function (val) {
-            this.$store.commit('setRenderCounter', val)
-        }
+    network() {
+      return this.$store.state.wallet.aen.network.name
     },
-    haveEthereumWallet() { return this.$store.getters["wallet/haveWalletType"]('eth') }
+    testnet() {
+      try {
+        return this.wallet.network.testing
+      } catch (e) {
+        return false
+      }
+    }
   },
   /**
    * MOUNTED
@@ -212,6 +142,11 @@ export default {
     const preparationInterval = setInterval(
       function () {
         if (this.$store.getters.booting === false) {
+          // Redirect user to the dashboard if they already have account
+          if (this.$store.getters["wallet/haveWalletType"]('aen') === true) {
+            console.debug('User has saved wallet present, redirecting to dashboard')
+            this.$nuxt.$router.replace({ path: '/dashboard' })
+          }
           clearInterval(preparationInterval)
           this.$store.commit('setLoading', { t: 'router', v: false })
         }
@@ -223,22 +158,25 @@ export default {
    * METHODS
    */
   methods: {
-    formatMoney(amount) {
-      return amount.toLocaleString('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      })
+    season (val) {
+      return this.seasons[val]
     },
-    getPercentage(partial, total) {
-      return Math.floor((100 / total) * partial)
+    /**
+     * Method to send user on to dashboard once wallet has been created
+     */
+    walletCreated: function (wallet) {
+      this.wallet = wallet
+      this.panel = [false,true,false]
     },
-    toMillion(input) { return (input / 1000000) },
-    walletAdded() {
-      this.dialogWalletAdd = false
-      this.$store.commit('showNotification', {
-        type: 'success',
-        message: 'Your wallet has been successfully setup!'
-      })
+    setupComplete: function () {
+      this.dialogEulaAgree = true
+    },
+    goToFaucet: function () {
+      window.open(this.$g('aen.faucets')[0].address + '?address=' + this.wallet.address)
+    },
+    acceptAndProceed: function () {
+      this.$store.commit('setUserProperty', { key: 'eulaAgree', value: true })
+      this.$nuxt.$router.replace({ path: '/wallet' })
     }
   }
 }
