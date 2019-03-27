@@ -5,7 +5,7 @@
     @submit.prevent="onSubmit"
   >
     <v-layout row wrap>
-      <v-flex xs12 v-if="multipleNetworks">
+      <v-flex v-if="multipleNetworks" xs12>
         <v-select
           v-model="network"
           :items="availableNetworks"

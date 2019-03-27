@@ -780,12 +780,12 @@ export const mutations = {
   },
   removeWallet(state, wallet) {
     Vue.delete(state.wallets, wallet.address)
+    Vue.delete(state.contacts, wallet.address)
   },
   setAccountStatus(state, status) {
     state.meta.wallet_present = status
   },
   setWallet(state, wallet) {
-
     Vue.set(state.wallets, wallet.address, wallet)
     if (wallet.type === 'aen') {
       state.aen.haveWallet = true

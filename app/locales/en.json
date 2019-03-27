@@ -110,7 +110,7 @@
       "exchange": "Exchange",
       "exit": "Exit",
       "help": "Help",
-      "security": "Security",
+      "settings": "Settings",
       "wallet_management": "Wallet Management"
     }
   },
@@ -199,9 +199,10 @@
       "token_denomination": "Denominations"
     },
     "message": {
-      "s_until_next_check": "s until next check",
+      "broadcasting_please_wait": "Sending, this may take a minute",
       "checking_best_api": "Ranking API destinations",
-      "broadcasting_please_wait": "Broadcasting to network, please wait"
+      "find_best_api": "Find best API Server",
+      "s_until_next_check": "s until next check"
     }
   },
   "security": {

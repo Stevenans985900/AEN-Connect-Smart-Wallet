@@ -54,7 +54,7 @@
                       {{ $t('security.message.instructions') }}
                     </p>
                     <security-controls />
-                    <v-btn @click="panel = [false,false,true]" class="primary">
+                    <v-btn class="primary" @click="panel = [false,false,true]">
                       {{ $t('common.action.continue') }}
                     </v-btn>
                   </v-expansion-panel-content>
@@ -66,7 +66,7 @@
                         {{ $t('index.label.accept_end_user_license_agreement') }}
                       </h2>
                     </div>
-                    <p v-html="$t('eula.message.introduction')" class="pa-2" />
+                    <p class="pa-2" v-html="$t('eula.message.introduction')" />
                     <v-btn color="primary" @click="acceptAndProceed">
                       {{ $t('eula.action.agree_eula') }}
                     </v-btn>

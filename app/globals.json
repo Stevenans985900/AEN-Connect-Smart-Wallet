@@ -117,7 +117,16 @@
         }
       }
     ],
-    "faucets": [{
+    "faucets": [
+      {
+        "name": "Kyber Faucet",
+        "address": "https://faucet.kyber.network/"
+      },
+      {
+        "name": "B9Lab Academy",
+        "address": "https://ipfs.io/ipfs/QmVAwVKys271P5EQyEfVSxm7BJDKWt42A2gHvNmxLjZMps/"
+      },
+      {
       "name": "Ropsten Ethereum Faucet",
       "address": "https://faucet.ropsten.be"
     }]

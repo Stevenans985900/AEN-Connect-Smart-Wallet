@@ -21,7 +21,7 @@
                   <v-list-tile-title>{{ $t('network.label.eth') }}</v-list-tile-title>
                 </v-list-tile>
                 <!--<v-list-tile @click="walletType = 'btc'; dialogWalletAdd = true">-->
-                  <!--<v-list-tile-title>{{ $t('network.label.btc') }}</v-list-tile-title>-->
+                <!--<v-list-tile-title>{{ $t('network.label.btc') }}</v-list-tile-title>-->
                 <!--</v-list-tile>-->
                 <v-list-tile v-if="haveEthereumWallet" @click="walletType = 'contract'; dialogWalletAdd = true">
                   <v-list-tile-title>{{ $t('network.contract') }}</v-list-tile-title>
@@ -30,7 +30,7 @@
             </v-menu>
           </template>
           <!--:close-on-click="false"-->
-          <v-menu v-else offset-y :close-on-content-click="false" >
+          <v-menu v-else offset-y :close-on-content-click="false">
             <v-btn
               slot="activator"
               small
@@ -52,7 +52,7 @@
                   <v-list-tile-title>{{ $t('network.label.eth') }}</v-list-tile-title>
                 </v-list-tile>
                 <!--<v-list-tile @click="walletType = 'btc'; dialogWalletAdd = true">-->
-                  <!--<v-list-tile-title>{{ $t('network.label.btc') }}</v-list-tile-title>-->
+                <!--<v-list-tile-title>{{ $t('network.label.btc') }}</v-list-tile-title>-->
                 <!--</v-list-tile>-->
                 <v-list-tile v-if="haveEthereumWallet" @click="walletType = 'contract'; dialogWalletAdd = true">
                   <v-list-tile-title>{{ $t('network.contract') }}</v-list-tile-title>
@@ -63,7 +63,7 @@
         </v-toolbar>
         <!-- Wallet Management -->
         <v-card v-bar>
-          <v-card-text v-if="haveWallet" style="max-height: 60vh;">
+          <v-card-text v-if="haveWallet" style="max-height: 75vh;">
             <v-expansion-panel>
               <v-expansion-panel-content v-for="(wallet, address) in wallets" :key="address">
                 <!-- Main Table Row -->
@@ -166,7 +166,7 @@
       </v-dialog>
 
       <!-- New Wallet Dialog -->
-      <v-dialog v-if="dialogWalletAdd === true" v-model="dialogWalletAdd" persistent max-width="1024px">
+      <v-dialog v-if="dialogWalletAdd === true" v-model="dialogWalletAdd" persistent max-width="650px">
         <v-toolbar color="primary">
           <v-toolbar-title>{{ $t('wallet.action.add') }}</v-toolbar-title>
 

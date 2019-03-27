@@ -11,7 +11,7 @@
     </v-flex>
     <v-flex xs12 sm8 lg9>
       <v-progress-circular v-if="loading === true" indeterminate />
-      <v-card v-else flat v-bar>
+      <v-card v-else v-bar flat>
         <v-card-text>
           <v-list>
             <template v-for="(wallet) in wallets">

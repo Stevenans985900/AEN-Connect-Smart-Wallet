@@ -33,9 +33,8 @@
                     :label="$t('network.label.current_api_endpoint')"
                   />
                   <v-btn @click="refreshAenApiEndpoint">
-                    Find best API Server
+                    {{ $t('network.message.find_best_api') }}
                   </v-btn>
-                  <p>Block Height: {{ aenHeight }}</p>
                 </v-card-text>
               </v-card>
             </v-expansion-panel-content>

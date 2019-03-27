@@ -35,9 +35,7 @@
       </v-card-text>
       <v-card-actions>
         <v-btn v-if="busy == true" flat disabled>
-          <v-progress-circular
-            indeterminate
-          ></v-progress-circular>
+          <v-progress-circular indeterminate />
           {{ $t('network.message.broadcasting_please_wait') }}
         </v-btn>
         <v-spacer />

@@ -1,10 +1,10 @@
 <template>
   <v-app dark>
     <!-- NAV DRAWER -->
-    <v-navigation-drawer v-model="cDrawerOpen" :mini-variant="minifyDrawer" v-if="showNav" stateless app>
+    <v-navigation-drawer v-if="showNav" v-model="cDrawerOpen" :mini-variant="minifyDrawer" stateless app>
       <v-layout column fill-height>
         <v-list>
-          <v-list-tile v-for="(item, i) in navigationItems" :key="i" :to="item.to" router exact>
+          <v-list-tile v-for="(item, i) in navigationItems" :key="i" :to="item.to" router exact @click="toggleNav">
             <v-list-tile-action>
               <v-icon>{{ item.icon }}</v-icon>
             </v-list-tile-action>
@@ -15,7 +15,7 @@
         </v-list>
         <v-spacer />
         <v-list>
-          <v-list-tile to="/settings">
+          <v-list-tile to="/settings" @click="toggleNav">
             <v-list-tile-action>
               <v-icon>settings</v-icon>
             </v-list-tile-action>
@@ -29,8 +29,8 @@
 
     <!-- TOP BAR -->
     <v-toolbar fixed app>
-      <v-toolbar-side-icon @click="toggleNav" v-if="showNav" />
-      <v-btn flat to="/">
+      <v-toolbar-side-icon v-if="showNav" @click="toggleNav" />
+      <v-btn flat to="/" active-class="">
         <v-img src="/logo.png" contain height="25" max-width="125px" />
       </v-btn>
       <v-toolbar-title class="hidden-sm-and-down text-xs-left" v-text="title" />
@@ -45,16 +45,14 @@
 
     <!-- MAIN CONTENT AREA -->
     <v-content>
-      <v-container fluid>
-        <security-challenge />
-        <v-snackbar v-model="showNotification" :timeout="timeout" :top="true" :vertical="true">
-          {{ notification_message }}
-          <v-btn flat @click="showNotification = false">
-            Close
-          </v-btn>
-        </v-snackbar>
-        <nuxt />
-      </v-container>
+      <security-challenge />
+      <v-snackbar v-model="showNotification" :timeout="timeout" :top="true" :vertical="true" color="primary">
+        {{ notification_message }}
+        <v-btn flat @click="showNotification = false">
+          Close
+        </v-btn>
+      </v-snackbar>
+      <nuxt />
     </v-content>
 
     <!-- Exit Dialog -->
@@ -324,7 +322,7 @@ export default {
       if(this.$vuetify.breakpoint.mdAndUp === true) {
         this.minifyDrawer = !this.minifyDrawer
       } else {
-        this.drawerOpen = true
+        this.drawerOpen = !this.drawerOpen
       }
 
     },

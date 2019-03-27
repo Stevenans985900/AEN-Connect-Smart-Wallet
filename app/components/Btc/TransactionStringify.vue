@@ -57,6 +57,20 @@ export default {
       address: null
     }
   },
+  computed: {
+      date() {
+        return format(this.transaction.confirmed, 'YYYY-MM-DD HH:mm')
+      },
+      direction() {
+        if(this.transaction.tx_input_n === -1) {
+          return 'incoming'
+        }
+        return 'outgoing'
+      },
+      symbol() {
+        return this.$store.state.wallet.btc.displaySymbol
+      }
+  },
   mounted() {
     if(this.display === 'all' || this.display === 'address') {
       const networkHandler = this.$store.getters['wallet/networkHandler']('btc')
@@ -66,20 +80,6 @@ export default {
       }).then((transactionInformation) => {
         this.address = transactionInformation.addresses[0]
       })
-    }
-  },
-  computed: {
-    date() {
-      return format(this.transaction.confirmed, 'YYYY-MM-DD HH:mm')
-    },
-    direction() {
-      if(this.transaction.tx_input_n === -1) {
-        return 'incoming'
-      }
-      return 'outgoing'
-    },
-    symbol() {
-      return this.$store.state.wallet.btc.displaySymbol
     }
   }
 }

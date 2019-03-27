@@ -1,7 +1,7 @@
 <template>
   <span>
     <v-menu offset-y>
-      <v-btn slot="activator" small  icon>
+      <v-btn slot="activator" small icon>
         <v-icon>
           build
         </v-icon>
@@ -47,10 +47,9 @@
               <v-btn v-if="busy == true" flat disabled>
                 <v-progress-circular
                   indeterminate
-                ></v-progress-circular>
+                />
                 {{ $t('network.message.broadcasting_please_wait') }}
               </v-btn>
-
             </v-flex>
           </v-layout>
         </v-card-text>
@@ -125,7 +124,7 @@
             <td>{{ props.item.type }}</td>
             <td v-if="props.item.type === 'aen'">
               <v-btn small class="mr-2" @click="switchMainAenStatus(props.item)">
-                {{(props.item.address === mainAenAddress ? "Main" : "Sub") }}
+                {{ (props.item.address === mainAenAddress ? "Main" : "Sub") }}
               </v-btn>
             </td>
             <td v-else>
