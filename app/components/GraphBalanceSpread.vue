@@ -2,8 +2,8 @@
   <v-layout v-if="haveWallet" row wrap align-center>
     <v-flex xs12 sm4 lg3 pa-2>
       <v-progress-circular v-if="loading === true" indeterminate />
-      <v-card v-else flat max-height="300px">
-        <doughnut v-if="totalValue > 0" :title="chartTitle" :data="graphData" />
+      <v-card v-else flat>
+        <doughnut v-if="totalValue > 0" :title="chartTitle" :data="graphData" id="graphwrapper" />
         <p v-else>
           {{ $t('wallet.message.blocked_until_transaction') }}
         </p>
@@ -122,6 +122,12 @@
   </v-layout>
 </template>
 
+<style>
+  #graphwrapper > canvas{
+    max-height: 300px !important;
+    max-width: 300px !important;
+  }
+</style>
 <script>
 import Doughnut from '~/components/Doughnut'
 import BackupWallet from '~/components/BackupWallet'
