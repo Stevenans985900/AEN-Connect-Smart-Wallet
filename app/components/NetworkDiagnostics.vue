@@ -2,7 +2,10 @@
   <div>
     <v-menu v-model="netStatus" :close-on-content-click="false" offset-y>
       <v-btn slot="activator" :class="color" round small>
-        {{ $t('network.label.connection_status') }} {{ connectionStatus }}
+        <span v-if="$vuetify.breakpoint.mdAndUp">
+          {{ $t('network.label.connection_status') }}&nbsp;
+        </span>
+        {{ connectionStatus }}
       </v-btn>
 
       <v-card max-width="400px">
@@ -30,9 +33,8 @@
                     :label="$t('network.label.current_api_endpoint')"
                   />
                   <v-btn @click="refreshAenApiEndpoint">
-                    Find best API Server
+                    {{ $t('network.message.find_best_api') }}
                   </v-btn>
-                  <p>Block Height: {{ aenHeight }}</p>
                 </v-card-text>
               </v-card>
             </v-expansion-panel-content>

@@ -24,6 +24,7 @@ import {
   mergeMap
 } from 'rxjs/operators'
 import Generic from './Generic.js'
+import {format} from "date-fns";
 
 export default class Aen extends Generic {
 
@@ -170,8 +171,14 @@ export default class Aen extends Generic {
       return accountHttp
         .transactions(publicAccount, new QueryParams(25))
         .subscribe((transactions) => {
-          resolve(transactions)
-          // this.$store.state.userTransactions.historical = transactions
+          let transactionsWorkingObject = {}
+          let currentTransaction, timeKey
+          for(let transactionCount = 0; transactionCount < transactions.length; transactionCount++) {
+            currentTransaction = transactions[transactionCount]
+            timeKey = format(currentTransaction.deadline.value, 'YYYY-MM-DD HH:mm')
+            transactionsWorkingObject[timeKey] = currentTransaction
+          }
+          resolve(transactionsWorkingObject)
         }, (err) => {
           reject(err)
         })

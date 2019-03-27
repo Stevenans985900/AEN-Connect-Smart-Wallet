@@ -1,10 +1,10 @@
 <template>
   <v-app dark>
     <!-- NAV DRAWER -->
-    <v-navigation-drawer :value="showNav" :mini-variant="minifyDrawer" fixed stateless app>
+    <v-navigation-drawer v-if="showNav" v-model="cDrawerOpen" :mini-variant="minifyDrawer" stateless app>
       <v-layout column fill-height>
         <v-list>
-          <v-list-tile v-for="(item, i) in navigationItems" :key="i" :to="item.to" router exact>
+          <v-list-tile v-for="(item, i) in navigationItems" :key="i" :to="item.to" router exact @click="toggleNav">
             <v-list-tile-action>
               <v-icon>{{ item.icon }}</v-icon>
             </v-list-tile-action>
@@ -15,60 +15,44 @@
         </v-list>
         <v-spacer />
         <v-list>
-          <v-list-tile @click="dialogHelp = true">
+          <v-list-tile to="/settings" @click="toggleNav">
             <v-list-tile-action>
-              <v-icon>help</v-icon>
+              <v-icon>settings</v-icon>
             </v-list-tile-action>
             <v-list-tile-content>
-              {{ $t('common.navigation.help') }}
+              {{ $t('common.navigation.settings') }}
             </v-list-tile-content>
           </v-list-tile>
-          <!--<v-list-tile router exact>-->
-          <!--<v-list-tile-action @click="dialogExit = true">-->
-          <!--<v-icon>exit_to_app</v-icon>-->
-          <!--</v-list-tile-action>-->
-          <!--<v-list-tile-content>-->
-          <!--{{ $t('common.navigation.exit') }}-->
-          <!--</v-list-tile-content>-->
-          <!--</v-list-tile>-->
         </v-list>
       </v-layout>
     </v-navigation-drawer>
 
     <!-- TOP BAR -->
     <v-toolbar fixed app>
-      <v-toolbar-side-icon @click="toggleNav" />
-      <!--size="24"-->
-      <!--<v-avatar >-->
-      <v-btn flat active-class="" to="/" :disabled="!showMainNav">
+      <v-toolbar-side-icon v-if="showNav" @click="toggleNav" />
+      <v-btn flat to="/" active-class="">
         <v-img src="/logo.png" contain height="25" max-width="125px" />
       </v-btn>
-      <!--</v-avatar>-->
       <v-toolbar-title class="hidden-sm-and-down text-xs-left" v-text="title" />
       <v-spacer />
       <!-- Environment -->
       <no-ssr>
         <busy />
       </no-ssr>
-      <token-display-options />
       <development v-if="environment === 'development'" />
       <help />
     </v-toolbar>
 
     <!-- MAIN CONTENT AREA -->
     <v-content>
-      <v-container fluid>
-        <security-challenge />
-        <v-snackbar v-model="showNotification" :timeout="timeout" :top="true" :vertical="true">
-          {{ notification_message }}
-          <v-btn flat @click="showNotification = false">
-            Close
-          </v-btn>
-        </v-snackbar>
-        <!-- NUXT BEGINNING -->
-        <end-user-license-agreement v-if="!eulaAgreed && $nuxt.$route.name !== 'setup-wizard'" />
-        <nuxt />
-      </v-container>
+      <security-challenge />
+      <v-snackbar v-model="showNotification" :timeout="timeout" :top="true" :vertical="true" color="primary">
+        {{ notification_message }}
+        <v-btn flat @click="showNotification = false">
+          Close
+        </v-btn>
+      </v-snackbar>
+      <nuxt />
     </v-content>
 
     <!-- Exit Dialog -->
@@ -105,10 +89,8 @@ import Busy from '~/components/Busy'
 import Development from '~/components/Development'
 import Help from '~/components/Help'
 import SecurityChallenge from '~/components/SecurityChallenge'
-import TokenDisplayOptions from '~/components/TokenDisplayOptions'
 import isElectron from 'is-electron'
 import isOnline from 'is-online'
-import EndUserLicenseAgreement from '~/components/EndUserLicenseAgreement'
 // import childProcess from 'child_process'
 if (isElectron()) {
   // TODO Satisfy linter
@@ -123,10 +105,8 @@ export default {
   components: {
     Busy,
     Development,
-    EndUserLicenseAgreement,
     Help,
-    SecurityChallenge,
-    TokenDisplayOptions
+    SecurityChallenge
   },
   /**
    * DATA
@@ -135,12 +115,13 @@ export default {
     return {
       dialogExit: false,
       minifyDrawer: false,
+      drawerOpen: false,
       hydrated: false,
       navigationItems: [
         {
           icon: 'apps',
           key: 'dashboard',
-          to: '/'
+          to: '/dashboard'
         },
         {
           icon: 'settings_system_daydream',
@@ -161,14 +142,8 @@ export default {
           icon: 'contacts',
           key: 'address_book',
           to: '/address-book'
-        },
-        {
-          icon: 'lock_open',
-          key: 'security',
-          to: '/security'
         }
       ],
-      showNav: true,
       title: 'Smart Connect',
       userMenu: false
     }
@@ -177,18 +152,19 @@ export default {
    * COMPUTED
    */
   computed: {
+    cDrawerOpen: {
+      get: function() {
+        if (this.$vuetify.breakpoint.mdAndUp === true) {
+          return true
+        } else {
+          return this.drawerOpen
+        }
+      },
+      set: function (val) { this.drawerOpen = val }
+    },
     dialogHelp: {
       get: function () { return this.$store.state.user.help },
       set: function (val) { this.$store.commit('setUserProperty', {key: 'help', value: val}) }
-    },
-    showMainNav: {
-      get: function () {
-        if (this.$store.state.wallet.aen.mainAddress !== '' && this.$store.state.user.eulaAgree === true) {
-          return true
-        }
-        return false
-      },
-      set : function () {}
     },
     eulaAgreed() { return this.$store.state.user.eulaAgree },
     isOnline() { return this.$store.state.runtime.isOnline },
@@ -207,6 +183,7 @@ export default {
         })
       }
     },
+    showNav() { return this.$store.state.user.eulaAgree },
     // notification details
     showNotification: {
       get: function () {
@@ -238,11 +215,11 @@ export default {
 
     // Determine how to handle main navigation by default depending on device size
     if(this.$vuetify.breakpoint.mdAndUp === true) {
-      this.showNav = true
-      this.minifyDrawer = false
+      this.drawerOpen = true
+      this.minifyDrawer = true
     } else {
       this.minifyDrawer = false
-      this.showNav = false
+      this.drawerOpen = false
     }
 
     this.$store.commit('setLoading', {
@@ -343,11 +320,9 @@ export default {
     },
     toggleNav() {
       if(this.$vuetify.breakpoint.mdAndUp === true) {
-        this.showNav = true
         this.minifyDrawer = !this.minifyDrawer
       } else {
-        this.minifyDrawer = false
-        this.showNav = !this.showNav
+        this.drawerOpen = !this.drawerOpen
       }
 
     },

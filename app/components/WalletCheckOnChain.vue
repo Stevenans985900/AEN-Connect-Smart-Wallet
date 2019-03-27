@@ -5,7 +5,6 @@
     </v-icon>
     {{ timeToCheck }}{{ $t('network.message.s_until_next_check') }}
   </v-btn>
-
 </template>
 
 <script>

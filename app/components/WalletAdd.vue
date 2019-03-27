@@ -29,7 +29,7 @@
         <v-card v-if="addType == 'fileImport'">
           <v-card-text>
             <v-layout row wrap>
-              <restore-from-file :type="type" @complete="walletRestoredFromFile" />
+              <restore-from-file :type="type" :main="main" @complete="walletRestoredFromFile" />
             </v-layout>
           </v-card-text>
         </v-card>
@@ -47,7 +47,7 @@
         {{ $t('wallet.label.review') }}
       </v-stepper-step>
       <v-stepper-content step="3">
-        <v-layout v-if="wallet">
+        <v-layout row wrap v-if="wallet">
           <v-flex xs12 md6 lg4>
             <h2>{{ $t('wallet.message.add_success') }}</h2>
             <h3>{{ wallet.name }}</h3>
@@ -110,7 +110,7 @@ export default {
       BackupWallet,
       RestoreFromFile
     },
-    props: {
+  props: {
     main: {
       type: Boolean,
       default: false

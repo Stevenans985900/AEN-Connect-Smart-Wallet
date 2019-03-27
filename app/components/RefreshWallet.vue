@@ -25,16 +25,18 @@
             if(this.wallet.balanceLastSynced === false) {
                 return this.$t('common.label.never')
             } else {
-                return format(this.wallet.balanceLastSynced, 'Do MMM HH:mm')
+                return format(this.wallet.balanceLastSynced, 'D/M HH:mm')
             }
         }
       },
       methods: {
           refresh() {
             this.$store.commit('CACHE_SKIP', true)
-            this.$store.dispatch('wallet/transactionsHistorical', this.wallet)
-            this.$store.commit('CACHE_SKIP', true)
-            this.$store.dispatch('wallet/balance', this.wallet)
+            this.$store.dispatch('wallet/transactionsHistorical', this.wallet).then(() => {
+                this.$store.commit('CACHE_SKIP', true)
+                this.$store.dispatch('wallet/balance', this.wallet)
+            })
+
         }
       }
   }

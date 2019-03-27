@@ -33,6 +33,7 @@ export const getters = {
    * @returns {function(*): string}
    */
   secureProperty: (state) => (options) => {
+    console.log('Secure Property')
     return JSON.parse(CryptoJS.AES.decrypt(
         state.wallets[options.address].credentials,
         Vue.prototype.$g('salt')

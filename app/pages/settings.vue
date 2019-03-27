@@ -1,9 +1,9 @@
 <template>
   <v-container>
-    <v-layout row justify-center align-center mb-2>
+    <v-layout row wrap justify-center align-center>
       <!-- Security Options -->
-      <v-flex xs12 md12>
-        <v-toolbar class="primary mb-2">
+      <v-flex xs12 class="mb-2">
+        <v-toolbar class="primary">
           <v-toolbar-title>
             Security Controls
           </v-toolbar-title>
@@ -14,52 +14,16 @@
           </v-card-text>
         </v-card>
       </v-flex>
-    </v-layout>
-
-    <v-layout row>
-      <v-flex xs12>
+      <v-flex xs12 class="mb-2">
+        <v-toolbar class="primary">
+          <v-toolbar-title>
+            {{ $t('settings.label.denominations') }}
+          </v-toolbar-title>
+        </v-toolbar>
         <v-card>
-          <v-card-title>
-            <h1>
-              Change Master Password
-            </h1>
-          </v-card-title>
           <v-card-text>
-            <p>
-              The master password is used to authenticate a user for access to the entire Smart Wallet app. By default,
-              it is set to the same password as your initial AEN Wallet.
-            </p>
-            <v-text-field
-              v-model="existingPassword"
-              :append-icon="showPassword ? 'visibility_off' : 'visibility'"
-              :type="showPassword ? 'text' : 'password'"
-              :rules="[rules.basic.required, rules.password.minLength]"
-              label="Existing Password"
-              required
-              @click:append="showPassword = !showPassword"
-            />
-            <v-text-field
-              v-model="password1"
-              :append-icon="showPassword ? 'visibility_off' : 'visibility'"
-              :type="showPassword ? 'text' : 'password'"
-              :rules="[rules.basic.required, rules.password.minLength]"
-              label="New Password"
-              required
-              counter
-              @click:append="showPassword = !showPassword"
-            />
-            <v-text-field
-              v-model="password2"
-              :append-icon="showPassword ? 'visibility_off' : 'visibility'"
-              :type="showPassword ? 'text' : 'password'"
-              :rules="[rules.basic.required, rules.password.minLength]"
-              label="Repeat Password"
-              :error-messages="passwordsMatch()"
-              required
-              counter
-              @click:append="showPassword = !showPassword"
-            />
-            <v-btn @click="changePassword" />
+            <p>{{ $t('settings.message.denominations') }}</p>
+            <token-display-options />
           </v-card-text>
         </v-card>
       </v-flex>
@@ -69,6 +33,7 @@
 
 <script>
   import SecurityControls from '~/components/SecurityControls'
+  import TokenDisplayOptions from '~/components/TokenDisplayOptions'
 
   function initialDataState() {
     return {
@@ -88,7 +53,8 @@
   }
 export default {
   components: {
-    SecurityControls
+    SecurityControls,
+    TokenDisplayOptions
   },
   /**
    * DATA

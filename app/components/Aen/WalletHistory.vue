@@ -1,37 +1,34 @@
 <template>
-  <span>
-    <v-progress-circular v-if="loading === true" indeterminate />
-    <span>
-      <v-data-table
-        :headers="headers"
-        :items="transactions"
-        item-key="signature"
-      >
-        <!-- :expand="expand" -->
-        <template slot="items" slot-scope="props">
-          <tr @click="props.expanded = !props.expanded">
-            <td>
-              <transaction-stringify :transaction="props.item" display="date" />
-            </td>
-            <td>
-              <transaction-stringify :wallet="wallet" :transaction="props.item" display="direction" />
-            </td>
-            <td>
-              <transaction-stringify :wallet="wallet" :transaction="props.item" display="value" />
-            </td>
-            <td>
-              <transaction-stringify :wallet="wallet" :transaction="props.item" display="address" />
-            </td>
-          </tr>
-        </template>
-        <!-- <template slot="expand" slot-scope="props">
-          <v-card flat>
-            <v-card-text>Peek-a-boo!</v-card-text>
-          </v-card>
-        </template> -->
-      </v-data-table>
-    </span>
-  </span>
+  <v-progress-circular v-if="loading === true" indeterminate />
+  <v-data-table
+    v-else
+    :headers="headers"
+    :items="transactions"
+    item-key="signature"
+  >
+    <!-- :expand="expand" -->
+    <template slot="items" slot-scope="props">
+      <tr @click="props.expanded = !props.expanded">
+        <td>
+          <transaction-stringify :transaction="props.item" display="date" />
+        </td>
+        <td>
+          <transaction-stringify :wallet="wallet" :transaction="props.item" display="direction" />
+        </td>
+        <td>
+          <transaction-stringify :wallet="wallet" :transaction="props.item" display="value" />
+        </td>
+        <td>
+          <transaction-stringify :wallet="wallet" :transaction="props.item" display="address" />
+        </td>
+      </tr>
+    </template>
+    <!-- <template slot="expand" slot-scope="props">
+      <v-card flat>
+        <v-card-text>Peek-a-boo!</v-card-text>
+      </v-card>
+    </template> -->
+  </v-data-table>
 </template>
 
 <script>
@@ -64,7 +61,7 @@ export default {
     }
   },
     computed: {
-      transactions() { return this.$store.state.wallet.wallets[this.wallet.address].transactions }
+      transactions() { return Object.values(this.wallet.transactions) }
     },
     mounted() {
       this.$store.dispatch('wallet/transactionsHistorical', this.wallet).then(() => {

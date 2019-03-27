@@ -6,7 +6,7 @@
       </v-icon>
       {{ $t('wallet.action.backup') }}
     </v-btn>
-    <v-dialog v-model="dialogBackup" max-width="600px">
+    <v-dialog v-model="dialogBackup" max-width="600px" persistent>
       <v-toolbar color="primary">
         <v-toolbar-title>{{ $t('backup.action.choose_wallet') }}</v-toolbar-title>
         <v-spacer />
@@ -71,9 +71,12 @@ export default {
   },
   methods: {
     clickBackupWallet() {
+      console.log('user clicked backup wallet')
       if (Object.keys(this.wallet).length === 0) {
+        console.log('using the dialog')
         this.dialogBackup = true
       } else {
+        console.log('trying to backup this wallet')
         this.backupWallet(this.wallet)
       }
     },

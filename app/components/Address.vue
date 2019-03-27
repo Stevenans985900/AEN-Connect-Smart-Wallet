@@ -1,21 +1,30 @@
 <template>
-  <span>
-    <clipboard :data="address" :display-text="displayText" />
-    <!-- New transfer -->
-    <v-dialog v-if="haveContact === false && showAdd === true" v-model="dialog" persistent max-width="600px">
-      <v-btn slot="activator" outline small>
-        {{ $t('contact.action.add') }}
-      </v-btn>
-      <v-toolbar color="primary">
-        <v-toolbar-title>{{ $t('contact.action.add') }}</v-toolbar-title>
-        <v-spacer />
-        <v-btn small icon outline @click="dialog = false">
-          <v-icon>close</v-icon>
+  <v-layout row wrap>
+    <v-flex
+      xs11
+      :class="{ 'text-xs-right': showAdd }"
+    >
+      <clipboard :data="address" :display-text="displayText" />
+    </v-flex>
+    <v-flex xs1 class="text-xs-left">
+      <!-- New transfer -->
+      <v-dialog v-if="haveContact === false && showAdd === true" v-model="dialog" persistent max-width="600px">
+        <v-btn slot="activator" small icon>
+          <v-icon>
+            add
+          </v-icon>
         </v-btn>
-      </v-toolbar>
-      <contact-edit :display-text="displayText" :address="address" @complete="contactAdded" />
-    </v-dialog>
-  </span>
+        <v-toolbar color="primary">
+          <v-toolbar-title>{{ $t('contact.action.add') }}</v-toolbar-title>
+          <v-spacer />
+          <v-btn small icon outline @click="dialog = false">
+            <v-icon>close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <contact-edit :display-text="displayText" :address="address" @complete="contactAdded" />
+      </v-dialog>
+    </v-flex>
+  </v-layout>
 </template>
 
 <script>
@@ -35,6 +44,10 @@ export default {
     useAddressBook: {
       type: Boolean,
       default: true
+    },
+    useReceiverAddress: {
+        type: Boolean,
+        default: false
     }
   },
   data() {
@@ -43,6 +56,12 @@ export default {
     }
   },
   computed: {
+    processedAddress() {
+      if(this.useReceiverAddress) {
+          return this.$store.state.wallet.wallets[this.address].receiverAddress
+      }
+      return this.address
+    },
     contacts() { return this.$store.state.wallet.contacts },
     haveContact() {
       if (this.contacts.hasOwnProperty(this.address)) {
@@ -55,7 +74,7 @@ export default {
       if (this.haveContact && this.useAddressBook === true) {
         return this.contacts[this.address].displayText
       } else {
-        return this.address
+        return this.processedAddress
       }
     }
   },

@@ -8,9 +8,9 @@
             {{ $t('common.navigation.aen') }}
           </v-toolbar-title>
           <v-spacer />
-          <v-btn color="success" @click="dialogNewServiceSpace = true">
-            <v-icon>add</v-icon>New Service Space
-          </v-btn>
+          <!--<v-btn color="success" @click="dialogNewServiceSpace = true">-->
+          <!--<v-icon>add</v-icon>New Service Space-->
+          <!--</v-btn>-->
         </v-toolbar>
         <v-card>
           <v-card-text>

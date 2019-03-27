@@ -1,8 +1,8 @@
 <template>
-  <v-layout v-if="haveWallet" row align-center>
+  <v-layout v-if="haveWallet" row wrap align-center>
     <v-flex xs12 sm4 lg3 pa-2>
       <v-progress-circular v-if="loading === true" indeterminate />
-      <v-card v-else flat>
+      <v-card v-else flat max-height="300px">
         <doughnut v-if="totalValue > 0" :title="chartTitle" :data="graphData" />
         <p v-else>
           {{ $t('wallet.message.blocked_until_transaction') }}
@@ -11,7 +11,7 @@
     </v-flex>
     <v-flex xs12 sm8 lg9>
       <v-progress-circular v-if="loading === true" indeterminate />
-      <v-card v-else flat>
+      <v-card v-else v-bar flat>
         <v-card-text>
           <v-list>
             <template v-for="(wallet) in wallets">
@@ -21,7 +21,7 @@
                 </v-list-tile-avatar>
                 <v-list-tile-content>
                   <v-list-tile-title>{{ wallet.name }}</v-list-tile-title>
-                  <v-list-tile-sub-title>{{ toCurrency(wallet.balance, wallet.type) }}</v-list-tile-sub-title>
+                  <v-list-tile-sub-title>{{ toCurrency(wallet.balance, wallet.type) }} | {{ percentageWorth(wallet) }}%</v-list-tile-sub-title>
                 </v-list-tile-content>
               </v-list-tile>
             </template>
@@ -189,6 +189,7 @@ export default {
     }
   },
   mounted() {
+    console.log('dumping theme variables', this.$vuetify.theme)
     this.processWallets()
 
     this.balanceCheckInterval = setInterval(
@@ -221,13 +222,16 @@ export default {
             this.totalValue += walletValue
             this.graphData[walletProcessed.name] = walletValue
             this.processedWallets++
-            this.chartTitle = 'USD ' + this.toMillion(this.totalValue) + 'M'
+            this.chartTitle = 'USD $' + this.toSmallestDenomination(this.totalValue)
           })
           .catch((err) => {
             console.error(err)
             return err
           })
       }
+    },
+    percentageWorth(wallet) {
+      return ((100 / this.totalValue) * this.graphData[wallet.name]).toFixed(1)
     },
     removeWallet() {
       this.dialogRemoveWallet = false
@@ -251,6 +255,7 @@ export default {
       })
     },
     toSmallestDenomination(input) {
+      console.log('going to be drawing smallest denomination for', input)
       let answer = input
       let suffix = ''
       // If over million, format that way
@@ -264,9 +269,6 @@ export default {
       // If over thousand
       return answer.toFixed(2) + suffix
 
-    },
-    toMillion(input) {
-      return (input / 1000000).toFixed(2)
     },
     transferComplete() {
       this.dialogMakeTransfer = false

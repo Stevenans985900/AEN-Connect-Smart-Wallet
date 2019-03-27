@@ -1,8 +1,10 @@
 <template>
   <span>
     <v-menu offset-y>
-      <v-btn slot="activator" color="primary">
-        Development
+      <v-btn slot="activator" small icon>
+        <v-icon>
+          build
+        </v-icon>
       </v-btn>
       <v-list>
         <v-list-tile @click="dialogWalletControl = true">
@@ -45,10 +47,9 @@
               <v-btn v-if="busy == true" flat disabled>
                 <v-progress-circular
                   indeterminate
-                ></v-progress-circular>
+                />
                 {{ $t('network.message.broadcasting_please_wait') }}
               </v-btn>
-
             </v-flex>
           </v-layout>
         </v-card-text>
@@ -115,13 +116,22 @@
             <td>{{ props.item.name }}</td>
             <td>{{ props.item.address }}</td>
             <td><balance :wallet="props.item" /></td>
-            <td>{{ props.item.onChain }}</td>
-            <td>{{ props.item.type }}</td>
-            <td class="justify-center layout px-0">
+            <td>
               <v-btn small class="mr-2" @click="switchOnChainStatus(props.item)">
-                Switch onChain Status
+                {{ props.item.onChain }}
               </v-btn>
-              <v-icon small @click="deleteContact(props.item)">
+            </td>
+            <td>{{ props.item.type }}</td>
+            <td v-if="props.item.type === 'aen'">
+              <v-btn small class="mr-2" @click="switchMainAenStatus(props.item)">
+                {{ (props.item.address === mainAenAddress ? "Main" : "Sub") }}
+              </v-btn>
+            </td>
+            <td v-else>
+              NA
+            </td>
+            <td class="justify-center layout px-0">
+              <v-icon small>
                 delete
               </v-icon>
             </td>
@@ -179,6 +189,10 @@ export default {
           value: 'type'
         },
         {
+          text: 'Main',
+          value: ''
+        },
+        {
           text: 'Actions',
           value: ''
         }
@@ -194,6 +208,10 @@ export default {
     ]),
     ethereumWallets() {
       return this.$store.getters['wallet/walletsByType']('eth')
+    },
+    mainAenAddress: {
+      get: function() { return this.$store.state.wallet.aen.mainAddress },
+      set: function(val) { this.$store.commit('wallet/setAenProperty', {key: 'mainAddress', value: val } )}
     },
     walletsWithSecurity() {
       return this.$store.state.security.walletPolicies
@@ -392,6 +410,9 @@ export default {
         console.log("Waiting a mined block to include your contract... currently in block " + web3.eth.blockNumber);
         await this.simpleSleep(4000);
       }
+    },
+    switchMainAenStatus(wallet) {
+      this.mainAenAddress = wallet.address
     },
     switchOnChainStatus(wallet) {
       const newCondition = !wallet.onChain

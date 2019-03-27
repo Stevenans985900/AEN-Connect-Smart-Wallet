@@ -7,36 +7,69 @@
             {{ $t('common.navigation.wallet_management') }}
           </v-toolbar-title>
           <v-spacer />
-          <backup-wallet :show-icon="true" />
-          <v-menu offset-y>
-            <v-btn slot="activator" color="success">
-              <v-icon>add</v-icon>{{ $t('wallet.action.add') }}
+          <template v-if="$vuetify.breakpoint.mdAndUp">
+            <backup-wallet :show-icon="true" />
+            <v-menu offset-y>
+              <v-btn slot="activator" color="success">
+                <v-icon>add</v-icon>{{ $t('wallet.action.add') }}
+              </v-btn>
+              <v-list>
+                <v-list-tile @click="walletType = 'aen'; dialogWalletAdd = true">
+                  <v-list-tile-title>{{ $t('network.label.aen') }}</v-list-tile-title>
+                </v-list-tile>
+                <v-list-tile @click="walletType = 'eth'; dialogWalletAdd = true">
+                  <v-list-tile-title>{{ $t('network.label.eth') }}</v-list-tile-title>
+                </v-list-tile>
+                <!--<v-list-tile @click="walletType = 'btc'; dialogWalletAdd = true">-->
+                <!--<v-list-tile-title>{{ $t('network.label.btc') }}</v-list-tile-title>-->
+                <!--</v-list-tile>-->
+                <v-list-tile v-if="haveEthereumWallet" @click="walletType = 'contract'; dialogWalletAdd = true">
+                  <v-list-tile-title>{{ $t('network.contract') }}</v-list-tile-title>
+                </v-list-tile>
+              </v-list>
+            </v-menu>
+          </template>
+          <!--:close-on-click="false"-->
+          <v-menu v-else offset-y :close-on-content-click="false">
+            <v-btn
+              slot="activator"
+              small
+              icon
+            >
+              <v-icon>
+                menu
+              </v-icon>
             </v-btn>
             <v-list>
-              <v-list-tile @click="walletType = 'aen'; dialogWalletAdd = true">
-                <v-list-tile-title>{{ $t('network.label.aen') }}</v-list-tile-title>
-              </v-list-tile>
-              <v-list-tile @click="walletType = 'eth'; dialogWalletAdd = true">
-                <v-list-tile-title>{{ $t('network.label.eth') }}</v-list-tile-title>
-              </v-list-tile>
-              <v-list-tile @click="walletType = 'btc'; dialogWalletAdd = true">
-                <v-list-tile-title>{{ $t('network.label.btc') }}</v-list-tile-title>
-              </v-list-tile>
-              <v-list-tile v-if="haveEthereumWallet" @click="walletType = 'contract'; dialogWalletAdd = true">
-                <v-list-tile-title>{{ $t('network.contract') }}</v-list-tile-title>
-              </v-list-tile>
+              <v-list>
+                <backup-wallet :show-icon="true" />
+                <v-divider />
+                <v-subheader>Add Wallet</v-subheader>
+                <v-list-tile @click="walletType = 'aen'; dialogWalletAdd = true">
+                  <v-list-tile-title>{{ $t('network.label.aen') }}</v-list-tile-title>
+                </v-list-tile>
+                <v-list-tile @click="walletType = 'eth'; dialogWalletAdd = true">
+                  <v-list-tile-title>{{ $t('network.label.eth') }}</v-list-tile-title>
+                </v-list-tile>
+                <!--<v-list-tile @click="walletType = 'btc'; dialogWalletAdd = true">-->
+                <!--<v-list-tile-title>{{ $t('network.label.btc') }}</v-list-tile-title>-->
+                <!--</v-list-tile>-->
+                <v-list-tile v-if="haveEthereumWallet" @click="walletType = 'contract'; dialogWalletAdd = true">
+                  <v-list-tile-title>{{ $t('network.contract') }}</v-list-tile-title>
+                </v-list-tile>
+              </v-list>
             </v-list>
           </v-menu>
         </v-toolbar>
         <!-- Wallet Management -->
-        <v-card>
-          <v-card-text v-if="haveWallet">
+        <v-card v-bar>
+          <v-card-text v-if="haveWallet" style="max-height: 75vh;">
             <v-expansion-panel>
               <v-expansion-panel-content v-for="(wallet, address) in wallets" :key="address">
                 <!-- Main Table Row -->
                 <div slot="header" @click="accordionTogglingWallet(wallet)">
                   <v-layout row wrap>
-                    <v-flex xs2 sm1>
+                    <v-flex xs3 sm1 class="text-xs-left">
                       <wallet-image :wallet="wallet" />
                     </v-flex>
                     <v-flex xs7 sm5 class="text-truncate">
@@ -50,7 +83,7 @@
                       </v-layout>
                     </v-flex>
                     <!-- Wallet Controls -->
-                    <v-flex v-if="$vuetify.breakpoint.mdAndUp" xs3 sm6 class="text-xs-right">
+                    <v-flex v-if="$vuetify.breakpoint.mdAndUp" xs2 sm6 class="text-xs-right">
                       <v-btn v-if="wallet.onChain === true" outline small @click="contextWallet = wallet; dialogMakeTransfer = true">
                         {{ $t('common.action.send') }}
                       </v-btn>
@@ -62,14 +95,16 @@
                       </v-btn>
                     </v-flex>
                     <!-- Mobile Button -->
-                    <v-flex v-else xs3 sm6 class="text-xs-right">
+                    <v-flex v-else xs2 sm6 class="text-xs-right">
                       <v-menu offset-y>
                         <v-btn
                           slot="activator"
-                          outline
                           small
+                          icon
                         >
-                          {{ $t('common.label.actions') }}
+                          <v-icon>
+                            menu
+                          </v-icon>
                         </v-btn>
                         <v-list>
                           <v-list-tile v-if="wallet.onChain === true" @click="contextWallet = wallet; dialogMakeTransfer = true">
@@ -89,11 +124,21 @@
                 <!-- Wallet expansion details. Only try to render the section if selected to avoid unnecessary proc -->
                 <v-card v-if="selectedWalletAddress == address">
                   <v-card-text>
-                    <refresh-wallet :wallet="wallet" />
-                    <testnet-buttons :wallet="wallet" />
-                    <address-render :address="wallet.address" :use-address-book="false" />
-                    <wallet-history v-if="wallet.onChain === true" :wallet="wallet" />
-                    <activation v-else :wallet="wallet" />
+                    <v-layout row wrap>
+                      <v-flex xs12 md3>
+                        <refresh-wallet :wallet="wallet" />
+                      </v-flex>
+                      <v-flex xs12 md3>
+                        <testnet-buttons :wallet="wallet" />
+                      </v-flex>
+                      <v-flex xs12 md6>
+                        <address-render :address="wallet.address" :use-address-book="false" :use-receiver-address="true" />
+                      </v-flex>
+                      <v-flex xs12>
+                        <wallet-history v-if="wallet.onChain === true" :wallet="wallet" />
+                        <activation v-else :wallet="wallet" />
+                      </v-flex>
+                    </v-layout>
                     <hr>
                   </v-card-text>
                 </v-card>
@@ -117,11 +162,11 @@
             <v-icon>close</v-icon>
           </v-btn>
         </v-toolbar>
-        <business-card :wallet="contextWallet" :use-address-book="false" />
+        <business-card :wallet="contextWallet" :use-address-book="false" :include-private-key="true" />
       </v-dialog>
 
       <!-- New Wallet Dialog -->
-      <v-dialog v-if="dialogWalletAdd === true" v-model="dialogWalletAdd" persistent max-width="1024px">
+      <v-dialog v-if="dialogWalletAdd === true" v-model="dialogWalletAdd" persistent max-width="650px">
         <v-toolbar color="primary">
           <v-toolbar-title>{{ $t('wallet.action.add') }}</v-toolbar-title>
 

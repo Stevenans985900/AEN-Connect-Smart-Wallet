@@ -110,16 +110,17 @@ module.exports = {
   ** Plugins to load before mounting the App
   */
   plugins: [
-    '@/plugins/globals.js',
-    '@/plugins/addressRender.js',
-    '@/plugins/businessCard.js',
-    '@/plugins/clipboard.js',
-    '@/plugins/feedback-tawk.js',
-    '@/plugins/i18n.js',
+    '@/plugins/addressRender',
+    '@/plugins/businessCard',
+    '@/plugins/clipboard',
+    '@/plugins/feedback-tawk',
+    '@/plugins/globals',
+    '@/plugins/i18n',
     {
-        src: '@/plugins/localStorage.js',
+        src: '@/plugins/localStorage',
         ssr: false
     },
+    '@/plugins/vuebar',
     '@/plugins/vuetify',
     '@/plugins/walletImage',
     '@/plugins/youtube'
@@ -135,8 +136,8 @@ module.exports = {
       matomoUrl: '//stats.aencoin.com/',
       // trackerUrl: 'https://stats.aencoin.com/matomo.php',
       siteId: 6,
-      debug: true,
-      verbose: true
+      debug: false,
+      verbose: false
     }]
   ],
   /*
