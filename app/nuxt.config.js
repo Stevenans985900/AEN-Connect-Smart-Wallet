@@ -136,8 +136,8 @@ module.exports = {
       matomoUrl: '//stats.aencoin.com/',
       // trackerUrl: 'https://stats.aencoin.com/matomo.php',
       siteId: 6,
-      debug: true,
-      verbose: true
+      debug: false,
+      verbose: false
     }]
   ],
   /*
