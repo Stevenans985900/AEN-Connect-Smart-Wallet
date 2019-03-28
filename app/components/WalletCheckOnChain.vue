@@ -1,7 +1,7 @@
 <template>
   <v-btn outline small @click="manualCheck()">
     <v-icon>
-      cloud_off
+      loop
     </v-icon>
     {{ timeToCheck }}{{ $t('network.message.s_until_next_check') }}
   </v-btn>

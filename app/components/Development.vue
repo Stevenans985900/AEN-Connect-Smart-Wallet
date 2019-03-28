@@ -350,19 +350,14 @@ export default {
      */
   methods: {
     deployTestContract() {
-      console.debug('Development: Deploying test contract')
       import('~/class/network/contract/test.json').then((jsonInterface) => {
         const web3 = this.$store.getters["wallet/networkHandler"]("contract").web3
         const apiEndpoint = this.$store.state.wallet.eth.activeApiEndpoint
             .replace('###NETWORK_IDENTIFIER###', this.wallet.network.identifier)
+        this.$log.debug(this.wallet, ('Sending to: ' + apiEndpoint))
         web3.setProvider(apiEndpoint)
         this.$store.dispatch('security/getCredentials', this.wallet.address).then((credentials) => {
-          this.$store.commit('setLoading', {
-            t: 'page',
-            v: true,
-            m: 'development.label.deploy_contract'
-          })
-
+          this.$store.dispatch('busy', 'development.label.deploy_contract')
           web3.eth.estimateGas({
             from: this.wallet.address,
             data: jsonInterface.bin
@@ -377,9 +372,7 @@ export default {
                 .then((signedTx) => {
                   web3.eth.sendSignedTransaction(signedTx.rawTransaction)
                     .then(() => {
-                        this.$store.commit('setLoading', {
-                          t: 'page',
-                          v: false })
+                        this.$store.dispatch('busy', false)
                         console.debug('Contract has been pushed out to the network')
                       this.dialogDeployContract = false
                     })

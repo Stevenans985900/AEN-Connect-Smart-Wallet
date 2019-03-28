@@ -8,6 +8,7 @@
     "controllerPollReadyInterval": 1000,
     "commonTasksInterval": 900000,
     "apiEndpointPingInterval": 10000,
+    "loggerEnabled": true,
     "walletCheckInterval": 600000,
     "exchangeRateUpdateInterval": 900000,
     "walletRefreshGraceTime": 600000

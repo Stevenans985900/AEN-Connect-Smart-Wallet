@@ -121,7 +121,7 @@ export default {
         return (this.amount < this.wallet.balance) ? '' : this.$t('wallet.message.cannot_exceed_balance')
     },
     initiateTransfer() {
-      this.$store.commit('setLoading', { t: 'page', v: true })
+      this.$store.dispatch('busy', 'wallet.message.transfer_start')
         this.$store.dispatch('security/getCredentials', this.parentWallet.address).then((credentials) => {
 
             const transactionOptions = {
@@ -138,11 +138,10 @@ export default {
                     amount: this.amount
                 }
             }
-            console.log('initiating transfer')
             this.$store.dispatch('wallet/transfer', transactionOptions)
                 .then((transfer) => {
-                    this.$store.commit('setLoading', {t: 'page', v: false})
-                    console.debug(transfer)
+                    this.$log.debug(transfer)
+                    this.$store.dispatch('busy', false)
                     this.$store.commit('showNotification', {
                         type: 'success',
                         message: 'Your transfer has been successfully dispatched to the network'

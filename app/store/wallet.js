@@ -112,7 +112,7 @@ export const getters = {
 }
 
 export const actions = {
-  balance: ({state, commit, rootState}, wallet) => {
+  balance: ({state, commit, dispatch, rootState}, wallet) => {
     let apiEndpoint, networkHandler
     return new Promise((resolve, reject) => {
       // Use cache if offline or wallet not yet recognised on network
@@ -131,11 +131,7 @@ export const actions = {
         }
       }
       // Set the page loader going
-      commit('setLoading', {
-        t: 'page',
-        v: true,
-        m: 'wallet.message.updating_balance'
-      }, { root: true })
+      dispatch('busy', 'wallet.message.updating_balance', { root: true })
 
       switch (wallet.type) {
         case 'aen':
@@ -161,10 +157,7 @@ export const actions = {
               .catch((err) => {
                 reject(err)
               })
-              .finally(() => { commit('setLoading', {
-                t: 'page',
-                v: false
-              }, { root: true }) })
+              .finally(() => { dispatch('busy', false, { root: true }) })
           break
         case 'btc':
           resolve(wallet)
@@ -193,10 +186,7 @@ export const actions = {
               .catch((err) => {
                 reject(err)
               })
-              .finally(() => { commit('setLoading', {
-                t: 'page',
-                v: false
-              }, { root: true }) })
+              .finally(() => { dispatch('busy', false, { root: true }) })
           break
         case 'contract':
           // TODO For this active API endpoint, mixin network selection
@@ -221,10 +211,7 @@ export const actions = {
               .catch((err) => {
                 reject(err)
               })
-              .finally(() => { commit('setLoading', {
-                t: 'page',
-                v: false
-              }, { root: true }) })
+              .finally(() => { dispatch('busy', false, { root: true }) })
           break
         case 'eth':
           // TODO For this active API endpoint, mixin network selection
@@ -249,16 +236,13 @@ export const actions = {
               .catch((err) => {
                 reject(err)
               })
-              .finally(() => { commit('setLoading', {
-                t: 'page',
-                v: false
-              }, { root: true }) })
+              .finally(() => { dispatch('busy', false, { root: true }) })
           break
       }
 
     })
   },
-  transactionsHistorical({state, commit, rootState}, wallet) {
+  transactionsHistorical({state, commit, dispatch, rootState}, wallet) {
     let apiEndpoint, networkHandler
     return new Promise((resolve) => {
       // Use cache if offline or wallet not yet recognised on network
@@ -277,11 +261,7 @@ export const actions = {
           return
         }
       }
-      commit('setLoading', {
-        t: 'page',
-        v: true,
-        m: 'wallet.message.updating_history'
-      }, { root: true })
+      dispatch('busy', 'wallet.message.updating_history', { root: true })
       switch (wallet.type) {
         case 'aen':
           networkHandler = new Aen(
@@ -302,10 +282,7 @@ export const actions = {
               key: 'transactionsLastSynced',
               value: Date.now()
             })
-            commit('setLoading', {
-              t: 'page',
-              v: false
-            }, { root: true })
+            dispatch('busy', false, { root: true })
             resolve(wallet)
           })
           break
@@ -374,10 +351,7 @@ export const actions = {
               key: 'transactionsLastSynced',
               value: Date.now()
             })
-            commit('setLoading', {
-              t: 'page',
-              v: false
-            }, { root: true })
+            dispatch('busy', false, { root: true })
             resolve(wallet)
           })
 
@@ -400,10 +374,7 @@ export const actions = {
               key: 'transactionsLastSynced',
               value: Date.now()
             })
-            commit('setLoading', {
-              t: 'page',
-              v: false
-            }, { root: true })
+            dispatch('busy', false, { root: true })
             resolve(wallet)
           })
           break
@@ -425,24 +396,17 @@ export const actions = {
               key: 'transactionsLastSynced',
               value: Date.now()
             })
-            commit('setLoading', {
-              t: 'page',
-              v: false
-            }, { root: true })
+            dispatch('busy', false, { root: true })
             resolve(wallet)
           })
           break
       }
     })
   },
-  getLiveWallet({commit, state }, wallet) {
+  getLiveWallet({dispatch, state }, wallet) {
     let apiEndpoint, networkHandler
     return new Promise((resolve) => {
-      commit('setLoading', {
-        t: 'page',
-        v: true,
-        m: 'wallet.message.checking_wallet_status'
-      }, { root: true })
+      dispatch('busy', 'wallet.message.checking_wallet_status', { root: true })
       switch (wallet.type) {
         case 'aen':
           networkHandler = new Aen(
@@ -452,20 +416,14 @@ export const actions = {
           networkHandler.getLiveWallet(wallet).then((response) => {
             resolve(response)
           })
-          .finally(() => { commit('setLoading', {
-            t: 'page',
-            v: false
-          }, { root: true }) })
+          .finally(() => { dispatch('busy', false, { root: true }) })
           break
         case 'btc':
           networkHandler = new Btc(state.btc.activeApiEndpoint, Vue.prototype.$g('btc'))
           networkHandler.getLiveWallet(wallet).then((response) => {
             resolve(response)
           })
-              .finally(() => { commit('setLoading', {
-                t: 'page',
-                v: false
-              }, { root: true }) })
+              .finally(() => { dispatch('busy', false, { root: true }) })
           break
         case 'contract':
           networkHandler = new Contract(
@@ -474,10 +432,7 @@ export const actions = {
           networkHandler.getLiveWallet(wallet).then((response) => {
             resolve(response)
           })
-              .finally(() => { commit('setLoading', {
-                t: 'page',
-                v: false
-              }, { root: true }) })
+              .finally(() => { dispatch('busy', false, { root: true }) })
           break
         case 'eth':
           apiEndpoint = state.eth.activeApiEndpoint
@@ -486,10 +441,7 @@ export const actions = {
           networkHandler.getLiveWallet(wallet).then((response) => {
             resolve(response)
           })
-              .finally(() => { commit('setLoading', {
-                t: 'page',
-                v: false
-              }, { root: true }) })
+              .finally(() => { dispatch('busy', false, { root: true }) })
           break
       }
     })
@@ -637,7 +589,7 @@ export const actions = {
       }
     })
   },
-  transfer({commit, state}, options) {
+  transfer({dispatch, state}, options) {
     return new Promise((resolve) => {
       let apiEndpoint, networkHandler
 
@@ -645,11 +597,7 @@ export const actions = {
       if (typeof options.destination.address === 'object' && options.destination.address !== null) {
         options.destination.address = options.destination.address.address
       }
-      commit('setLoading', {
-        t: 'page',
-        v: true,
-        m: 'wallet.message.updating_balance'
-      }, { root: true })
+      dispatch('busy', 'wallet.message.updating_balance', { root: true })
       switch (options.source.type) {
         case 'aen':
           networkHandler = new Aen(
@@ -659,20 +607,14 @@ export const actions = {
           networkHandler.transfer(options).then((transfer) => {
             resolve(transfer)
           })
-              .finally(() => { commit('setLoading', {
-                t: 'page',
-                v: false
-              }, { root: true }) })
+              .finally(() => { dispatch('busy', false, { root: true }) })
           break
         case 'btc':
           networkHandler = new Btc(state.btc.activeApiEndpoint, Vue.prototype.$g('btc'))
           networkHandler.transfer(options).then((transfer) => {
             resolve(transfer)
           })
-              .finally(() => { commit('setLoading', {
-                t: 'page',
-                v: false
-              }, { root: true }) })
+              .finally(() => { dispatch('busy', false, { root: true }) })
           break
         case 'contract':
           apiEndpoint = state.eth.activeApiEndpoint
@@ -681,10 +623,7 @@ export const actions = {
           networkHandler.transfer(options).then((transfer) => {
             resolve(transfer)
           })
-              .finally(() => { commit('setLoading', {
-                t: 'page',
-                v: false
-              }, { root: true }) })
+              .finally(() => { dispatch('busy', false, { root: true }) })
           break
         case 'eth':
           apiEndpoint = state.eth.activeApiEndpoint
@@ -693,10 +632,7 @@ export const actions = {
           networkHandler.transfer(options).then((transfer) => {
             resolve(transfer)
           })
-              .finally(() => { commit('setLoading', {
-                t: 'page',
-                v: false
-              }, { root: true }) })
+              .finally(() => { dispatch('busy', false, { root: true }) })
           break
       }
     })

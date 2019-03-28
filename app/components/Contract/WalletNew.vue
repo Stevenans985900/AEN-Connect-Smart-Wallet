@@ -122,11 +122,7 @@ export default {
         console.log('form is invalid')
         return false
       }
-      this.$store.commit('setLoading', {
-        t: 'page',
-        v: true,
-        m: this.$t('contract.message.checking_contract')
-      })
+      this.$store.dispatch('busy', 'contract.message.checking_contract')
 
       this.contractFound = false
       // Check if there is a contract interface definition within the wallet
@@ -135,10 +131,7 @@ export default {
         this.contractName = erc20Interface.title
         this.decimals = erc20Interface.decimals
         this.symbol = erc20Interface.symbol
-        this.$store.commit('setLoading', {
-          t: 'page',
-          v: false
-        })
+          this.$store.dispatch('busy', false)
         // If app is not aware of the contract specification. This is very likely
           .catch(async () => {
             this.loading = true
@@ -152,10 +145,7 @@ export default {
             } catch (e) {
               this.contractFound = false
             }
-            this.$store.commit('setLoading', {
-              t: 'page',
-              v: false
-            })
+              this.$store.dispatch('busy', false)
           })
       })
 

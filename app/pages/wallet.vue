@@ -64,7 +64,7 @@
         <!-- Wallet Management -->
         <v-card v-bar>
           <v-card-text v-if="haveWallet" style="max-height: 75vh;">
-            <v-expansion-panel>
+            <v-expansion-panel popout>
               <v-expansion-panel-content v-for="(wallet, address) in wallets" :key="address">
                 <!-- Main Table Row -->
                 <div slot="header" @click="accordionTogglingWallet(wallet)">
@@ -139,7 +139,6 @@
                         <activation v-else :wallet="wallet" />
                       </v-flex>
                     </v-layout>
-                    <hr>
                   </v-card-text>
                 </v-card>
               </v-expansion-panel-content>
@@ -318,7 +317,7 @@ export default {
     }
   },
   mounted: function () {
-    console.debug('P:W:Wallets Page Started')
+    this.$log.debug('Wallet Management Startup')
     // Only start once global loading finished
     const preparationInterval = setInterval(
       function () {
@@ -333,9 +332,6 @@ export default {
     accordionTogglingWallet(wallet) {
       this.contextWallet = wallet
       this.selectedWalletAddress = wallet.address
-        console.log('toggled accordion')
-        console.log(this.contextWallet)
-        console.log(this.selectedWalletAddress)
       // Check whether the user security is ok
       if(this.contextWallet.onChain === false) {
         const walletLiveCheckInterval = setInterval(

@@ -34,7 +34,7 @@ export default {
           try {
             this.component = () => import('./' + this.type + '/MakeTransfer')
           } catch (err) {
-            console.debug(err)
+              this.$log.error(err)
           }
         } else {
           this.component = () => import('./Fallback')

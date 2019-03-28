@@ -90,11 +90,7 @@ export default {
 
       this.$store.dispatch('security/getCredentials', this.wallet.address).then((credentials) => {
         console.log('Got Crednetials', credentials)
-          this.$store.commit('setLoading', {
-          t: 'page',
-          v: true,
-          m: this.$t('wallet.message.transfer_start')
-        })
+          this.$store.dispatch('busy', 'wallet.message.transfer_start')
         this.$store.dispatch('wallet/transfer', {
           credentials: credentials,
           source: this.wallet,
@@ -103,10 +99,7 @@ export default {
               amount: this.amount
           }
         }).then(() => {
-            this.$store.commit('setLoading', {
-                t: 'page',
-                v: false
-            })
+            this.$store.dispatch('busy', false)
             this.$store.commit('showNotification', {
                 type: 'success',
                 message: this.$t('wallet.message.transfer_complete')

@@ -137,14 +137,14 @@ export default {
    * MOUNTED
    */
   mounted: function () {
-    console.debug('Index Page: Started')
+    this.$log.debug('Index Startup')
     // Only start once global loading finished
     const preparationInterval = setInterval(
       function () {
         if (this.$store.getters.booting === false) {
           // Redirect user to the dashboard if they already have account
           if (this.$store.getters["wallet/haveWalletType"]('aen') === true) {
-            console.debug('User has saved wallet present, redirecting to dashboard')
+            this.$log.debug('Redirecting user to the dashboard')
             this.$nuxt.$router.replace({ path: '/dashboard' })
           }
           clearInterval(preparationInterval)

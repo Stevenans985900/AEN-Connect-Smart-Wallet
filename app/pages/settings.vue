@@ -103,9 +103,7 @@ export default {
      * Facade handler for picking up password reset request
      */
     changePassword() {
-
-      // Check whether the existing password matches records
-      console.log(this.passwordsMatch())
+      // TODO Working from here
       // Check that the two passwords match just in case validation failed
       // Update the state variable for the password change
     },

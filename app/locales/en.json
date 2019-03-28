@@ -3,7 +3,7 @@
     "message": {
       "initial_guidance": "If you have already made a transfer, it is possible the network has not yet processed it. The app will periodically check network status and this message will disappear once verified.",
       "troubleshooting_guidance": "If you are not sure how to proceed, check the help section by clicking the question mark in the top right corner to help diagnose the problem.",
-      "wallet_offline": "The wallet is currently offline"
+      "wallet_offline": "Wallet has no funds / Transactions"
     }
   },
   "aen": {
@@ -14,6 +14,9 @@
       "accountPrivateKey": "Account Private Key",
       "duration": "Duration",
       "namespace": "Namespace Identifier"
+    },
+    "message": {
+      "about_aenc": "Aenco is a \"one stop shop\" for the delivery of cutting edge institutional financing, prime brokerage, and smart capital solutions for the HealthTech industry, as well as a research and collaboration hub for healthcare companies and projects involved in the field of blockchain development. Aenco will be combining its solutions platform and core financing ecosystem with the wider community, through the AEN token, as the key ecosystem building block and extensions across all its service and community deliveries."
     }
   },
   "backup": {
@@ -25,7 +28,7 @@
     },
     "message": {
       "import_bad_file": "The uploaded file is invalid",
-      "backup_explained": "When you click a wallet from the list below, two files will be downloaded which will allow you to import them easily back in to the AENConnect smart wallet. One is a plain text file and the other is encoded so that it can only be ready by this application. To later restore a given wallet, choose the import from file option during the add wallet procedure."
+      "backup_explained": "When you click a wallet from the list below, two files will be downloaded which will allow you to import them easily back in to the AENConnect. One is a plain text file and the other is encoded so that it can only be ready by this application. To later restore a given wallet, choose the import from file option during the add wallet procedure."
     }
   },
   "clipboard": {
@@ -66,13 +69,14 @@
       "actions": "Actions",
       "address": "Address",
       "amount": "Amount",
-      "app_name": "AENC Smart Connect",
+      "app_name": "AEN Connect",
       "app_slogan": "Change",
       "busy": "Busy",
       "comment": "Comment",
       "date": "Date",
       "default": "Default",
       "direction": "Direction",
+      "feedback": "Feedback",
       "features": "Features",
       "help": "Help",
       "information": "Information",
@@ -92,6 +96,7 @@
       "send_message": "Send Message",
       "synced": "Synced",
       "value": "Value",
+      "version": "Version",
       "wallets": "Wallets",
       "wizard": "Wizard"
     },

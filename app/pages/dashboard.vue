@@ -207,7 +207,7 @@ export default {
    * MOUNTED
    */
   mounted: function () {
-    console.debug('Index Page: Started')
+    this.$log.debug('Dashboard Startup')
     // Only start once global loading finished
     const preparationInterval = setInterval(
       function () {

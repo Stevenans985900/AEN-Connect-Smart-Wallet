@@ -33,7 +33,7 @@
       <v-btn flat to="/" active-class="">
         <v-img src="/logo.png" contain height="25" max-width="125px" />
       </v-btn>
-      <v-toolbar-title class="hidden-sm-and-down text-xs-left" v-text="title" />
+      <v-toolbar-title class="hidden-sm-and-down text-xs-left" v-text="$t('common.label.app_name')" />
       <v-spacer />
       <!-- Environment -->
       <no-ssr>
@@ -144,7 +144,6 @@ export default {
           to: '/address-book'
         }
       ],
-      title: 'Smart Connect',
       userMenu: false
     }
   },
@@ -207,6 +206,7 @@ export default {
    *
    */
   beforeMount() {
+      this.$log.debug('Running window startup routines')
     // Ensure some global variables are clean for start
     this.$store.commit('CACHE_SKIP', false)
     this.$store.commit('setAppMode', 'web')
@@ -227,10 +227,7 @@ export default {
       v: true,
       m: 'Page Startup'
     })
-    this.$store.commit('setLoading', {
-      t: 'page',
-      v: false
-    })
+    this.$store.commit('BUSY', false)
 
     this.onlineCheck()
     setInterval(
