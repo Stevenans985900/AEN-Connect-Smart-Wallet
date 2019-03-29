@@ -8,6 +8,8 @@ export const initialState = {
     message: 'message_placeholder',
     timeout: 6000
   },
+  // Used for defining time periods to be used in intervals and timeouts
+  time_definitions: {},
   // High level app properties
   runtime: {
     mode: 'web',
@@ -245,5 +247,12 @@ export const mutations = {
   },
   setAppMode(state, mode) {
     state.runtime.mode = mode
+  },
+  TIME_DEF(state, input) {
+    if(input.hasOwnProperty('key')) {
+      Vue.set(state.time_definitions, input.key, input.value)
+    } else {
+      state.time_definitions = Object.assign({}, state.time_definitions, input)
+    }
   }
 }

@@ -31,14 +31,14 @@
         mounted: function ()  {
             this.checkOnline()
             if(this.wallet.onChain === false) {
-                this.nextRun = new Date().getTime() + this.$g('internal.walletCheckInterval')
+                this.nextRun = new Date().getTime() + this.$store.state.time_definitions.wallet_update
                 this.timeToCheck = Math.round((this.nextRun - new Date().getTime()) / 1000)
                 this.walletOnlineCheckInterval = setInterval(
                     function () {
                         let nowTime = new Date().getTime()
                         if(this.nextRun < nowTime) {
                             this.checkOnline()
-                            this.nextRun = nowTime + this.$g('internal.walletCheckInterval')
+                            this.nextRun = nowTime + this.$store.state.time_definitions.wallet_update
                         }
                         this.timeToCheck = Math.round((this.nextRun - nowTime) / 1000)
                     }.bind(this),
@@ -48,7 +48,7 @@
         },
         methods: {
             manualCheck: function () {
-                this.nextRun = new Date().getTime() + this.$g('internal.walletCheckInterval')
+                this.nextRun = new Date().getTime() + this.$store.state.time_definitions.wallet_update
                 this.timeToCheck = (this.nextRun - new Date().getTime()) / 1000
                 this.checkOnline()
             },

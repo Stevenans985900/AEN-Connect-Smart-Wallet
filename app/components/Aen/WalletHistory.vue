@@ -74,7 +74,7 @@ export default {
                   this.$store.dispatch('busy', false)
               })
           }.bind(this),
-          this.$g('internal.commonTasksInterval')
+          this.$store.state.time_definitions.wallet_update
         )
 
     },

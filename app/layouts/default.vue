@@ -161,10 +161,6 @@ export default {
       },
       set: function (val) { this.drawerOpen = val }
     },
-    dialogHelp: {
-      get: function () { return this.$store.state.user.help },
-      set: function (val) { this.$store.commit('setUserProperty', {key: 'help', value: val}) }
-    },
     eulaAgreed() { return this.$store.state.user.eulaAgree },
     isOnline() { return this.$store.state.runtime.isOnline },
     buildNumber() { return this.$g('build_number') },
@@ -213,6 +209,11 @@ export default {
     const env = process.env.NODE_ENV || 'dev'
     this.$store.commit('setRuntimeProperty', { key: 'environment', value: env })
 
+    // If time intervals have not been set in the state yet
+    if(Object.keys(this.$store.state.time_definitions).length === 0) {
+      this.$store.commit('TIME_DEF', this.$g('time_definitions'))
+    }
+
     // Determine how to handle main navigation by default depending on device size
     if(this.$vuetify.breakpoint.mdAndUp === true) {
       this.drawerOpen = true
@@ -234,7 +235,7 @@ export default {
       function () {
         this.onlineCheck()
       }.bind(this),
-      this.$g('internal.commonTasksInterval')
+      this.$store.state.time_definitions.online_interval
     )
 
     // Desktop app setup

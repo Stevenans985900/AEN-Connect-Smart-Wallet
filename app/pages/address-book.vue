@@ -163,7 +163,7 @@ export default {
           this.$store.commit('setLoading', { t: 'router', v: false })
         }
       }.bind(this),
-      this.$g('internal.controllerPollReadyInterval')
+      this.$store.state.time_definitions.controller_poll
     )
   },
   /**

@@ -62,7 +62,7 @@
           </v-menu>
         </v-toolbar>
         <!-- Wallet Management -->
-        <v-card v-bar>
+        <v-card v-bar class="apply-active-expansion">
           <v-card-text v-if="haveWallet" style="max-height: 75vh;">
             <v-expansion-panel popout>
               <v-expansion-panel-content v-for="(wallet, address) in wallets" :key="address">
@@ -227,6 +227,14 @@
   </v-container>
 </template>
 
+<style>
+  .apply-active-expansion .v-expansion-panel__container--active .v-expansion-panel__header,
+  .apply-active-expansion .v-expansion-panel__container--active .v-card__text,
+  .apply-active-expansion .v-expansion-panel__container--active .v-table,
+  .apply-active-expansion .v-expansion-panel__container--active .v-datatable__actions {
+    background-color: var(--primary-dark-1) !important;
+  }
+</style>
 <script>
 import Activation from '~/components/Activation'
 import Balance from '~/components/Balance'
@@ -325,7 +333,7 @@ export default {
         clearInterval(preparationInterval)
         this.$store.commit('setLoading', { t: 'router', v: false })
       }.bind(this),
-      this.$g('internal.controllerPollReadyInterval')
+      this.$store.state.time_definitions.controller_poll
     )
   },
   methods: {
@@ -347,7 +355,7 @@ export default {
               }
             })
           }.bind(this),
-          this.$g('internal.commonTasksInterval')
+          this.$store.state.time_definitions.wallet_update
         )
       }
       this.dialogWalletView = true

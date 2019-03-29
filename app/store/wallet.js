@@ -660,19 +660,16 @@ export const actions = {
      *
      * @param {*} context
      */
-  async rankApiNodes({ commit, state }) {
-    console.debug('Wallet Store: Rank API Nodes')
-
+  async rankApiNodes({ commit }) {
     const aenApiEndpoints = Vue.prototype.$g('aen.api_endpoints')
     const apiCount = aenApiEndpoints.length
-
+    let currentBest = 9999
 
     // Test function encapsulate for variable scoping and asynchronous calling
     const check = function (currentRound) {
       const position = currentRound
       const thisAddress = aenApiEndpoints[position].address + Vue.prototype.$g('aen.api_endpoint_height')
       aenApiEndpoints[position].scanStart = new Date()
-
       // Perform the actual call
       this.$axios
         .$get(thisAddress)
@@ -682,8 +679,8 @@ export const actions = {
           aenApiEndpoints[position].scanTime = aenApiEndpoints[position].scanEnd - aenApiEndpoints[position].scanStart
 
           // If the test beats current score, set as endpoint to use
-          if (aenApiEndpoints[position].scanTime < state.aen.apiPing) {
-            console.debug('Updating AEN API endpoint to: ' + aenApiEndpoints[position].address)
+          if (aenApiEndpoints[position].scanTime < currentBest) {
+            currentBest = aenApiEndpoints[position].scanTime
             commit('setAenProperty', {
               key: 'activeApiEndpoint',
               value: aenApiEndpoints[position].address
@@ -732,6 +729,10 @@ export const mutations = {
       address: wallet.address
     })
   },
+  AEN_PROP(state, options) {
+    Vue.set(state.aen, options.key, options.value)
+  },
+  // TODO Do a global find replace here for the cleaner above
   setAenProperty(state, options) {
     Vue.set(state.aen, options.key, options.value)
   },

@@ -8,7 +8,7 @@ export default {
   props: {
     symbol: {
       type: String,
-      default: ''
+      default: 'default'
     },
     type: {
       type: String,

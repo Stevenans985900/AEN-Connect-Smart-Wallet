@@ -19,7 +19,7 @@ import {
   UInt64,
   XEM
 } from 'chain-js-sdk'
-
+import Vue from 'vue'
 import {
   mergeMap
 } from 'rxjs/operators'
@@ -70,6 +70,12 @@ export default class Aen extends Generic {
         new NamespaceHttp(this.apiEndpoint)
       )
       const addressObject = Address.createFromRawAddress(options.address)
+      Vue.$log.debug('looking here', addressObject, mosaicService, this.apiEndpoint)
+
+      mosaicService
+        .mosaicsAmountViewFromAddress(addressObject).pipe(
+          mergeMap(_ => _)
+        ).subscribe((any) => console.log(any))
 
       return mosaicService
       .mosaicsAmountViewFromAddress(addressObject)
@@ -78,9 +84,11 @@ export default class Aen extends Generic {
       )
       .subscribe(
         (mosaic) => {
+          Vue.$log.debug('got result ok and now going to parse', mosaic)
           resolve(mosaic.relativeAmount())
         },
         (error) => {
+          Vue.$log.error('Could not get balance', error)
           reject(error)
         }
       )

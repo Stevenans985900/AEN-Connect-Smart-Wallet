@@ -201,7 +201,7 @@ export default {
         // Create a wallet index map to control accordion with
         this.processWallets()
       }.bind(this),
-      this.$g('internal.walletCheckInterval')
+      this.$store.state.time_definitions.wallet_update
     )
 
   },

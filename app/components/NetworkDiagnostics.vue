@@ -27,7 +27,7 @@
                 <v-card-text>
                   <v-select
                     :items="apiEndpoints"
-                    :value="currentApi"
+                    v-model="currentApi"
                     item-text="alias"
                     item-value="address"
                     :label="$t('network.label.current_api_endpoint')"
@@ -131,10 +131,12 @@ export default {
     },
     currentApi: {
       get: function () {
+        this.$log.debug('getting current API', this.$store.state.wallet.aen.activeApiEndpoint)
         return this.$store.state.wallet.aen.activeApiEndpoint
       },
       set: function (value) {
-        this.$store.commit('setApiEndpoint', value)
+        this.$log.debug('setting new API', value)
+        this.$store.commit('wallet/AEN_PROP', {key: "activeApiEndpoint", value: value })
       }
     },
     apiEndpoints() {

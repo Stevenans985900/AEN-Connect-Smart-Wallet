@@ -87,7 +87,7 @@ export default {
             function () {
                 this.$store.dispatch('wallet/transactionsHistorical', this.wallet)
             }.bind(this),
-            this.$g('internal.commonTasksInterval')
+          this.$store.state.time_definitions.wallet_update
         )
 
     },

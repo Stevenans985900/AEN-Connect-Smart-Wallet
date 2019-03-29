@@ -5,6 +5,7 @@
   "google_recaptcha_key": "NA",
   "internal": {
     "baseImagePath": "/",
+    "onlineInterval": "15000",
     "controllerPollReadyInterval": 1000,
     "commonTasksInterval": 900000,
     "apiEndpointPingInterval": 10000,
@@ -12,6 +13,12 @@
     "walletCheckInterval": 600000,
     "exchangeRateUpdateInterval": 900000,
     "walletRefreshGraceTime": 600000
+  },
+  "time_definitions": {
+    "controller_poll": 500,
+    "online_interval": 15000,
+    "transaction_watch": 8000,
+    "wallet_update": 30000
   },
   "userExperience": {
     "notificationTimeout": 6000,

@@ -164,9 +164,7 @@
                   clearInterval(transactionWatcherInterval)
                 }
               })
-
-
-            }, 5000)
+            }, this.$store.state.time_definitions.transaction_watch)
 
             // Subscribe to trasnfer event and only stop loading once a receipt has been had
               this.$store.dispatch('busy', false)
