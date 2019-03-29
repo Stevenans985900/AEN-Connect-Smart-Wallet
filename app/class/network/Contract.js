@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import Generic from '~/class/network/Generic'
 import axios from 'axios'
 import Web3 from 'web3'
@@ -12,12 +13,12 @@ export default class Contract extends Generic {
 
   balance(options) {
     super.balance(options)
-
     return new Promise((resolve, reject) => {
       import('~/class/network/contract/erc20').then((erc20Interface) => {
         const contract = new this.web3.eth.Contract(erc20Interface.abi, options.address)
         contract.methods.balanceOf(options.managerWalletAddress).call().then((response) => {
-          resolve(response.balance)
+          Vue.$log.debug('Response back from trying to get balance from managing contract address', response)
+          resolve(response.toString())
         })
           .catch((err) => {
             reject(err)
@@ -27,12 +28,16 @@ export default class Contract extends Generic {
   }
 
   async erc20PublicMethod(options) {
-    console.debug('Contract Store: ERC20 Method ('+ options.method + ')')
+    Vue.$log.debug('ERC20 Method', options)
     return new Promise((resolve) => {
       import('~/class/network/contract/erc20').then((erc20Interface) => {
-        const contract = new this.web3.eth.Contract(erc20Interface.abi, options.contractAddress)
+        // const contract = new this.web3.eth.Contract(erc20Interface.abi, options.contractAddress)
+        const contract = new this.web3.eth.Contract(erc20Interface.abi, '0x3f2cfaec506acdc25dd38b7b7baaf5a5b6ad91ca')
+
+        Vue.$log.debug('Got the contrat interface ready to play with', contract)
+
         contract.methods[options.method]().call().then((response) => {
-          console.debug('Contract Store: ERC20 Method Result '+ options.method + ' = ' + response)
+          Vue.$log.debug('Contract Store: ERC20 Method Result '+ options.method + ' = ' + response)
           resolve(response)
         })
       })

@@ -15,9 +15,10 @@
     "walletRefreshGraceTime": 600000
   },
   "time_definitions": {
+    "api_ranking": 90000,
     "controller_poll": 500,
     "online_interval": 15000,
-    "transaction_watch": 8000,
+    "transaction_watch": 15000,
     "wallet_update": 30000
   },
   "userExperience": {

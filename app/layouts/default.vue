@@ -278,7 +278,7 @@ export default {
       function () {
           this.rankApiNodes()
       }.bind(this),
-      this.$g('internal.apiEndpointPingInterval')
+      this.$store.state.time_definitions.api_ranking
     )
 
     // Perform an initial investigation in to state of each network
@@ -311,10 +311,12 @@ export default {
      */
     async onlineCheck() {
       const result = await isOnline()
-      this.$store.commit('setRuntimeProperty', {
-        key: 'isOnline',
-        value: result
-      })
+      if(this.$store.state.runtime.isOnline !== result) {
+        this.$store.commit('setRuntimeProperty', {
+          key: 'isOnline',
+          value: result
+        })
+      }
     },
     toggleNav() {
       if(this.$vuetify.breakpoint.mdAndUp === true) {

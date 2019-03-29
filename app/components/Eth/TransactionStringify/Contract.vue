@@ -53,16 +53,21 @@ export default {
     return {
       networkHandler: null,
       contractDetails: {},
-      title: 'Unrecognised Contract',
-      controlledTokens: 0
+      title: 'Unrecognised Contract'
     }
   },
   computed: {
     date() {
       return format(this.transaction.timeStamp * 1000, 'YYYY-MM-DD HH:mm')
     },
+    controlledTokens() {
+      if(this.transaction.hasOwnProperty('amount')) {
+        return this.transaction.amount + ' ' + this.transaction.symbol
+      } else {
+        return 0
+      }
+    },
     direction() {
-
       if(this.transaction.from.toUpperCase() === this.wallet.address.toUpperCase()) {
         return 'incoming'
       } else {
@@ -84,17 +89,20 @@ export default {
   },
   methods: {
     fetchContractInfo() {
+      let extraTransactionInfo = {}
+      let transactionKey
       const networkHandler = this.$store.getters['wallet/networkHandler']('contract')
-        console.log(this.wallet)
       const apiEndpoint = this.$store.state.wallet.eth.activeApiEndpoint
           .replace('###NETWORK_IDENTIFIER###', this.wallet.network.identifier)
-        console.log(networkHandler)
       networkHandler.setProvider(apiEndpoint)
+      // Parse and extend the transaction object with extra information
+      if(!this.transaction.hasOwnProperty('parsed')) {
+        extraTransactionInfo.parsed = true
+        transactionKey = format((this.transaction.timeStamp * 1000), 'YYYY-MM-DD HH:mm')
+      }
 
       // Check whether a wallet record exists for handling the contract
       if(!this.$store.state.wallet.wallets.hasOwnProperty(this.transaction.contractAddress)) {
-        console.log('no reference in wallets to contract located')
-
         let walletOptions = {
           type: 'contract',
           address: this.transaction.contractAddress,
@@ -106,11 +114,19 @@ export default {
           walletOptions.contractName = erc20Interface.name
           walletOptions.decimals = erc20Interface.decimals
           walletOptions.symbol = erc20Interface.symbol
+
+          if(!this.transaction.hasOwnProperty('parsed')) {
+            extraTransactionInfo.contractName = erc20Interface.name
+            extraTransactionInfo.decimals = erc20Interface.decimals
+            extraTransactionInfo.symbol = erc20Interface.symbol
+          }
+
           this.addWallet(walletOptions)
         })
         // If app is not aware of the contract specification, try and get details from the wire. this is quite likely
         .catch(async () => {
           try {
+            console.log('Going to add a contract with the following address: ' + this.transaction.contractAddress)
             walletOptions.contractName = await networkHandler.erc20PublicMethod({
               contractAddress: this.transaction.contractAddress,
               method: 'name'
@@ -125,20 +141,37 @@ export default {
             })
             this.addWallet(walletOptions)
 
+            if(!this.transaction.hasOwnProperty('parsed')) {
+              extraTransactionInfo.contractName = walletOptions.contractName
+              extraTransactionInfo.decimals = walletOptions.decimals
+              extraTransactionInfo.symbol = walletOptions.symbol
+            }
           } catch (e) {
             this.contractFound = false
           }
         })
+      } else {
+        extraTransactionInfo.contractName = this.$store.state.wallet.wallets[this.transaction.contractAddress].name
+        extraTransactionInfo.decimals = this.$store.state.wallet.wallets[this.transaction.contractAddress].decimals
+        extraTransactionInfo.symbol = this.$store.state.wallet.wallets[this.transaction.contractAddress].symbol
       }
-      //
-      networkHandler
-        .balance({
-          managerWalletAddress: this.wallet.address,
-          address: this.transaction.contractAddress
-        })
-        .then((response) => {
-          this.controlledTokens = response
-        })
+
+      if(!this.transaction.hasOwnProperty('parsed')) {
+        networkHandler
+          .balance({
+            managerWalletAddress: this.wallet.address,
+            address: this.transaction.contractAddress
+          })
+          .then((response) => {
+              extraTransactionInfo.amount = response
+              const newTransaction = Object.assign({}, this.transaction, extraTransactionInfo)
+              this.$store.commit('wallet/TRANSACTION', {
+                key: transactionKey,
+                transaction: newTransaction,
+                wallet: this.wallet
+              })
+            })
+      }
       //
       // networkHandler
       //     .erc20PublicMethod({
@@ -154,9 +187,7 @@ export default {
 
     },
     addWallet(walletOptions) {
-      console.debug('Contract: Adding wallet from token value')
-      console.debug(walletOptions)
-
+      this.$log.debug('About to try adding a contract for management sake', walletOptions)
       this.$store.dispatch('wallet/load', walletOptions)
       .then((wallet) => {
         this.$store.commit('showNotification', {

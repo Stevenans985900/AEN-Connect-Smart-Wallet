@@ -70,13 +70,6 @@ export default class Aen extends Generic {
         new NamespaceHttp(this.apiEndpoint)
       )
       const addressObject = Address.createFromRawAddress(options.address)
-      Vue.$log.debug('looking here', addressObject, mosaicService, this.apiEndpoint)
-
-      mosaicService
-        .mosaicsAmountViewFromAddress(addressObject).pipe(
-          mergeMap(_ => _)
-        ).subscribe((any) => console.log(any))
-
       return mosaicService
       .mosaicsAmountViewFromAddress(addressObject)
       .pipe(
@@ -84,7 +77,6 @@ export default class Aen extends Generic {
       )
       .subscribe(
         (mosaic) => {
-          Vue.$log.debug('got result ok and now going to parse', mosaic)
           resolve(mosaic.relativeAmount())
         },
         (error) => {

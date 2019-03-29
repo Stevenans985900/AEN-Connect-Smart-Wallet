@@ -1,8 +1,5 @@
 <template>
   <v-list>
-    <v-subheader v-if="$vuetify.breakpoint.smAndDown">
-      {{ $t('network.label.token_denomination') }}
-    </v-subheader>
     <v-list-tile>
       <v-list-tile-action>
         <v-select

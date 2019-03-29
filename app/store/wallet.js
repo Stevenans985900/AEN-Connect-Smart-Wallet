@@ -660,7 +660,7 @@ export const actions = {
      *
      * @param {*} context
      */
-  async rankApiNodes({ commit }) {
+  async rankApiNodes({ commit, state }) {
     const aenApiEndpoints = Vue.prototype.$g('aen.api_endpoints')
     const apiCount = aenApiEndpoints.length
     let currentBest = 9999
@@ -680,15 +680,18 @@ export const actions = {
 
           // If the test beats current score, set as endpoint to use
           if (aenApiEndpoints[position].scanTime < currentBest) {
-            currentBest = aenApiEndpoints[position].scanTime
-            commit('setAenProperty', {
-              key: 'activeApiEndpoint',
-              value: aenApiEndpoints[position].address
-            })
-            commit('setAenProperty', {
-              key: 'apiPing',
-              value: aenApiEndpoints[position].scanTime
-            })
+
+            if(state.aen.activeApiEndpoint !== aenApiEndpoints[position].address) {
+              currentBest = aenApiEndpoints[position].scanTime
+              commit('setAenProperty', {
+                key: 'activeApiEndpoint',
+                value: aenApiEndpoints[position].address
+              })
+              commit('setAenProperty', {
+                key: 'apiPing',
+                value: aenApiEndpoints[position].scanTime
+              })
+            }
           }
         })
         .catch(() => {
@@ -789,5 +792,9 @@ export const mutations = {
   },
   setMosaics(state, input) {
     state.mosaics = input
+  },
+  TRANSACTION(state, input) {
+    Vue.$log.debug('TRANSACTION', input)
+    state.wallets[input.wallet.address].transactions[input.key] = input.transaction
   }
 }

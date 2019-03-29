@@ -92,6 +92,7 @@
       "required": "Required",
       "question": "Question",
       "search": "Search",
+      "seconds": "Seconds",
       "security": "Security",
       "send_message": "Send Message",
       "synced": "Synced",
@@ -200,8 +201,11 @@
       "eth": "Ethereum",
       "offline": "Offline",
       "online": "Online",
+      "rank_api": "Rank API Servers",
       "testnet_functions": "TestNet Functions",
-      "token_denomination": "Denominations"
+      "token_denomination": "Denominations",
+      "transaction_watch": "Transaction Watcher",
+      "wallet_update": "Wallet Update"
     },
     "message": {
       "broadcasting_please_wait": "Sending, this may take a minute",
@@ -230,10 +234,13 @@
   },
   "settings": {
     "label": {
-      "denominations": "Token Denominations"
+      "denominations": "Token Denominations",
+      "update_frequency": "Update Frequency"
+
     },
     "message": {
-      "denominations": "By default, the app will try to use the largest denomination available to display token values. If you would like to force display in a set denomination, please choose and option from the dropdown's below for each network."
+      "denominations": "By default, the app will try to use the largest denomination available to display token values. If you would like to force display in a set denomination, please choose and option from the dropdown's below for each network.",
+      "update_frequency": "The wallet will routinely synchronise itself with the various blockchain networks. Change settings in this section to alter the time intervals used"
     }
   },
   "wallet": {
