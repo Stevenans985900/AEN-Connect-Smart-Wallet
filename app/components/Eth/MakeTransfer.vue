@@ -134,6 +134,7 @@
 
         this.$store.dispatch('security/getCredentials', this.wallet.address).then((credentials) => {
           this.$store.dispatch('busy', 'wallet.message.transfer_start')
+
           this.$store.dispatch('wallet/transfer', {
             credentials: credentials,
             source: this.wallet,
@@ -150,27 +151,28 @@
             console.log('receipt from the transaction')
             console.log(receipt)
 
-            const networkHandler = this.$store.getters['wallet/networkHandler']('eth')
-            const apiEndpoint = this.$store.state.wallet.eth.activeApiEndpoint
-                .replace('###NETWORK_IDENTIFIER###', this.wallet.network.identifier)
-            networkHandler.setProvider(apiEndpoint)
-            const transactionWatcherInterval = setInterval(() => {
-              networkHandler.receipt().then((result) => {
-                if(result === true) {
-                  this.$store.commit('showNotification', {
-                    type: 'success',
-                    message: this.$t('wallet.message.transfer_complete')
-                  })
-                  clearInterval(transactionWatcherInterval)
-                }
-              })
-            }, this.$store.state.time_definitions.transaction_watch)
-
-            // Subscribe to trasnfer event and only stop loading once a receipt has been had
-              this.$store.dispatch('busy', false)
-
+            // Start watching the transaction until complete
+            // const networkHandler = this.$store.getters['wallet/networkHandler']('eth')
+            // const apiEndpoint = this.$store.state.wallet.eth.activeApiEndpoint
+            //     .replace('###NETWORK_IDENTIFIER###', this.wallet.network.identifier)
+            // networkHandler.setProvider(apiEndpoint)
+            // const transactionWatcherInterval = setInterval(() => {
+            //   networkHandler.receipt().then((result) => {
+            //     if(result === true) {
+            //       this.$store.commit('showNotification', {
+            //         type: 'success',
+            //         message: this.$t('wallet.message.transfer_complete')
+            //       })
+            //       clearInterval(transactionWatcherInterval)
+            //     }
+            //   })
+            // }, this.$store.state.time_definitions.transaction_watch)
+            console.log('complete')
             this.$emit('complete')
           })
+            .catch((err) => {
+              this.$log.debug('Problem making transfer', err)
+            })
         })
       }
     }

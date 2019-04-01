@@ -1,9 +1,11 @@
+import Vue from 'vue'
 import Web3 from 'web3'
 import axios from 'axios'
 import Generic from './Generic.js'
 import {format} from "date-fns";
+import EthereumTx from 'ethereumjs-tx'
 
-export default class Aen extends Generic {
+export default class Eth extends Generic {
   constructor(apiEndpoint, config) {
     super()
     this.pluginName = 'ETH'
@@ -17,6 +19,17 @@ export default class Aen extends Generic {
       this.web3.eth.getBalance(options.address).then((wei) => {
         console.log('BALANCE from network: ' + wei)
         resolve(wei)
+      })
+    })
+  }
+
+  async erc20PublicMethod(options) {
+    return new Promise((resolve) => {
+      import('~/class/network/contract/erc20').then((erc20Interface) => {
+        const contract = new this.web3.eth.Contract(erc20Interface.abi, options.contractAddress)
+        contract.methods[options.method]().call().then((response) => {
+          resolve(response)
+        })
       })
     })
   }
@@ -40,14 +53,13 @@ export default class Aen extends Generic {
           module: 'account',
           action: 'txlist',
           address: options.address,
-          startblock: 0,
+          startblock: options.startBlock || 0,
           endblock: 99999999,
           sort: 'desc',
           apikey: this.config.etherscan.api_key
         }
       })
-        .then(function (response) {
-
+        .then(async function (response) {
           let transactionsWorkingObject = {}
           let currentTransaction, timeKey
           const transactions = response.data.result
@@ -64,29 +76,54 @@ export default class Aen extends Generic {
         })
     })
   }
+  async transactionConfirmed(transactionHash) {
+    Vue.$log.debug('ETH Plugin: Transaction Status')
+    const transaction = await this.web3.eth.getTransaction(transactionHash)
+    const currentBlock = await this.web3.eth.getBlockNumber()
+
+    // When transaction is unconfirmed, its block number is null.
+    // In this case we return 0 as number of confirmations
+    const blocksConfirmed = transaction.blockNumber === null ? 0 : currentBlock - transaction.blockNumber
+    if(blocksConfirmed > Vue.$g('eth.transaction_blocks_confirmed')) {
+      return true
+    }
+    return false
+  }
 
     transfer(options) {
-        Generic.prototype.transfer.call(this, options)
-        return new Promise((resolve, reject) => {
+      Generic.prototype.transfer.call(this, options)
+      return new Promise(async (resolve, reject) => {
 
-            const transaction = {
-                "from": options.source.address,
-                "to": options.destination.address,
-                "value": this.web3.utils.toHex(this.web3.utils.toWei(options.destination.amount, "ether")),
-                "gasPrice": this.web3.utils.toHex(options.transfer.gasPrice),
-                "gas": this.web3.utils.toHex(options.transfer.gas),
-                "gasLimit": this.web3.utils.toHex(options.transfer.gasLimit),
-                "chainId": options.source.network.network_id
-            }
+        // TESTING ETHEREUMJS-TX
 
-      this.web3.eth.accounts.signTransaction(transaction, options.credentials.privateKey)
-        .then(signedTx => this.web3.eth.sendSignedTransaction(signedTx.rawTransaction))
-        .then((receipt) => {
-          resolve(receipt)
-        })
-        .catch((err) => {
-          reject(err)
-        })
+        const privateKey = Buffer.from(options.credentials.privateKey.substring(2), 'hex')
+        const nonce = await this.web3.eth.getTransactionCount(options.source.address, 'pending')
+        console.log(nonce)
+        const txParams = {
+          nonce: this.web3.utils.toHex(nonce),
+          gasPrice: this.web3.utils.toHex(options.transfer.gasPrice),
+          gas: this.web3.utils.toHex(options.transfer.gas),
+          gasLimit: this.web3.utils.toHex(options.transfer.gasLimit),
+          to: options.destination.address,
+          value: this.web3.utils.toHex(this.web3.utils.toWei(options.destination.amount, "ether")),
+          chainId: 3
+        }
+        const tx = new EthereumTx(txParams)
+        tx.sign(privateKey)
+        const serializedTx = tx.serialize()
+
+        this.web3.eth.sendSignedTransaction('0x'+serializedTx.toString('hex'))
+          .on('transactionHash', function(hash){
+            resolve(hash)
+          })
+          // .on('receipt', function(receipt){
+          //   console.log('receipt', receipt)
+          // })
+          .on('confirmation', function(confirmationNumber, receipt){
+            console.log('confirmation number', confirmationNumber)
+            console.log('receipt', receipt)
+          })
+          .on('error', reject)
     })
   }
 
@@ -121,6 +158,7 @@ export default class Aen extends Generic {
       const walletObject = {
         address: wallet.address,
         network: options.network,
+        startBlock: options.startBlock || 0,
         credentials: {
           keystore: wallet.encrypt(options.password),
           password: options.password,
@@ -138,6 +176,7 @@ export default class Aen extends Generic {
       const walletObject = {
         address: wallet.address,
         network: options.network,
+        startBlock: 0,
         credentials: {
           keystore: wallet.encrypt(options.password),
           password: options.password,

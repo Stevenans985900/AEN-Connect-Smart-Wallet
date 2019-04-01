@@ -106,6 +106,7 @@
         "address": "https://###NETWORK_IDENTIFIER###.infura.io/v3/9a666ac7a44747428586ff05020f91fc"
       }
     ],
+    "transaction_blocks_confirmed": 10,
     "etherscan": {
       "api_key": "IJQ88ERU7QH9HQNV2NX46G2XJAIEZ6EBPB",
       "api_endpoint": "http://api-###NETWORK_IDENTIFIER###.etherscan.io/api"

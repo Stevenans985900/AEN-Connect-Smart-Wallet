@@ -1,6 +1,5 @@
 <template>
   <span>
-    <v-progress-circular v-if="loading === true" indeterminate />
     <span>
       <v-data-table
         :headers="headers"
@@ -64,7 +63,6 @@ export default {
       transactionsListener: null,
       options: {},
       // transactions: {},
-      loading: true,
       expand: false,
       headers: [
         { text: 'Date', sortable: false, value: '' },
@@ -78,21 +76,6 @@ export default {
         transactions() {
             return Object.values(this.wallet.transactions)
         }
-    },
-    mounted() {
-        this.$store.dispatch('wallet/transactionsHistorical', this.wallet).then(() => {
-            this.loading = false
-        })
-        this.transactionsListener = setInterval(
-            function () {
-                this.$store.dispatch('wallet/transactionsHistorical', this.wallet)
-            }.bind(this),
-          this.$store.state.time_definitions.wallet_update
-        )
-
-    },
-  beforeDestroy() {
-    clearInterval(this.transactionsListener)
-  }
+    }
 }
 </script>

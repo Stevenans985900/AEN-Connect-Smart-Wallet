@@ -3,10 +3,12 @@ import Aen from '~/class/network/Aen'
 import Btc from '~/class/network/Btc'
 import Contract from '~/class/network/Contract'
 import Eth from '~/class/network/Eth'
+// import {format} from "date-fns";
 
 export const initialState = {
   contacts: {},
   wallets: {},
+  trackedTransactions: {},
   aen: {
     mainAddress: '',
     activeApiEndpoint: '',
@@ -190,6 +192,7 @@ export const actions = {
           break
         case 'contract':
           // TODO For this active API endpoint, mixin network selection
+          Vue.$log.debug('going to be checking the balance of contract with the following wallet', wallet, state.wallets)
           apiEndpoint = state.eth.activeApiEndpoint
               .replace('###NETWORK_IDENTIFIER###', state.wallets[wallet.managerWalletAddress].network.identifier)
           networkHandler = new Contract(apiEndpoint, Vue.prototype.$g('eth'))
@@ -243,7 +246,7 @@ export const actions = {
     })
   },
   transactionsHistorical({state, commit, dispatch, rootState}, wallet) {
-    let apiEndpoint, networkHandler
+    var apiEndpoint, contractHandler, networkHandler
     return new Promise((resolve) => {
       // Use cache if offline or wallet not yet recognised on network
       if(rootState.runtime.isOnline === false || wallet.onChain === false) {
@@ -382,20 +385,42 @@ export const actions = {
           apiEndpoint = state.eth.activeApiEndpoint
               .replace('###NETWORK_IDENTIFIER###', wallet.network.identifier)
           networkHandler = new Eth(apiEndpoint, Vue.prototype.$g('eth'))
+          contractHandler = new Contract(apiEndpoint, Vue.prototype.$g('eth'))// Do behind the scenes work
           // Do behind the scenes work
-          networkHandler.transactionsHistorical(wallet).then((headTransactions) => {
+
+          // Update the current block number so that future transaction lookups aren't duplicated
+          networkHandler.getHeight().then((blockHeight) => {
+            commit('setWalletProperty', {
+              address: wallet.address,
+              key: 'blockHeight',
+              value: blockHeight
+            })
+          })
+
+          networkHandler.transactionsHistorical(wallet).then(async (headTransactions) => {
+            let transactionKey, contractDetails
+            for (transactionKey in headTransactions) {
+              if (headTransactions[transactionKey].value === '0') {
+                contractDetails = await contractHandler.contractInformation({
+                  contractAddress: headTransactions[transactionKey].contractAddress
+                })
+                headTransactions[transactionKey] = Object.assign({}, headTransactions[transactionKey], contractDetails)
+              }
+            }
             // Create a new transaction array
-            const transactions = Object.assign({}, wallet.transactions, headTransactions)
+            headTransactions = Object.assign({}, wallet.transactions, headTransactions)
+            console.log('writing transaction to wallet', headTransactions)
             commit('setWalletProperty', {
               address: wallet.address,
               key: 'transactions',
-              value: transactions
+              value: headTransactions
             })
             commit('setWalletProperty', {
               address: wallet.address,
               key: 'transactionsLastSynced',
               value: Date.now()
             })
+
             dispatch('busy', false, { root: true })
             resolve(wallet)
           })
@@ -589,8 +614,8 @@ export const actions = {
       }
     })
   },
-  transfer({dispatch, state}, options) {
-    return new Promise((resolve) => {
+  transfer({commit, dispatch, state}, options) {
+    return new Promise((reject, resolve) => {
       let apiEndpoint, networkHandler
 
       // Check whether the destination is using a contact from the address book
@@ -629,10 +654,29 @@ export const actions = {
           apiEndpoint = state.eth.activeApiEndpoint
               .replace('###NETWORK_IDENTIFIER###', options.source.network.identifier)
           networkHandler = new Eth(apiEndpoint, Vue.prototype.$g('eth'))
-          networkHandler.transfer(options).then((transfer) => {
-            resolve(transfer)
+          networkHandler.transfer(options).then((transactionHash) => {
+
+            // Add tracking reference to the transaction
+            commit('TRANSACTION_TRACK', {
+              key: transactionHash,
+              direction: 'outgoing',
+              address: options.destination.address,
+              amount: options.destination.amount
+            })
+
+            // Can resolve the transaction letting the user know that it has been broadcast to the network and is now pending
+            let transactionWatcherInterval = setInterval(async () => {
+              console.log('just finished checking the status of ('+transactionHash+') and status return is')
+              // Check whether the transaction has been confirmed
+              if(networkHandler.transactionConfirmed(transactionHash) === true) {
+                console.log('complete')
+                // commit('TRANSACTION_COMPLETE', transactionHash)
+                clearInterval(transactionWatcherInterval)
+              }
+            }, Vue.$g('time_definitions.transaction_watch'))
+            resolve(transactionHash)
           })
-              .finally(() => { dispatch('busy', false, { root: true }) })
+          .catch((err) => { reject(err) })
           break
       }
     })
@@ -796,5 +840,12 @@ export const mutations = {
   TRANSACTION(state, input) {
     Vue.$log.debug('TRANSACTION', input)
     state.wallets[input.wallet.address].transactions[input.key] = input.transaction
+  },
+  TRANSACTION_COMPLETE(state, transactionHash) {
+    Vue.delete(state.trackedTransactions, transactionHash)
+  },
+  TRANSACTION_TRACK(state, input) {
+    Vue.set(state.trackedTransactions, input.key, input)
   }
+
 }

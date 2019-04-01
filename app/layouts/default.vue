@@ -40,6 +40,7 @@
         <busy />
       </no-ssr>
       <development v-if="environment === 'development'" />
+      <tracked-transactions />
       <help />
     </v-toolbar>
 
@@ -89,9 +90,9 @@ import Busy from '~/components/Busy'
 import Development from '~/components/Development'
 import Help from '~/components/Help'
 import SecurityChallenge from '~/components/SecurityChallenge'
+import TrackedTransactions from '~/components/TrackedTransactions'
 import isElectron from 'is-electron'
 import isOnline from 'is-online'
-// import childProcess from 'child_process'
 if (isElectron()) {
   // TODO Satisfy linter
   // const execFile = require('child_process').execFile
@@ -106,7 +107,8 @@ export default {
     Busy,
     Development,
     Help,
-    SecurityChallenge
+    SecurityChallenge,
+    TrackedTransactions
   },
   /**
    * DATA
@@ -201,7 +203,7 @@ export default {
   /**
    *
    */
-  beforeMount() {
+  async beforeMount() {
       this.$log.debug('Running window startup routines')
     // Ensure some global variables are clean for start
     this.$store.commit('CACHE_SKIP', false)

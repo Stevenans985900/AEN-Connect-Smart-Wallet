@@ -27,15 +27,46 @@ export default class Contract extends Generic {
     })
   }
 
+  async contractInformation(options) {
+    Vue.$log.debug('Contract Method', options)
+    var contract = {}
+    return new Promise(async (resolve) => {
+      import('~/class/network/contract/' + options.contractAddress).then((erc20Interface) => {
+        contract.contractName = erc20Interface.name
+        contract.decimals = erc20Interface.decimals
+        contract.symbol = erc20Interface.symbol
+        resolve(contract)
+      })
+      // If app is not aware of the contract specification, try and get details from the wire. this is quite likely
+      .catch(async () => {
+        try {
+          console.log('gertting details from the wire')
+          contract.contractName = await this.erc20PublicMethod({
+            contractAddress: options.contractAddress,
+            method: 'name'
+          })
+          contract.decimals = await this.erc20PublicMethod({
+            contractAddress: options.contractAddress,
+            method: 'decimals'
+          })
+          contract.symbol = await this.erc20PublicMethod({
+            contractAddress: options.contractAddress,
+            method: 'symbol'
+          })
+          console.log('made it past runnign all the ERC20 methods')
+          resolve(contract)
+        } catch (err) {
+          Vue.$log.debug(err)
+        }
+      })
+    })
+  }
+
   async erc20PublicMethod(options) {
     Vue.$log.debug('ERC20 Method', options)
     return new Promise((resolve) => {
       import('~/class/network/contract/erc20').then((erc20Interface) => {
-        // const contract = new this.web3.eth.Contract(erc20Interface.abi, options.contractAddress)
-        const contract = new this.web3.eth.Contract(erc20Interface.abi, '0x3f2cfaec506acdc25dd38b7b7baaf5a5b6ad91ca')
-
-        Vue.$log.debug('Got the contrat interface ready to play with', contract)
-
+        const contract = new this.web3.eth.Contract(erc20Interface.abi, options.contractAddress)
         contract.methods[options.method]().call().then((response) => {
           Vue.$log.debug('Contract Store: ERC20 Method Result '+ options.method + ' = ' + response)
           resolve(response)
