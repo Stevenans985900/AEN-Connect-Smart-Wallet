@@ -40,7 +40,18 @@
         <busy />
       </no-ssr>
       <development v-if="environment === 'development'" />
-      <tracked-transactions />
+      <v-menu v-if="haveTrackedTransactions" v-model="menuPendingTransactions" offset-y :close-on-click="false">
+        <v-btn slot="activator" color="green" icon small>
+          <v-icon>
+            swap_horiz
+          </v-icon>
+        </v-btn>
+        <v-card max-width="550px">
+          <v-card-text>
+            <tracked-transactions />
+          </v-card-text>
+        </v-card>
+      </v-menu>
       <help />
     </v-toolbar>
 
@@ -146,6 +157,7 @@ export default {
           to: '/address-book'
         }
       ],
+      pendingTransactionsClicked: false,
       userMenu: false
     }
   },
@@ -163,6 +175,17 @@ export default {
       },
       set: function (val) { this.drawerOpen = val }
     },
+    menuPendingTransactions: {
+      get() {
+        if(this.haveTrackedTransactions === true && this.pendingTransactionsClicked === true) {
+          return true
+        } else {
+          return false
+        }
+      },
+      set(val) { this.pendingTransactionsClicked = val }
+    },
+    haveTrackedTransactions() { return Object.keys(this.$store.state.wallet.trackedTransactions).length > 0 ? true : false },
     eulaAgreed() { return this.$store.state.user.eulaAgree },
     isOnline() { return this.$store.state.runtime.isOnline },
     buildNumber() { return this.$g('build_number') },

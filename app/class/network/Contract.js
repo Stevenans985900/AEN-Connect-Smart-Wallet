@@ -17,7 +17,6 @@ export default class Contract extends Generic {
       import('~/class/network/contract/erc20').then((erc20Interface) => {
         const contract = new this.web3.eth.Contract(erc20Interface.abi, options.address)
         contract.methods.balanceOf(options.managerWalletAddress).call().then((response) => {
-          Vue.$log.debug('Response back from trying to get balance from managing contract address', response)
           resolve(response.toString())
         })
           .catch((err) => {
@@ -30,7 +29,7 @@ export default class Contract extends Generic {
   async contractInformation(options) {
     Vue.$log.debug('Contract Method', options)
     var contract = {}
-    return new Promise(async (resolve) => {
+    return new Promise(async (resolve, reject) => {
       import('~/class/network/contract/' + options.contractAddress).then((erc20Interface) => {
         contract.contractName = erc20Interface.name
         contract.decimals = erc20Interface.decimals
@@ -40,7 +39,6 @@ export default class Contract extends Generic {
       // If app is not aware of the contract specification, try and get details from the wire. this is quite likely
       .catch(async () => {
         try {
-          console.log('gertting details from the wire')
           contract.contractName = await this.erc20PublicMethod({
             contractAddress: options.contractAddress,
             method: 'name'
@@ -53,10 +51,9 @@ export default class Contract extends Generic {
             contractAddress: options.contractAddress,
             method: 'symbol'
           })
-          console.log('made it past runnign all the ERC20 methods')
           resolve(contract)
         } catch (err) {
-          Vue.$log.debug(err)
+          reject(err)
         }
       })
     })
@@ -64,12 +61,17 @@ export default class Contract extends Generic {
 
   async erc20PublicMethod(options) {
     Vue.$log.debug('ERC20 Method', options)
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       import('~/class/network/contract/erc20').then((erc20Interface) => {
         const contract = new this.web3.eth.Contract(erc20Interface.abi, options.contractAddress)
-        contract.methods[options.method]().call().then((response) => {
-          Vue.$log.debug('Contract Store: ERC20 Method Result '+ options.method + ' = ' + response)
+        contract.methods[options.method]().call()
+        .then((response) => {
+          Vue.$log.debug('Contract Store: ERC20 Method Result ' + options.method + ' = ' + response)
           resolve(response)
+        })
+        .catch ((err) => {
+          Vue.$log.debug('ERC20 Method failed because', err)
+          reject(err)
         })
       })
     })
@@ -167,7 +169,7 @@ export default class Contract extends Generic {
 
     return new Promise((resolve) => {
       resolve({
-        name: options.contractName,
+        name: options.name,
         address: options.address,
         onChain: true,
         managerWalletAddress: options.managerWalletAddress,

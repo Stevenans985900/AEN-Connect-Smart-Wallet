@@ -136,7 +136,8 @@ export default {
           .catch(async () => {
             this.loading = true
             try {
-              const networkHandler = this.$store.getters['wallet/networkHandler']('contract')
+              const networkHandler = this.$store.getters['wallet/networkHandler'](
+                { type: 'contract', network: this.wallet.network })
               const contractDetails = await networkHandler.contractDetails(this.contractAddress)
               this.contractFound = true
               this.contractName = contractDetails.name

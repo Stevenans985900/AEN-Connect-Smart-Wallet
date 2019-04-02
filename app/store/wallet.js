@@ -79,7 +79,24 @@ export const getters = {
     }
     return contacts
   },
-  networkHandler: (state) => (type) => {
+  trackedTransactionsByWallet: (state) => (wallet) => {
+    let transactions = []
+    for (let transactionIndex in state.trackedTransactions) {
+      if(state.trackedTransactions[transactionIndex].walletAddress === wallet.address) {
+        transactions.push(state.trackedTransactions[transactionIndex])
+      }
+    }
+    return transactions
+  },
+  networkHandler: (state) => (options) => {
+    Vue.$log.debug('Getter - Network Handler', options)
+    let apiEndpoint, type
+    if(typeof options === 'object') {
+      type = options.type
+    } else {
+      type = options
+    }
+
     switch (type) {
       case 'aen':
         return new Aen(
@@ -89,9 +106,13 @@ export const getters = {
       case 'btc':
         return new Btc(state.btc.activeApiEndpoint, Vue.prototype.$g('btc'))
       case 'contract':
-        return new Contract(state.eth.activeApiEndpoint)
+        apiEndpoint = state.eth.activeApiEndpoint
+          .replace('###NETWORK_IDENTIFIER###', options.network.identifier)
+        return new Contract(apiEndpoint, Vue.prototype.$g('eth'))
       case 'eth':
-        return new Eth(state.eth.activeApiEndpoint, Vue.prototype.$g('eth'))
+        apiEndpoint = state.eth.activeApiEndpoint
+          .replace('###NETWORK_IDENTIFIER###', options.network.identifier)
+        return new Eth(apiEndpoint, Vue.prototype.$g('eth'))
     }
   },
   walletsByType: (state) => (type) => {
@@ -114,8 +135,8 @@ export const getters = {
 }
 
 export const actions = {
-  balance: ({state, commit, dispatch, rootState}, wallet) => {
-    let apiEndpoint, networkHandler
+  balance: ({state, commit, dispatch, getters, rootState}, wallet) => {
+    let networkHandler
     return new Promise((resolve, reject) => {
       // Use cache if offline or wallet not yet recognised on network
       if(rootState.runtime.isOnline === false || wallet.onChain === false) {
@@ -137,10 +158,7 @@ export const actions = {
 
       switch (wallet.type) {
         case 'aen':
-          networkHandler = new Aen(
-              state.aen.activeApiEndpoint,
-              Vue.prototype.$g('aen')
-          )
+          networkHandler = getters['networkHandler']('aen')
           networkHandler
               .balance(wallet)
               .then((response) => {
@@ -164,7 +182,7 @@ export const actions = {
         case 'btc':
           resolve(wallet)
           // TODO For this active API endpoint, mixin network selection
-          networkHandler = new Btc(state.btc.activeApiEndpoint, Vue.prototype.$g('btc'))
+          networkHandler = getters['networkHandler']('btc')
           networkHandler
               .balance(wallet)
               .then((response) => {
@@ -191,11 +209,8 @@ export const actions = {
               .finally(() => { dispatch('busy', false, { root: true }) })
           break
         case 'contract':
-          // TODO For this active API endpoint, mixin network selection
-          Vue.$log.debug('going to be checking the balance of contract with the following wallet', wallet, state.wallets)
-          apiEndpoint = state.eth.activeApiEndpoint
-              .replace('###NETWORK_IDENTIFIER###', state.wallets[wallet.managerWalletAddress].network.identifier)
-          networkHandler = new Contract(apiEndpoint, Vue.prototype.$g('eth'))
+          networkHandler = getters['networkHandler'](
+            { type: 'contract', network: state.wallets[wallet.managerWalletAddress].network })
           networkHandler
               .balance(wallet)
               .then((response) => {
@@ -217,10 +232,8 @@ export const actions = {
               .finally(() => { dispatch('busy', false, { root: true }) })
           break
         case 'eth':
-          // TODO For this active API endpoint, mixin network selection
-          apiEndpoint = state.eth.activeApiEndpoint
-              .replace('###NETWORK_IDENTIFIER###', wallet.network.identifier)
-          networkHandler = new Eth(apiEndpoint, Vue.prototype.$g('eth'))
+          networkHandler = getters['networkHandler'](
+            { type: 'eth', network: wallet.network })
           networkHandler
               .balance(wallet)
               .then((response) => {
@@ -245,15 +258,14 @@ export const actions = {
 
     })
   },
-  transactionsHistorical({state, commit, dispatch, rootState}, wallet) {
-    var apiEndpoint, contractHandler, networkHandler
+  transactionsHistorical({state, commit, dispatch, getters, rootState}, wallet) {
+    var contractHandler, networkHandler
     return new Promise((resolve) => {
       // Use cache if offline or wallet not yet recognised on network
       if(rootState.runtime.isOnline === false || wallet.onChain === false) {
         resolve(wallet)
       }
       // Use cache if function called to recently
-      console.log('getting historical transactions')
       if((Date.now() - wallet.transactionsLastSynced) < Vue.prototype.$g('internal.walletRefreshGraceTime')) {
         if(rootState.runtime.skipCacheNextOp === true) {
           console.debug('Skipping cache')
@@ -267,10 +279,7 @@ export const actions = {
       dispatch('busy', 'wallet.message.updating_history', { root: true })
       switch (wallet.type) {
         case 'aen':
-          networkHandler = new Aen(
-              state.aen.activeApiEndpoint,
-              Vue.prototype.$g('aen')
-          )
+          networkHandler = getters['networkHandler']('aen')
           // Do behind the scenes work
           networkHandler.transactionsHistorical(wallet).then((headTransactions) => {
             // Create a new transaction array
@@ -291,7 +300,7 @@ export const actions = {
           break
         case 'btc':
           // TODO For this active API endpoint, mixin network selection
-          networkHandler = new Btc(state.btc.activeApiEndpoint, Vue.prototype.$g('btc'))
+          networkHandler = getters['networkHandler']('btc')
           // Do behind the scenes work
           networkHandler.transactionsHistorical(wallet).then((headTransactions) => {
 
@@ -360,65 +369,94 @@ export const actions = {
 
           break
         case 'contract':
-          // TODO For this active API endpoint, mixin network selection
-          apiEndpoint = state.eth.activeApiEndpoint
-              .replace('###NETWORK_IDENTIFIER###', state.wallets[wallet.managerWalletAddress].network.identifier)
-          networkHandler = new Contract(apiEndpoint, Vue.prototype.$g('eth'))// Do behind the scenes work
-          networkHandler.transactionsHistorical(wallet).then((headTransactions) => {
+          networkHandler = getters['networkHandler'](
+            { type: 'contract', network: state.wallets[wallet.managerWalletAddress].network })
             // Create a new transaction array
-            const transactions = Object.assign({}, wallet.transactions, headTransactions)
-            commit('setWalletProperty', {
-              address: wallet.address,
-              key: 'transactions',
-              value: transactions
-            })
-            commit('setWalletProperty', {
-              address: wallet.address,
-              key: 'transactionsLastSynced',
-              value: Date.now()
-            })
+            // TODO Actually refresh the original wallet
             dispatch('busy', false, { root: true })
             resolve(wallet)
-          })
           break
         case 'eth':
-          apiEndpoint = state.eth.activeApiEndpoint
-              .replace('###NETWORK_IDENTIFIER###', wallet.network.identifier)
-          networkHandler = new Eth(apiEndpoint, Vue.prototype.$g('eth'))
-          contractHandler = new Contract(apiEndpoint, Vue.prototype.$g('eth'))// Do behind the scenes work
-          // Do behind the scenes work
-
-          // Update the current block number so that future transaction lookups aren't duplicated
-          networkHandler.getHeight().then((blockHeight) => {
-            commit('setWalletProperty', {
-              address: wallet.address,
-              key: 'blockHeight',
-              value: blockHeight
-            })
-          })
+          networkHandler = getters['networkHandler'](
+            { type: 'eth', network: wallet.network })
+          contractHandler = getters['networkHandler'](
+            { type: 'contract', network: wallet.network })
 
           networkHandler.transactionsHistorical(wallet).then(async (headTransactions) => {
             let transactionKey, contractDetails
+            let contractTransactions = {}
             for (transactionKey in headTransactions) {
-              if (headTransactions[transactionKey].value === '0') {
-                contractDetails = await contractHandler.contractInformation({
-                  contractAddress: headTransactions[transactionKey].contractAddress
-                })
-                headTransactions[transactionKey] = Object.assign({}, headTransactions[transactionKey], contractDetails)
+
+              if (headTransactions[transactionKey].value === '0' && headTransactions[transactionKey].contractAddress !== '') {
+                Vue.$log.debug('getting information about the contract', headTransactions[transactionKey])
+                try {
+                  contractDetails = await contractHandler.contractInformation({
+                    contractAddress: headTransactions[transactionKey].contractAddress
+                  })
+
+                  if(!contractTransactions.hasOwnProperty(headTransactions[transactionKey].contractAddress)) {
+                    contractTransactions[headTransactions[transactionKey].contractAddress] = {
+                      meta: contractDetails,
+                      transactions: []
+                    }
+                  }
+
+                  headTransactions[transactionKey] = Object.assign({}, headTransactions[transactionKey], contractDetails)
+                  contractTransactions[headTransactions[transactionKey].contractAddress].transactions.push(headTransactions[transactionKey])
+                } catch (err) {
+                  Vue.$log.error('Caught error when trying to get contract information', err)
+                }
               }
             }
-            // Create a new transaction array
-            headTransactions = Object.assign({}, wallet.transactions, headTransactions)
-            console.log('writing transaction to wallet', headTransactions)
-            commit('setWalletProperty', {
-              address: wallet.address,
-              key: 'transactions',
-              value: headTransactions
-            })
-            commit('setWalletProperty', {
-              address: wallet.address,
-              key: 'transactionsLastSynced',
-              value: Date.now()
+            if(Object.keys(headTransactions).length > 0) {
+              // Write any contract details
+              for (let contractAddress in contractTransactions) {
+
+                // const contract = contractTransactions[contractAddress]
+                // Is the contract managed at all? If not, add it to the stack
+                if (!state.wallets.hasOwnProperty(contractAddress)) {
+                  let walletOptions = {
+                    type: 'contract',
+                    address: contractAddress.toLowerCase(),
+                    network: wallet.network,
+                    onChain: true,
+                    managerWalletAddress: wallet.address.toLowerCase(),
+                    name: contractTransactions[contractAddress].meta.contractName,
+                    decimals: contractTransactions[contractAddress].meta.decimals,
+                    symbol: contractTransactions[contractAddress].meta.symbol,
+                    transactionsLastSynced: Date.now(),
+                    transactions: contractTransactions[contractAddress].transactions
+                  }
+                  dispatch('load', walletOptions)
+                    .then((wallet) => {
+                      commit('showNotification', {
+                        type: 'success',
+                        message: Vue.prototype.$t('wallet.message.contract_added' + ': ' + wallet.name)
+                      })
+                    })
+                }
+              }
+
+              // Create a new transaction array
+              headTransactions = Object.assign({}, wallet.transactions, headTransactions)
+              commit('setWalletProperty', {
+                address: wallet.address,
+                key: 'transactions',
+                value: headTransactions
+              })
+              commit('setWalletProperty', {
+                address: wallet.address,
+                key: 'transactionsLastSynced',
+                value: Date.now()
+              })
+            }
+            // Update the current block number so that future transaction lookups aren't duplicated
+            networkHandler.getHeight().then((blockHeight) => {
+              commit('setWalletProperty', {
+                address: wallet.address,
+                key: 'startBlock',
+                value: blockHeight
+              })
             })
 
             dispatch('busy', false, { root: true })
@@ -429,7 +467,7 @@ export const actions = {
     })
   },
   getLiveWallet({dispatch, state }, wallet) {
-    let apiEndpoint, networkHandler
+    let networkHandler
     return new Promise((resolve) => {
       dispatch('busy', 'wallet.message.checking_wallet_status', { root: true })
       switch (wallet.type) {
@@ -444,7 +482,7 @@ export const actions = {
           .finally(() => { dispatch('busy', false, { root: true }) })
           break
         case 'btc':
-          networkHandler = new Btc(state.btc.activeApiEndpoint, Vue.prototype.$g('btc'))
+          networkHandler = getters['networkHandler']('btc')
           networkHandler.getLiveWallet(wallet).then((response) => {
             resolve(response)
           })
@@ -460,9 +498,8 @@ export const actions = {
               .finally(() => { dispatch('busy', false, { root: true }) })
           break
         case 'eth':
-          apiEndpoint = state.eth.activeApiEndpoint
-              .replace('###NETWORK_IDENTIFIER###', wallet.network.identifier)
-          networkHandler = new Eth(apiEndpoint, Vue.prototype.$g('eth'))
+          networkHandler = getters['networkHandler'](
+            { type: 'eth', network: wallet.network })
           networkHandler.getLiveWallet(wallet).then((response) => {
             resolve(response)
           })
@@ -471,6 +508,15 @@ export const actions = {
       }
     })
   },
+
+  /**
+   *
+   * @param state
+   * @param commit
+   * @param dispatch
+   * @param options
+   * @returns {Promise<any>}
+   */
   load({state, commit, dispatch}, options) {
     const typeRef = options.type[0].toUpperCase() + options.type.slice(1)
     console.debug('Wallet Store: Load (' + typeRef + ')')
@@ -485,7 +531,7 @@ export const actions = {
         type: options.type
       }
 
-      let apiEndpoint, networkHandler
+      let networkHandler
       switch (typeRef) {
         case 'Aen':
           networkHandler = new Aen(
@@ -514,7 +560,7 @@ export const actions = {
           break
 
         case 'Btc':
-          networkHandler = new Btc(state.btc.activeApiEndpoint, Vue.prototype.$g('btc'))
+          networkHandler = getters['networkHandler']('btc')
           networkHandler.walletLoad(options).then((walletObject) => {
             Object.assign(wallet, walletObject)
             dispatch('security/monitorWallet', wallet, {root:true})
@@ -536,9 +582,8 @@ export const actions = {
           break
 
         case 'Eth':
-         apiEndpoint = state.eth.activeApiEndpoint
-              .replace('###NETWORK_IDENTIFIER###', options.network.identifier)
-          networkHandler = new Eth(apiEndpoint, Vue.prototype.$g('eth'))
+          networkHandler = getters['networkHandler'](
+            { type: 'eth', network: options.network })
           networkHandler.walletLoad(options).then((walletObject) => {
             Object.assign(wallet, walletObject)
             dispatch('security/monitorWallet', wallet, {root:true})
@@ -562,7 +607,7 @@ export const actions = {
         transactionsLastSynced: false,
         type: options.type
       }
-      let apiEndpoint, networkHandler
+      let  networkHandler
       switch (options.type) {
         case 'aen':
           networkHandler = new Aen(
@@ -588,7 +633,7 @@ export const actions = {
           })
           break
         case 'btc':
-          networkHandler = new Btc(state.btc.activeApiEndpoint, Vue.prototype.$g('btc'))
+          networkHandler = getters['networkHandler']('btc')
           networkHandler.walletNew(options).then((walletObject) => {
             Object.assign(wallet, walletObject)
             dispatch('security/monitorWallet', wallet, {root:true})
@@ -599,9 +644,8 @@ export const actions = {
           break
 
         case 'eth':
-          apiEndpoint = state.eth.activeApiEndpoint
-              .replace('###NETWORK_IDENTIFIER###', options.network.identifier)
-          networkHandler = new Eth(apiEndpoint, Vue.prototype.$g('eth'))
+          networkHandler = getters['networkHandler'](
+            { type: 'eth', network: options.network })
           networkHandler.walletNew(options).then((walletObject) => {
             Object.assign(wallet, walletObject)
             console.log('about to add wallet to security')
@@ -614,15 +658,36 @@ export const actions = {
       }
     })
   },
+  /**
+   * TRANSACTION INFO
+   * @param getters
+   * @param options
+   * @returns {Promise<any>}
+   */
+  transactionStatus({commit, getters, state}, options) {
+    Vue.$log.debug('Transaction Status', options)
+    return new Promise((resolve) => {
+      const networkHandler = getters['networkHandler'](options)
+      networkHandler.transactionStatus(options.key).then((transaction) => {
+
+        // If the transaction is being tracked, update the entry
+        if(state.trackedTransactions.hasOwnProperty(options.key)) {
+          transaction = Object.assign({}, options, transaction)
+          commit('TRANSACTION', transaction)
+        }
+        resolve(transaction)
+      })
+    })
+  },
   transfer({commit, dispatch, state}, options) {
-    return new Promise((reject, resolve) => {
+    return new Promise((resolve, reject) => {
       let apiEndpoint, networkHandler
 
       // Check whether the destination is using a contact from the address book
       if (typeof options.destination.address === 'object' && options.destination.address !== null) {
         options.destination.address = options.destination.address.address
       }
-      dispatch('busy', 'wallet.message.updating_balance', { root: true })
+      dispatch('busy', 'wallet.message.transfer_start', { root: true })
       switch (options.source.type) {
         case 'aen':
           networkHandler = new Aen(
@@ -655,28 +720,23 @@ export const actions = {
               .replace('###NETWORK_IDENTIFIER###', options.source.network.identifier)
           networkHandler = new Eth(apiEndpoint, Vue.prototype.$g('eth'))
           networkHandler.transfer(options).then((transactionHash) => {
-
-            // Add tracking reference to the transaction
-            commit('TRANSACTION_TRACK', {
+            const transaction = {
               key: transactionHash,
               direction: 'outgoing',
               address: options.destination.address,
-              amount: options.destination.amount
-            })
-
-            // Can resolve the transaction letting the user know that it has been broadcast to the network and is now pending
-            let transactionWatcherInterval = setInterval(async () => {
-              console.log('just finished checking the status of ('+transactionHash+') and status return is')
-              // Check whether the transaction has been confirmed
-              if(networkHandler.transactionConfirmed(transactionHash) === true) {
-                console.log('complete')
-                // commit('TRANSACTION_COMPLETE', transactionHash)
-                clearInterval(transactionWatcherInterval)
-              }
-            }, Vue.$g('time_definitions.transaction_watch'))
-            resolve(transactionHash)
+              amount: options.destination.amount,
+              type: options.source.type,
+              walletAddress: options.source.address,
+              network: options.source.network,
+              status: 'PENDING'
+            }
+            // Add tracking reference to the transaction
+            commit('TRANSACTION', transaction)
+            resolve(transaction)
           })
-          .catch((err) => { reject(err) })
+          .catch((err) => {
+            reject(err)
+          })
           break
       }
     })
@@ -837,14 +897,10 @@ export const mutations = {
   setMosaics(state, input) {
     state.mosaics = input
   },
-  TRANSACTION(state, input) {
-    Vue.$log.debug('TRANSACTION', input)
-    state.wallets[input.wallet.address].transactions[input.key] = input.transaction
-  },
   TRANSACTION_COMPLETE(state, transactionHash) {
     Vue.delete(state.trackedTransactions, transactionHash)
   },
-  TRANSACTION_TRACK(state, input) {
+  TRANSACTION(state, input) {
     Vue.set(state.trackedTransactions, input.key, input)
   }
 

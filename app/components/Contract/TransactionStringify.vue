@@ -1,10 +1,20 @@
 <template>
-  <component :is="component" v-if="component" :transaction="transaction" :wallet="wallet" />
+  <component
+    :is="component"
+    v-if="component"
+    :transaction="transaction"
+    :wallet="wallet"
+    :display="display"
+    />
 </template>
 
 <script>
 export default {
   props: {
+    display: {
+      type: String,
+      default: 'all'
+    },
     transaction: {
       type: Object,
       default: function () {
@@ -27,10 +37,9 @@ export default {
   mounted() {
     // Try to import the contract renderer by it's contact address
     this.component = () => import('~/components/Contract/TransactionStringify/' + this.transaction.contractAddress)
-      // Fallback to ERC20 on failure
-      .catch(function () {
-        this.component = () => import('~/components/Contract/TransactionStringify/Erc20')
-      }.bind(this))
+    .catch(() => {
+      this.component = () => import('~/components/Contract/TransactionStringify/Erc20')
+    })
   }
 }
 </script>

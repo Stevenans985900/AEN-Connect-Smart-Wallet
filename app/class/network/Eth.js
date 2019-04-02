@@ -4,6 +4,7 @@ import axios from 'axios'
 import Generic from './Generic.js'
 import {format} from "date-fns";
 import EthereumTx from 'ethereumjs-tx'
+import $g from '~/globals.json'
 
 export default class Eth extends Generic {
   constructor(apiEndpoint, config) {
@@ -15,9 +16,7 @@ export default class Eth extends Generic {
   balance(options) {
     super.balance(options)
     return new Promise((resolve) => {
-      console.log('goes wrong here')
       this.web3.eth.getBalance(options.address).then((wei) => {
-        console.log('BALANCE from network: ' + wei)
         resolve(wei)
       })
     })
@@ -71,59 +70,81 @@ export default class Eth extends Generic {
           resolve(transactionsWorkingObject)
         })
         .catch(function (error) {
-          console.debug(error)
-          reject([])
+          reject(error)
         })
     })
   }
-  async transactionConfirmed(transactionHash) {
-    Vue.$log.debug('ETH Plugin: Transaction Status')
+
+  /**
+   *
+   * @param transactionHash
+   * @returns {Promise<{transactionBlock: number, currentBlock: number, transactionHash: *}>}
+   */
+  async transactionStatus(transactionHash) {
+    Vue.$log.debug('ETH Plugin: Transaction Status', transactionHash)
+    console.log(this.web3)
     const transaction = await this.web3.eth.getTransaction(transactionHash)
+    console.log('transaction details', transactionHash)
+
     const currentBlock = await this.web3.eth.getBlockNumber()
+    console.log('block number', currentBlock)
+
+    const result = {
+      transactionHash: transactionHash,
+      currentBlock: currentBlock,
+      transactionBlock: transaction.blockNumber
+    }
 
     // When transaction is unconfirmed, its block number is null.
     // In this case we return 0 as number of confirmations
     const blocksConfirmed = transaction.blockNumber === null ? 0 : currentBlock - transaction.blockNumber
-    if(blocksConfirmed > Vue.$g('eth.transaction_blocks_confirmed')) {
-      return true
+    if(blocksConfirmed > $g.eth.transaction_blocks_confirmed) {
+      result.status = 'CONFIRMED'
+    } else {
+      result.status = 'PENDING'
     }
-    return false
+    Vue.$log.debug('Got the status of the transaction', result)
+    return result
   }
 
     transfer(options) {
       Generic.prototype.transfer.call(this, options)
-      return new Promise(async (resolve, reject) => {
-
-        // TESTING ETHEREUMJS-TX
-
+      return new Promise((resolve) => {
         const privateKey = Buffer.from(options.credentials.privateKey.substring(2), 'hex')
-        const nonce = await this.web3.eth.getTransactionCount(options.source.address, 'pending')
-        console.log(nonce)
-        const txParams = {
-          nonce: this.web3.utils.toHex(nonce),
-          gasPrice: this.web3.utils.toHex(options.transfer.gasPrice),
-          gas: this.web3.utils.toHex(options.transfer.gas),
-          gasLimit: this.web3.utils.toHex(options.transfer.gasLimit),
-          to: options.destination.address,
-          value: this.web3.utils.toHex(this.web3.utils.toWei(options.destination.amount, "ether")),
-          chainId: 3
-        }
-        const tx = new EthereumTx(txParams)
-        tx.sign(privateKey)
-        const serializedTx = tx.serialize()
 
-        this.web3.eth.sendSignedTransaction('0x'+serializedTx.toString('hex'))
-          .on('transactionHash', function(hash){
-            resolve(hash)
-          })
+        this.web3.eth.getTransactionCount(options.source.address, 'pending').then((nonce) => {
+          const txParams = {
+            nonce: this.web3.utils.toHex(nonce),
+            gasPrice: this.web3.utils.toHex(options.transfer.gasPrice),
+            gas: this.web3.utils.toHex(options.transfer.gas),
+            gasLimit: this.web3.utils.toHex(options.transfer.gasLimit),
+            to: options.destination.address,
+            value: this.web3.utils.toHex(this.web3.utils.toWei(options.destination.amount, "ether")),
+            chainId: 3
+          }
+          const tx = new EthereumTx(txParams)
+          tx.sign(privateKey)
+          const serializedTx = tx.serialize()
+
+          // const meth =
+          this.web3.eth.sendSignedTransaction('0x'+serializedTx.toString('hex'))
+            .on('transactionHash', function(hash){
+              Vue.$log.debug('Have transaction hash from web3', hash)
+              resolve(hash)
+            })
+            .on('error', function(err){ Vue.$log.error(err) })
+        })
+
           // .on('receipt', function(receipt){
           //   console.log('receipt', receipt)
           // })
-          .on('confirmation', function(confirmationNumber, receipt){
-            console.log('confirmation number', confirmationNumber)
-            console.log('receipt', receipt)
-          })
-          .on('error', reject)
+          // .on('confirmation', function(confirmationNumber, receipt){
+          //   console.log('confirmation number', confirmationNumber)
+          //   console.log('receipt', receipt)
+          //   return resolve(receipt)
+          // })
+        // return meth
+          //
     })
   }
 

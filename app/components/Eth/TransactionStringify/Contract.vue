@@ -84,27 +84,6 @@ export default {
     operationGas() {
       return this.transaction.cumulativeGasUsed - this.transaction.gasUsed
     }
-  },
-  mounted() {
-    // Check whether a wallet record exists for handling the contract
-    if(!this.$store.state.wallet.wallets.hasOwnProperty(this.transaction.contractAddress)) {
-      let walletOptions = {
-        type: 'contract',
-        address: this.transaction.contractAddress,
-        network: this.wallet.network,
-        managerWalletAddress: this.wallet.address,
-        contractName: this.transaction.contractName,
-        decimals: this.transaction.decimals,
-        symbol: this.transaction.symbol
-      }
-      this.$store.dispatch('wallet/load', walletOptions)
-        .then((wallet) => {
-          this.$store.commit('showNotification', {
-            type: 'success',
-            message: this.$t('wallet.message.contract_added' + ': ' + wallet.name)
-          })
-        })
-    }
   }
 }
 </script>

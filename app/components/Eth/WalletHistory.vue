@@ -1,45 +1,43 @@
 <template>
   <span>
-    <span>
-      <v-data-table
-        :headers="headers"
-        :items="transactions"
-        item-key="signature"
-      >
-        <template slot="items" slot-scope="props">
-          <tr @click="props.expanded = !props.expanded">
-            <td>
-              <transaction-stringify
-                :wallet="wallet"
-                :transaction="props.item"
-                display="date"
-              />
-            </td>
-            <td>
-              <transaction-stringify
-                :wallet="wallet"
-                :transaction="props.item"
-                display="direction"
-              />
-            </td>
-            <td>
-              <transaction-stringify
-                :wallet="wallet"
-                :transaction="props.item"
-                display="value"
-              />
-            </td>
-            <td>
-              <transaction-stringify
-                :wallet="wallet"
-                :transaction="props.item"
-                display="address"
-              />
-            </td>
-          </tr>
-        </template>
-      </v-data-table>
-    </span>
+    <v-data-table
+      :headers="headers"
+      :items="transactions"
+      item-key="signature"
+    >
+      <template slot="items" slot-scope="props">
+        <tr @click="props.expanded = !props.expanded">
+          <td>
+            <transaction-stringify
+              :wallet="wallet"
+              :transaction="props.item"
+              display="date"
+            />
+          </td>
+          <td>
+            <transaction-stringify
+              :wallet="wallet"
+              :transaction="props.item"
+              display="direction"
+            />
+          </td>
+          <td>
+            <transaction-stringify
+              :wallet="wallet"
+              :transaction="props.item"
+              display="value"
+            />
+          </td>
+          <td>
+            <transaction-stringify
+              :wallet="wallet"
+              :transaction="props.item"
+              display="address"
+            />
+          </td>
+        </tr>
+      </template>
+    </v-data-table>
   </span>
 </template>
 

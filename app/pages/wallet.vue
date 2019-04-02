@@ -135,6 +135,7 @@
                         <address-render :address="wallet.address" :use-address-book="false" :use-receiver-address="true" />
                       </v-flex>
                       <v-flex xs12>
+                        <tracked-transactions :wallet="wallet" />
                         <wallet-history v-if="wallet.onChain === true" :wallet="wallet" />
                         <activation v-else :wallet="wallet" />
                       </v-flex>
@@ -240,6 +241,7 @@ import Activation from '~/components/Activation'
 import Balance from '~/components/Balance'
 import BackupWallet from '~/components/BackupWallet'
 import RefreshWallet from '~/components/RefreshWallet'
+import TrackedTransactions from '~/components/TrackedTransactions'
 // import VueRecaptcha from 'vue-recaptcha'
 import WalletHistory from '~/components/WalletHistory'
 import MakeTransfer from '~/components/MakeTransfer'
@@ -291,6 +293,7 @@ export default {
     MakeTransfer,
     RefreshWallet,
     TestnetButtons,
+    TrackedTransactions,
     WalletAdd,
     WalletHistory
   },
@@ -325,7 +328,6 @@ export default {
     }
   },
   mounted: function () {
-    this.$log.debug('Wallet Management Startup')
     // Only start once global loading finished
     const preparationInterval = setInterval(
       function () {
@@ -337,6 +339,11 @@ export default {
     )
   },
   methods: {
+    trackedTransactions(wallet) {
+      const transactions = this.$store.getters['wallet/trackedTransactionsByWallet'](wallet)
+      console.log('tracked transactions', transactions)
+      return transactions
+    },
     accordionTogglingWallet(wallet) {
       this.contextWallet = wallet
       this.selectedWalletAddress = wallet.address

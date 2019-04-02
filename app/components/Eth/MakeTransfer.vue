@@ -147,31 +147,11 @@
               address: this.address,
               amount: this.amount.toString()
             }
-          }).then((receipt) => {
-            console.log('receipt from the transaction')
-            console.log(receipt)
-
-            // Start watching the transaction until complete
-            // const networkHandler = this.$store.getters['wallet/networkHandler']('eth')
-            // const apiEndpoint = this.$store.state.wallet.eth.activeApiEndpoint
-            //     .replace('###NETWORK_IDENTIFIER###', this.wallet.network.identifier)
-            // networkHandler.setProvider(apiEndpoint)
-            // const transactionWatcherInterval = setInterval(() => {
-            //   networkHandler.receipt().then((result) => {
-            //     if(result === true) {
-            //       this.$store.commit('showNotification', {
-            //         type: 'success',
-            //         message: this.$t('wallet.message.transfer_complete')
-            //       })
-            //       clearInterval(transactionWatcherInterval)
-            //     }
-            //   })
-            // }, this.$store.state.time_definitions.transaction_watch)
-            console.log('complete')
+          }).then(() => {
             this.$emit('complete')
           })
-            .catch((err) => {
-              this.$log.debug('Problem making transfer', err)
+            .catch((something) => {
+              this.$log.error('promise error', something)
             })
         })
       }

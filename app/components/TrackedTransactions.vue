@@ -1,48 +1,73 @@
 <template>
-  <v-menu v-if="haveTrackedTransactions" v-model="menuPendingTransactions" offset-y>
-    <v-btn slot="activator" :class="color" icon small>
-      <v-icon>
-        swap_horiz
-      </v-icon>
-    </v-btn>
-
-    <v-card max-width="400px">
-      <v-card-text>
-        <h3>{{ $t('network.label.pending_transactions') }}</h3>
-        <v-list>
-          <v-list-tile v-for="transaction in trackedTransactions" :key="transaction.key" avatar>
-            <v-list-tile-avatar>
-              <v-icon>
-                {{ icon(transaction) }}
-              </v-icon>
-            </v-list-tile-avatar>
-            <v-list-tile-content>
-              <v-list-tile-title>
-                {{ transaction.address }}
-              </v-list-tile-title>
-              <v-list-tile-sub-title>
-                {{ transaction.amount }}
-              </v-list-tile-sub-title>
-            </v-list-tile-content>
-          </v-list-tile>
-        </v-list>
-      </v-card-text>
-    </v-card>
-  </v-menu>
+  <span v-if="trackedTransactions.length > 0">
+    <h3>{{ $t('network.label.pending_transactions') }}</h3>
+    <v-layout v-for="transaction in trackedTransactions" :key="transaction.key" row wrap>
+      <v-flex xs2 sm1>
+        <v-icon>
+          {{ icon(transaction) }}
+        </v-icon>
+      </v-flex>
+      <v-flex xs8 sm10>
+        {{ transaction.address }}<br />
+        <span class="caption">
+          <token-value :value="transaction.amount" :type="transaction.type" />
+        </span>
+      </v-flex>
+      <v-flex xs2 sm1>
+        <v-btn icon @click="stopTracking(transaction)">
+          <v-icon>
+            close
+          </v-icon>
+        </v-btn>
+      </v-flex>
+      <v-flex xs12>
+        <v-divider />
+      </v-flex>
+    </v-layout>
+  </span>
 </template>
-
 <script>
+  import TokenValue from '~/components/TokenValue'
   export default {
+    components: { TokenValue },
+    props: {
+      wallet: {
+        type: Object,
+        default: null
+      }
+    },
     data() {
       return {
         menuPendingTransactions: false
       }
     },
     computed: {
-      haveTrackedTransactions() { return Object.keys(this.trackedTransactions).length > 0 ? true : false },
-      trackedTransactions() { return this.$store.state.wallet.trackedTransactions }
+      trackedTransactions() {
+        if(this.wallet !== null) {
+           return this.$store.getters['wallet/trackedTransactionsByWallet'](this.wallet)
+        } else {
+          return this.$store.state.wallet.trackedTransactions
+        }
+      }
+    },
+    mounted() {
+      setInterval(() => { this.processTrackedTransactions() }, this.$g('time_definitions.transaction_watch'))
     },
     methods: {
+      processTrackedTransactions() {
+        if(this.haveTrackedTransactions === true) {
+          for(let transactionHash in this.trackedTransactions) {
+            this.$store.dispatch('wallet/transactionStatus', this.trackedTransactions[transactionHash]).then((transaction) => {
+              if (transaction.status === 'CONFIRMED') {
+                this.stopTracking(this.trackedTransactions[transactionHash])
+              }
+            })
+          }
+        }
+      },
+      stopTracking(transaction) {
+        this.$store.commit('wallet/TRANSACTION_COMPLETE', transaction.key)
+      },
       icon(transaction) {
         if(transaction.direction === 'outgoing') {
           return 'call_made'
