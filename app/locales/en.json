@@ -272,7 +272,7 @@
       "network_recognise_wallet": "The wallet is recognised on the network",
       "network_miss_wallet": "The wallet is not yet recognised on the network",
       "remove_success": "Your wallet has been remove",
-      "remove_warning": "If you remove the wallet, there will be no way to access it unless you have made a backup.",
+      "remove_warning": "Type in the name of your wallet in the box below and then click delete to proceed. If you remove the wallet, there will be no way to access it unless you have made a backup.",
       "transfer_complete": "Your transfer has been successfully dispatched to the network",
       "transfer_start": "Sending transaction",
       "updating_balance": "Updating Balance",

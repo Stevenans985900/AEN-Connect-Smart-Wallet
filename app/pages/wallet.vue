@@ -76,15 +76,6 @@
                       <v-layout row wrap>
                         <v-flex  xs12 sm6>
                           {{ wallet.name }}
-                          <v-btn
-                            v-if="selectedWalletAddress === wallet.address"
-                            icon
-                            @click="dialogEditWalletClick($event)"
-                          >
-                            <v-icon>
-                              edit
-                            </v-icon>
-                          </v-btn>
                         </v-flex>
                         <v-flex xs12 sm6>
                           <balance :wallet="wallet" />
@@ -99,8 +90,8 @@
                       <v-btn outline small @click="addressShow(wallet)">
                         {{ $t('common.action.receive') }}
                       </v-btn>
-                      <v-btn v-if="wallet.address !== mainWalletAddress" outline class="error" small @click="contextWallet = wallet; dialogRemoveWallet = true">
-                        {{ $t('common.action.disable') }}
+                      <v-btn  outline  small @click="contextWallet = wallet; dialogEditWallet = true">
+                        {{ $t('common.action.edit') }}
                       </v-btn>
                     </v-flex>
                     <!-- Mobile Button -->
@@ -122,8 +113,8 @@
                           <v-list-tile @click="addressShow(wallet)">
                             <v-list-tile-title>{{ $t('common.action.receive') }}</v-list-tile-title>
                           </v-list-tile>
-                          <v-list-tile v-if="wallet.address !== mainWalletAddress" @click="contextWallet = wallet; dialogRemoveWallet = true">
-                            <v-list-tile-title>{{ $t('common.action.disable') }}</v-list-tile-title>
+                          <v-list-tile v-if="wallet.address !== mainWalletAddress" @click="contextWallet = wallet; dialogEditWallet = true">
+                            <v-list-tile-title>{{ $t('common.action.edit') }}</v-list-tile-title>
                           </v-list-tile>
                         </v-list>
                       </v-menu>
@@ -183,26 +174,64 @@
             <v-icon>close</v-icon>
           </v-btn>
         </v-toolbar>
-        <v-card>
-          <v-card-text>
-            <v-layout row wrap>
-              <v-flex xs12>
-                <v-text-field
-                  :label="$t('common.label.name')"
-                  v-model="modelWalletName"
-                  @keyup.enter="dialogEditWallet = false"
-                />
-              </v-flex>
-              <v-flex xs12>
-                <!-- The details are written straight in to the model so, simply close the dialog box -->
-                <!-- TODO When adding more wallet customisation features, edit the way information is save -->
-                <v-btn color="primary" @click="dialogEditWallet = false">
-                  {{ $t('common.action.save') }}
-                </v-btn>
-              </v-flex>
-            </v-layout>
-          </v-card-text>
-        </v-card>
+        <v-tabs>
+          <!--v-model="active"-->
+          <v-tab>
+           Edit
+          </v-tab>
+          <v-tab-item>
+            <v-card flat>
+              <v-card-text>
+                <v-layout row wrap>
+                  <v-flex xs12>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-text-field
+                      :label="$t('common.label.name')"
+                      v-model="modelWalletName"
+                      @keyup.enter="dialogEditWallet = false"
+                    />
+                  </v-flex>
+                  <v-flex xs12>
+                    <!-- The details are written straight in to the model so, simply close the dialog box -->
+                    <!-- TODO When adding more wallet customisation features, edit the way information is save -->
+                    <v-btn color="primary" @click="dialogEditWallet = false">
+                      {{ $t('common.action.save') }}
+                    </v-btn>
+                  </v-flex>
+                </v-layout>
+              </v-card-text>
+            </v-card>
+          </v-tab-item>
+
+          <v-tab>
+            {{ $t('common.action.remove') }}
+          </v-tab>
+          <v-tab-item>
+            <v-card flat>
+              <v-card-text>
+                <v-layout row wrap>
+                  <v-flex xs12>
+                    {{ $t('wallet.message.remove_warning') }}
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-text-field
+                      :label="$t('common.label.name')"
+                      v-model="confirmedWalletName"
+                    />
+                  </v-flex>
+                  <v-flex xs12>
+                    <!-- The details are written straight in to the model so, simply close the dialog box -->
+                    <!-- TODO When adding more wallet customisation features, edit the way information is save -->
+                    <v-btn color="warning" :disabled="deleteDisabled" @click="deleteWallet">
+                      {{ $t('common.action.remove') }}
+                    </v-btn>
+                  </v-flex>
+                </v-layout>
+              </v-card-text>
+            </v-card>
+          </v-tab-item>
+        </v-tabs>
       </v-dialog>
 
       <!-- New Wallet Dialog -->
@@ -290,6 +319,7 @@ import WalletAdd from '~/components/WalletAdd'
 
 function initialDataState() {
   return {
+    accordionOpen: false,
     dialogWalletAdd: false,
     dialogWalletView: false,
     dialogMakeTransfer: false,
@@ -298,6 +328,7 @@ function initialDataState() {
     dialogAddressShow: false,
     dialogEditWallet: false,
     activeWatchers: [],
+    confirmedWalletName: '',
     walletType: null,
     valid: false,
     backupAgree: false,
@@ -348,6 +379,7 @@ export default {
     }
   },
   computed: {
+    deleteDisabled() { return this.contextWallet.name !== this.confirmedWalletName ? true : false },
     modelWalletName: {
       get() { if(this.contextWallet) { return this.contextWallet.name } else { return '' } },
       set(val) { this.$store.commit('wallet/setWalletProperty', {
@@ -396,6 +428,15 @@ export default {
       return transactions
     },
     accordionTogglingWallet(wallet) {
+
+      // TODO Make this code simpler, shame on me xD
+      if(!this.selectedWalletAddress) { this.accordionOpen = true }
+      if(this.selectedWalletAddress === wallet.address && this.accordionOpen === true) {
+        this.accordionOpen = false
+      } else {
+        this.accordionOpen = true
+      }
+
       this.contextWallet = wallet
       this.selectedWalletAddress = wallet.address
       // Check whether the user security is ok
