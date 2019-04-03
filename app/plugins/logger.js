@@ -8,7 +8,7 @@ const options = {
     logLevel : isProduction ? 'error' : 'debug',
     stringifyArguments : false,
     showLogLevel : true,
-    showMethodName : true,
+    showMethodName : false,
     separator: '|',
     showConsoleColors: true
 };

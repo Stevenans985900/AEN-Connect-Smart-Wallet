@@ -3,6 +3,8 @@ import Generic from '~/class/network/Generic'
 import axios from 'axios'
 import Web3 from 'web3'
 
+// function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)) }
+
 export default class Contract extends Generic {
   constructor(apiEndpoint, config) {
     super()
@@ -59,8 +61,8 @@ export default class Contract extends Generic {
     })
   }
 
-  async erc20PublicMethod(options) {
-    Vue.$log.debug('ERC20 Method', options)
+  erc20PublicMethod(options) {
+    Vue.$log.debug('Contract Plugin: ERC20 Method', options)
     return new Promise((resolve, reject) => {
       import('~/class/network/contract/erc20').then((erc20Interface) => {
         const contract = new this.web3.eth.Contract(erc20Interface.abi, options.contractAddress)
@@ -170,18 +172,13 @@ export default class Contract extends Generic {
     return new Promise((resolve) => {
       resolve({
         name: options.name,
-        address: options.address,
+        address: options.address.toLowerCase(),
         onChain: true,
         managerWalletAddress: options.managerWalletAddress,
         symbol: options.symbol,
         decimals: options.decimals
       })
     })
-  }
-
-  walletNew(options) {
-    Generic.prototype.walletNew.call(this, options)
-    return this.web3.eth.accounts.create(options.password)
   }
 
   getWeb3() {

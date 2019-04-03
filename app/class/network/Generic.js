@@ -10,11 +10,11 @@ export default class Genetic {
    * Get details on an individual transaction
    * @param options
    */
-  transactionDetails(options) { Vue.$log.debug(this.pluginName+' plugin', options)}
-  transactionsHistorical(options) { Vue.$log.debug(this.pluginName+' plugin', options) }
-  transactionsIncoming(options) { Vue.$log.debug(this.pluginName+' plugin', options)}
-  transactionsOutgoing(options) { Vue.$log.debug(this.pluginName+' plugin', options)}
-  transactionsUnconfirmed(options) { Vue.$log.debug(this.pluginName+' plugin', options) }
+  transactionDetails(options) { Vue.$log.debug(this.pluginName+' plugin: Transaction Details', options)}
+  transactionsHistorical(options) { Vue.$log.debug(this.pluginName+' plugin: Transaction Historical', options) }
+  transactionsIncoming(options) { Vue.$log.debug(this.pluginName+' plugin: Transaction Incoming', options)}
+  transactionsOutgoing(options) { Vue.$log.debug(this.pluginName+' plugin: Transaction Outgoing', options)}
+  transactionsUnconfirmed(options) { Vue.$log.debug(this.pluginName+' plugin: Transaction Unconfirmed', options) }
   /**
    * Send tokens / contract specifics from a wallet
    * @param options

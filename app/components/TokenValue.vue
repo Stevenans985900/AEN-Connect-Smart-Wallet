@@ -1,6 +1,6 @@
 <template>
   <span>
-    {{ displayAmount }}{{ symbolShow }}
+    {{ displayAmount }}&nbsp;{{ symbolShow }}
   </span>
 </template>
 <script>

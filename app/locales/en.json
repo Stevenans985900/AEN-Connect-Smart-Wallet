@@ -140,7 +140,7 @@
   },
   "ethereum": {
     "message": {
-      "contract_history_not_supported": "Transaction history for ERC20 contracts is not currently supported"
+      "contract_history_not_supported": "Transaction history for ERC20 contracts is not currently supported. To view history, please see the managing wallet"
     }
   },
   "eula": {

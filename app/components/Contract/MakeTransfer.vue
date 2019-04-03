@@ -1,59 +1,64 @@
 <template>
   <!-- New transfer -->
   <v-card>
-    <v-card-text>
-      <v-container grid-list-md>
-        <v-layout wrap>
-          <v-flex xs12>
-            {{ $t('wallet.label.balance') }}: <token-value :symbol="wallet.symbol" :type="wallet.type" :value="wallet.balance" />
-          </v-flex>
-          <v-flex xs12>
-            <v-text-field
-              v-model="amount"
-              :label="$t('common.label.amount')"
-              :suffix="wallet.symbol"
-              :error-messages="lessThanBalance()"
-              required
-            />
-          </v-flex>
-          <v-flex xs12>
-            <v-combobox
-              v-model="address"
-              :items="contacts"
-              item-text="displayText"
-              :label="$t('common.label.address')"
-              prepend-icon="contacts"
-              required
-            />
-          </v-flex>
-          <v-flex xs12 md6>
-            <v-checkbox v-model="priorityTransfer" label="Priority Transfer" />
-            <v-text-field
-              v-model="gasPrice"
-              suffix="Wei"
-            />
-          </v-flex>
-          <v-flex xs12 md6>
-            <v-slider
-              v-model="gasPrice"
-              :color="color"
-              :max="maximumGas"
-              label="Gas Price"
-              step="500000"
-              min="100000"
-              thumb-label
-              ticks
-            />
-          </v-flex>
-        </v-layout>
-      </v-container>
-    </v-card-text>
-    <v-card-actions>
-      <v-spacer />
-      <v-btn color="blue darken-1" flat @click="initiateTransfer">
-        Initiate
-      </v-btn>
-    </v-card-actions>
+    <v-form
+      ref="makeTransferForm"
+      v-model="transferValid"
+    >
+      <v-card-text>
+        <v-container grid-list-md>
+          <v-layout wrap>
+            <v-flex xs12>
+              {{ $t('wallet.label.balance') }}: <token-value :symbol="wallet.symbol" :type="wallet.type" :value="wallet.balance" />
+            </v-flex>
+            <v-flex xs12>
+              <v-text-field
+                v-model="amount"
+                :label="$t('common.label.amount')"
+                :suffix="wallet.symbol"
+                :error-messages="lessThanBalance()"
+                required
+              />
+            </v-flex>
+            <v-flex xs12>
+              <v-combobox
+                v-model="address"
+                :items="contacts"
+                item-text="displayText"
+                :label="$t('common.label.address')"
+                prepend-icon="contacts"
+                required
+              />
+            </v-flex>
+            <v-flex xs12 md6>
+              <v-checkbox v-model="priorityTransfer" label="Priority Transfer" />
+              <v-text-field
+                v-model="gasPrice"
+                suffix="Wei"
+              />
+            </v-flex>
+            <v-flex xs12 md6>
+              <v-slider
+                v-model="gasPrice"
+                :color="color"
+                :max="maximumGas"
+                label="Gas Price"
+                step="500000"
+                min="100000"
+                thumb-label
+                ticks
+              />
+            </v-flex>
+          </v-layout>
+        </v-container>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn color="blue darken-1" flat @click="initiateTransfer">
+          Initiate
+        </v-btn>
+      </v-card-actions>
+    </v-form>
   </v-card>
 </template>
 
@@ -81,7 +86,8 @@ export default {
       maximumGas: 0,
       normalGas: 0,
       priorityGas: 0,
-      parentWallet: null
+      parentWallet: null,
+      transferValid: false
     }
   },
   computed: {

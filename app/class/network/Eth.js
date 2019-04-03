@@ -23,6 +23,7 @@ export default class Eth extends Generic {
   }
 
   async erc20PublicMethod(options) {
+    Vue.$log.debug('ETH Plugin: ERC20 Method', options)
     return new Promise((resolve) => {
       import('~/class/network/contract/erc20').then((erc20Interface) => {
         const contract = new this.web3.eth.Contract(erc20Interface.abi, options.contractAddress)
@@ -59,6 +60,7 @@ export default class Eth extends Generic {
         }
       })
         .then(async function (response) {
+          Vue.$log.debug('ETH: Transactions Historical: Axios return object', response)
           let transactionsWorkingObject = {}
           let currentTransaction, timeKey
           const transactions = response.data.result
@@ -67,6 +69,7 @@ export default class Eth extends Generic {
             timeKey = format((currentTransaction.timeStamp * 1000), 'YYYY-MM-DD HH:mm')
             transactionsWorkingObject[timeKey] = currentTransaction
           }
+          Vue.$log.debug('ETH: Transactions Historical: Working Transactions object', transactionsWorkingObject)
           resolve(transactionsWorkingObject)
         })
         .catch(function (error) {
@@ -177,9 +180,9 @@ export default class Eth extends Generic {
     return new Promise((resolve) => {
       const wallet = this.web3.eth.accounts.privateKeyToAccount(options.privateKey)
       const walletObject = {
-        address: wallet.address,
+        address: wallet.address.toLowerCase(),
         network: options.network,
-        startBlock: options.startBlock || 0,
+        startBlock: 0,
         credentials: {
           keystore: wallet.encrypt(options.password),
           password: options.password,
@@ -194,8 +197,9 @@ export default class Eth extends Generic {
     Generic.prototype.walletNew.call(this, options)
     return new Promise((resolve) => {
       const wallet = this.web3.eth.accounts.create(options.password)
+
       const walletObject = {
-        address: wallet.address,
+        address: wallet.address.toLowerCase(),
         network: options.network,
         startBlock: 0,
         credentials: {
