@@ -84,36 +84,39 @@
                     </v-flex>
                     <!-- Wallet Controls -->
                     <v-flex v-if="$vuetify.breakpoint.mdAndUp" xs2 sm6 class="text-xs-right">
-                      <v-btn v-if="wallet.onChain === true" outline small @click="contextWallet = wallet; dialogMakeTransfer = true">
+                      <v-btn v-if="wallet.onChain === true" outline small @click="sendShow(wallet, $event)">
                         {{ $t('common.action.send') }}
                       </v-btn>
                       <v-btn outline small @click="addressShow(wallet)">
                         {{ $t('common.action.receive') }}
                       </v-btn>
-                      <v-btn  outline  small @click="contextWallet = wallet; dialogEditWallet = true">
+                      <v-btn  outline  small @click="editShow(wallet, $event)">
                         {{ $t('common.action.edit') }}
                       </v-btn>
                     </v-flex>
                     <!-- Mobile Button -->
                     <v-flex v-else xs2 sm6 class="text-xs-right">
-                      <v-menu offset-y>
-                        <v-btn
-                          slot="activator"
-                          small
-                          icon
-                        >
-                          <v-icon>
-                            menu
-                          </v-icon>
-                        </v-btn>
+                      <v-btn small icon @click="mobileMenuShow($event)">
+                        <v-icon>
+                          menu
+                        </v-icon>
+                      </v-btn>
+
+                      <v-menu
+                        v-model="menuMobile"
+                        :position-x="x"
+                        :position-y="y"
+                        offset-y
+                        absolute
+                      >
                         <v-list>
-                          <v-list-tile v-if="wallet.onChain === true" @click="contextWallet = wallet; dialogMakeTransfer = true">
+                          <v-list-tile v-if="wallet.onChain === true" @click="sendShow(wallet, $event)">
                             <v-list-tile-title>{{ $t('common.action.send') }}</v-list-tile-title>
                           </v-list-tile>
                           <v-list-tile @click="addressShow(wallet)">
                             <v-list-tile-title>{{ $t('common.action.receive') }}</v-list-tile-title>
                           </v-list-tile>
-                          <v-list-tile v-if="wallet.address !== mainWalletAddress" @click="contextWallet = wallet; dialogEditWallet = true">
+                          <v-list-tile v-if="wallet.address !== mainWalletAddress" @click="editShow(wallet, $event)">
                             <v-list-tile-title>{{ $t('common.action.edit') }}</v-list-tile-title>
                           </v-list-tile>
                         </v-list>
@@ -333,7 +336,9 @@ function initialDataState() {
     valid: false,
     backupAgree: false,
     newAccount: false,
+    menuMobile: false,
     existingAccount: false,
+    mobileWalletMenu: false,
     walletCreated: false,
     selectedWalletAddress: null,
     showPassword: false,
@@ -343,6 +348,8 @@ function initialDataState() {
     accordionControlMap: [],
     accordionControlling: false,
     accordionCurrentPosition: 0,
+    x: 0,
+    y: 0,
     rules: {
       required: value => !!value || 'Required.'
     },
@@ -471,6 +478,22 @@ export default {
         type: 'success',
         message: 'Your wallet has been removed'
       })
+    },
+    mobileMenuShow(event) {
+      event.stopPropagation()
+      this.x = event.clientX
+      this.y = event.clientY
+      this.menuMobile = true
+    },
+    editShow(wallet, event) {
+      event.stopPropagation()
+      this.contextWallet = wallet
+      this.dialogEditWallet = true
+    },
+    sendShow(wallet, event) {
+      event.stopPropagation()
+      this.contextWallet = wallet
+      this.dialogMakeTransfer = true
     },
     walletAdded() {
       this.dialogWalletAdd = false
