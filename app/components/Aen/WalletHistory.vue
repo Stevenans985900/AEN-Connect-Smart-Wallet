@@ -69,19 +69,12 @@ export default {
       })
         this.transactionsListener = setInterval(
           function () {
-            this.$store.commit('setLoading', {
-              t: 'page',
-              v: true,
-              m: this.$t('wallet.message.updating_history')
-            })
+            this.$store.dispatch('busy', 'wallet.message.updating_history')
               this.$store.dispatch('wallet/transactionsHistorical', this.wallet).then(() => {
-                this.$store.commit('setLoading', {
-                  t: 'page',
-                  v: false
-                })
+                  this.$store.dispatch('busy', false)
               })
           }.bind(this),
-          this.$g('internal.commonTasksInterval')
+          this.$store.state.time_definitions.wallet_update
         )
 
     },

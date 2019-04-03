@@ -207,7 +207,7 @@ export default {
    * MOUNTED
    */
   mounted: function () {
-    console.debug('Index Page: Started')
+    this.$log.debug('Dashboard Startup')
     // Only start once global loading finished
     const preparationInterval = setInterval(
       function () {
@@ -216,7 +216,7 @@ export default {
           this.$store.commit('setLoading', { t: 'router', v: false })
         }
       }.bind(this),
-      this.$g('internal.controllerPollReadyInterval')
+      this.$store.state.time_definitions.controller_poll
     )
   },
   /**

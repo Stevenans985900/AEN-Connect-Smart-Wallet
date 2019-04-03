@@ -12,13 +12,13 @@
       {{ date }}
     </span>
     <span v-if="display === 'all' || display === 'value'">
-      {{ totalGas }}
+      {{ transaction.amount }}
     </span>
     <span v-if="display === 'all' || display === 'title'">
       {{ title }}
     </span>
     <span v-if="display === 'all' || display === 'address'">
-      <address-render :address="transaction.contractAddress" show-add />
+      <address-render :address="transaction.from" show-add />
     </span>
     <span v-if="display === 'all' || display === 'details'">
       <p>You currently control {{ controlledTokens }} tokens</p>
@@ -51,15 +51,19 @@ export default {
   },
   data() {
     return {
-      networkHandler: null,
-      contractDetails: {},
-      title: 'Unrecognised Contract',
-      controlledTokens: 0
+      title: 'Unrecognised Contract'
     }
   },
   computed: {
     date() {
       return format(this.transaction.timeStamp * 1000, 'YYYY-MM-DD HH:mm')
+    },
+    direction() {
+      if(this.transaction.from.toUpperCase() === this.wallet.address.toUpperCase()) {
+        return 'incoming'
+      } else {
+        return 'outgoing'
+      }
     },
     totalGas() {
       return this.transaction.cumulativeGasUsed
@@ -69,48 +73,6 @@ export default {
     },
     operationGas() {
       return this.transaction.cumulativeGasUsed - this.transaction.gasUsed
-    }
-  },
-  watch: {
-    transaction: {
-      handler: function () {
-        this.fetchContractInfo()
-      },
-      deep: true
-    }
-  },
-  mounted() {
-    this.fetchContractInfo()
-  },
-  methods: {
-    fetchContractInfo() {
-      const networkHandler = this.$store.getters['wallet/networkHandler']('contract')
-      console.log('fetching transaction info for contract')
-      console.log(this.transaction)
-      networkHandler
-        .balance({
-          managerWalletAddress: this.wallet.address,
-          address: this.transaction.contractAddress
-        })
-        .then((response) => {
-          this.controlledTokens = response
-        })
-        .catch(function () {
-          console.log('caught bad return from balance')
-        })
-
-      networkHandler
-          .erc20PublicMethod({
-            contractAddress: this.transaction.contractAddress,
-            method: 'name'
-          })
-          .then((contractName) => {
-            this.title = contractName
-          })
-          .catch(function () {
-              console.debug('This contract does not really exist...')
-            })
-
     }
   }
 }

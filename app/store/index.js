@@ -1,3 +1,5 @@
+import Vue from 'vue'
+
 export const initialState = {
   // Snackbar Controls
   notification: {
@@ -6,6 +8,8 @@ export const initialState = {
     message: 'message_placeholder',
     timeout: 6000
   },
+  // Used for defining time periods to be used in intervals and timeouts
+  time_definitions: {},
   // High level app properties
   runtime: {
     mode: 'web',
@@ -69,6 +73,24 @@ export const getters = {
   }
 }
 
+export const actions = {
+  busy({state, commit}, input) {
+    if(input === false) {
+      commit('BUSY', false)
+    } else {
+      commit('BUSY', input)
+      // Start a timeout countdown to make sure the app isn't hanging and can gracefully recover
+      setTimeout(function() {
+        // Check if the page is still busy
+        Vue.$log.debug('after interval, checking whether function finished', input, state.busy.page)
+        if(state.busy.page === true) {
+          Vue.$log.error(input)
+          commit('BUSY', false)
+        }
+      }.bind(state, commit), 6000)
+    }
+  },
+}
 export const mutations = {
   setRenderCounter(state, value) {
     state.runtime.renderCounter = value
@@ -137,6 +159,20 @@ export const mutations = {
     state.busy[loadingObject.t] = loadingObject.v
     if (loadingObject.hasOwnProperty('m')) {
       state.busy.message = loadingObject.m
+    }
+  },
+  /**
+   *
+   * @param state
+   * @param input
+   * @constructor
+   */
+  BUSY(state, input) {
+    if(input === false) {
+      state.busy.page = false
+    } else {
+      state.busy.page = true
+      state.busy.message = input
     }
   },
   setRouterLoading(state, value) {
@@ -211,5 +247,12 @@ export const mutations = {
   },
   setAppMode(state, mode) {
     state.runtime.mode = mode
+  },
+  TIME_DEF(state, input) {
+    if(input.hasOwnProperty('key')) {
+      Vue.set(state.time_definitions, input.key, input.value)
+    } else {
+      state.time_definitions = Object.assign({}, state.time_definitions, input)
+    }
   }
 }

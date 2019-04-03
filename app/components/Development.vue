@@ -350,43 +350,46 @@ export default {
      */
   methods: {
     deployTestContract() {
-      console.debug('Development: Deploying test contract')
+      this.$log.debug('Deploy Test Contract', this.wallet)
       import('~/class/network/contract/test.json').then((jsonInterface) => {
         const web3 = this.$store.getters["wallet/networkHandler"]("contract").web3
         const apiEndpoint = this.$store.state.wallet.eth.activeApiEndpoint
             .replace('###NETWORK_IDENTIFIER###', this.wallet.network.identifier)
+        this.$log.debug(this.wallet, ('Sending to: ' + apiEndpoint))
         web3.setProvider(apiEndpoint)
         this.$store.dispatch('security/getCredentials', this.wallet.address).then((credentials) => {
-          this.$store.commit('setLoading', {
-            t: 'page',
-            v: true,
-            m: 'development.label.deploy_contract'
-          })
-
+          this.$store.dispatch('busy', 'development.label.deploy_contract')
           web3.eth.estimateGas({
             from: this.wallet.address,
             data: jsonInterface.bin
           })
             .then((gas) => {
-              web3.eth.accounts.signTransaction({
+              this.$log.debug('gas from network estimated as using the following network handler', gas, web3)
+              const baseTransaction = {
                 from: this.wallet.address,
                 gas: gas,
                 gasPrice:  50000000000,
-                data: jsonInterface.bin
-              }, credentials.privateKey)
-                .then((signedTx) => {
+                data: jsonInterface.bin,
+                chainId: this.wallet.network.network_id
+              }
+              this.$log.debug(baseTransaction, credentials)
+              web3.eth.accounts.signTransaction(baseTransaction, credentials.privateKey)
+                .then(signedTx => {
+                  console.log('signed the transaction, time to send it', web3)
                   web3.eth.sendSignedTransaction(signedTx.rawTransaction)
-                    .then(() => {
-                        this.$store.commit('setLoading', {
-                          t: 'page',
-                          v: false })
-                        console.debug('Contract has been pushed out to the network')
+                    .then((transaction) => {
+                      this.$vue.debug('Transaction receipt from wire', transaction)
+                      this.waitContract(transaction)
+                      this.$store.dispatch('busy', false)
                       this.dialogDeployContract = false
                     })
+                  // this.web3.eth.sendSignedTransaction(signedTx.rawTransaction)
+                })
+                .then((receipt) => {
+                  console.log(receipt)
                 })
                 .catch((err) => {
-                  console.log('something went wrong when sending a transaction')
-                  console.error(err)
+                  console.log(err)
                 })
             })
         })

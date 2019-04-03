@@ -1,5 +1,5 @@
 <template>
-  <v-layout row justify-center align-center>
+  <v-layout row wrap justify-center>
     <v-flex xs12>
       <v-card flat>
         <v-card-text>
@@ -9,24 +9,3 @@
     </v-flex>
   </v-layout>
 </template>
-
-<script>
-
-export default {
-  props: {
-    wallet: {
-      type: Object,
-      default: function () {
-        return {}
-      }
-    }
-  },
-  data() {
-    return {
-      options: {},
-      transactions: {},
-      loading: true
-    }
-  }
-}
-</script>

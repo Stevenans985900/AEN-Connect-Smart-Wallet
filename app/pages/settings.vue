@@ -1,29 +1,44 @@
 <template>
   <v-container>
-    <v-layout row wrap justify-center align-center>
+    <v-layout row wrap justify-center class="full-height">
       <!-- Security Options -->
-      <v-flex xs12 class="mb-2">
-        <v-toolbar class="primary">
-          <v-toolbar-title>
-            Security Controls
-          </v-toolbar-title>
-        </v-toolbar>
+      <v-flex xs12 class="mb-4">
         <v-card>
+          <v-toolbar class="primary mb-2">
+            <v-toolbar-title>
+              Security Controls
+            </v-toolbar-title>
+          </v-toolbar>
+
           <v-card-text>
             <security-controls />
           </v-card-text>
         </v-card>
       </v-flex>
-      <v-flex xs12 class="mb-2">
-        <v-toolbar class="primary">
-          <v-toolbar-title>
-            {{ $t('settings.label.denominations') }}
-          </v-toolbar-title>
-        </v-toolbar>
+      <v-flex xs12 md6 pr-2>
         <v-card>
+          <v-toolbar class="primary mb-2">
+            <v-toolbar-title>
+              {{ $t('settings.label.denominations') }}
+            </v-toolbar-title>
+          </v-toolbar>
           <v-card-text>
             <p>{{ $t('settings.message.denominations') }}</p>
             <token-display-options />
+          </v-card-text>
+        </v-card>
+      </v-flex>
+      <v-flex xs12 md6>
+        <v-card>
+          <v-toolbar class="primary mb-2">
+            <v-toolbar-title>
+              {{ $t('settings.label.update_frequency') }}
+            </v-toolbar-title>
+          </v-toolbar>
+
+          <v-card-text>
+            <p>{{ $t('settings.message.update_frequency') }}</p>
+            <time-interval-options />
           </v-card-text>
         </v-card>
       </v-flex>
@@ -31,9 +46,19 @@
   </v-container>
 </template>
 
+<style scoped>
+  .full-height .flex {
+    display: flex;
+  }
+
+  .full-height .flex > .v-card {
+    flex: 1 1 auto;
+  }
+</style>
 <script>
   import SecurityControls from '~/components/SecurityControls'
   import TokenDisplayOptions from '~/components/TokenDisplayOptions'
+  import TimeIntervalOptions from '~/components/TimeIntervalOptions'
 
   function initialDataState() {
     return {
@@ -54,6 +79,7 @@
 export default {
   components: {
     SecurityControls,
+    TimeIntervalOptions,
     TokenDisplayOptions
   },
   /**
@@ -95,7 +121,7 @@ export default {
           this.$store.commit('setLoading', { t: 'router', v: false })
         }
       }.bind(this),
-      this.$g('internal.controllerPollReadyInterval')
+      this.$store.state.time_definitions.controller_poll
     )
   },
   methods: {
@@ -103,9 +129,7 @@ export default {
      * Facade handler for picking up password reset request
      */
     changePassword() {
-
-      // Check whether the existing password matches records
-      console.log(this.passwordsMatch())
+      // TODO Working from here
       // Check that the two passwords match just in case validation failed
       // Update the state variable for the password change
     },

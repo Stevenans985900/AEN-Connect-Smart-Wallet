@@ -120,6 +120,7 @@ module.exports = {
         src: '@/plugins/localStorage',
         ssr: false
     },
+    '@/plugins/logger',
     '@/plugins/vuebar',
     '@/plugins/vuetify',
     '@/plugins/walletImage',

@@ -19,7 +19,7 @@ import {
   UInt64,
   XEM
 } from 'chain-js-sdk'
-
+import Vue from 'vue'
 import {
   mergeMap
 } from 'rxjs/operators'
@@ -70,7 +70,6 @@ export default class Aen extends Generic {
         new NamespaceHttp(this.apiEndpoint)
       )
       const addressObject = Address.createFromRawAddress(options.address)
-
       return mosaicService
       .mosaicsAmountViewFromAddress(addressObject)
       .pipe(
@@ -81,6 +80,7 @@ export default class Aen extends Generic {
           resolve(mosaic.relativeAmount())
         },
         (error) => {
+          Vue.$log.error('Could not get balance', error)
           reject(error)
         }
       )
@@ -143,10 +143,9 @@ export default class Aen extends Generic {
         new Password(options.password),
         options.account.privateKey,
         options.network.byte)
-
       const walletObject = {
         publicKey: options.account.publicKey,
-        address: wallet.address.address,
+        address: wallet.address.toLowerCase(),
         network: options.network,
         credentials: {
           password: options.password,

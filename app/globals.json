@@ -5,12 +5,21 @@
   "google_recaptcha_key": "NA",
   "internal": {
     "baseImagePath": "/",
+    "onlineInterval": "15000",
     "controllerPollReadyInterval": 1000,
     "commonTasksInterval": 900000,
     "apiEndpointPingInterval": 10000,
+    "loggerEnabled": true,
     "walletCheckInterval": 600000,
     "exchangeRateUpdateInterval": 900000,
     "walletRefreshGraceTime": 600000
+  },
+  "time_definitions": {
+    "api_ranking": 90000,
+    "controller_poll": 500,
+    "online_interval": 15000,
+    "transaction_watch": 15000,
+    "wallet_update": 30000
   },
   "userExperience": {
     "notificationTimeout": 6000,
@@ -97,6 +106,7 @@
         "address": "https://###NETWORK_IDENTIFIER###.infura.io/v3/9a666ac7a44747428586ff05020f91fc"
       }
     ],
+    "transaction_blocks_confirmed": 15,
     "etherscan": {
       "api_key": "IJQ88ERU7QH9HQNV2NX46G2XJAIEZ6EBPB",
       "api_endpoint": "http://api-###NETWORK_IDENTIFIER###.etherscan.io/api"

@@ -33,13 +33,25 @@
       <v-btn flat to="/" active-class="">
         <v-img src="/logo.png" contain height="25" max-width="125px" />
       </v-btn>
-      <v-toolbar-title class="hidden-sm-and-down text-xs-left" v-text="title" />
+      <v-toolbar-title class="hidden-sm-and-down text-xs-left" v-text="$t('common.label.app_name')" />
       <v-spacer />
       <!-- Environment -->
       <no-ssr>
         <busy />
       </no-ssr>
       <development v-if="environment === 'development'" />
+      <v-menu v-if="haveTrackedTransactions" v-model="menuPendingTransactions" offset-y :close-on-click="false">
+        <v-btn slot="activator" color="green" icon small>
+          <v-icon>
+            swap_horiz
+          </v-icon>
+        </v-btn>
+        <v-card max-width="550px">
+          <v-card-text>
+            <tracked-transactions />
+          </v-card-text>
+        </v-card>
+      </v-menu>
       <help />
     </v-toolbar>
 
@@ -89,9 +101,9 @@ import Busy from '~/components/Busy'
 import Development from '~/components/Development'
 import Help from '~/components/Help'
 import SecurityChallenge from '~/components/SecurityChallenge'
+import TrackedTransactions from '~/components/TrackedTransactions'
 import isElectron from 'is-electron'
 import isOnline from 'is-online'
-// import childProcess from 'child_process'
 if (isElectron()) {
   // TODO Satisfy linter
   // const execFile = require('child_process').execFile
@@ -106,7 +118,8 @@ export default {
     Busy,
     Development,
     Help,
-    SecurityChallenge
+    SecurityChallenge,
+    TrackedTransactions
   },
   /**
    * DATA
@@ -144,7 +157,7 @@ export default {
           to: '/address-book'
         }
       ],
-      title: 'Smart Connect',
+      pendingTransactionsClicked: false,
       userMenu: false
     }
   },
@@ -162,10 +175,17 @@ export default {
       },
       set: function (val) { this.drawerOpen = val }
     },
-    dialogHelp: {
-      get: function () { return this.$store.state.user.help },
-      set: function (val) { this.$store.commit('setUserProperty', {key: 'help', value: val}) }
+    menuPendingTransactions: {
+      get() {
+        if(this.haveTrackedTransactions === true && this.pendingTransactionsClicked === true) {
+          return true
+        } else {
+          return false
+        }
+      },
+      set(val) { this.pendingTransactionsClicked = val }
     },
+    haveTrackedTransactions() { return Object.keys(this.$store.state.wallet.trackedTransactions).length > 0 ? true : false },
     eulaAgreed() { return this.$store.state.user.eulaAgree },
     isOnline() { return this.$store.state.runtime.isOnline },
     buildNumber() { return this.$g('build_number') },
@@ -206,12 +226,18 @@ export default {
   /**
    *
    */
-  beforeMount() {
+  async beforeMount() {
+      this.$log.debug('Running window startup routines')
     // Ensure some global variables are clean for start
     this.$store.commit('CACHE_SKIP', false)
     this.$store.commit('setAppMode', 'web')
     const env = process.env.NODE_ENV || 'dev'
     this.$store.commit('setRuntimeProperty', { key: 'environment', value: env })
+
+    // If time intervals have not been set in the state yet
+    if(Object.keys(this.$store.state.time_definitions).length === 0) {
+      this.$store.commit('TIME_DEF', this.$g('time_definitions'))
+    }
 
     // Determine how to handle main navigation by default depending on device size
     if(this.$vuetify.breakpoint.mdAndUp === true) {
@@ -227,17 +253,14 @@ export default {
       v: true,
       m: 'Page Startup'
     })
-    this.$store.commit('setLoading', {
-      t: 'page',
-      v: false
-    })
+    this.$store.commit('BUSY', false)
 
     this.onlineCheck()
     setInterval(
       function () {
         this.onlineCheck()
       }.bind(this),
-      this.$g('internal.commonTasksInterval')
+      this.$store.state.time_definitions.online_interval
     )
 
     // Desktop app setup
@@ -280,7 +303,7 @@ export default {
       function () {
           this.rankApiNodes()
       }.bind(this),
-      this.$g('internal.apiEndpointPingInterval')
+      this.$store.state.time_definitions.api_ranking
     )
 
     // Perform an initial investigation in to state of each network
@@ -313,10 +336,12 @@ export default {
      */
     async onlineCheck() {
       const result = await isOnline()
-      this.$store.commit('setRuntimeProperty', {
-        key: 'isOnline',
-        value: result
-      })
+      if(this.$store.state.runtime.isOnline !== result) {
+        this.$store.commit('setRuntimeProperty', {
+          key: 'isOnline',
+          value: result
+        })
+      }
     },
     toggleNav() {
       if(this.$vuetify.breakpoint.mdAndUp === true) {

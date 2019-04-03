@@ -1,6 +1,6 @@
 <template>
   <span>
-    {{ displayAmount }}{{ symbolShow }}
+    {{ displayAmount }}&nbsp;{{ symbolShow }}
   </span>
 </template>
 <script>
@@ -8,7 +8,7 @@ export default {
   props: {
     symbol: {
       type: String,
-      default: ''
+      default: 'default'
     },
     type: {
       type: String,

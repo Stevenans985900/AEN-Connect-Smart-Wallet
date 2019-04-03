@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import CryptoJS from 'crypto-js'
+// import CryptoJS from 'crypto-js'
 
 export default {
   props: {
@@ -71,12 +71,9 @@ export default {
   },
   methods: {
     clickBackupWallet() {
-      console.log('user clicked backup wallet')
       if (Object.keys(this.wallet).length === 0) {
-        console.log('using the dialog')
         this.dialogBackup = true
       } else {
-        console.log('trying to backup this wallet')
         this.backupWallet(this.wallet)
       }
     },
@@ -96,17 +93,17 @@ export default {
       downloadAnchorNode.remove()
 
       // Create an encrypted version of the backup
-      const encrypted = 'data:application/octet-stream,' + CryptoJS.AES.encrypt(JSON.stringify(forExport), this.$g('salt')).toString()
-      const downloadEncryptedAnchorNode = document.createElement('a')
-      downloadEncryptedAnchorNode.setAttribute('href', encrypted)
-      downloadEncryptedAnchorNode.setAttribute('download', exportName + '.enc')
-      document.body.appendChild(downloadEncryptedAnchorNode)
-      downloadEncryptedAnchorNode.click()
-      downloadEncryptedAnchorNode.remove()
+      // const encrypted = 'data:application/octet-stream,' + CryptoJS.AES.encrypt(JSON.stringify(forExport), this.$g('salt')).toString()
+      // const downloadEncryptedAnchorNode = document.createElement('a')
+      // downloadEncryptedAnchorNode.setAttribute('href', encrypted)
+      // downloadEncryptedAnchorNode.setAttribute('download', exportName + '.enc')
+      // document.body.appendChild(downloadEncryptedAnchorNode)
+      // downloadEncryptedAnchorNode.click()
+      // downloadEncryptedAnchorNode.remove()
 
       this.$store.commit('showNotification', {
         type: 'info',
-        message: 'A plain JSON version and an encrypted version (which can only be read from this program) have requested download'
+        message: this.$t('backup.message.backup_downloading')
       })
     }
   }

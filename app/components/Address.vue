@@ -64,7 +64,7 @@ export default {
     },
     contacts() { return this.$store.state.wallet.contacts },
     haveContact() {
-      if (this.contacts.hasOwnProperty(this.address)) {
+      if (this.contacts.hasOwnProperty(this.address.toLowerCase())) {
         return true
       } else {
         return false
@@ -72,7 +72,7 @@ export default {
     },
     displayText() {
       if (this.haveContact && this.useAddressBook === true) {
-        return this.contacts[this.address].displayText
+        return this.contacts[this.address.toLowerCase()].displayText
       } else {
         return this.processedAddress
       }

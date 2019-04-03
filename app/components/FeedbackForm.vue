@@ -70,7 +70,7 @@
         if (!this.$refs.feedbackForm.validate()) {
           return false
         }
-        this.$store.commit("setLoading", { m: this.$t('feedback.message.sending'), t: "page", v: true })
+        this.$store.commit("BUSY", 'feedback.message.sending')
 
         axios.post(this.formUrl, {
           feedbackType: this.feedbackType,
@@ -80,7 +80,7 @@
           contactDetails: this.contactDetails
         })
           .then(function () {
-            this.$store.commit("setLoading", { t: "page", v: false })
+            this.$store.commit("BUSY", false)
             this.$store.commit('showNotification', {
               type: 'success',
               message: this.$t('feedback.message.thank_you_message')

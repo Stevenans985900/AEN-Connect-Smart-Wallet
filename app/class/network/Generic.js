@@ -1,54 +1,26 @@
+import Vue from 'vue'
+
 export default class Genetic {
   constructor() {
     this.services = {}
     this.pluginName = 'Abstract'
   }
-  balance(options) {
-    console.debug(this.pluginName + ' Plugin: Balance')
-    console.debug(options)
-  }
+  balance(options) { Vue.$log.debug(this.pluginName+' plugin', options) }
   /**
    * Get details on an individual transaction
    * @param options
    */
-  transactionDetails(options) {
-    console.debug(this.pluginName + ' Plugin: Transaction Details')
-    console.debug(options)
-  }
-  transactionsHistorical(options) {
-    console.debug(this.pluginName + ' Plugin: Transactions Historical')
-    console.debug(options)
-  }
-  transactionsIncoming(options) {
-    console.debug(this.pluginName + ' Plugin: Transactions Incoming')
-    console.debug(options)
-  }
-  transactionsOutgoing(options) {
-    console.debug(this.pluginName + ' Plugin: Transactions Outgoing')
-    console.debug(options)
-  }
-  transactionsUnconfirmed(options) {
-    console.debug(this.pluginName + ' Plugin: Transactions Unconfirmed')
-    console.debug(options)
-  }
+  transactionDetails(options) { Vue.$log.debug(this.pluginName+' plugin: Transaction Details', options)}
+  transactionsHistorical(options) { Vue.$log.debug(this.pluginName+' plugin: Transaction Historical', options) }
+  transactionsIncoming(options) { Vue.$log.debug(this.pluginName+' plugin: Transaction Incoming', options)}
+  transactionsOutgoing(options) { Vue.$log.debug(this.pluginName+' plugin: Transaction Outgoing', options)}
+  transactionsUnconfirmed(options) { Vue.$log.debug(this.pluginName+' plugin: Transaction Unconfirmed', options) }
   /**
    * Send tokens / contract specifics from a wallet
    * @param options
    */
-  transfer(options) {
-    console.debug(this.pluginName + ' Plugin: Transfer')
-    console.debug(options)
-  }
-  getLiveWallet(options) {
-    console.debug(this.pluginName + ' Plugin: Wallet is Live?')
-    console.debug(options)
-  }
-  walletLoad(options) {
-    console.debug(this.pluginName + ' Plugin: Wallet Load')
-    console.debug(options)
-  }
-  walletNew(options) {
-    console.debug(this.pluginName + ' Plugin: Wallet New')
-    console.debug(options)
-  }
+  transfer(options) { Vue.$log.debug(this.pluginName+' plugin', options) }
+  getLiveWallet(options) { Vue.$log.debug(this.pluginName+' plugin', options) }
+  walletLoad(options) { Vue.$log.debug(this.pluginName+' plugin', options) }
+  walletNew(options) { Vue.$log.debug(this.pluginName+' plugin', options) }
 }

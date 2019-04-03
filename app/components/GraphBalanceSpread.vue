@@ -190,12 +190,10 @@ export default {
       }
     },
     renderWatch: function () {
-        console.log('render watch triggered')
         this.processWallets()
     }
   },
   mounted() {
-    console.log('dumping theme variables', this.$vuetify.theme)
     this.processWallets()
 
     this.balanceCheckInterval = setInterval(
@@ -203,7 +201,7 @@ export default {
         // Create a wallet index map to control accordion with
         this.processWallets()
       }.bind(this),
-      this.$g('internal.walletCheckInterval')
+      this.$store.state.time_definitions.wallet_update
     )
 
   },
@@ -231,8 +229,7 @@ export default {
             this.chartTitle = 'USD $' + this.toSmallestDenomination(this.totalValue)
           })
           .catch((err) => {
-            console.error(err)
-            return err
+              this.$log.error(err)
           })
       }
     },
@@ -261,7 +258,6 @@ export default {
       })
     },
     toSmallestDenomination(input) {
-      console.log('going to be drawing smallest denomination for', input)
       let answer = input
       let suffix = ''
       // If over million, format that way

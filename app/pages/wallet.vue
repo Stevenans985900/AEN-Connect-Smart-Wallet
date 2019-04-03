@@ -62,9 +62,9 @@
           </v-menu>
         </v-toolbar>
         <!-- Wallet Management -->
-        <v-card v-bar>
+        <v-card v-bar class="apply-active-expansion">
           <v-card-text v-if="haveWallet" style="max-height: 75vh;">
-            <v-expansion-panel>
+            <v-expansion-panel popout>
               <v-expansion-panel-content v-for="(wallet, address) in wallets" :key="address">
                 <!-- Main Table Row -->
                 <div slot="header" @click="accordionTogglingWallet(wallet)">
@@ -74,8 +74,17 @@
                     </v-flex>
                     <v-flex xs7 sm5 class="text-truncate">
                       <v-layout row wrap>
-                        <v-flex xs12 sm6>
+                        <v-flex  xs12 sm6>
                           {{ wallet.name }}
+                          <v-btn
+                            v-if="selectedWalletAddress === wallet.address"
+                            icon
+                            @click="dialogEditWalletClick($event)"
+                          >
+                            <v-icon>
+                              edit
+                            </v-icon>
+                          </v-btn>
                         </v-flex>
                         <v-flex xs12 sm6>
                           <balance :wallet="wallet" />
@@ -135,11 +144,11 @@
                         <address-render :address="wallet.address" :use-address-book="false" :use-receiver-address="true" />
                       </v-flex>
                       <v-flex xs12>
+                        <tracked-transactions :wallet="wallet" />
                         <wallet-history v-if="wallet.onChain === true" :wallet="wallet" />
                         <activation v-else :wallet="wallet" />
                       </v-flex>
                     </v-layout>
-                    <hr>
                   </v-card-text>
                 </v-card>
               </v-expansion-panel-content>
@@ -163,6 +172,37 @@
           </v-btn>
         </v-toolbar>
         <business-card :wallet="contextWallet" :use-address-book="false" :include-private-key="true" />
+      </v-dialog>
+
+      <!-- Edit Wallet Dialog -->
+      <v-dialog v-if="dialogEditWallet === true" v-model="dialogEditWallet" max-width="500px">
+        <v-toolbar class="primary">
+          <v-toolbar-title>{{ contextWallet.name }}</v-toolbar-title>
+          <v-spacer />
+          <v-btn small icon outline @click="dialogEditWallet = false">
+            <v-icon>close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card>
+          <v-card-text>
+            <v-layout row wrap>
+              <v-flex xs12>
+                <v-text-field
+                  :label="$t('common.label.name')"
+                  v-model="modelWalletName"
+                  @keyup.enter="dialogEditWallet = false"
+                />
+              </v-flex>
+              <v-flex xs12>
+                <!-- The details are written straight in to the model so, simply close the dialog box -->
+                <!-- TODO When adding more wallet customisation features, edit the way information is save -->
+                <v-btn color="primary" @click="dialogEditWallet = false">
+                  {{ $t('common.action.save') }}
+                </v-btn>
+              </v-flex>
+            </v-layout>
+          </v-card-text>
+        </v-card>
       </v-dialog>
 
       <!-- New Wallet Dialog -->
@@ -228,11 +268,20 @@
   </v-container>
 </template>
 
+<style>
+  .apply-active-expansion .v-expansion-panel__container--active .v-expansion-panel__header,
+  .apply-active-expansion .v-expansion-panel__container--active .v-card__text,
+  .apply-active-expansion .v-expansion-panel__container--active .v-table,
+  .apply-active-expansion .v-expansion-panel__container--active .v-datatable__actions {
+    background-color: var(--primary-dark-1) !important;
+  }
+</style>
 <script>
 import Activation from '~/components/Activation'
 import Balance from '~/components/Balance'
 import BackupWallet from '~/components/BackupWallet'
 import RefreshWallet from '~/components/RefreshWallet'
+import TrackedTransactions from '~/components/TrackedTransactions'
 // import VueRecaptcha from 'vue-recaptcha'
 import WalletHistory from '~/components/WalletHistory'
 import MakeTransfer from '~/components/MakeTransfer'
@@ -247,6 +296,7 @@ function initialDataState() {
     dialogReceiveTransfer: false,
     dialogRemoveWallet: false,
     dialogAddressShow: false,
+    dialogEditWallet: false,
     activeWatchers: [],
     walletType: null,
     valid: false,
@@ -284,6 +334,7 @@ export default {
     MakeTransfer,
     RefreshWallet,
     TestnetButtons,
+    TrackedTransactions,
     WalletAdd,
     WalletHistory
   },
@@ -297,6 +348,12 @@ export default {
     }
   },
   computed: {
+    modelWalletName: {
+      get() { if(this.contextWallet) { return this.contextWallet.name } else { return '' } },
+      set(val) { this.$store.commit('wallet/setWalletProperty', {
+        address: this.contextWallet.address, key: 'name', value: val
+      }) }
+    },
     mainWalletAddress() { return this.$store.state.wallet.aen.mainAddress },
     environment() {
       return this.$store.state.runtime.environment
@@ -318,7 +375,6 @@ export default {
     }
   },
   mounted: function () {
-    console.debug('P:W:Wallets Page Started')
     // Only start once global loading finished
     const preparationInterval = setInterval(
       function () {
@@ -326,16 +382,22 @@ export default {
         clearInterval(preparationInterval)
         this.$store.commit('setLoading', { t: 'router', v: false })
       }.bind(this),
-      this.$g('internal.controllerPollReadyInterval')
+      this.$store.state.time_definitions.controller_poll
     )
   },
   methods: {
+    dialogEditWalletClick(event) {
+      event.stopPropagation()
+      this.dialogEditWallet = true;
+    },
+    trackedTransactions(wallet) {
+      const transactions = this.$store.getters['wallet/trackedTransactionsByWallet'](wallet)
+      console.log('tracked transactions', transactions)
+      return transactions
+    },
     accordionTogglingWallet(wallet) {
       this.contextWallet = wallet
       this.selectedWalletAddress = wallet.address
-        console.log('toggled accordion')
-        console.log(this.contextWallet)
-        console.log(this.selectedWalletAddress)
       // Check whether the user security is ok
       if(this.contextWallet.onChain === false) {
         const walletLiveCheckInterval = setInterval(
@@ -351,7 +413,7 @@ export default {
               }
             })
           }.bind(this),
-          this.$g('internal.commonTasksInterval')
+          this.$store.state.time_definitions.wallet_update
         )
       }
       this.dialogWalletView = true

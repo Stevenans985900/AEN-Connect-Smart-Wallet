@@ -1,6 +1,9 @@
+import Vue from 'vue'
 import Generic from '~/class/network/Generic'
 import axios from 'axios'
 import Web3 from 'web3'
+
+// function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)) }
 
 export default class Contract extends Generic {
   constructor(apiEndpoint, config) {
@@ -12,12 +15,11 @@ export default class Contract extends Generic {
 
   balance(options) {
     super.balance(options)
-
     return new Promise((resolve, reject) => {
       import('~/class/network/contract/erc20').then((erc20Interface) => {
         const contract = new this.web3.eth.Contract(erc20Interface.abi, options.address)
         contract.methods.balanceOf(options.managerWalletAddress).call().then((response) => {
-          resolve(response.balance)
+          resolve(response.toString())
         })
           .catch((err) => {
             reject(err)
@@ -26,14 +28,52 @@ export default class Contract extends Generic {
     })
   }
 
-  async erc20PublicMethod(options) {
-    console.debug('Contract Store: ERC20 Method ('+ options.method + ')')
-    return new Promise((resolve) => {
+  async contractInformation(options) {
+    Vue.$log.debug('Contract Method', options)
+    var contract = {}
+    return new Promise(async (resolve, reject) => {
+      import('~/class/network/contract/' + options.contractAddress).then((erc20Interface) => {
+        contract.contractName = erc20Interface.name
+        contract.decimals = erc20Interface.decimals
+        contract.symbol = erc20Interface.symbol
+        resolve(contract)
+      })
+      // If app is not aware of the contract specification, try and get details from the wire. this is quite likely
+      .catch(async () => {
+        try {
+          contract.contractName = await this.erc20PublicMethod({
+            contractAddress: options.contractAddress,
+            method: 'name'
+          })
+          contract.decimals = await this.erc20PublicMethod({
+            contractAddress: options.contractAddress,
+            method: 'decimals'
+          })
+          contract.symbol = await this.erc20PublicMethod({
+            contractAddress: options.contractAddress,
+            method: 'symbol'
+          })
+          resolve(contract)
+        } catch (err) {
+          reject(err)
+        }
+      })
+    })
+  }
+
+  erc20PublicMethod(options) {
+    Vue.$log.debug('Contract Plugin: ERC20 Method', options)
+    return new Promise((resolve, reject) => {
       import('~/class/network/contract/erc20').then((erc20Interface) => {
         const contract = new this.web3.eth.Contract(erc20Interface.abi, options.contractAddress)
-        contract.methods[options.method]().call().then((response) => {
-          console.debug('Contract Store: ERC20 Method Result '+ options.method + ' = ' + response)
+        contract.methods[options.method]().call()
+        .then((response) => {
+          Vue.$log.debug('Contract Store: ERC20 Method Result ' + options.method + ' = ' + response)
           resolve(response)
+        })
+        .catch ((err) => {
+          Vue.$log.debug('ERC20 Method failed because', err)
+          reject(err)
         })
       })
     })
@@ -131,19 +171,14 @@ export default class Contract extends Generic {
 
     return new Promise((resolve) => {
       resolve({
-        name: options.contractName,
-        address: options.address,
+        name: options.name,
+        address: options.address.toLowerCase(),
         onChain: true,
         managerWalletAddress: options.managerWalletAddress,
         symbol: options.symbol,
         decimals: options.decimals
       })
     })
-  }
-
-  walletNew(options) {
-    Generic.prototype.walletNew.call(this, options)
-    return this.web3.eth.accounts.create(options.password)
   }
 
   getWeb3() {

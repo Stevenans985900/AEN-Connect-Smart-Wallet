@@ -64,8 +64,11 @@ export default {
   },
   computed: {
     address() {
-      if (!this.transaction.hasOwnProperty('from')) return 'Unknown'
-      return this.transaction.from
+      if(this.direction === 'incoming') {
+        return this.transaction.from
+      } else {
+        return this.transaction.to
+      }
     },
     color() {
       return (this.direction === 'incoming' ? 'green' : 'red')

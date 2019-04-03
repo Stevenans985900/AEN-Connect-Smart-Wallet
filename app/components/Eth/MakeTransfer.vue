@@ -133,11 +133,8 @@
       initiateTransfer() {
 
         this.$store.dispatch('security/getCredentials', this.wallet.address).then((credentials) => {
-          this.$store.commit('setLoading', {
-            t: 'page',
-            v: true,
-            m: this.$t('wallet.message.transfer_start')
-          })
+          this.$store.dispatch('busy', 'wallet.message.transfer_start')
+
           this.$store.dispatch('wallet/transfer', {
             credentials: credentials,
             source: this.wallet,
@@ -150,36 +147,12 @@
               address: this.address,
               amount: this.amount.toString()
             }
-          }).then((receipt) => {
-            console.log('receipt from the transaction')
-            console.log(receipt)
-
-            const networkHandler = this.$store.getters['wallet/networkHandler']('eth')
-            const apiEndpoint = this.$store.state.wallet.eth.activeApiEndpoint
-                .replace('###NETWORK_IDENTIFIER###', this.wallet.network.identifier)
-            networkHandler.setProvider(apiEndpoint)
-            const transactionWatcherInterval = setInterval(() => {
-              networkHandler.receipt().then((result) => {
-                if(result === true) {
-                  this.$store.commit('showNotification', {
-                    type: 'success',
-                    message: this.$t('wallet.message.transfer_complete')
-                  })
-                  clearInterval(transactionWatcherInterval)
-                }
-              })
-
-
-            }, 5000)
-
-            // Subscribe to trasnfer event and only stop loading once a receipt has been had
-            this.$store.commit('setLoading', {
-              t: 'page',
-              v: false
-            })
-
+          }).then(() => {
             this.$emit('complete')
           })
+            .catch((something) => {
+              this.$log.error('promise error', something)
+            })
         })
       }
     }
