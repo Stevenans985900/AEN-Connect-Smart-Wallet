@@ -207,7 +207,7 @@
             </v-card>
           </v-tab-item>
 
-          <v-tab>
+          <v-tab v-if="contextWallet.address !== mainWalletAddress">
             {{ $t('common.action.remove') }}
           </v-tab>
           <v-tab-item>
@@ -266,36 +266,6 @@
         <make-transfer :wallet="contextWallet" @complete="transferComplete()" />
       </v-dialog>
 
-      <!-- Remove Wallet Dialog -->
-      <v-dialog v-if="dialogRemoveWallet === true" v-model="dialogRemoveWallet" persistent max-width="600px">
-        <v-toolbar color="primary">
-          <v-toolbar-title>{{ $t('common.message.are_you_sure') }}</v-toolbar-title>
-          <v-spacer />
-          <v-btn small icon outline @click="dialogRemoveWallet = false">
-            <v-icon>close</v-icon>
-          </v-btn>
-        </v-toolbar>
-        <v-card>
-          <v-card-title class="headline">
-            {{ contextWallet.name }}
-          </v-card-title>
-          <v-card-text>
-            <p>
-              {{ $t('wallet.message.remove_warning') }}
-            </p>
-            <backup-wallet :wallet="contextWallet" />
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer />
-            <v-btn color="blue darken-1" flat @click="dialogRemoveWallet = false">
-              {{ $t('common.action.cancel') }}
-            </v-btn>
-            <v-btn color="blue darken-1" flat @click="removeWallet">
-              {{ $t('common.action.confirm') }}
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
     </v-layout>
   </v-container>
 </template>
