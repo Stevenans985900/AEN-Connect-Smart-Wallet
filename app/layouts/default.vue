@@ -40,17 +40,13 @@
         <busy />
       </no-ssr>
       <development v-if="environment === 'development'" />
-      <v-menu v-if="haveTrackedTransactions" v-model="menuPendingTransactions" offset-y :close-on-click="false">
+      <v-menu v-if="haveTrackedTransactions" v-model="menuPendingTransactions" offset-y>
         <v-btn slot="activator" color="green" icon small>
           <v-icon>
             swap_horiz
           </v-icon>
         </v-btn>
-        <v-card max-width="550px">
-          <v-card-text>
-            <tracked-transactions />
-          </v-card-text>
-        </v-card>
+        <tracked-transactions />
       </v-menu>
       <help />
     </v-toolbar>

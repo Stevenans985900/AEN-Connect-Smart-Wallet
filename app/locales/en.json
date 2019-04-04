@@ -261,7 +261,9 @@
       "import_from_file": "Import from file",
       "manual_input_existing": "Manually enter wallet details",
       "name": "Wallet Name",
+      "parent_balance": "Parent Wallet Balance",
       "review": "Review you wallet",
+      "tokens": "Tokens",
       "transfer_from": "Make a Transfer from "
     },
     "message": {
@@ -277,6 +279,7 @@
       "network_miss_wallet": "The wallet is not yet recognised on the network",
       "remove_success": "Your wallet has been remove",
       "remove_warning": "Type in the name of your wallet in the box below and then click delete to proceed. If you remove the wallet, there will be no way to access it unless you have made a backup.",
+      "transfer_check": "Checking Transfers",
       "transfer_complete": "Your transfer has been successfully dispatched to the network",
       "transfer_start": "Sending transaction",
       "updating_balance": "Updating Balance",

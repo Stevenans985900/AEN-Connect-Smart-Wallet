@@ -141,9 +141,16 @@ function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)) }
 export const actions = {
   balance: ({state, commit, dispatch, getters, rootState}, wallet) => {
     let networkHandler
+    // There are cases where this is actually undefined so perform a quick check before trying to proceed
+    if(typeof this !== 'undefined') {
+      if(this.hasOwnProperty('app')) {
+        dispatch('busy', this.app.i18n.t('wallet.message.updating_balance'), {root: true})
+      }
+    }
     return new Promise((resolve, reject) => {
       // Use cache if offline or wallet not yet recognised on network
       if(rootState.runtime.isOnline === false || wallet.onChain === false) {
+        dispatch('busy', false, { root: true })
         resolve(wallet)
       }
       // Use cache if function called to recently
@@ -153,12 +160,13 @@ export const actions = {
           commit('CACHE_SKIP', false, { root: true})
         } else {
           console.debug('Balance: Using cache')
+          dispatch('busy', false, { root: true })
           resolve(wallet)
           return
         }
       }
       // Set the page loader going
-      dispatch('busy', 'wallet.message.updating_balance', { root: true })
+
 
       switch (wallet.type) {
         case 'aen':
@@ -280,7 +288,13 @@ export const actions = {
           return
         }
       }
-      dispatch('busy', 'wallet.message.updating_history', { root: true })
+
+      // There are cases where this is actually undefined so perform a quick check before trying to proceed
+      if(typeof this !== 'undefined') {
+        if(this.hasOwnProperty('app')) {
+          dispatch('busy', this.app.i18n.t('wallet.message.updating_history'), {root: true})
+        }
+      }
       switch (wallet.type) {
         case 'aen':
           networkHandler = getters['networkHandler']('aen')
@@ -482,7 +496,12 @@ export const actions = {
   getLiveWallet({dispatch, getters, state }, wallet) {
     let networkHandler
     return new Promise((resolve) => {
-      dispatch('busy', 'wallet.message.checking_wallet_status', { root: true })
+      // There are cases where this is actually undefined so perform a quick check before trying to proceed
+      if(typeof this !== 'undefined') {
+        if(this.hasOwnProperty('app')) {
+          dispatch('busy', this.app.i18n.t('wallet.message.checking_wallet_status'), {root: true})
+        }
+      }
       switch (wallet.type) {
         case 'aen':
           networkHandler = getters['networkHandler']('aen')
@@ -676,18 +695,25 @@ export const actions = {
    * @param options
    * @returns {Promise<any>}
    */
-  transactionStatus({commit, getters, state}, options) {
+  transactionStatus({commit, dispatch, getters, state}, options) {
     Vue.$log.debug('Transaction Status', options)
     // TODO Check here
     return new Promise((resolve) => {
+      // There are cases where this is actually undefined so perform a quick check before trying to proceed
+      if(typeof this !== 'undefined') {
+        if(this.hasOwnProperty('app')) {
+          dispatch('busy', this.app.i18n.t('wallet.message.transfer_check'), {root: true})
+        }
+      }
       const networkHandler = getters['networkHandler'](options)
       networkHandler.transactionStatus(options.key).then((transaction) => {
-
         // If the transaction is being tracked, update the entry
         if(state.trackedTransactions.hasOwnProperty(options.key)) {
           transaction = Object.assign({}, options, transaction)
           commit('TRANSACTION', transaction)
         }
+        dispatch('busy', false, { root: true})
+
         resolve(transaction)
       })
     })
@@ -707,7 +733,12 @@ export const actions = {
       if (typeof options.destination.address === 'object' && options.destination.address !== null) {
         options.destination.address = options.destination.address.address
       }
-      dispatch('busy', 'wallet.message.transfer_start', { root: true })
+      // There are cases where this is actually undefined so perform a quick check before trying to proceed
+      if(typeof this !== 'undefined') {
+        if(this.hasOwnProperty('app')) {
+          dispatch('busy', this.app.i18n.t('wallet.message.transfer_start'), {root: true})
+        }
+      }
       switch (options.source.type) {
         case 'aen':
           networkHandler = getters['networkHandler']('aen')
@@ -742,7 +773,7 @@ export const actions = {
               amount: options.destination.amount,
               type: options.source.type,
               walletAddress: options.source.address,
-              network: options.source.network,
+              network: options.source.network.identifier,
               status: 'PENDING'
             }
             // Add tracking reference to the transaction
@@ -752,10 +783,12 @@ export const actions = {
           .catch((err) => {
             reject(err)
           })
+            .finally(() => { dispatch('busy', false, { root: true }) })
           break
       }
     })
   },
+
   async pingNetworkApiNode({ commit, state }, network) {
     console.debug('Wallet Store: Query API Node ('+network+')')
     const scanStart = new Date()
