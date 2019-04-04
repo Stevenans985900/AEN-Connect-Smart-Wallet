@@ -207,7 +207,7 @@
             </v-card>
           </v-tab-item>
 
-          <v-tab>
+          <v-tab v-if="contextWallet.address !== mainWalletAddress">
             {{ $t('common.action.remove') }}
           </v-tab>
           <v-tab-item>
@@ -226,7 +226,7 @@
                   <v-flex xs12>
                     <!-- The details are written straight in to the model so, simply close the dialog box -->
                     <!-- TODO When adding more wallet customisation features, edit the way information is save -->
-                    <v-btn color="warning" :disabled="deleteDisabled" @click="deleteWallet">
+                    <v-btn color="warning" :disabled="deleteDisabled" @click="removeWallet">
                       {{ $t('common.action.remove') }}
                     </v-btn>
                   </v-flex>
@@ -266,36 +266,6 @@
         <make-transfer :wallet="contextWallet" @complete="transferComplete()" />
       </v-dialog>
 
-      <!-- Remove Wallet Dialog -->
-      <v-dialog v-if="dialogRemoveWallet === true" v-model="dialogRemoveWallet" persistent max-width="600px">
-        <v-toolbar color="primary">
-          <v-toolbar-title>{{ $t('common.message.are_you_sure') }}</v-toolbar-title>
-          <v-spacer />
-          <v-btn small icon outline @click="dialogRemoveWallet = false">
-            <v-icon>close</v-icon>
-          </v-btn>
-        </v-toolbar>
-        <v-card>
-          <v-card-title class="headline">
-            {{ contextWallet.name }}
-          </v-card-title>
-          <v-card-text>
-            <p>
-              {{ $t('wallet.message.remove_warning') }}
-            </p>
-            <backup-wallet :wallet="contextWallet" />
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer />
-            <v-btn color="blue darken-1" flat @click="dialogRemoveWallet = false">
-              {{ $t('common.action.cancel') }}
-            </v-btn>
-            <v-btn color="blue darken-1" flat @click="removeWallet">
-              {{ $t('common.action.confirm') }}
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
     </v-layout>
   </v-container>
 </template>
@@ -419,6 +389,16 @@ export default {
       function () {
         // Create a wallet index map to control accordion with
         clearInterval(preparationInterval)
+
+        // Set up some listeners to update balance of the wallets
+        for(let walletAddress in this.wallets) {
+          this.$store.dispatch('wallet/balance', this.wallets[walletAddress])
+          setInterval(() => {
+            this.$store.dispatch('wallet/balance', this.wallets[walletAddress])
+          }, this.$store.state.time_definitions.wallet_update)
+
+        }
+
         this.$store.commit('setLoading', { t: 'router', v: false })
       }.bind(this),
       this.$store.state.time_definitions.controller_poll
@@ -431,7 +411,6 @@ export default {
     },
     trackedTransactions(wallet) {
       const transactions = this.$store.getters['wallet/trackedTransactionsByWallet'](wallet)
-      console.log('tracked transactions', transactions)
       return transactions
     },
     accordionTogglingWallet(wallet) {
@@ -476,7 +455,7 @@ export default {
       this.$store.commit('wallet/removeWallet', this.contextWallet)
       this.$store.commit('showNotification', {
         type: 'success',
-        message: 'Your wallet has been removed'
+        message: this.$t('common.message.removed')
       })
     },
     mobileMenuShow(event) {
@@ -499,7 +478,7 @@ export default {
       this.dialogWalletAdd = false
       this.$store.commit('showNotification', {
         type: 'success',
-        message: 'Your wallet has been successfully setup!'
+        message: this.$t('wallet.message.add_success')
       })
     },
     transferComplete() {

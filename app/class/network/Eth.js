@@ -115,6 +115,7 @@ export default class Eth extends Generic {
       return new Promise((resolve) => {
         const privateKey = Buffer.from(options.credentials.privateKey.substring(2), 'hex')
 
+        // TODO Add in split to handle different chainId depending on the network for this wallet
         this.web3.eth.getTransactionCount(options.source.address, 'pending').then((nonce) => {
           const txParams = {
             nonce: this.web3.utils.toHex(nonce),
@@ -122,7 +123,7 @@ export default class Eth extends Generic {
             gas: this.web3.utils.toHex(options.transfer.gas),
             gasLimit: this.web3.utils.toHex(options.transfer.gasLimit),
             to: options.destination.address,
-            value: this.web3.utils.toHex(this.web3.utils.toWei(options.destination.amount, "ether")),
+            value: this.web3.utils.toHex(options.destination.amount),
             chainId: 3
           }
           const tx = new EthereumTx(txParams)

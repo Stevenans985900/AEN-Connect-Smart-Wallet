@@ -11,6 +11,20 @@
             <v-flex xs12>
               {{ $t('wallet.label.balance') }}: <token-value :symbol="symbol" :type="wallet.type" :value="wallet.balance" />
             </v-flex>
+            <v-flex xs10>
+              <v-text-field
+                v-model="computedAmount"
+                :label="$t('common.label.amount')"
+                :error-message="lessThanBalance()"
+                required
+              />
+            </v-flex>
+            <v-flex xs2>
+              <v-select
+                :items="transferAmountDenominationKeys"
+                v-model="selectedTransferDenomination"
+              ></v-select>
+            </v-flex>
             <v-flex xs12>
               <v-combobox
                 v-model="address"
@@ -19,9 +33,6 @@
                 label="To"
                 prepend-icon="contacts"
               />
-            </v-flex>
-            <v-flex xs12>
-              <v-text-field v-model="amount" label="Amount" suffix="ETH" />
             </v-flex>
             <v-flex xs-12>
               <v-layout row wrap>
@@ -86,13 +97,27 @@
         maximumGas: 0,
         normalGas: 0,
         priorityGas: 0,
-        transferValid: false
+        transferValid: false,
+        selectedTransferDenomination: ''
       }
     },
     computed: {
       ...mapGetters([
         'busy'
       ]),
+      computedAmount: {
+        get: function() {
+          if(this.amount === 0 ) { return 0 }
+          return this.amount / this.$g('exchange.divisibility.eth.' + this.selectedTransferDenomination)
+        },
+        set: function(val) {
+          if(val === 0 || val == '') {
+            this.amount = 0
+          } else {
+            this.amount = val * this.$g('exchange.divisibility.eth.' + this.selectedTransferDenomination)
+          }
+        }
+      },
       color () {
         if(this.gasPrice < (this.normalGas / 2)) return 'red'
         if(this.gasPrice < (this.normalGas)) return 'amber'
@@ -109,9 +134,8 @@
         get: function () { return this.gasPrice / 1000000000 },
         set: function (val) { this.gasPrice = val * 1000000000 }
       },
-      symbol() {
-        return this.$store.state.wallet.eth.displaySymbol
-      }
+      symbol() { return this.$store.state.wallet.eth.displaySymbol },
+      transferAmountDenominationKeys() { return Object.keys(this.$g('exchange.divisibility.eth')) }
     },
     watch: {
       priorityTransfer: function(val) {
@@ -123,6 +147,7 @@
       }
     },
     mounted() {
+      this.selectedTransferDenomination = this.$g('exchange.base_denomination.eth')
       this.normalGas = this.wallet.network.gasPrice.normal
       this.gas = this.normalGas
       this.gasPrice = this.normalGas
@@ -130,11 +155,11 @@
       this.maximumGas = this.wallet.network.gasPrice.maximum
     },
     methods: {
+      lessThanBalance() {
+        return (this.amount < this.wallet.balance) ? '' : this.$t('wallet.message.cannot_exceed_balance')
+      },
       initiateTransfer() {
-
         this.$store.dispatch('security/getCredentials', this.wallet.address).then((credentials) => {
-          this.$store.dispatch('busy', 'wallet.message.transfer_start')
-
           this.$store.dispatch('wallet/transfer', {
             credentials: credentials,
             source: this.wallet,
@@ -150,9 +175,9 @@
           }).then(() => {
             this.$emit('complete')
           })
-            .catch((something) => {
-              this.$log.error('promise error', something)
-            })
+          .catch((something) => {
+            this.$log.error('promise error', something)
+          })
         })
       }
     }

@@ -237,7 +237,7 @@ export default {
       this.dialogWalletAdd = false
       this.$store.commit('showNotification', {
         type: 'success',
-        message: 'Your wallet has been successfully setup!'
+        message: this.$t('wallet.message.add_success')
       })
     }
   }

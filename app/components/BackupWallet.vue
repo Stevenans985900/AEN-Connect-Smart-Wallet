@@ -92,15 +92,6 @@ export default {
       downloadAnchorNode.click()
       downloadAnchorNode.remove()
 
-      // Create an encrypted version of the backup
-      // const encrypted = 'data:application/octet-stream,' + CryptoJS.AES.encrypt(JSON.stringify(forExport), this.$g('salt')).toString()
-      // const downloadEncryptedAnchorNode = document.createElement('a')
-      // downloadEncryptedAnchorNode.setAttribute('href', encrypted)
-      // downloadEncryptedAnchorNode.setAttribute('download', exportName + '.enc')
-      // document.body.appendChild(downloadEncryptedAnchorNode)
-      // downloadEncryptedAnchorNode.click()
-      // downloadEncryptedAnchorNode.remove()
-
       this.$store.commit('showNotification', {
         type: 'info',
         message: this.$t('backup.message.backup_downloading')

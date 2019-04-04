@@ -48,12 +48,12 @@ export default {
         if (response === true) {
           this.$store.commit('showNotification', {
             type: 'success',
-            message: 'The wallet is recognised on the blockchain'
+            message: this.$t('wallet.message.network_recognise_wallet')
           })
         } else {
           this.$store.commit('showNotification', {
             type: 'info',
-            message: 'The wallet is not yet recognised on the blockchain'
+            message: this.$t('wallet.message.network_miss_wallet')
           })
         }
       })

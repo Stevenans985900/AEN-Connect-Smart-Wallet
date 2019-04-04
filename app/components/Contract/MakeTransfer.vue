@@ -9,7 +9,8 @@
         <v-container grid-list-md>
           <v-layout wrap>
             <v-flex xs12>
-              {{ $t('wallet.label.balance') }}: <token-value :symbol="wallet.symbol" :type="wallet.type" :value="wallet.balance" />
+              {{ $t('wallet.label.parent_balance') }}: <token-value :symbol="symbol" :type="parentWallet.type" :value="parentWallet.balance" /> <br />
+              {{ $t('wallet.label.tokens') }}: <token-value :symbol="wallet.symbol" :type="wallet.type" :value="wallet.balance" />
             </v-flex>
             <v-flex xs12>
               <v-text-field
@@ -86,7 +87,6 @@ export default {
       maximumGas: 0,
       normalGas: 0,
       priorityGas: 0,
-      parentWallet: null,
       transferValid: false
     }
   },
@@ -105,7 +105,9 @@ export default {
     gasPriceGwei: {
         get: function () { return this.gasPrice / 1000000000 },
         set: function (val) { this.gasPrice = val * 1000000000 }
-    }
+    },
+    parentWallet() { return this.$store.state.wallet.wallets[this.wallet.managerWalletAddress] },
+    symbol() { return this.$store.state.wallet.eth.displaySymbol }
   },
   watch: {
     priorityTransfer: function (val) {
@@ -117,7 +119,6 @@ export default {
     }
   },
   created() {
-    this.parentWallet = this.$store.state.wallet.wallets[this.wallet.managerWalletAddress]
     this.normalGas = this.parentWallet.network.gasPrice.normal
     this.priorityGas = this.parentWallet.network.gasPrice.priority
     this.maximumGas = this.parentWallet.network.gasPrice.maximum
@@ -127,13 +128,12 @@ export default {
         return (this.amount < this.wallet.balance) ? '' : this.$t('wallet.message.cannot_exceed_balance')
     },
     initiateTransfer() {
-      this.$store.dispatch('busy', 'wallet.message.transfer_start')
         this.$store.dispatch('security/getCredentials', this.parentWallet.address).then((credentials) => {
-
             const transactionOptions = {
                 source: this.wallet,
                 transfer: {
                     gasPrice: this.gasPrice,
+                  // TODO Change the code here to reflect user input better
                     gas: this.$g("eth.available_networks")[0].gas.transfer, // litre of gas, mileage
                     gasLimit: this.$g("eth.available_networks")[0].gas.transfer + 4000,
                     managerWallet: this.parentWallet,
@@ -145,15 +145,13 @@ export default {
                 }
             }
             this.$store.dispatch('wallet/transfer', transactionOptions)
-                .then((transfer) => {
-                    this.$log.debug(transfer)
-                    this.$store.dispatch('busy', false)
-                    this.$store.commit('showNotification', {
-                        type: 'success',
-                        message: 'Your transfer has been successfully dispatched to the network'
-                    })
-                    this.$emit('complete')
-                })
+            .then(() => {
+              this.$store.commit('showNotification', {
+                  type: 'success',
+                  message: this.$t('wallet.message.transfer_complete')
+              })
+              this.$emit('complete')
+            })
         })
     }
   }
