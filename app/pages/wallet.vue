@@ -457,6 +457,7 @@ export default {
         type: 'success',
         message: this.$t('common.message.removed')
       })
+      this.dialogEditWallet = false
     },
     mobileMenuShow(event) {
       event.stopPropagation()

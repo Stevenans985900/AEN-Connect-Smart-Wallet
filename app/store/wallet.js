@@ -274,7 +274,8 @@ export const actions = {
     var contractHandler, networkHandler
     return new Promise((resolve) => {
       // Use cache if offline or wallet not yet recognised on network
-      if(rootState.runtime.isOnline === false || wallet.onChain === false) {
+
+      if(rootState.runtime.isOnline === false || (wallet.hasOwnProperty('onChain') && wallet.onChain === false)) {
         resolve(wallet)
       }
       // Use cache if function called to recently
