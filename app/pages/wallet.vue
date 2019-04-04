@@ -226,7 +226,7 @@
                   <v-flex xs12>
                     <!-- The details are written straight in to the model so, simply close the dialog box -->
                     <!-- TODO When adding more wallet customisation features, edit the way information is save -->
-                    <v-btn color="warning" :disabled="deleteDisabled" @click="deleteWallet">
+                    <v-btn color="warning" :disabled="deleteDisabled" @click="removeWallet">
                       {{ $t('common.action.remove') }}
                     </v-btn>
                   </v-flex>
@@ -411,7 +411,6 @@ export default {
     },
     trackedTransactions(wallet) {
       const transactions = this.$store.getters['wallet/trackedTransactionsByWallet'](wallet)
-      console.log('tracked transactions', transactions)
       return transactions
     },
     accordionTogglingWallet(wallet) {
