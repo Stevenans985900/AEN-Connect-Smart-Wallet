@@ -143,9 +143,11 @@ export default class Aen extends Generic {
         new Password(options.password),
         options.account.privateKey,
         options.network.byte)
+
       const walletObject = {
         publicKey: options.account.publicKey,
-        address: wallet.address.toLowerCase(),
+        address: wallet.address.address,
+        addressObject: wallet.address,
         network: options.network,
         credentials: {
           password: options.password,
