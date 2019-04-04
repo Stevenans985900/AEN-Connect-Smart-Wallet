@@ -446,7 +446,7 @@ export default {
       this.$store.commit('wallet/removeWallet', this.contextWallet)
       this.$store.commit('showNotification', {
         type: 'success',
-        message: 'Your wallet has been removed'
+        message: this.$t('common.message.removed')
       })
     },
     mobileMenuShow(event) {
@@ -469,7 +469,7 @@ export default {
       this.dialogWalletAdd = false
       this.$store.commit('showNotification', {
         type: 'success',
-        message: 'Your wallet has been successfully setup!'
+        message: this.$t('wallet.message.add_success')
       })
     },
     transferComplete() {

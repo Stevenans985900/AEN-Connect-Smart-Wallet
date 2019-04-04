@@ -95,25 +95,19 @@ export default {
       if (!this.$refs.makeTransferForm.validate()) {
         return false
       }
-        this.$store.dispatch('security/getCredentials', this.wallet.address).then((credentials) => {
-
-          this.$store.dispatch('busy', 'wallet.message.transfer_start')
-          this.$store.dispatch('wallet/transfer', {
-              credentials: credentials,
-              source: this.wallet,
-              destination: this.destination
-          }).then(() => {
-            this.$store.dispatch('busy', false)
-              this.$store.commit('showNotification', {
-                  type: 'success',
-                  message: this.$t('wallet.message.transfer_complete')
-              })
-              this.$emit('complete')
-          })
+      this.$store.dispatch('security/getCredentials', this.wallet.address).then((credentials) => {
+        this.$store.dispatch('wallet/transfer', {
+            credentials: credentials,
+            source: this.wallet,
+            destination: this.destination
+        }).then(() => {
+            this.$store.commit('showNotification', {
+                type: 'success',
+                message: this.$t('wallet.message.transfer_complete')
+            })
+            this.$emit('complete')
         })
-
-
-
+      })
     }
   }
 }

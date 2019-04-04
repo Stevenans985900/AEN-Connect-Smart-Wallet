@@ -58,7 +58,7 @@
         },
         feedbackMessage: {
           minLength: v => v.length >= 4 || 'Min 4 Characters',
-          maxLength: v => v.length <= 255 || 'Max 255 Characters. If you have so much to say, we\'d love to chat with you directly!'
+          maxLength: v => v.length <= 255 || this.$t('feedback.message.message_length_exceeded')
         }
       }
     }
@@ -83,7 +83,7 @@
             this.$store.commit("BUSY", false)
             this.$store.commit('showNotification', {
               type: 'success',
-              message: this.$t('feedback.message.thank_you_message')
+              message: this.$t('feedback.message.thank_you')
             })
           })
       }

@@ -27,7 +27,7 @@
       "file_choose": "Choose or drag a file here"
     },
     "message": {
-      "import_bad_file": "The uploaded file is invalid",
+      "import_bad_file": "The file you uploaded is invalid",
       "backup_explained": "When you click a wallet from the list below, a file will be downloaded to your device. To later restore a given wallet, choose the import from file option during the add wallet procedure.",
       "backup_downloading": "A JSON file is currently being downloaded to your device. This can be used to restore your wallet later"
     }
@@ -107,7 +107,9 @@
       "coming_soon": "Coming Soon",
       "footer_text": "Aenco Solutions Ltd",
       "name_already_used": "Name already in use",
+      "removed": "Successfully Removed",
       "results_empty": "No results found",
+      "saved": "Successfully Saved",
       "something_went_wrong": "Something went wrong"
     },
     "navigation": {
@@ -129,7 +131,8 @@
       "contact": "Contact",
       "name": "Contact Name"
     },
-    "chunk": {
+    "message": {
+      "added": "Contact has been added to the address book",
       "removal_warning": "If you remove this contact from your address book, you will no longer be able to quickly look them up during operations and where applicable, the long form of their address will be used."
     }
   },
@@ -161,7 +164,8 @@
       "type": "Feedback Type"
     },
     "message": {
-      "thank_you_message": "Thank you for your message",
+      "message_length_exceeded": "Max 255 Characters. We'd love to get in contact with you directly",
+      "thank_you": "Thank you for your message",
       "sending": "Sending Message"
     }
   },

@@ -90,7 +90,7 @@ export default {
     contactAdded() {
       this.$store.commit('showNotification', {
         type: 'success',
-        message: 'Contact added to address book'
+        message: this.$t('contact.message.added')
       })
       this.dialog = false
     }

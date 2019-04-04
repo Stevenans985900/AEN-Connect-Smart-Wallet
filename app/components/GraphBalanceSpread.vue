@@ -214,6 +214,7 @@ export default {
       this.totalValue = 0
       this.chartTitle =''
       this.graphData = {}
+      let exchangeRate
       let walletKey
       // this.reset()
       for (walletKey in this.wallets) {
@@ -222,11 +223,16 @@ export default {
           .then((walletProcessed) => {
             // const color = this.colorSchema[walletProcessed.type]
             // Calculate the dollar value of the wallet
-            const walletValue = (walletProcessed.balance ? walletProcessed.balance * Number(this.$g('exchange.' + walletProcessed.type)) : 0)
-            this.totalValue += walletValue
-            this.graphData[walletProcessed.name] = walletValue
+
+            exchangeRate = this.$g('exchange.' + walletProcessed.type)
+            this.$log.debug('Exchange rate for the current token (' + walletProcessed.type + ') is ' + exchangeRate, walletProcessed)
+            if(exchangeRate) {
+              const walletValue = (walletProcessed.balance ? walletProcessed.balance * Number(exchangeRate) : 0)
+              this.totalValue += walletValue
+              this.graphData[walletProcessed.name] = walletValue
+              this.chartTitle = 'USD $' + this.toSmallestDenomination(this.totalValue)
+            }
             this.processedWallets++
-            this.chartTitle = 'USD $' + this.toSmallestDenomination(this.totalValue)
           })
           .catch((err) => {
               this.$log.error(err)
@@ -234,7 +240,8 @@ export default {
       }
     },
     percentageWorth(wallet) {
-      return ((100 / this.totalValue) * this.graphData[wallet.name]).toFixed(1)
+      const percentage = ((100 / this.totalValue) * this.graphData[wallet.name]).toFixed(1)
+      return percentage === 'NaN' ? '0.0' : percentage
     },
     removeWallet() {
       this.dialogRemoveWallet = false
@@ -254,7 +261,7 @@ export default {
       this.dialogWalletAdd = false
       this.$store.commit('showNotification', {
         type: 'success',
-        message: this.$t('wallet.message.add_sucess')
+        message: this.$t('wallet.message.add_success')
       })
     },
     toSmallestDenomination(input) {

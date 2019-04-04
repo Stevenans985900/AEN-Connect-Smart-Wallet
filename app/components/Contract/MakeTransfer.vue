@@ -127,13 +127,12 @@ export default {
         return (this.amount < this.wallet.balance) ? '' : this.$t('wallet.message.cannot_exceed_balance')
     },
     initiateTransfer() {
-      this.$store.dispatch('busy', 'wallet.message.transfer_start')
         this.$store.dispatch('security/getCredentials', this.parentWallet.address).then((credentials) => {
-
             const transactionOptions = {
                 source: this.wallet,
                 transfer: {
                     gasPrice: this.gasPrice,
+                  // TODO Change the code here to reflect user input better
                     gas: this.$g("eth.available_networks")[0].gas.transfer, // litre of gas, mileage
                     gasLimit: this.$g("eth.available_networks")[0].gas.transfer + 4000,
                     managerWallet: this.parentWallet,
@@ -145,15 +144,13 @@ export default {
                 }
             }
             this.$store.dispatch('wallet/transfer', transactionOptions)
-                .then((transfer) => {
-                    this.$log.debug(transfer)
-                    this.$store.dispatch('busy', false)
-                    this.$store.commit('showNotification', {
-                        type: 'success',
-                        message: 'Your transfer has been successfully dispatched to the network'
-                    })
-                    this.$emit('complete')
-                })
+            .then(() => {
+              this.$store.commit('showNotification', {
+                  type: 'success',
+                  message: this.$t('wallet.message.transfer_complete')
+              })
+              this.$emit('complete')
+            })
         })
     }
   }

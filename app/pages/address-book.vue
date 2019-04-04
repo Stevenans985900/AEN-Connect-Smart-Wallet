@@ -174,14 +174,14 @@ export default {
       this.$store.commit('wallet/deleteContact', contact)
       this.$store.commit('showNotification', {
         type: 'success',
-        message: 'Contact Removed'
+        message: this.$t('common.message.removed')
       })
       this.dialogDeleteContact = false
     },
     contactSaved() {
       this.$store.commit('showNotification', {
         type: 'success',
-        message: 'Contact Saved'
+        message: this.$t('common.message.saved')
       })
       this.dialogEditContact = false
     },
