@@ -12,7 +12,7 @@
         readonly
         @click:append="showPrivateKey = !showPrivateKey"
       />
-      <v-img :src="imageData" aspect-ratio="1" />
+      <v-img v-if="imageData" :src="imageData" aspect-ratio="1" />
     </v-card-text>
   </v-card>
 </template>
