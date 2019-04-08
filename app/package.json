@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "nuxt",
     "build": "nuxt build --no-lock",
+    "electron-dev": "cross-env NODE_ENV=DEV electron .",
+    "electron-build": "nuxt build && electron-builder",
     "start": "nuxt start",
     "generate": "nuxt generate",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
@@ -61,6 +63,9 @@
     "babel-eslint": "^10.0.1",
     "browser-env": "^3.2.6",
     "createjs": "^1.0.1",
+    "electron": "^4.1.4",
+    "electron-builder": "^20.39.0",
+    "electron-devtools-installer": "^2.2.4",
     "eslint": "^5.15.3",
     "eslint-config-standard": ">=12.0.0",
     "eslint-loader": "^2.1.2",
