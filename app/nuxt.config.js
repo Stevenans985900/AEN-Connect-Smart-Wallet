@@ -110,21 +110,7 @@ module.exports = {
   ** Plugins to load before mounting the App
   */
   plugins: [
-    '@/plugins/addressRender',
-    '@/plugins/businessCard',
-    '@/plugins/clipboard',
-    '@/plugins/feedback-tawk',
-    '@/plugins/globals',
-    '@/plugins/i18n',
-    {
-        src: '@/plugins/localStorage',
-        ssr: false
-    },
-    '@/plugins/logger',
-    '@/plugins/vuebar',
-    '@/plugins/vuetify',
-    '@/plugins/walletImage',
-    '@/plugins/youtube'
+    '@/plugins/vuetify'
   ],
 
   /*
@@ -132,14 +118,7 @@ module.exports = {
   */
   modules: [
     // Doc: https://axios.nuxtjs.org/usage
-    '@nuxtjs/axios',
-    ['nuxt-matomo', {
-      matomoUrl: '//stats.aencoin.com/',
-      // trackerUrl: 'https://stats.aencoin.com/matomo.php',
-      siteId: 6,
-      debug: false,
-      verbose: false
-    }]
+    '@nuxtjs/axios'
   ],
   /*
   ** Axios module configuration
