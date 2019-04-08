@@ -64,7 +64,7 @@
     "api_endpoints": [
       {
         "alias": "Block Cypher",
-        "address": "http://api.blockcypher.com/v1/btc/"
+        "address": "https://api.blockcypher.com/v1/btc/"
       },
       {
         "alias": "AEN Proxy",
@@ -109,7 +109,7 @@
     "transaction_blocks_confirmed": 15,
     "etherscan": {
       "api_key": "IJQ88ERU7QH9HQNV2NX46G2XJAIEZ6EBPB",
-      "api_endpoint": "http://api-###NETWORK_IDENTIFIER###.etherscan.io/api"
+      "api_endpoint": "https://api-###NETWORK_IDENTIFIER###.etherscan.io/api"
     },
     "available_networks": [
       {
