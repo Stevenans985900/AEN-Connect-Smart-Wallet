@@ -29,16 +29,16 @@
     "networkVersion": "0.1",
     "api_endpoint_height": "/chain/height",
     "api_endpoints": [{
-        "alias": "API-2",
-        "address": "http://api-2.aencoin.io:3000"
-      },
+      "alias": "API-2",
+      "address": "https://api-2.aencoin.io"
+    },
       {
         "alias": "API-5",
-        "address": "http://api-5.aencoin.io:3000"
+        "address": "https://api-5.aencoin.io"
       },
       {
         "alias": "API-10",
-        "address": "http://api-10.aencoin.io:3000"
+        "address": "https://api-10.aencoin.io"
       }
     ],
     "available_networks": [{
@@ -137,9 +137,9 @@
         "address": "https://ipfs.io/ipfs/QmVAwVKys271P5EQyEfVSxm7BJDKWt42A2gHvNmxLjZMps/"
       },
       {
-      "name": "Ropsten Ethereum Faucet",
-      "address": "https://faucet.ropsten.be"
-    }]
+        "name": "Ropsten Ethereum Faucet",
+        "address": "https://faucet.ropsten.be"
+      }]
   },
   "exchange": {
     "base_denomination": {
