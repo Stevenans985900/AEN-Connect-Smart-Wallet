@@ -31,7 +31,8 @@
     <v-toolbar fixed app>
       <v-toolbar-side-icon v-if="showNav" @click="toggleNav" />
       <v-btn flat to="/" active-class="">
-        <v-img src="/logo.png" contain height="25" max-width="125px" />
+        <img src="logo.png" />
+        <v-img src="~/assets/logo.png" contain height="25" max-width="125px" />
       </v-btn>
       <v-toolbar-title class="hidden-sm-and-down text-xs-left" v-text="$t('common.label.app_name')" />
       <v-spacer />

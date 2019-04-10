@@ -1,7 +1,7 @@
 <template>
   <v-layout row wrap justify-center align-center class="text-xs-center">
     <v-flex xs12 md6 class="mt-4">
-      <v-img src="/logo-800.png" contain />
+      <v-img src="./img/logo-800.png" contain />
       <h1>{{ $t('common.label.app_name') }}</h1>
       <h2>{{ $t('common.label.version') }}: {{ version }}#{{ build }}</h2>
       <p>{{ $t('aen.message.about_aen') }}</p>

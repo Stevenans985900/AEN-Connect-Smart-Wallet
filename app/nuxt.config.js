@@ -147,13 +147,13 @@ module.exports = {
   axios: {
     rejectUnauthorized: false
   },
-
   /*
   ** Build configuration
   */
   build: {
     cache: true,
     parallel: true,
+    // publicPath: 'nuxt/',
     transpile: ['vuetify/lib'],
     plugins: [new VuetifyLoaderPlugin()],
     loaders: {
@@ -175,6 +175,17 @@ module.exports = {
             child_process: 'empty'
         }
       }
+
+      config.module.rules.push({
+        test: /\.(png|jpeg|gif|svg)$/i,
+        loader: 'url-loader',
+        options: {
+          limit: 8192,
+          name: 'img/[name].[hash:7].[ext]',
+          outputPath: "img/"
+        }
+      })
+
       // Run ESLint on save
       if (ctx.isDev && ctx.isClient) {
         config.module.rules.push({
@@ -183,6 +194,11 @@ module.exports = {
           loader: 'eslint-loader',
           exclude: /(node_modules)/
         })
+      }
+
+      if(process.env.hasOwnProperty('BUILD_TARGET') && process.env.BUILD_TARGET === 'android') {
+        console.log('BUILDING FOR ANDROID, EDITING PUBLIC PATHS')
+        config.output.publicPath = '/nuxt/'
       }
 
       // Check if we're in Electron and change the renderer if so

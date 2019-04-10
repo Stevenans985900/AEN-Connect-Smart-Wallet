@@ -7,7 +7,7 @@
     >
       <v-card-text>
         <v-container grid-list-md>
-          <v-layout wrap>
+          <v-layout row wrap>
             <v-flex xs12>
               {{ $t('wallet.label.balance') }}: <token-value :symbol="symbol" :type="wallet.type" :value="wallet.balance" />
             </v-flex>
@@ -30,11 +30,11 @@
                 v-model="address"
                 :items="contacts"
                 item-text="displayText"
-                label="To"
+                :label="$t('common.label.address')"
                 prepend-icon="contacts"
               />
             </v-flex>
-            <v-flex xs-12>
+            <v-flex xs12>
               <v-layout row wrap>
                 <v-flex xs6>
                   <v-text-field v-model="gasPriceGwei" label="Gas Price" suffix="Gwei" />

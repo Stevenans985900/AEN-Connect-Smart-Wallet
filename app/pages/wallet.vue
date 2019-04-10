@@ -96,19 +96,19 @@
                     </v-flex>
                     <!-- Mobile Button -->
                     <v-flex v-else xs2 sm6 class="text-xs-right">
-                      <v-btn small icon @click="mobileMenuShow($event)">
-                        <v-icon>
-                          menu
-                        </v-icon>
-                      </v-btn>
-
-                      <v-menu
-                        v-model="menuMobile"
-                        :position-x="x"
-                        :position-y="y"
-                        offset-y
-                        absolute
-                      >
+                      <v-menu bottom left>
+                        <template v-slot:activator="{ on }">
+                          <v-btn
+                            dark
+                            icon
+                            v-on="on"
+                            @click="$event.stopPropagation()"
+                          >
+                            <v-icon>
+                              menu
+                            </v-icon>
+                          </v-btn>
+                        </template>
                         <v-list>
                           <v-list-tile v-if="wallet.onChain === true" @click="sendShow(wallet, $event)">
                             <v-list-tile-title>{{ $t('common.action.send') }}</v-list-tile-title>

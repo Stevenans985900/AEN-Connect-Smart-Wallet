@@ -7,11 +7,7 @@
     >
       <v-card-text>
         <v-container grid-list-md>
-          <v-layout wrap>
-            <v-flex xs12>
-              {{ $t('wallet.label.parent_balance') }}: <token-value :symbol="symbol" :type="parentWallet.type" :value="parentWallet.balance" /> <br />
-              {{ $t('wallet.label.tokens') }}: <token-value :symbol="wallet.symbol" :type="wallet.type" :value="wallet.balance" />
-            </v-flex>
+          <v-layout row wrap>
             <v-flex xs12>
               <v-text-field
                 v-model="amount"
@@ -28,9 +24,31 @@
                 item-text="displayText"
                 :label="$t('common.label.address')"
                 prepend-icon="contacts"
-                required
               />
             </v-flex>
+
+            <v-flex xs12>
+              <v-layout row wrap>
+                <v-flex xs6>
+                  <v-text-field v-model="gasPriceGwei" label="Gas Price" suffix="Gwei" />
+                </v-flex>
+                <v-flex xs6>
+                  <v-checkbox v-model="priorityTransfer" label="Priority Transfer" />
+                </v-flex>
+                <v-flex xs12>
+                  <v-slider
+                    v-model="gasPrice"
+                    :color="color"
+                    :max="50000000000"
+                    step="2500000000"
+                    min="5000000000"
+                    thumb-label
+                    ticks
+                  />
+                </v-flex>
+              </v-layout>
+            </v-flex>
+
             <v-flex xs12 md6>
               <v-checkbox v-model="priorityTransfer" label="Priority Transfer" />
               <v-text-field
@@ -64,9 +82,9 @@
 </template>
 
 <script>
-    import TokenValue from "~/components/TokenValue"
+    // import TokenValue from "~/components/TokenValue"
 export default {
-  components: { TokenValue },
+  // components: { TokenValue },
   props: {
     wallet: {
       type: Object,
@@ -83,6 +101,7 @@ export default {
       address: '',
       amount: '',
       message: '',
+      parentWallet: null,
       priorityTransfer: false,
       maximumGas: 0,
       normalGas: 0,
@@ -106,8 +125,7 @@ export default {
         get: function () { return this.gasPrice / 1000000000 },
         set: function (val) { this.gasPrice = val * 1000000000 }
     },
-    parentWallet() { return this.$store.state.wallet.wallets[this.wallet.managerWalletAddress] },
-    symbol() { return this.$store.state.wallet.eth.displaySymbol }
+    symbol() { return this.wallet.symbol }
   },
   watch: {
     priorityTransfer: function (val) {
@@ -119,6 +137,7 @@ export default {
     }
   },
   created() {
+    this.parentWallet = this.$store.state.wallet.wallets[this.wallet.managerWalletAddress]
     this.normalGas = this.parentWallet.network.gasPrice.normal
     this.priorityGas = this.parentWallet.network.gasPrice.priority
     this.maximumGas = this.parentWallet.network.gasPrice.maximum
