@@ -9,7 +9,7 @@
         <v-container grid-list-md>
           <v-layout wrap>
             <v-flex xs12>
-              {{ $t('wallet.label.parent_balance') }}: <token-value :symbol="symbol" :type="parentWallet.type" :value="parentWallet.balance" /> <br />
+              {{ $t('wallet.label.parent_balance') }}: <token-value :symbol="symbol" :type="parentWallet.type" :value="parentWallet.balance" /> <br>
               {{ $t('wallet.label.tokens') }}: <token-value :symbol="wallet.symbol" :type="wallet.type" :value="wallet.balance" />
             </v-flex>
             <v-flex xs12>
@@ -42,10 +42,10 @@
               <v-slider
                 v-model="gasPrice"
                 :color="color"
-                :max="maximumGas"
                 label="Gas Price"
-                step="500000"
-                min="100000"
+                max="50000000000"
+                step="2500000000"
+                min="5000000000"
                 thumb-label
                 ticks
               />
@@ -125,7 +125,7 @@ export default {
   },
   methods: {
     lessThanBalance() {
-        return (this.amount < this.wallet.balance) ? '' : this.$t('wallet.message.cannot_exceed_balance')
+      return (this.amount < this.wallet.balance) ? '' : this.$t('wallet.message.cannot_exceed_balance')
     },
     initiateTransfer() {
         this.$store.dispatch('security/getCredentials', this.parentWallet.address).then((credentials) => {

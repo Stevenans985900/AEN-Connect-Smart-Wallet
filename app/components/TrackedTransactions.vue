@@ -9,7 +9,7 @@
           </v-icon>
         </v-flex>
         <v-flex xs8 sm10>
-          {{ transaction.address }}<br />
+          {{ transaction.address }}<br>
           <span class="caption">
             <token-value :value="transaction.amount" :type="transaction.type" />
           </span>

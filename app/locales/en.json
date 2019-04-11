@@ -79,6 +79,7 @@
       "direction": "Direction",
       "feedback": "Feedback",
       "features": "Features",
+      "global": "Global",
       "help": "Help",
       "information": "Information",
       "message": "Message",
@@ -241,8 +242,8 @@
   "settings": {
     "label": {
       "denominations": "Token Denominations",
+      "per_wallet_security": "Individual Wallet Security",
       "update_frequency": "Update Frequency"
-
     },
     "message": {
       "denominations": "By default, the app will try to use the largest denomination available to display token values. If you would like to force display in a set denomination, please choose and option from the dropdown's below for each network.",
@@ -251,7 +252,7 @@
   },
   "wallet": {
     "action": {
-      "add": "Add Wallet",
+      "add": "Add Account",
       "backup": "Backup Wallet"
     },
     "label": {

@@ -26,8 +26,8 @@
               <v-card>
                 <v-card-text>
                   <v-select
-                    :items="apiEndpoints"
                     v-model="currentApi"
+                    :items="apiEndpoints"
                     item-text="alias"
                     item-value="address"
                     :label="$t('network.label.current_api_endpoint')"

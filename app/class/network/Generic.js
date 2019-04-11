@@ -19,8 +19,8 @@ export default class Genetic {
    * Send tokens / contract specifics from a wallet
    * @param options
    */
-  transfer(options) { Vue.$log.debug(this.pluginName+' plugin', options) }
-  getLiveWallet(options) { Vue.$log.debug(this.pluginName+' plugin', options) }
-  walletLoad(options) { Vue.$log.debug(this.pluginName+' plugin', options) }
-  walletNew(options) { Vue.$log.debug(this.pluginName+' plugin', options) }
+  transfer(options) { Vue.$log.debug(this.pluginName+' plugin: Transfer', options) }
+  getLiveWallet(options) { Vue.$log.debug(this.pluginName+' plugin: Get Live Wallet', options) }
+  walletLoad(options) { Vue.$log.debug(this.pluginName+' plugin: Wallet Load', options) }
+  walletNew(options) { Vue.$log.debug(this.pluginName+' plugin: Wallet New', options) }
 }

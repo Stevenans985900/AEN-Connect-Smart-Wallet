@@ -21,9 +21,9 @@
             </v-flex>
             <v-flex xs2>
               <v-select
-                :items="transferAmountDenominationKeys"
                 v-model="selectedTransferDenomination"
-              ></v-select>
+                :items="transferAmountDenominationKeys"
+              />
             </v-flex>
             <v-flex xs12>
               <v-combobox

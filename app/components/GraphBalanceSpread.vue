@@ -3,7 +3,12 @@
     <v-flex xs12 sm4 lg3 pa-2>
       <v-progress-circular v-if="loading === true" indeterminate />
       <v-card v-else flat>
-        <doughnut v-if="totalValue > 0" :title="chartTitle" :data="graphData" id="graphwrapper" />
+        <doughnut
+          v-if="totalValue > 0"
+          id="graphwrapper"
+          :title="chartTitle"
+          :data="graphData"
+        />
         <p v-else>
           {{ $t('wallet.message.blocked_until_transaction') }}
         </p>

@@ -2,7 +2,8 @@ import Vue from 'vue'
 import Generic from '~/class/network/Generic'
 import axios from 'axios'
 import Web3 from 'web3'
-
+import EthereumTx from "ethereumjs-tx";
+// import EthereumTx from 'ethereumjs-tx'
 // function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)) }
 
 export default class Contract extends Generic {
@@ -19,7 +20,13 @@ export default class Contract extends Generic {
       import('~/class/network/contract/erc20').then((erc20Interface) => {
         const contract = new this.web3.eth.Contract(erc20Interface.abi, options.address)
         contract.methods.balanceOf(options.managerWalletAddress).call().then((response) => {
-          resolve(response.toString())
+          console.log(response,options)
+
+          // Work out where the decimal place should be
+          const balance = response.toString()
+          const balanceBreakpoint = balance.length - options.decimals
+          const finalBalance = Number(balance.slice(0, balanceBreakpoint) + '.' + balance.slice(balanceBreakpoint))
+          resolve(finalBalance)
         })
           .catch((err) => {
             reject(err)
@@ -113,31 +120,55 @@ export default class Contract extends Generic {
 
   transfer(options) {
     super.transfer(options)
-    return new Promise(({resolve, reject}) => {
-      let transaction
-            // TODO Add in the flexibility to handle meta contracts if there is a proxy transfer method
-            import('~/class/network/contract/erc20').then((erc20Interface) => {
-              const contract = new this.web3.eth.Contract(erc20Interface.abi, options.source.address)
+    console.log('in the contract transfer method')
+    return new Promise(async (resolve) => {
 
-              transaction = contract.methods.transfer(options.destination.address, options.destination.amount)
-              transaction.chainId = options.transfer.managerWallet.network.network_id
-              transaction.gasPrice = this.web3.utils.toHex(options.transfer.gasPrice)
-              transaction.gas = this.web3.utils.toHex(options.transfer.gas)
-              transaction.gasLimit = this.web3.utils.toHex(options.transfer.gasLimit)
+      const privateKey = Buffer.from(options.transfer.credentials.privateKey.substring(2), 'hex')
+      const erc20Interface = await import('~/class/network/contract/erc20')
+      const contract = new this.web3.eth.Contract(erc20Interface.abi, options.source.address)
+      const nonce = await this.web3.eth.getTransactionCount(options.transfer.managerWallet.address, 'pending')
+      const data = contract.methods.transfer(options.destination.address, options.destination.amount).encodeABI()
 
-              this.web3.eth.accounts.signTransaction(transaction, options.transfer.credentials.privateKey)
-                .then(signedTx => this.web3.eth.sendSignedTransaction(signedTx.rawTransaction))
-                .then((receipt) => {
-                  console.log(receipt)
-                  console.log('Transaction receipt: ', receipt)
-                  resolve(receipt)
-                })
-                .catch((err) => {
-                  console.log('something went wrong when sending a transaction')
-                  console.error(err)
-                  reject(err)
-                })
-            })
+      const txParams = {
+        nonce: this.web3.utils.toHex(nonce),
+        gasPrice: this.web3.utils.toHex(options.transfer.gasPrice),
+        gas: this.web3.utils.toHex(options.transfer.gas),
+        gasLimit: this.web3.utils.toHex(options.transfer.gasLimit),
+        to: options.source.address,
+        data: data,
+        chainId: 3
+      }
+      const tx = new EthereumTx(txParams)
+      tx.sign(privateKey)
+      const serializedTx = tx.serialize()
+      // const meth =
+      this.web3.eth.sendSignedTransaction('0x'+serializedTx.toString('hex'))
+        .on('transactionHash', function(transactionHash) {
+          resolve(transactionHash)
+        })
+        .on('error', function(err){ console.error(err) })
+      //
+      // const nonce = await this.web3.eth.getTransactionCount(options.source.address, 'pending')
+      // const privateKey = Buffer.from(options.transfer.credentials.privateKey.substring(2), 'hex')
+      // const txParams = {
+      //   nonce: this.web3.utils.toHex(nonce),
+      //   gasPrice: this.web3.utils.toHex(options.transfer.gasPrice),
+      //   gas: this.web3.utils.toHex(options.transfer.gas),
+      //   gasLimit: this.web3.utils.toHex(options.transfer.gasLimit),
+      //   data: erc20Interface.bin,
+      //   chainId: 3
+      // }
+      // const tx = new EthereumTx(txParams)
+      // tx.sign(privateKey)
+      // const serializedTx = tx.serialize()
+      //
+      //
+      // this.web3.eth.sendSignedTransaction('0x'+serializedTx.toString('hex'))
+      //   .on('transactionHash', function(transactionHash){
+      //     resolve(transactionHash)
+      //   }.bind(this))
+      //   .on('error', function(err){ console.error(err) })
+
     })
   }
 

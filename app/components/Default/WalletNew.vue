@@ -135,6 +135,7 @@
         }
       },
       mounted: function () {
+        this.walletName = this.type + '-' +this.$store.state.wallet[this.type].walletCount
         if(!this.multipleNetworks) {
           this.network = this.$g(this.type + '.available_networks')[0]
         }

@@ -51,9 +51,9 @@
                 <v-list-tile @click="walletType = 'eth'; dialogWalletAdd = true">
                   <v-list-tile-title>{{ $t('network.label.eth') }}</v-list-tile-title>
                 </v-list-tile>
-                <!--<v-list-tile @click="walletType = 'btc'; dialogWalletAdd = true">-->
-                <!--<v-list-tile-title>{{ $t('network.label.btc') }}</v-list-tile-title>-->
-                <!--</v-list-tile>-->
+                <v-list-tile @click="walletType = 'btc'; dialogWalletAdd = true">
+                  <v-list-tile-title>{{ $t('network.label.btc') }}</v-list-tile-title>
+                </v-list-tile>
                 <v-list-tile v-if="haveEthereumWallet" @click="walletType = 'contract'; dialogWalletAdd = true">
                   <v-list-tile-title>{{ $t('network.contract') }}</v-list-tile-title>
                 </v-list-tile>
@@ -74,7 +74,7 @@
                     </v-flex>
                     <v-flex xs7 sm5 class="text-truncate">
                       <v-layout row wrap>
-                        <v-flex  xs12 sm6>
+                        <v-flex xs12 sm6>
                           {{ wallet.name }}
                         </v-flex>
                         <v-flex xs12 sm6>
@@ -90,7 +90,7 @@
                       <v-btn outline small @click="addressShow(wallet)">
                         {{ $t('common.action.receive') }}
                       </v-btn>
-                      <v-btn  outline  small @click="editShow(wallet, $event)">
+                      <v-btn outline small @click="editShow(wallet, $event)">
                         {{ $t('common.action.edit') }}
                       </v-btn>
                     </v-flex>
@@ -135,7 +135,7 @@
                         <testnet-buttons :wallet="wallet" />
                       </v-flex>
                       <v-flex xs12 md6>
-                        <address-render :address="wallet.address" :use-address-book="false" :use-receiver-address="true" />
+                        <address-render :address="wallet.address" :use-address-book="false" />
                       </v-flex>
                       <v-flex xs12>
                         <tracked-transactions :wallet="wallet" />
@@ -180,18 +180,16 @@
         <v-tabs>
           <!--v-model="active"-->
           <v-tab>
-           Edit
+            Edit
           </v-tab>
           <v-tab-item>
             <v-card flat>
               <v-card-text>
                 <v-layout row wrap>
                   <v-flex xs12>
-                  </v-flex>
-                  <v-flex xs12>
                     <v-text-field
-                      :label="$t('common.label.name')"
                       v-model="modelWalletName"
+                      :label="$t('common.label.name')"
                       @keyup.enter="dialogEditWallet = false"
                     />
                   </v-flex>
@@ -219,8 +217,8 @@
                   </v-flex>
                   <v-flex xs12>
                     <v-text-field
-                      :label="$t('common.label.name')"
                       v-model="confirmedWalletName"
+                      :label="$t('common.label.name')"
                     />
                   </v-flex>
                   <v-flex xs12>
@@ -265,7 +263,6 @@
         </v-toolbar>
         <make-transfer :wallet="contextWallet" @complete="transferComplete()" />
       </v-dialog>
-
     </v-layout>
   </v-container>
 </template>

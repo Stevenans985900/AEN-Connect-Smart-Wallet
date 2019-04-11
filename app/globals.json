@@ -144,8 +144,8 @@
   "exchange": {
     "base_denomination": {
       "aen": "aen",
-      "btc": "sat",
-      "eth": "wei"
+      "btc": "btc",
+      "eth": "ether"
     },
     "divisibility": {
       "aen": {

@@ -30,7 +30,7 @@
             :class="{ 'info': isAddressActive('global') }"
             @click="walletAddress = 'global'"
           >
-            {{ $t('common.label.default') }}
+            {{ $t('common.label.global') }}
           </v-btn>
           <v-btn
             v-for="(security, contextWalletAddress) in walletsWithSecurity"
@@ -149,9 +149,9 @@ export default {
   computed: {
     walletsWithoutSecurity() {
       let wallets = {}
-      for (let wallet in this.$store.state.wallet.wallets) {
-        if(!this.$store.state.security.walletPolicies.hasOwnProperty(wallet)) {
-          wallets[wallet] = this.$store.state.wallet.wallets[wallet]
+      for (let walletKey in this.$store.state.wallet.wallets) {
+        if(!this.$store.state.security.walletPolicies.hasOwnProperty(walletKey)) {
+          wallets[walletKey] = this.$store.state.wallet.wallets[walletKey]
         }
       }
       return wallets
@@ -181,11 +181,11 @@ export default {
             this.$store.commit('security/setGlobalPolicy', policy)
           } else {
             this.$store.commit('security/setWalletPolicy', {
-              walletAddress: this.walletAddress,
+              address: this.walletAddress,
               policy: policy
             })
             this.$store.commit('security/setWalletPolicyProperty', {
-              walletAddress: this.walletAddress,
+              address: this.walletAddress,
               key: 'securityLevel',
               value: inputLevel
             })
@@ -243,12 +243,12 @@ export default {
           })
         } else {
           this.$store.commit('security/setWalletPolicyProperty', {
-            walletAddress: this.walletAddress,
+            address: this.walletAddress,
             key: 'securityLevel',
             value: 'custom'
           })
           this.$store.commit('security/setWalletPolicyProperty', {
-            walletAddress: this.walletAddress,
+            address: this.walletAddress,
             key: 'transaction_start',
             value: val
           })
@@ -277,12 +277,12 @@ export default {
           })
         } else {
           this.$store.commit('security/setWalletPolicyProperty', {
-            walletAddress: this.walletAddress,
+            address: this.walletAddress,
             key: 'securityLevel',
             value: 'custom'
           })
           this.$store.commit('security/setWalletPolicyProperty', {
-            walletAddress: this.walletAddress,
+            address: this.walletAddress,
             key: 'wallet_open',
             value: val
           })
@@ -313,12 +313,12 @@ export default {
       this.$store.commit('security/removeWalletPolicy', addressToDelete)
     },
     addSecurityPolicy(wallet) {
-      this.$store.commit('security/setWalletPolicy', {
-        walletAddress:  wallet.address,
+      this.$store.commit('security/WALLET_POLICY', {
+        address:  wallet.address,
         policy: this.$store.state.security.globalPolicy
       })
       this.$store.commit('security/setWalletPolicyProperty', {
-        walletAddress: wallet.address,
+        address: wallet.address,
         key: 'securityLevel',
         value: this.$store.state.security.securityLevel
       })
@@ -326,6 +326,7 @@ export default {
       this.walletAddress = wallet.address
     },
     walletFromAddress(address) {
+      console.log('trying to get the wallet for address', address)
       return this.$store.state.wallet.wallets[address]
     }
   }

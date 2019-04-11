@@ -1,13 +1,17 @@
 <template>
   <v-layout row wrap>
     <v-flex
+      v-if="address"
       xs11
       :class="{ 'text-xs-right': showAdd }"
-      v-if="address"
     >
       <clipboard :data="address" :display-text="displayText" />
     </v-flex>
-    <v-flex xs1 class="text-xs-left" v-if="address">
+    <v-flex
+      v-if="address"
+      xs1
+      class="text-xs-left"
+    >
       <!-- New transfer -->
       <v-dialog v-if="haveContact === false && showAdd === true" v-model="dialog" persistent max-width="600px">
         <v-btn slot="activator" small icon>
@@ -58,9 +62,6 @@ export default {
   },
   computed: {
     processedAddress() {
-      if(this.useReceiverAddress) {
-          return this.$store.state.wallet.wallets[this.address].receiverAddress
-      }
       return this.address
     },
     contacts() { return this.$store.state.wallet.contacts },

@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import $g from '~/globals.json'
 import Aen from '~/class/network/Aen'
 import Btc from '~/class/network/Btc'
 import Contract from '~/class/network/Contract'
@@ -10,25 +11,28 @@ export const initialState = {
   wallets: {},
   trackedTransactions: {},
   aen: {
+    walletCount: 1,
     mainAddress: '',
     activeApiEndpoint: '',
     apiPing: 9999,
     blockHeight: 0,
     blockScore: 0,
     network: {},
-    displaySymbol: 'default'
+    displaySymbol: $g.exchange.base_denomination.aen
   },
   btc: {
+    walletCount: 1,
     activeApiEndpoint: '',
     apiPing: 9999,
     network: {},
-    displaySymbol: 'default'
+    displaySymbol: $g.exchange.base_denomination.btc
   },
   eth: {
+    walletCount: 1,
     activeApiEndpoint: '',
     apiPing: 9999,
     network: {},
-    displaySymbol: 'default'
+    displaySymbol: $g.exchange.base_denomination.eth
   },
   internal: {
     walletCheckInterval: 10000,
@@ -547,6 +551,12 @@ export const actions = {
    */
   load({state, commit, getters, dispatch}, options) {
     const typeRef = options.type[0].toUpperCase() + options.type.slice(1)
+
+      // Check whether the name has already been used and add a random suffix if so
+      if(getters['getByName'](options.name)) {
+        options.name = options.name + (Math.random() + 1).toString(36).substring(6)
+      }
+
     console.debug('Wallet Store: Load (' + typeRef + ')')
     return new Promise(async (resolve) => {
       const wallet = {
@@ -576,6 +586,10 @@ export const actions = {
                     value: wallet.address
                   })
                 }
+                commit('setAenProperty', {
+                  key: 'walletCount',
+                  value: (state.aen.walletCount + 1)
+                })
                 dispatch('security/monitorWallet', wallet, {root:true})
                 delete wallet.credentials
                 commit('setWallet', wallet)
@@ -591,6 +605,10 @@ export const actions = {
             dispatch('security/monitorWallet', wallet, {root:true})
             delete wallet.credentials
             commit('setWallet', wallet)
+            commit('setBtcProperty', {
+              key: 'walletCount',
+              value: (state.btc.walletCount + 1)
+            })
             resolve(wallet)
           })
           break
@@ -615,6 +633,10 @@ export const actions = {
             dispatch('security/monitorWallet', wallet, {root:true})
             delete wallet.credentials
             commit('setWallet', wallet)
+            commit('setEthProperty', {
+              key: 'walletCount',
+              value: (state.eth.walletCount + 1)
+            })
             resolve(wallet)
           })
           break
@@ -629,7 +651,7 @@ export const actions = {
    * @param options
    * @returns {Promise<any>}
    */
-  new({dispatch, commit, getters}, options) {
+  new({dispatch, commit, getters, state}, options) {
 
     return new Promise((resolve) => {
       const wallet = {
@@ -651,6 +673,11 @@ export const actions = {
             networkHandler.walletLoad(options).then((walletObject) => {
               Object.assign(wallet, walletObject)
 
+              commit('setAenProperty', {
+                key: 'walletCount',
+                value: (state.aen.walletCount + 1)
+              })
+
               if(options.main === true) {
                 commit('setAenProperty', {
                   key: 'mainAddress',
@@ -671,6 +698,10 @@ export const actions = {
             dispatch('security/monitorWallet', wallet, {root:true})
             delete wallet.credentials
             commit('setWallet', wallet)
+            commit('setBtcProperty', {
+              key: 'walletCount',
+              value: (state.btc.walletCount + 1)
+            })
             resolve(wallet)
           })
           break
@@ -683,6 +714,10 @@ export const actions = {
             console.log('about to add wallet to security')
             dispatch('security/monitorWallet', wallet, {root:true})
             delete wallet.credentials
+            commit('setEthProperty', {
+              key: 'walletCount',
+              value: (state.eth.walletCount + 1)
+            })
             commit('setWallet', wallet)
             resolve(wallet)
           })

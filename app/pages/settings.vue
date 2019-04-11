@@ -1,8 +1,8 @@
 <template>
   <v-container>
-    <v-layout row wrap justify-center class="full-height">
+    <v-layout row wrap justify-center class="full-height mb-4">
       <!-- Security Options -->
-      <v-flex xs12 class="mb-4">
+      <v-flex xs12 md6 class="pr-2">
         <v-card>
           <v-toolbar class="primary mb-2">
             <v-toolbar-title>
@@ -28,19 +28,36 @@
           </v-card-text>
         </v-card>
       </v-flex>
-      <v-flex xs12 md6>
-        <v-card>
-          <v-toolbar class="primary mb-2">
-            <v-toolbar-title>
-              {{ $t('settings.label.update_frequency') }}
-            </v-toolbar-title>
-          </v-toolbar>
+    </v-layout>
 
-          <v-card-text>
-            <p>{{ $t('settings.message.update_frequency') }}</p>
-            <time-interval-options />
-          </v-card-text>
-        </v-card>
+    <v-layout row wrap>
+      <v-flex xs12>
+        <v-expansion-panel>
+          <v-expansion-panel-content>
+            <template v-slot:header>
+              <div>
+                {{ $t('settings.label.update_frequency') }}
+              </div>
+            </template>
+            <v-card>
+              <v-card-text>
+                <time-interval-options />
+              </v-card-text>
+            </v-card>
+          </v-expansion-panel-content>
+          <v-expansion-panel-content>
+            <template v-slot:header>
+              <div>
+                {{ $t('settings.label.per_wallet_security') }}
+              </div>
+            </template>
+            <v-card>
+              <v-card-text>
+                <security-controls :global-security-only="false" />
+              </v-card-text>
+            </v-card>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
       </v-flex>
     </v-layout>
   </v-container>
