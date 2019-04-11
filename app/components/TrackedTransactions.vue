@@ -64,7 +64,7 @@
           case 'aen':
             return ''
           case 'btc':
-            return ''
+            return 'https://live.blockcypher.com/btc-testnet/tx/'+transaction.transactionHash+'/'
           case 'eth':
             return 'https://'+transaction.network+'.etherscan.io/address/' + transaction.transactionHash
         }
