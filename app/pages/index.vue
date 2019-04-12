@@ -87,6 +87,7 @@ import WalletAdd from '~/components/WalletAdd'
 
 function initialDataState() {
   return {
+    interval: null,
     panel: [true, false, false],
     dialogEulaAgree: false,
     wallet: null,
@@ -137,22 +138,24 @@ export default {
    * MOUNTED
    */
   mounted: function () {
-    this.$log.debug('Index Startup')
+    this.$log.debug('Dashboard Startup')
     // Only start once global loading finished
-    const preparationInterval = setInterval(
+    this.interval = setInterval(
       function () {
         if (this.$store.getters.booting === false) {
-          // Redirect user to the dashboard if they already have account
           if (this.$store.getters["wallet/haveWalletType"]('aen') === true) {
             this.$log.debug('Redirecting user to the dashboard')
             this.$nuxt.$router.replace({ path: '/dashboard' })
           }
-          clearInterval(preparationInterval)
+          clearInterval(this.interval)
           this.$store.commit('setLoading', { t: 'router', v: false })
         }
       }.bind(this),
       this.$store.state.time_definitions.controller_poll
     )
+  },
+  beforeDestroy() {
+    clearInterval(this.interval)
   },
   /**
    * METHODS

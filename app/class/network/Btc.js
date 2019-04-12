@@ -41,7 +41,6 @@ export default class Btc extends Generic {
       const address = this.apiEndpoint + options.network.block_cypher_id + '/addrs/' + options.address + '/balance'
       axios.get(address)
         .then(function (response) {
-          console.log('Response from BTC Balance', response)
           resolve(response.data.balance)
         })
         .catch(function (error) {
@@ -54,7 +53,6 @@ export default class Btc extends Generic {
     return new Promise((resolve, reject) => {
       axios.get(this.apiEndpoint + this.context.block_cypher_id)
         .then((response) => {
-          console.log(response)
           resolve(response.data.height)
         })
         .catch((err) => { reject(err) })
@@ -69,7 +67,6 @@ export default class Btc extends Generic {
       const address = this.apiEndpoint + options.network.block_cypher_id + '/addrs/' + options.address
       axios.get(address)
         .then(function (response) {
-          console.log(response.data)
           if(response.data.total_received === 0) {
             resolve(false)
           }
@@ -102,10 +99,8 @@ export default class Btc extends Generic {
    * @returns {SimpleWallet}
    */
   walletLoad(options) {
-    console.log('in wallet load')
     super.walletLoad(options)
-    return new Promise(({resolve}) => {
-
+    return new Promise((resolve) => {
       // Regenerate the wallet from the wallet import format
       const keyPair = bitcoin.ECPair.fromWIF(options.walletImportFormat, bitcoin.networks[options.network.identifier])
       const {address} = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey, network: bitcoin.networks[options.network.identifier] })
@@ -149,9 +144,9 @@ export default class Btc extends Generic {
   /**
    * Transaction Information
    * Gets detailed information about a given transaction seeing as the transaction listing itself is quite light
+   * TODO Replace this function with the normalised transaction details from Generic
    */
   transactionInfo(options) {
-    console.debug('BTC Plugin: Transaction Info', options)
     return new Promise((resolve) => {
       const address = this.apiEndpoint + options.network.block_cypher_id + '/txs/' + options.hash
       axios.get(address)
@@ -178,14 +173,17 @@ export default class Btc extends Generic {
   transactionsUnconfirmed(options) {
     super.transactionsUnconfirmed(options)
   }
+  /**
+   * TODO - This function is currently broken and needs some TLC
+   * @param options
+   * @returns {Promise<any>}
+   */
   transfer(options) {
     super.transfer(options)
     return new Promise((resolve, reject) => {
 
       const key =  bitcoin.ECPair.fromWIF(options.credentials.walletImportFormat, bitcoin.networks[options.source.network.identifier])
-      console.log('retrieved key OK', key)
       const transactionBuilder = new bitcoin.TransactionBuilder(bitcoin.networks[options.source.network.identifier])
-      console.log('Created Transaction builder ok')
       transactionBuilder.setVersion(1)
       // Find input transaction with money to use in this transaction
       for(let i = 0; i < options.source.transactions.length; i++) {
@@ -201,7 +199,7 @@ export default class Btc extends Generic {
         tx: builtTransaction
       })
         .then(function (response) {
-          console.log(response)
+          resolve(response)
         })
         .catch(function (error) {
           reject(error)

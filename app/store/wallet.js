@@ -160,10 +160,8 @@ export const actions = {
       // Use cache if function called to recently
       if((Date.now() - wallet.balanceLastSynced) < Vue.prototype.$g('internal.walletRefreshGraceTime')) {
         if(rootState.runtime.skipCacheNextOp === true) {
-          console.debug('Skipping cache')
           commit('CACHE_SKIP', false, { root: true})
         } else {
-          console.debug('Balance: Using cache')
           dispatch('busy', false, { root: true })
           resolve(wallet)
           return
@@ -280,10 +278,8 @@ export const actions = {
       // Use cache if function called to recently
       if((Date.now() - wallet.transactionsLastSynced) < Vue.prototype.$g('internal.walletRefreshGraceTime')) {
         if(rootState.runtime.skipCacheNextOp === true) {
-          console.debug('Skipping cache')
           commit('CACHE_SKIP', false, { root: true})
         } else {
-          console.debug('Transactions Historical: Using cache')
           resolve(wallet)
           return
         }
@@ -327,16 +323,15 @@ export const actions = {
               address: wallet.address
             })
 
+            // TODO WORKING FROM HERE
             // Check if any of the transactions are incoming in order to push the BIP index forward
             for(let key in headTransactions) {
               let transaction = headTransactions[key]
-              console.log('inspecting transaction', transaction)
               if(transaction.tx_input_n === -1) {
                 networkHandler.transactionInfo({
                   hash: transaction.tx_hash,
                   network: wallet.network
                 }).then((transactionInformation) => {
-                  console.log('got detailed info:', transactionInformation)
                   // If one of the output addresses matches the current BIP index, move it forward
                   if(transactionInformation.addresses.includes(wallet.receiverAddress)) {
                     const managedAddressesWithTokens = Object.assign({}, wallet.managedAddressesWithTokens)
@@ -547,12 +542,11 @@ export const actions = {
   load({state, commit, getters, dispatch}, options) {
     const typeRef = options.type[0].toUpperCase() + options.type.slice(1)
 
-      // Check whether the name has already been used and add a random suffix if so
-      if(getters['getByName'](options.name)) {
-        options.name = options.name + (Math.random() + 1).toString(36).substring(6)
-      }
+    // Check whether the name has already been used and add a random suffix if so
+    if(getters['getByName'](options.name)) {
+      options.name = options.name + (Math.random() + 1).toString(36).substring(6)
+    }
 
-    console.debug('Wallet Store: Load (' + typeRef + ')')
     return new Promise(async (resolve) => {
       const wallet = {
         onChain: options.onChain || false,
@@ -706,7 +700,6 @@ export const actions = {
             { type: 'eth', network: options.network.identifier })
           networkHandler.walletNew(options).then((walletObject) => {
             Object.assign(wallet, walletObject)
-            console.log('about to add wallet to security')
             dispatch('security/monitorWallet', wallet, {root:true})
             delete wallet.credentials
             commit('setEthProperty', {
@@ -821,7 +814,7 @@ export const actions = {
   },
 
   async pingNetworkApiNode({ commit, state }, network) {
-    console.debug('Wallet Store: Query API Node ('+network+')')
+    Vue.$log.debug('Wallet Store: Query API Node', network)
     const scanStart = new Date()
     const typeRef = network[0].toUpperCase() + network.slice(1)
     // ### SYNCHRONOUS CODE ###
@@ -878,7 +871,7 @@ export const actions = {
           }
         })
         .catch(() => {
-          console.log('Node offline: ' + thisAddress)
+          Vue.$log.debug('Node offline: ' + thisAddress)
         })
     }.bind(this)
 

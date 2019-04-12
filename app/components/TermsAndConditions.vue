@@ -42,9 +42,9 @@
         HOW WE COLLECT INFORMATION
       </h3>
       <p>
-        When You Contact Us. <br >
-        We may collect certain information if you choose to contact us, if you use our Services or if you report a bug or other error with AEN Connect. This may include contact information such as your name, email address, phone number, and public wallet address.  We, or companies that provide services on our behalf, may also collect certain Non-Personal Information from you, such as your locally hosted public wallet (a “Wallet”) addresses.<br >
-        Information We Automatically Collect<br >
+        When You Contact Us. <br>
+        We may collect certain information if you choose to contact us, if you use our Services or if you report a bug or other error with AEN Connect. This may include contact information such as your name, email address, phone number, and public wallet address.  We, or companies that provide services on our behalf, may also collect certain Non-Personal Information from you, such as your locally hosted public wallet (a “Wallet”) addresses.<br>
+        Information We Automatically Collect<br>
         Users who visit our website or use our application may have their device’s IP address logged for the purpose of generating anonymous statistics or troubleshooting the performance of our web servers. Your IP address will not be used to track or identify you, but may be used to determine your geographic location in order to determine which of our services you are presented with. Users of our website or mobile applications will receive an anonymous unique device id (“UDID”) for the purpose of identifying the device to AEN Connect servers. This UDID will not be tied to users’ identities, but will be used for debugging purposes and to differentiate devices when users access our Services using multiple devices.
       </p>
       <h3>
@@ -161,11 +161,11 @@
         QUESTIONS
       </h3>
       <p>
-        We’d be happy to answer them. Shoot us an email or send us a note:<br >
-        Email: support@aencoin.com<br >
-        Mailing Address:<br >
-        Vistra Corporate Services Centre<br >
-        Ground Floor NPF Building<br >
+        We’d be happy to answer them. Shoot us an email or send us a note:<br>
+        Email: support@aencoin.com<br>
+        Mailing Address:<br>
+        Vistra Corporate Services Centre<br>
+        Ground Floor NPF Building<br>
         Beach Road, Apia, Samoa
       </p>
     </v-flex>

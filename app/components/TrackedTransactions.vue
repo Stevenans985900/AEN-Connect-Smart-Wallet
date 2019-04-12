@@ -55,8 +55,18 @@
         }
       }
     },
-    mounted() {
-      setInterval(() => { this.processTrackedTransactions() }, this.$g('time_definitions.transaction_watch'))
+    mounted: function () {
+      this.$log.debug('Dashboard Startup')
+      // Only start once global loading finished
+      this.interval = setInterval(
+        function () {
+          this.processTrackedTransactions()
+        }.bind(this),
+        this.$store.state.time_definitions.transaction_watch
+      )
+    },
+    beforeDestroy() {
+      clearInterval(this.interval)
     },
     methods: {
       blockExplorerLink(transaction) {

@@ -34,7 +34,7 @@ export default {
           try {
             this.component = () => import('~/components/' + this.type + '/WalletHistory')
           } catch (err) {
-            console.debug(err)
+            this.$log.debug('Could not load wallet history component for: ' + this.type)
           }
         } else {
           this.component = () => import('./Fallback')

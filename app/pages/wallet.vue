@@ -77,7 +77,7 @@
                         <v-flex xs12 sm6>
                           {{ wallet.name }}
                           <p v-if="testNet(wallet)" class="testnet">
-                            TESTNET
+                            {{ $t('development.label.testnet') }}
                           </p>
                         </v-flex>
                         <v-flex xs12 sm6>
@@ -280,6 +280,7 @@
   .testnet {
     font-size: 0.6rem;
     color: #b5b5b5;
+    text-transform: uppercase;
   }
 </style>
 <script>

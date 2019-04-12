@@ -1,8 +1,5 @@
 <template>
-  <v-progress-circular v-if="loading" indeterminate />
-  <span v-else>
-    <token-value :symbol="symbol" :value="balance" :type="wallet.type" />
-  </span>
+  <token-value :symbol="symbol" :value="balance" :type="wallet.type" />
 </template>
 
 <script>
@@ -17,13 +14,11 @@
       }
     },
     data() {
-      return {
-        loading: true
-      }
+      return {}
     },
     computed: {
       balance() {
-        return this.$store.state.wallet.wallets[this.wallet.address].balance
+        return this.wallet.balance
       },
       symbol() {
         try {
@@ -31,41 +26,6 @@
         } catch (e) {
           return this.wallet.symbol
         }
-      }
-    },
-    // watch: {
-    //   wallet: {
-    //     handler: function() {
-    //       if(this.wallet.onChain === true) {
-    //         this.startListener()
-    //       }
-    //     },
-    //     deep: true
-    //   }
-    // },
-    created() {
-      console.log(this.wallet)
-      if(this.wallet.onChain === true) {
-        this.startListener()
-      } else {
-        this.loading = false
-      }
-    },
-    methods: {
-      startListener() {
-        this.loading = true
-        this.$store.dispatch('wallet/balance', this.wallet).then(() => {
-          this.loading = false
-        })
-        setInterval(
-          function () {
-            this.loading = true
-            this.$store.dispatch('wallet/balance', this.wallet).then(() => {
-              this.loading = false
-            })
-          }.bind(this),
-          this.$store.state.time_definitions.wallet_update
-        )
       }
     }
   }

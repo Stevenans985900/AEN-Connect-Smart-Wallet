@@ -35,22 +35,20 @@
           :append-icon="showPassword ? 'visibility_off' : 'visibility'"
           :type="showPassword ? 'text' : 'password'"
           :label="$t('common.label.password')"
+          :rules="[rules.basic.required]"
           @click:append="showPassword = !showPassword"
-          @keyup.enter="submitChallenge"
+          @keyup.enter="submitChallenge()"
         />
         <v-alert v-if="message" :value="true">
           {{ message }}
         </v-alert>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer />
         <v-btn color="blue darken-1" flat @click="validity = 'CANCELLED'">
           {{ $t('common.action.cancel') }}
         </v-btn>
         <v-btn color="blue darken-1" flat @click="submitChallenge">
           {{ $t('common.action.submit') }}
         </v-btn>
-      </v-card-actions>
+      </v-card-text>
     </v-card>
   </v-dialog>
 </template>
@@ -59,9 +57,15 @@
 
 function initialDataState() {
   return {
+    formPasswordValid: false,
     message: null,
     password: '',
-    showPassword: false
+    showPassword: false,
+    rules: {
+      basic: {
+        required: value => !!value || 'Required.'
+      }
+    }
   }
 }
 export default {

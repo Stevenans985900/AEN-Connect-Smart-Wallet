@@ -34,8 +34,12 @@ export default class Eth extends Generic {
     })
   }
 
+  /**
+   * TODO Rename this function to use the standardised version from the Generic
+   * @param address
+   * @returns {Promise<any>}
+   */
   receipt(address) {
-    console.debug('Ethereum Plugin: Receipt')
     return new Promise((resolve, reject) => {
       this.web3.eth.getTransactionReceipt(address)
         .then((receipt) => { resolve(receipt) })
@@ -85,13 +89,8 @@ export default class Eth extends Generic {
    */
   async transactionStatus(transactionHash) {
     Vue.$log.debug('ETH Plugin: Transaction Status', transactionHash)
-    console.log(this.web3)
     const transaction = await this.web3.eth.getTransaction(transactionHash)
-    console.log('transaction details', transactionHash)
-
     const currentBlock = await this.web3.eth.getBlockNumber()
-    console.log('block number', currentBlock)
-
     const result = {
       transactionHash: transactionHash,
       currentBlock: currentBlock,
@@ -106,7 +105,6 @@ export default class Eth extends Generic {
     } else {
       result.status = 'PENDING'
     }
-    Vue.$log.debug('Got the status of the transaction', result)
     return result
   }
 

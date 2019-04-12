@@ -103,8 +103,8 @@ module.exports = {
   ** Global CSS
   */
   css: [
-    '@/assets/style/app.styl',
-    '@fortawesome/fontawesome-svg-core/styles.css'
+    '@/assets/style/app.styl'
+    // '@fortawesome/fontawesome-svg-core/styles.css'
   ],
 
   /*
@@ -115,7 +115,7 @@ module.exports = {
     '@/plugins/businessCard',
     '@/plugins/clipboard',
     '@/plugins/feedback-tawk',
-    '@/plugins/fonts',
+    // '@/plugins/fonts',
     '@/plugins/globals',
     '@/plugins/i18n',
     {

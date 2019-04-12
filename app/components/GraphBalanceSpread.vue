@@ -152,7 +152,7 @@ function initialDataState() {
     dialogMakeTransfer: false,
     dialogRemoveWallet: false,
     dialogShowWallet: false,
-    balanceCheckInterval: null
+    interval: null
   }
 }
 export default {
@@ -201,7 +201,7 @@ export default {
   mounted() {
     this.processWallets()
 
-    this.balanceCheckInterval = setInterval(
+    this.interval = setInterval(
       function () {
         // Create a wallet index map to control accordion with
         this.processWallets()
@@ -211,7 +211,7 @@ export default {
 
   },
   beforeDestroy() {
-    clearInterval(this.balanceCheckInterval)
+    clearInterval(this.interval)
   },
   methods: {
     processWallets() {

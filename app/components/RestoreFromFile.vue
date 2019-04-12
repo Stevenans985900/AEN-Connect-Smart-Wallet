@@ -552,12 +552,10 @@ export default {
             } else {
               walletInformation = JSON.parse(walletData.data)
             }
-            console.log(walletInformation)
             walletInformation.credentials = JSON.parse(CryptoJS.AES.decrypt(
                 walletInformation.credentials,
                 this.$g('salt')
             ).toString(CryptoJS.enc.Utf8))
-              console.log(walletInformation)
             // If prop states wallet is a main, force property in wallet
             if (this.main === true) {
               walletInformation.wallet.main = true
@@ -568,14 +566,11 @@ export default {
             if(this.type !== '' && this.type !== simplifiedData.type) {
               throw 'Wallet type does not meet type requirement (' + this.type + ')'
             }
-            console.log('calling state dispatch')
             this.$store.dispatch('wallet/load', simplifiedData).then((wallet) => {
                 this.$emit('complete', wallet)
             })
-
-
-          } catch (e) {
-              console.debug(e)
+          } catch (err) {
+            this.$log.error(err)
             this.$store.commit('showNotification', {
               type: 'error',
               message: this.$t('backup.message.import_bad_file')

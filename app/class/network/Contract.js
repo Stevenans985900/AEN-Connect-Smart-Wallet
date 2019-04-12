@@ -20,8 +20,6 @@ export default class Contract extends Generic {
       import('~/class/network/contract/erc20').then((erc20Interface) => {
         const contract = new this.web3.eth.Contract(erc20Interface.abi, options.address)
         contract.methods.balanceOf(options.managerWalletAddress).call().then((response) => {
-          console.log(response,options)
-
           // Work out where the decimal place should be
           const balance = response.toString()
           const balanceBreakpoint = balance.length - options.decimals
@@ -37,7 +35,7 @@ export default class Contract extends Generic {
 
   async contractInformation(options) {
     Vue.$log.debug('Contract Method', options)
-    var contract = {}
+    let contract = {}
     return new Promise(async (resolve, reject) => {
       import('~/class/network/contract/' + options.contractAddress).then((erc20Interface) => {
         contract.contractName = erc20Interface.name
@@ -120,9 +118,7 @@ export default class Contract extends Generic {
 
   transfer(options) {
     super.transfer(options)
-    console.log('in the contract transfer method')
     return new Promise(async (resolve) => {
-
       const privateKey = Buffer.from(options.transfer.credentials.privateKey.substring(2), 'hex')
       const erc20Interface = await import('~/class/network/contract/erc20')
       const contract = new this.web3.eth.Contract(erc20Interface.abi, options.source.address)
@@ -146,29 +142,7 @@ export default class Contract extends Generic {
         .on('transactionHash', function(transactionHash) {
           resolve(transactionHash)
         })
-        .on('error', function(err){ console.error(err) })
-      //
-      // const nonce = await this.web3.eth.getTransactionCount(options.source.address, 'pending')
-      // const privateKey = Buffer.from(options.transfer.credentials.privateKey.substring(2), 'hex')
-      // const txParams = {
-      //   nonce: this.web3.utils.toHex(nonce),
-      //   gasPrice: this.web3.utils.toHex(options.transfer.gasPrice),
-      //   gas: this.web3.utils.toHex(options.transfer.gas),
-      //   gasLimit: this.web3.utils.toHex(options.transfer.gasLimit),
-      //   data: erc20Interface.bin,
-      //   chainId: 3
-      // }
-      // const tx = new EthereumTx(txParams)
-      // tx.sign(privateKey)
-      // const serializedTx = tx.serialize()
-      //
-      //
-      // this.web3.eth.sendSignedTransaction('0x'+serializedTx.toString('hex'))
-      //   .on('transactionHash', function(transactionHash){
-      //     resolve(transactionHash)
-      //   }.bind(this))
-      //   .on('error', function(err){ console.error(err) })
-
+        .on('error', function(err){ Vue.$log.error(err) })
     })
   }
 
@@ -177,9 +151,7 @@ export default class Contract extends Generic {
    * @param options
    */
   getLiveWallet(options) {
-    console.log('checking if CONTRACT has some wonga')
     super.getLiveWallet(options)
-
     return new Promise((resolve) => {
       this.balance(options).then((balance) => {
         if (balance.toString() !== '0') {

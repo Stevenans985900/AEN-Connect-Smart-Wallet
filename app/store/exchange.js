@@ -1,4 +1,4 @@
-// import Vue from 'vue'
+import Vue from 'vue'
 import $g from '~/globals.json'
 import axios from 'axios'
 
@@ -12,7 +12,6 @@ export const state = () => (initialState)
 
 export const getters = {
   convertToUsd: (state) => (options) => {
-    console.log('Exchange Store: Convert to USD')
     if(state.exchangeRates.hasOwnProperty(options.symbol)) {
       return (state.exchangeRates[options.symbol] * options.amount).toFixed(2)
     }
@@ -30,12 +29,10 @@ export const actions = {
         }
       })
         .then(function (response) {
-          console.log('response from request for: ' + currencySymbol)
-          console.log(response)
-
+          Vue.$log.debug('Exchange Store: Update Rates for ' + currencySymbol, response)
         })
-        .catch(function (error) {
-          console.log(error)
+        .catch(function (err) {
+          Vue.$log.error('Error updating exchange rate', err)
         })
     }
   }

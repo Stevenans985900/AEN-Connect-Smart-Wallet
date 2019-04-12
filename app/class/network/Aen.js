@@ -40,8 +40,7 @@ export default class Aen extends Generic {
     this.pluginName = 'AEN'
   }
   accountLoad(options) {
-    console.debug(this.pluginName + ' Plugin: Account Load')
-    console.debug(options)
+    Vue.$log.debug(this.pluginName + ' Plugin: Account Load', options)
     return new Promise((resolve) => {
       const account = Account.createFromPrivateKey(options.accountPrivateKey, options.network.byte)
       resolve(account)
@@ -128,7 +127,7 @@ export default class Aen extends Generic {
    * @returns {SimpleWallet}
    */
   walletNew(options) {
-    console.debug('For AEN: Wallet new = Wallet Load')
+    Vue.$log.debug('For AEN: Wallet new = Wallet Load')
     return this.walletLoad(options)
   }
   /**
@@ -189,14 +188,12 @@ export default class Aen extends Generic {
    *
    */
   transactionsIncoming(options) {
-    Generic.prototype.transactionsIncoming.call(this, options)
+    super.transactionsIncoming(options)
     const context = this
     this.$store.state.services.accountHttp.incomingTransactions(
       this.$store.state.publicAccount
     )
       .subscribe((transactions) => {
-        console.debug('IT:R')
-        console.debug(transactions)
         context.$store.state.userTransactions.incoming = transactions
       })
   }
@@ -204,7 +201,7 @@ export default class Aen extends Generic {
    *
    */
   transactionsOutgoing(options) {
-    Generic.prototype.transactionsOutgoing.call(this, options)
+    super.transactionsOutgoing(options)
     const context = this
     this.$store.state.services.accountHttp.outgoingTransactions(
       this.$store.state.publicAccount
@@ -217,14 +214,13 @@ export default class Aen extends Generic {
    *
    */
   transactionsUnconfirmed(options) {
-    Generic.prototype.transactionsUnconfirmed.call(this, options)
-    const context = this
+    super.transactionsUnconfirmed(options)
     this.$store.state.services.accountHttp.unconfirmedTransactions(
       this.$store.state.publicAccount
     )
       .subscribe((transactions) => {
-        console.log(transactions)
-        context.$store.state.userTransactions.unconfirmed = transactions
+        // TODO update here
+        Vue.$log.debug(transactions)
       })
   }
   /**
@@ -252,7 +248,7 @@ export default class Aen extends Generic {
       const signedTransaction = account.sign(transferTransaction)
       transactionHttp
         .announce(signedTransaction)
-        .subscribe(x => resolve(x), err => console.error(err))
+        .subscribe(x => resolve(x), err => Vue.$log.error(err))
     })
   }
   /**
@@ -260,8 +256,7 @@ export default class Aen extends Generic {
    * @param {*} namespaceDefinition
    */
   registerNamespace(options) {
-    console.debug('AEN Plugin: Register Namespace')
-    console.debug(options)
+    Vue.$log.debug('AEN Plugin: Register Namespace', options)
 
     return new Promise((resolve, reject) => {
       const transactionHttp = new TransactionHttp(this.apiEndpoint)
@@ -292,8 +287,7 @@ export default class Aen extends Generic {
    * @param {*} name
    */
   isNamespaceAvailable(name) {
-    console.debug('AEN Plugin: Is Namespace Available')
-    console.debug(name)
+    Vue.$log.debug('AEN Plugin: Is Namespace Available', name)
 
     return new Promise((resolve) => {
       const nameSpaceHttp = new NamespaceHttp(this.apiEndpoint)

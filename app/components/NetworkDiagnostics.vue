@@ -131,11 +131,9 @@ export default {
     },
     currentApi: {
       get: function () {
-        this.$log.debug('getting current API', this.$store.state.wallet.aen.activeApiEndpoint)
         return this.$store.state.wallet.aen.activeApiEndpoint
       },
       set: function (value) {
-        this.$log.debug('setting new API', value)
         this.$store.commit('wallet/AEN_PROP', {key: "activeApiEndpoint", value: value })
       }
     },
@@ -145,7 +143,6 @@ export default {
   },
     methods: {
         refreshAenApiEndpoint() {
-            console.log('refreshing endpoin')
             this.$store.dispatch('wallet/rankApiNodes')
         }
     }

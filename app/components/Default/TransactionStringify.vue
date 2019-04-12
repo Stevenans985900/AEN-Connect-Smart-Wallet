@@ -11,10 +11,6 @@ export default {
         return {}
       }
     }
-  },
-  mounted() {
-    console.debug('Unrecognised transaction type')
-    console.debug(this.transaction)
   }
 }
 </script>

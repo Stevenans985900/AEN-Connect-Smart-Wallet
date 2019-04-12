@@ -46,7 +46,7 @@ export default {
           this.type = 'Transfer'
           break
         default:
-          console.debug('TS:M:Unrecognised transfer type')
+          this.$log.error('AEN Transaction Stringify. Unhandle transfer type', this.transaction.type)
       }
     }
     if (this.type) {
@@ -54,7 +54,7 @@ export default {
         this.component = () =>
           import('./TransactionStringify/' + this.type)
       } catch (err) {
-        console.debug(err)
+        this.$log.debug('AEN Transaction Stringify. Unable to lazy load component', this.type)
       }
     } else {
       this.component = () => import('~/components/Fallback')

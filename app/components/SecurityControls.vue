@@ -326,7 +326,6 @@ export default {
       this.walletAddress = wallet.address
     },
     walletFromAddress(address) {
-      console.log('trying to get the wallet for address', address)
       return this.$store.state.wallet.wallets[address]
     }
   }

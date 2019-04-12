@@ -45,13 +45,10 @@ export const getters = {
    * @returns {function(*): string}
    */
   secureProperty: (state) => (options) => {
-    console.log('Secure Property')
     return JSON.parse(CryptoJS.AES.decrypt(
         state.wallets[options.address].credentials,
         Vue.prototype.$g('salt')
     ).toString(CryptoJS.enc.Utf8))[options.key]
-
-
   }
 }
 
@@ -62,11 +59,8 @@ export const actions = {
      * @param {*} context
      */
   addCheck({state, commit}, options) {
-    console.debug('Security Store: Add Check')
-    console.debug(options)
-
+    Vue.$log.debug('Adding security check', options)
     return new Promise((resolve) => {
-
       // Set global settings as the default
       let challengeUser = state.globalPolicy[options.challenge]
       if(state.wallets[options.address].hasOwnProperty('policy')) {
@@ -96,9 +90,7 @@ export const actions = {
     })
   },
   getCredentials({state, dispatch}, address) {
-    console.debug('Security Store: Add Check')
-    console.debug(address)
-
+    Vue.$log.debug('Security Store: Get Credentials', address)
     return new Promise((resolve) => {
       dispatch('addCheck', {
         challenge: 'transaction_start',

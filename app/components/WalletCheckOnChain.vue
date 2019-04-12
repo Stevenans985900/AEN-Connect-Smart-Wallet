@@ -19,7 +19,7 @@
         },
         data() {
             return {
-              walletOnlineCheckInterval: null,
+              interval: null,
               nextRun: 999999999,
               timeToCheck: 9999999,
               complete: false
@@ -33,7 +33,7 @@
             if(this.wallet.onChain === false) {
                 this.nextRun = new Date().getTime() + this.$store.state.time_definitions.wallet_update
                 this.timeToCheck = Math.round((this.nextRun - new Date().getTime()) / 1000)
-                this.walletOnlineCheckInterval = setInterval(
+                this.interval = setInterval(
                     function () {
                         let nowTime = new Date().getTime()
                         if(this.nextRun < nowTime) {
@@ -46,6 +46,9 @@
                 )
             }
         },
+      beforeDestroy() {
+        clearInterval(this.interval)
+      },
         methods: {
             manualCheck: function () {
                 this.nextRun = new Date().getTime() + this.$store.state.time_definitions.wallet_update
@@ -55,7 +58,7 @@
             checkOnline: function () {
                 this.$store.dispatch('wallet/getLiveWallet', this.wallet).then((response) => {
                    if (response !== false) {
-                        if(this.walletOnlineCheckInterval)  { clearInterval(this.walletOnlineCheckInterval) }
+                        if(this.interval)  { clearInterval(this.interval) }
 
                         if(this.$store.state.wallet.wallets[this.wallet.address].onChain === false) {
                             this.$store.commit('wallet/setWalletProperty', {

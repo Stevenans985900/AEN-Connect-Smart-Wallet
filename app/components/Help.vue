@@ -274,14 +274,10 @@
 
         // Check to see whether there is a template associated with this help entry
         let entry = this.help[this.selectedCategory].faq[this.selectedEntry]
-        console.log(entry)
         if(entry.hasOwnProperty('template')) {
           this.component = () => import('./Help/' + entry.template)
         } else {
           this.displayText = entry.displayText
-          console.log('using bare faq')
-          console.log(entry)
-          console.log(this.displayText)
           if(entry.hasOwnProperty('youtubeVideo')) {
             this.youtubeVideo = entry.youtubeVideo
           }
