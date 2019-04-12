@@ -42,7 +42,6 @@ export default {
           this.component = () => import('~/components/Default/TransactionStringify')
         }.bind(this))
     } else {
-      console.log('showing plain transaction')
       this.component = () => import('~/components/Eth/TransactionStringify/Transfer')
     }
   }

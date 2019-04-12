@@ -119,7 +119,6 @@ export default {
     getContractProfile: Debounce(function () {
       // Make sure the contract address passes validation to save effort
       if (!this.$refs.newWalletForm.validate()) {
-        console.log('form is invalid')
         return false
       }
       this.$store.dispatch('busy', 'contract.message.checking_contract')
@@ -157,7 +156,6 @@ export default {
      */
     loadContract() {
       if (!this.$refs.inputForm.validate()) {
-        console.log('form is invalid')
         return false
       }
       this.$store.dispatch('wallet/load', {
@@ -169,8 +167,7 @@ export default {
         network: this.wallet.network,
         managerWalletAddress: this.wallet.address
       }
-      ).then((wallet) => {
-        console.debug(wallet)
+      ).then(() => {
         this.currentStep++
       })
     }

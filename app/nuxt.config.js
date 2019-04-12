@@ -104,6 +104,7 @@ module.exports = {
   */
   css: [
     '@/assets/style/app.styl'
+    // '@fortawesome/fontawesome-svg-core/styles.css'
   ],
 
   /*
@@ -114,6 +115,7 @@ module.exports = {
     '@/plugins/businessCard',
     '@/plugins/clipboard',
     '@/plugins/feedback-tawk',
+    // '@/plugins/fonts',
     '@/plugins/globals',
     '@/plugins/i18n',
     {

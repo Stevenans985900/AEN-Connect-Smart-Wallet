@@ -20,7 +20,9 @@
 
 <script>
   function initialDataState() {
-    return {}
+    return {
+      interval: null
+    }
   }
   export default {
     /**
@@ -40,16 +42,20 @@
      * MOUNTED
      */
     mounted: function () {
+      this.$log.debug('Dashboard Startup')
       // Only start once global loading finished
-      const preparationInterval = setInterval(
+      this.interval = setInterval(
         function () {
           if (this.$store.getters.booting === false) {
-            clearInterval(preparationInterval)
+            clearInterval(this.interval)
             this.$store.commit('setLoading', { t: 'router', v: false })
           }
         }.bind(this),
         this.$store.state.time_definitions.controller_poll
       )
-    }
+    },
+    beforeDestroy() {
+      clearInterval(this.interval)
+    },
   }
 </script>

@@ -357,19 +357,11 @@ export default {
       const apiEndpoint = this.$store.state.wallet.eth.activeApiEndpoint
           .replace('###NETWORK_IDENTIFIER###', this.wallet.network.identifier)
       web3.setProvider(apiEndpoint)
-
-      this.$log.debug(this.wallet, ('Sending to: ' + apiEndpoint))
-
       const credentials = await this.$store.getters['security/walletProps'](this.wallet.address)
       const privateKey = Buffer.from(credentials.privateKey.substring(2), 'hex')
-      console.log(credentials)
-
       this.$store.dispatch('busy', 'development.label.deploy_contract')
       const gas = await web3.eth.estimateGas({from: this.wallet.address, data: jsonInterface.bin})
-      console.log('gas', gas)
       const nonce = await web3.eth.getTransactionCount(this.wallet.address, 'pending')
-      console.log('nonce', web3.utils.toHex(nonce))
-
       const txParams = {
         nonce: web3.utils.toHex(nonce),
         gasPrice: web3.utils.toHex(Math.floor(gas * 1.5)),
@@ -384,38 +376,19 @@ export default {
       const serializedTx = tx.serialize()
       web3.eth.sendSignedTransaction('0x'+serializedTx.toString('hex'))
         .on('transactionHash', function(transactionHash){
-          console.debug('Transaction receipt from wire', transactionHash)
-          this.waitContract(transactionHash)
           this.$store.dispatch('busy', false)
           this.dialogDeployContract = false
           return transactionHash
         }.bind(this))
-        .on('error', function(err){ console.error(err) })
+        .on('error', function(err){ this.$log.error(err) })
 
     },
+    /**
+     * TODO add in code to this function
+     * @param wallet
+     */
     removeSecurityPolicy(wallet) {
-      console.log('removing wallet policy')
-      console.log(wallet)
-    },
-    simpleSleep() { return new Promise(resolve => setTimeout(resolve, 3000))},
-
-    async waitContract(transactionHash) {
-      const web3 = this.$store.getters["wallet/networkHandler"]("contract").web3
-      const apiEndpoint = this.$store.state.wallet.eth.activeApiEndpoint
-        .replace('###NETWORK_IDENTIFIER###', this.wallet.network.identifier)
-        web3.setProvider(apiEndpoint)
-      const truthy = true
-      while (truthy) {
-        let receipt = web3.eth.getTransactionReceipt(transactionHash)
-        console.log(receipt)
-        if (typeof receipt === 'object' && receipt.hasOwnProperty('contractAddress')) {
-          console.log("Your contract has been deployed at http://testnet.etherscan.io/address/" + receipt.contractAddress)
-          console.log("Note that it might take 30 - 90 sceonds for the block to propagate befor it's visible in etherscan.io")
-          break
-        }
-        console.log("Waiting a mined block to include your contract...")
-        await this.simpleSleep(4000);
-      }
+      this.$log.debug('Remove Security Policy', wallet)
     },
     switchMainAenStatus(wallet) {
       this.mainAenAddress = wallet.address

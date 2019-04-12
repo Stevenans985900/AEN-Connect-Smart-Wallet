@@ -69,7 +69,7 @@
           {{ $t('development.label.development_release') }}
         </v-toolbar-title>
         <v-spacer />
-        <v-btn @click="developmentAgreed = true" icon>
+        <v-btn icon @click="developmentAgreed = true">
           <v-icon>
             close
           </v-icon>
@@ -80,7 +80,7 @@
           {{ $t('development.message.development_release') }}
         </v-card-text>
         <v-card-actions>
-          <v-btn @click="developmentAgreed = true" class="primary">
+          <v-btn class="primary" @click="developmentAgreed = true">
             {{ $t('common.action.accept') }}
           </v-btn>
         </v-card-actions>
@@ -130,6 +130,44 @@ if (isElectron()) {
   // const remote = require('electron').remote
 }
 
+function initialDataState() {
+  return {
+    dialogExit: false,
+    minifyDrawer: false,
+    drawerOpen: false,
+    hydrated: false,
+    navigationItems: [
+      {
+        icon: 'apps',
+        key: 'dashboard',
+        to: '/dashboard'
+      },
+      {
+        icon: 'settings_system_daydream',
+        key: 'wallet_management',
+        to: '/wallet'
+      },
+      {
+        icon: 'settings_ethernet',
+        key: 'exchange',
+        to: '/exchange'
+      },
+      {
+        icon: 'settings_remote',
+        key: 'aen',
+        to: '/aen-blockchain'
+      },
+      {
+        icon: 'contacts',
+        key: 'address_book',
+        to: '/address-book'
+      }
+    ],
+    pendingTransactionsClicked: false,
+    userMenu: false
+  }
+}
+
 export default {
   /**
    * COMPONENTS
@@ -144,43 +182,7 @@ export default {
   /**
    * DATA
    */
-  data() {
-    return {
-      dialogExit: false,
-      minifyDrawer: false,
-      drawerOpen: false,
-      hydrated: false,
-      navigationItems: [
-        {
-          icon: 'apps',
-          key: 'dashboard',
-          to: '/dashboard'
-        },
-        {
-          icon: 'settings_system_daydream',
-          key: 'wallet_management',
-          to: '/wallet'
-        },
-        {
-          icon: 'settings_ethernet',
-          key: 'exchange',
-          to: '/exchange'
-        },
-        {
-          icon: 'settings_remote',
-          key: 'aen',
-          to: '/aen-blockchain'
-        },
-        {
-          icon: 'contacts',
-          key: 'address_book',
-          to: '/address-book'
-        }
-      ],
-      pendingTransactionsClicked: false,
-      userMenu: false
-    }
-  },
+  data() { return initialDataState() },
   /**
    * COMPUTED
    */
@@ -196,9 +198,7 @@ export default {
       set: function (val) { this.drawerOpen = val }
     },
     developmentAgreed: {
-      get() {
-        console.log('DEVELOPMENT STATE', this.$store.state.user.developmentAgreed)
-        return !this.$store.state.user.developmentAgreed },
+      get() { return !this.$store.state.user.developmentAgreed },
       set(val) { this.$store.commit('USER_PROP', {key: "developmentAgreed", value: val }) }
     },
     menuPendingTransactions: {
@@ -378,12 +378,11 @@ export default {
 
     },
     exit() {
-      console.debug('F:E:Exit')
+      this.$log.debug('App is shutting down...')
 
       // Check if the user doesn't want to be remembered and reset the state machine
       if (this.$store.state.meta.rememberUser === false) {
         this.$store.commit('reset')
-        console.debug('E:Resetting state machine')
       }
 
       // If running the smart wallet as an app which has a window which can be closed

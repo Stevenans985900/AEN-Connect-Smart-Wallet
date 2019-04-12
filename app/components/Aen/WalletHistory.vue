@@ -48,7 +48,7 @@ export default {
   },
   data() {
     return {
-      transactionsListener: null,
+      interval: null,
       // transactions: {},
       loading: true,
       expand: false,
@@ -67,7 +67,7 @@ export default {
       this.$store.dispatch('wallet/transactionsHistorical', this.wallet).then(() => {
           this.loading = false
       })
-        this.transactionsListener = setInterval(
+        this.interval = setInterval(
           function () {
             this.$store.dispatch('busy', 'wallet.message.updating_history')
               this.$store.dispatch('wallet/transactionsHistorical', this.wallet).then(() => {
@@ -79,7 +79,7 @@ export default {
 
     },
   beforeDestroy() {
-    clearInterval(this.transactionsListener)
+    clearInterval(this.interval)
   }
 }
 </script>
