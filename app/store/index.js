@@ -119,6 +119,9 @@ export const mutations = {
   setUserProperty(state, options) {
     state.user[options.key] = options.value
   },
+  USER_PROP(state, options) {
+    state.user[options.key] = options.value
+  },
   setMeta(state, options) {
     state.meta[options.key] = options.value
   },

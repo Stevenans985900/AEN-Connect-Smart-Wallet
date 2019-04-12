@@ -50,6 +50,7 @@
   },
   "common": {
     "action": {
+      "accept": "Accept",
       "cancel": "Cancel",
       "close": "Close",
       "confirm": "Confirm",
@@ -139,7 +140,11 @@
   },
   "development": {
     "label": {
-      "deploy_contract": "Deploy Contract"
+      "deploy_contract": "Deploy Contract",
+      "development_release": "Preview Release"
+    },
+    "message": {
+      "development_release": "This is a development release and should not yet be considered production ready. For wallets on the main net, USE AT YOUR OWN RISK"
     }
   },
   "ethereum": {
