@@ -1,15 +1,7 @@
 import bitcoin from 'bitcoinjs-lib'
 import axios from 'axios'
 import Generic from './Generic.js'
-import bip32 from 'bip32'
-import bip39 from 'bip39'
 import { format } from 'date-fns'
-
-async function asyncForEach(input, callback) {
-  for (let key in input) {
-    await callback(key, key, input);
-  }
-}
 
 export default class Btc extends Generic {
   /**
@@ -18,9 +10,9 @@ export default class Btc extends Generic {
   getTransactionInfo(transactionHash) {
     return new Promise((resolve, reject) => {
       const address = this.blockchainInfoEndpoint + 'rawtx/' + transactionHash
+
       axios.get(address)
         .then(function (response) {
-          console.log(response)
           resolve(response.data)
         })
         .catch(function (error) {
@@ -39,63 +31,33 @@ export default class Btc extends Generic {
     this.context = null
     this.pluginName = 'Btc'
   }
-  receieverAddress(options) {
-    console.debug('BTC Plugin: Receiver Address')
-    console.debug(options)
-    return new Promise((resolve, reject) => {
-      if (bip39.validateMnemonic(options.mnemonic) === false) {
-        reject('MNEMONIC_GENERATE_ERROR')
-      }
-      const seed = bip39.mnemonicToSeed(options.mnemonic)
-      const root = bip32.fromSeed(seed)
-
-      // Work out the coin index to use when deriving an address
-      let coinIndex = '1'
-      if (options.wallet.network.hasOwnProperty('testing')) {
-        coinIndex = '2'
-      }
-      const path = "m/44'/" + coinIndex + "'/0'/0/" + options.wallet.currentBipIndex
-      const child = root.derivePath(path)
-
-      const rootAddress = bitcoin.payments.p2pkh({
-            pubkey: child.publicKey,
-            network: bitcoin.networks[options.wallet.network.identifier]
-          }
-      ).address
-      resolve(rootAddress)
-    })
-  }
   /**
    * @param options
    * @returns {Subscription}
    */
-  async balance(options) {
+  balance(options) {
     super.balance(options)
-
-    const output = {
-      wallets: {},
-      balance: 0
-    }
-    await asyncForEach(options.managedAddressesWithTokens, async (address) => {
-      let { data } = await axios.get(
-          this.apiEndpoint + options.network.block_cypher_id + '/addrs/' + address + '/balance'
-      )
-      console.log('upping balance by: ' + data.balance)
-      output.balance += data.balance
-      output.wallets[address] = data.balance
+    return new Promise((resolve, reject) => {
+      const address = this.apiEndpoint + options.network.block_cypher_id + '/addrs/' + options.address + '/balance'
+      axios.get(address)
+        .then(function (response) {
+          console.log('Response from BTC Balance', response)
+          resolve(response.data.balance)
+        })
+        .catch(function (error) {
+          reject(error)
+        })
     })
-    console.log('returning', output)
-    return output
   }
   setContext(context) { this.context = context }
   getHeight() {
     return new Promise((resolve, reject) => {
       axios.get(this.apiEndpoint + this.context.block_cypher_id)
-          .then((response) => {
-            console.log(response)
-              resolve(response.data.height)
-          })
-          .catch((err) => { reject(err) })
+        .then((response) => {
+          console.log(response)
+          resolve(response.data.height)
+        })
+        .catch((err) => { reject(err) })
     })
   }
   /**
@@ -120,45 +82,16 @@ export default class Btc extends Generic {
   }
   walletNew(options) {
     super.walletNew(options)
-    return new Promise((resolve, reject) => {
-      // Generate a mnemonic to use
-      const mnemonic = bip39.generateMnemonic()
-      if(bip39.validateMnemonic(mnemonic) === false) {
-        reject('MNEMONIC_GENERATE_ERROR')
-      }
-      const seed = bip39.mnemonicToSeed(mnemonic)
-      const root = bip32.fromSeed(seed)
-
-      // Work out the coin index to use when deriving an address
-      let coinIndex = '1'
-      if(options.network.hasOwnProperty('testing')) {
-        coinIndex = '2'
-      }
-      const path = "m/44'/" + coinIndex + "'/0'/0/0"
-      const child = root.derivePath(path)
-
-      const rootAddress = bitcoin.payments.p2pkh({
-        pubkey: child.publicKey,
-        network: bitcoin.networks[options.network.identifier] }
-      ).address
-
-      const receiverPath = "m/44'/" + coinIndex + "'/0'/0/1"
-      const receiverChild = root.derivePath(receiverPath)
-
-      const receiverAddress = bitcoin.payments.p2pkh({
-        pubkey: receiverChild.publicKey,
-        network: bitcoin.networks[options.network.identifier] }
-      ).address
-
+    return new Promise((resolve) => {
+      const keyPair = bitcoin.ECPair.makeRandom({ network: bitcoin.networks[options.network.identifier] })
+      const { address } = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey, network: bitcoin.networks[options.network.identifier] })
       const walletObject = {
         network: options.network,
-        address: rootAddress,
-        currentBipIndex: 1,
-        receiverAddress: receiverAddress,
-        managedAddressesWithTokens: {},
+        address: address,
+        publicKey: keyPair.publicKey,
         credentials: {
           password: options.password,
-          mnemonic: mnemonic,
+          walletImportFormat: keyPair.toWIF(),
         }
       }
       resolve(walletObject)
@@ -169,18 +102,21 @@ export default class Btc extends Generic {
    * @returns {SimpleWallet}
    */
   walletLoad(options) {
+    console.log('in wallet load')
     super.walletLoad(options)
-    return new Promise((resolve) => {
+    return new Promise(({resolve}) => {
+
+      // Regenerate the wallet from the wallet import format
+      const keyPair = bitcoin.ECPair.fromWIF(options.walletImportFormat, bitcoin.networks[options.network.identifier])
+      const {address} = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey, network: bitcoin.networks[options.network.identifier] })
 
       resolve({
         network: options.network,
-        address: options.address,
-        currentBipIndex: options.currentBipIndex,
-        managedAddressesWithTokens: options.managedAddressesWithTokens,
-        receiverAddress: options.receiverAddress,
+        address: address,
+        publicKey: keyPair.publicKey,
         credentials: {
           password: options.password,
-          mnemonic: options.mnemonic
+          walletImportFormat: keyPair.toWIF()
         }
       })
     })
@@ -244,29 +180,32 @@ export default class Btc extends Generic {
   }
   transfer(options) {
     super.transfer(options)
-      return new Promise((resolve, reject) => {
-          const key =  bitcoin.ECPair.fromWIF(options.credentials.walletImportFormat, bitcoin.networks[options.source.network.identifier])
-          const transactionBuilder = new bitcoin.TransactionBuilder(bitcoin.networks[options.source.network.identifier])
-          transactionBuilder.setVersion(1)
-          // Find input transaction with money to use in this transaction
-          for(let i = 0; i < options.source.transactions.length; i++) {
-              if(options.source.transactions[i].value > options.destination.amount) {
-                  transactionBuilder.addInput(options.source.transactions[i].tx_hash , 1)
-                  break
-              }
-          }
-          transactionBuilder.addOutput(options.destination.address, Number(options.destination.amount))
-          transactionBuilder.sign(0, key)
-          const builtTransaction = transactionBuilder.build().toHex()
-          axios.post(this.apiEndpoint +  options.source.network.block_cypher_id + '/tx/push?token=' + this.config.block_cypher.api_token, {
-              tx: builtTransaction
-          })
-              .then(function (response) {
-                  console.log(response)
-              })
-              .catch(function (error) {
-                  reject(error)
-              })
+    return new Promise((resolve, reject) => {
+
+      const key =  bitcoin.ECPair.fromWIF(options.credentials.walletImportFormat, bitcoin.networks[options.source.network.identifier])
+      console.log('retrieved key OK', key)
+      const transactionBuilder = new bitcoin.TransactionBuilder(bitcoin.networks[options.source.network.identifier])
+      console.log('Created Transaction builder ok')
+      transactionBuilder.setVersion(1)
+      // Find input transaction with money to use in this transaction
+      for(let i = 0; i < options.source.transactions.length; i++) {
+        if(options.source.transactions[i].value > options.destination.amount) {
+          transactionBuilder.addInput(options.source.transactions[i].tx_hash , 1)
+          break
+        }
+      }
+      transactionBuilder.addOutput(options.destination.address, Number(options.destination.amount))
+      transactionBuilder.sign(0, key)
+      const builtTransaction = transactionBuilder.build().toHex()
+      axios.post(this.apiEndpoint +  options.source.network.block_cypher_id + '/tx/push?token=' + this.config.block_cypher.api_token, {
+        tx: builtTransaction
       })
+        .then(function (response) {
+          console.log(response)
+        })
+        .catch(function (error) {
+          reject(error)
+        })
+    })
   }
 }

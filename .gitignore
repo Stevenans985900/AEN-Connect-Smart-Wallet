@@ -3,7 +3,8 @@ app/node_modules
 
 # logs
 app/npm-debug.log
-
+app/www
+app/platforms
 # Nuxt build
 app/.nuxt
 

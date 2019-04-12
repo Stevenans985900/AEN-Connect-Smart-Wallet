@@ -82,6 +82,11 @@
     },
     "available_networks": [
       {
+        "name": "MainNet",
+        "identifier": "main",
+        "block_cypher_id": "main"
+      },
+      {
         "name": "TestNet3",
         "identifier": "testnet",
         "block_cypher_id": "test3",
@@ -112,6 +117,19 @@
       "api_endpoint": "https://api-###NETWORK_IDENTIFIER###.etherscan.io/api"
     },
     "available_networks": [
+      {
+        "name": "MainNet",
+        "identifier": "frontier",
+        "network_id": 1,
+        "gasPrice": {
+          "normal": 5000000000,
+          "priority": 35000000000,
+          "maximum": 50000000000
+        },
+        "gas": {
+          "transfer": 210000
+        }
+      },
       {
         "name": "Ropsten",
         "identifier": "ropsten",
@@ -144,8 +162,8 @@
   "exchange": {
     "base_denomination": {
       "aen": "aen",
-      "btc": "sat",
-      "eth": "wei"
+      "btc": "btc",
+      "eth": "ether"
     },
     "divisibility": {
       "aen": {

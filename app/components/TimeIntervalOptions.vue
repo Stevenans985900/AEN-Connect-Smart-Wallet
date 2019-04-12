@@ -31,7 +31,6 @@
       </v-list-tile-action>
     </v-list-tile>
   </v-list>
-
 </template>
 
 <script>

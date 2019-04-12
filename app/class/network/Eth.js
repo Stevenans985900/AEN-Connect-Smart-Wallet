@@ -138,17 +138,6 @@ export default class Eth extends Generic {
             })
             .on('error', function(err){ Vue.$log.error(err) })
         })
-
-          // .on('receipt', function(receipt){
-          //   console.log('receipt', receipt)
-          // })
-          // .on('confirmation', function(confirmationNumber, receipt){
-          //   console.log('confirmation number', confirmationNumber)
-          //   console.log('receipt', receipt)
-          //   return resolve(receipt)
-          // })
-        // return meth
-          //
     })
   }
 

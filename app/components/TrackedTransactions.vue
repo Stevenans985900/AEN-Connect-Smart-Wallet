@@ -9,10 +9,12 @@
           </v-icon>
         </v-flex>
         <v-flex xs8 sm10>
-          {{ transaction.address }}<br />
-          <span class="caption">
-            <token-value :value="transaction.amount" :type="transaction.type" />
-          </span>
+          <a target="_blank" :href="blockExplorerLink(transaction)">
+            {{ transaction.address }}<br>
+            <span class="caption">
+              <token-value :value="transaction.amount" :type="transaction.type" />
+            </span>
+          </a>
         </v-flex>
         <v-flex xs2 sm1>
           <v-btn icon @click="stopTracking(transaction)">
@@ -57,6 +59,16 @@
       setInterval(() => { this.processTrackedTransactions() }, this.$g('time_definitions.transaction_watch'))
     },
     methods: {
+      blockExplorerLink(transaction) {
+        switch (transaction.type) {
+          case 'aen':
+            return ''
+          case 'btc':
+            return 'https://live.blockcypher.com/btc-testnet/tx/'+transaction.transactionHash+'/'
+          case 'eth':
+            return 'https://'+transaction.network+'.etherscan.io/address/' + transaction.transactionHash
+        }
+      },
       processTrackedTransactions() {
         if(this.haveTrackedTransactions === true) {
           this.$log.debug('processing tracked transactions')

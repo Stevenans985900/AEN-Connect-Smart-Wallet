@@ -153,6 +153,7 @@
 <script>
 import Balance from '~/components/Balance'
 import { mapGetters } from 'vuex'
+import EthereumTx from 'ethereumjs-tx'
 export default {
   components: { Balance },
   /**
@@ -349,68 +350,70 @@ export default {
      * METHODS
      */
   methods: {
-    deployTestContract() {
+    async deployTestContract() {
       this.$log.debug('Deploy Test Contract', this.wallet)
-      import('~/class/network/contract/test.json').then((jsonInterface) => {
-        const web3 = this.$store.getters["wallet/networkHandler"]("contract").web3
-        const apiEndpoint = this.$store.state.wallet.eth.activeApiEndpoint
-            .replace('###NETWORK_IDENTIFIER###', this.wallet.network.identifier)
-        this.$log.debug(this.wallet, ('Sending to: ' + apiEndpoint))
-        web3.setProvider(apiEndpoint)
-        this.$store.dispatch('security/getCredentials', this.wallet.address).then((credentials) => {
-          this.$store.dispatch('busy', 'development.label.deploy_contract')
-          web3.eth.estimateGas({
-            from: this.wallet.address,
-            data: jsonInterface.bin
-          })
-            .then((gas) => {
-              this.$log.debug('gas from network estimated as using the following network handler', gas, web3)
-              const baseTransaction = {
-                from: this.wallet.address,
-                gas: gas,
-                gasPrice:  50000000000,
-                data: jsonInterface.bin,
-                chainId: this.wallet.network.network_id
-              }
-              this.$log.debug(baseTransaction, credentials)
-              web3.eth.accounts.signTransaction(baseTransaction, credentials.privateKey)
-                .then(signedTx => {
-                  console.log('signed the transaction, time to send it', web3)
-                  web3.eth.sendSignedTransaction(signedTx.rawTransaction)
-                    .then((transaction) => {
-                      this.$vue.debug('Transaction receipt from wire', transaction)
-                      this.waitContract(transaction)
-                      this.$store.dispatch('busy', false)
-                      this.dialogDeployContract = false
-                    })
-                  // this.web3.eth.sendSignedTransaction(signedTx.rawTransaction)
-                })
-                .then((receipt) => {
-                  console.log(receipt)
-                })
-                .catch((err) => {
-                  console.log(err)
-                })
-            })
-        })
-      })
+      const jsonInterface = await import('~/class/network/contract/test.json')
+      const web3 = this.$store.getters["wallet/networkHandler"]("contract").web3
+      const apiEndpoint = this.$store.state.wallet.eth.activeApiEndpoint
+          .replace('###NETWORK_IDENTIFIER###', this.wallet.network.identifier)
+      web3.setProvider(apiEndpoint)
+
+      this.$log.debug(this.wallet, ('Sending to: ' + apiEndpoint))
+
+      const credentials = await this.$store.getters['security/walletProps'](this.wallet.address)
+      const privateKey = Buffer.from(credentials.privateKey.substring(2), 'hex')
+      console.log(credentials)
+
+      this.$store.dispatch('busy', 'development.label.deploy_contract')
+      const gas = await web3.eth.estimateGas({from: this.wallet.address, data: jsonInterface.bin})
+      console.log('gas', gas)
+      const nonce = await web3.eth.getTransactionCount(this.wallet.address, 'pending')
+      console.log('nonce', web3.utils.toHex(nonce))
+
+      const txParams = {
+        nonce: web3.utils.toHex(nonce),
+        gasPrice: web3.utils.toHex(Math.floor(gas * 1.5)),
+        gas: web3.utils.toHex(gas),
+        gasLimit: web3.utils.toHex(Math.floor(gas * 1.2)),
+        from: this.wallet.address,
+        data: jsonInterface.bin,
+        chainId: 3
+      }
+      const tx = new EthereumTx(txParams)
+      tx.sign(privateKey)
+      const serializedTx = tx.serialize()
+      web3.eth.sendSignedTransaction('0x'+serializedTx.toString('hex'))
+        .on('transactionHash', function(transactionHash){
+          console.debug('Transaction receipt from wire', transactionHash)
+          this.waitContract(transactionHash)
+          this.$store.dispatch('busy', false)
+          this.dialogDeployContract = false
+          return transactionHash
+        }.bind(this))
+        .on('error', function(err){ console.error(err) })
+
     },
     removeSecurityPolicy(wallet) {
       console.log('removing wallet policy')
       console.log(wallet)
     },
     simpleSleep() { return new Promise(resolve => setTimeout(resolve, 3000))},
-    async waitContract(contract) {
+
+    async waitContract(transactionHash) {
       const web3 = this.$store.getters["wallet/networkHandler"]("contract").web3
+      const apiEndpoint = this.$store.state.wallet.eth.activeApiEndpoint
+        .replace('###NETWORK_IDENTIFIER###', this.wallet.network.identifier)
+        web3.setProvider(apiEndpoint)
       const truthy = true
       while (truthy) {
-        let receipt = web3.eth.getTransactionReceipt(contract.transactionHash);
-        if (receipt && receipt.contractAddress) {
-          console.log("Your contract has been deployed at http://testnet.etherscan.io/address/" + receipt.contractAddress);
-          console.log("Note that it might take 30 - 90 sceonds for the block to propagate befor it's visible in etherscan.io");
-          break;
+        let receipt = web3.eth.getTransactionReceipt(transactionHash)
+        console.log(receipt)
+        if (typeof receipt === 'object' && receipt.hasOwnProperty('contractAddress')) {
+          console.log("Your contract has been deployed at http://testnet.etherscan.io/address/" + receipt.contractAddress)
+          console.log("Note that it might take 30 - 90 sceonds for the block to propagate befor it's visible in etherscan.io")
+          break
         }
-        console.log("Waiting a mined block to include your contract... currently in block " + web3.eth.blockNumber);
+        console.log("Waiting a mined block to include your contract...")
         await this.simpleSleep(4000);
       }
     },

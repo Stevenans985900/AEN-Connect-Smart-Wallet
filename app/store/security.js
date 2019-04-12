@@ -21,12 +21,24 @@ const initialState = {
     transaction_start: true,
     wallet_open: false
   },
+  walletPolicies: {},
   wallets: {}
 }
 
 export const state = () => (initialState)
 
 export const getters = {
+  /**
+   *
+   * @param state
+   * @returns {function(*): any}
+   */
+  walletProps: (state) => (walletKey) => {
+    return JSON.parse(CryptoJS.AES.decrypt(
+      state.wallets[walletKey].credentials,
+      Vue.prototype.$g('salt')
+    ).toString(CryptoJS.enc.Utf8))
+  },
   /**
    * Return a value from the encrypted security store
    * @param state
@@ -178,13 +190,13 @@ export const mutations = {
     state.wallets[options.address].securityLevel = options
   },
   WALLET_POLICY(state, options) {
-    state.wallets[options.address].policy = options.policy
+    Vue.set(state.walletPolicies, options.address, options.policy)
   },
   setWalletPolicyProperty(state, options) {
-    if(!state.wallets.hasOwnProperty(options.address)) {
-      state.wallets[options.address] = {}
+    if(!state.walletPolicies.hasOwnProperty(options.address)) {
+      Vue.set(state.walletPolicies, options.address, {})
     }
-    state.wallets[options.address].policy[options.key] = options.value
+    state.walletPolicies[options.address][options.key] = options.value
   },
   setaddress(state, options) {
     state.address = options

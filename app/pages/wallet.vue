@@ -20,9 +20,9 @@
                 <v-list-tile @click="walletType = 'eth'; dialogWalletAdd = true">
                   <v-list-tile-title>{{ $t('network.label.eth') }}</v-list-tile-title>
                 </v-list-tile>
-                <!--<v-list-tile @click="walletType = 'btc'; dialogWalletAdd = true">-->
-                <!--<v-list-tile-title>{{ $t('network.label.btc') }}</v-list-tile-title>-->
-                <!--</v-list-tile>-->
+                <v-list-tile @click="walletType = 'btc'; dialogWalletAdd = true">
+                  <v-list-tile-title>{{ $t('network.label.btc') }}</v-list-tile-title>
+                </v-list-tile>
                 <v-list-tile v-if="haveEthereumWallet" @click="walletType = 'contract'; dialogWalletAdd = true">
                   <v-list-tile-title>{{ $t('network.contract') }}</v-list-tile-title>
                 </v-list-tile>
@@ -51,9 +51,9 @@
                 <v-list-tile @click="walletType = 'eth'; dialogWalletAdd = true">
                   <v-list-tile-title>{{ $t('network.label.eth') }}</v-list-tile-title>
                 </v-list-tile>
-                <!--<v-list-tile @click="walletType = 'btc'; dialogWalletAdd = true">-->
-                <!--<v-list-tile-title>{{ $t('network.label.btc') }}</v-list-tile-title>-->
-                <!--</v-list-tile>-->
+                <v-list-tile @click="walletType = 'btc'; dialogWalletAdd = true">
+                  <v-list-tile-title>{{ $t('network.label.btc') }}</v-list-tile-title>
+                </v-list-tile>
                 <v-list-tile v-if="haveEthereumWallet" @click="walletType = 'contract'; dialogWalletAdd = true">
                   <v-list-tile-title>{{ $t('network.contract') }}</v-list-tile-title>
                 </v-list-tile>
@@ -70,11 +70,21 @@
                 <div slot="header" @click="accordionTogglingWallet(wallet)">
                   <v-layout row wrap>
                     <v-flex xs3 sm1 class="text-xs-left">
-                      <wallet-image :wallet="wallet" />
+                      <v-badge v-if="testNet(wallet)" left>
+                        <template v-slot:badge>
+                          <v-icon dark small>
+                            share
+                          </v-icon>
+                        </template>
+                        <span>
+                          <wallet-image :wallet="wallet" />
+                        </span>
+                      </v-badge>
+                      <wallet-image v-else :wallet="wallet" />
                     </v-flex>
                     <v-flex xs7 sm5 class="text-truncate">
                       <v-layout row wrap>
-                        <v-flex  xs12 sm6>
+                        <v-flex xs12 sm6>
                           {{ wallet.name }}
                         </v-flex>
                         <v-flex xs12 sm6>
@@ -84,13 +94,13 @@
                     </v-flex>
                     <!-- Wallet Controls -->
                     <v-flex v-if="$vuetify.breakpoint.mdAndUp" xs2 sm6 class="text-xs-right">
-                      <v-btn v-if="wallet.onChain === true" outline small @click="sendShow(wallet, $event)">
+                      <v-btn v-if="wallet.onChain === true && wallet.type !== 'btc'" outline small @click="sendShow(wallet, $event)">
                         {{ $t('common.action.send') }}
                       </v-btn>
                       <v-btn outline small @click="addressShow(wallet)">
                         {{ $t('common.action.receive') }}
                       </v-btn>
-                      <v-btn  outline  small @click="editShow(wallet, $event)">
+                      <v-btn outline small @click="editShow(wallet, $event)">
                         {{ $t('common.action.edit') }}
                       </v-btn>
                     </v-flex>
@@ -110,7 +120,7 @@
                         absolute
                       >
                         <v-list>
-                          <v-list-tile v-if="wallet.onChain === true" @click="sendShow(wallet, $event)">
+                          <v-list-tile v-if="wallet.onChain === true && wallet.type !== 'btc'" @click="sendShow(wallet, $event)">
                             <v-list-tile-title>{{ $t('common.action.send') }}</v-list-tile-title>
                           </v-list-tile>
                           <v-list-tile @click="addressShow(wallet)">
@@ -135,7 +145,7 @@
                         <testnet-buttons :wallet="wallet" />
                       </v-flex>
                       <v-flex xs12 md6>
-                        <address-render :address="wallet.address" :use-address-book="false" :use-receiver-address="true" />
+                        <address-render :address="wallet.address" :use-address-book="false" />
                       </v-flex>
                       <v-flex xs12>
                         <tracked-transactions :wallet="wallet" />
@@ -180,18 +190,16 @@
         <v-tabs>
           <!--v-model="active"-->
           <v-tab>
-           Edit
+            Edit
           </v-tab>
           <v-tab-item>
             <v-card flat>
               <v-card-text>
                 <v-layout row wrap>
                   <v-flex xs12>
-                  </v-flex>
-                  <v-flex xs12>
                     <v-text-field
-                      :label="$t('common.label.name')"
                       v-model="modelWalletName"
+                      :label="$t('common.label.name')"
                       @keyup.enter="dialogEditWallet = false"
                     />
                   </v-flex>
@@ -219,8 +227,8 @@
                   </v-flex>
                   <v-flex xs12>
                     <v-text-field
-                      :label="$t('common.label.name')"
                       v-model="confirmedWalletName"
+                      :label="$t('common.label.name')"
                     />
                   </v-flex>
                   <v-flex xs12>
@@ -265,7 +273,6 @@
         </v-toolbar>
         <make-transfer :wallet="contextWallet" @complete="transferComplete()" />
       </v-dialog>
-
     </v-layout>
   </v-container>
 </template>
@@ -405,6 +412,19 @@ export default {
     )
   },
   methods: {
+    testNet(wallet) {
+      // First check whether the wallet is a contract and using parent
+      if(wallet.hasOwnProperty('managerWalletAddress')) {
+        wallet = this.$store.state.wallet.wallets[wallet.managerWalletAddress]
+      }
+
+      if(wallet.hasOwnProperty('network')) {
+        if (wallet.network.hasOwnProperty('testing')) {
+          return true
+        }
+      }
+      return false
+    },
     dialogEditWalletClick(event) {
       event.stopPropagation()
       this.dialogEditWallet = true;

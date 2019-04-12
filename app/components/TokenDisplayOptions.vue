@@ -49,7 +49,7 @@
           this.$store.commit('emitRenderEvent')
         }
       },
-      aenSymbols() { return ['default'].concat(Object.keys(this.$g('exchange.divisibility.aen'))) },
+      aenSymbols() { return Object.keys(this.$g('exchange.divisibility.aen')) },
       btcDisplaySymbol: {
         get: function() {
           return this.$store.state.wallet.btc.displaySymbol
@@ -59,7 +59,7 @@
           this.$store.commit('emitRenderEvent')
         }
       },
-      btcSymbols() { return ['default'].concat(Object.keys(this.$g('exchange.divisibility.btc'))) },
+      btcSymbols() { return Object.keys(this.$g('exchange.divisibility.btc')) },
       ethDisplaySymbol: {
         get: function() {
           return this.$store.state.wallet.eth.displaySymbol
@@ -69,7 +69,7 @@
           this.$store.commit('emitRenderEvent')
         }
       },
-      ethSymbols() { return ['default'].concat(Object.keys(this.$g('exchange.divisibility.eth'))) }
+      ethSymbols() { return Object.keys(this.$g('exchange.divisibility.eth')) }
     },
     methods: {
       menuToggle(event) {

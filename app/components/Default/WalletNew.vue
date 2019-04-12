@@ -125,19 +125,17 @@
                     return true
                 }
                 return false
-            }
+            },
+            availableNetworks() { return this.$g(this.type + '.available_networks') }
         },
       watch: {
         type: function () {
-          if(!this.multipleNetworks) {
-            this.network = this.$g(this.type + '.available_networks')[0]
-          }
+          this.network = this.$g(this.type + '.available_networks')[0]
         }
       },
       mounted: function () {
-        if(!this.multipleNetworks) {
-          this.network = this.$g(this.type + '.available_networks')[0]
-        }
+        this.walletName = this.type + '-' +this.$store.state.wallet[this.type].walletCount
+        this.network = this.$g(this.type + '.available_networks')[0]
       },
         methods: {
             back() {

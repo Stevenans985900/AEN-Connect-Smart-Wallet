@@ -234,6 +234,10 @@
           ]
 
         },
+        "terms_and_conditions": {
+          "title": "Terms And Conditions",
+          "icon": "gavel"
+        },
         'about': {
           'title': 'About',
           "icon": "face"
@@ -300,6 +304,9 @@
         switch (this.categoryIndex) {
           case 'about':
             this.categoryComponent = () => import('./AboutUs')
+            break
+          case 'terms_and_conditions':
+            this.categoryComponent = () => import('./TermsAndConditions')
             break
           default:
             this.selectedCategory = this.categoryIndex

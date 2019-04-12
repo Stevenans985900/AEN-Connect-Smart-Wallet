@@ -63,6 +63,30 @@
       <nuxt />
     </v-content>
 
+    <v-dialog v-model="developmentAgreed" max-width="400px" persistent>
+      <v-toolbar class="primary">
+        <v-toolbar-title>
+          {{ $t('development.label.development_release') }}
+        </v-toolbar-title>
+        <v-spacer />
+        <v-btn @click="developmentAgreed = true" icon>
+          <v-icon>
+            close
+          </v-icon>
+        </v-btn>
+      </v-toolbar>
+      <v-card>
+        <v-card-text>
+          {{ $t('development.message.development_release') }}
+        </v-card-text>
+        <v-card-actions>
+          <v-btn @click="developmentAgreed = true" class="primary">
+            {{ $t('common.action.accept') }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <!-- Exit Dialog -->
     <!--<v-dialog v-if="dialogExit === true" v-model="dialogExit" persistent max-width="450px">-->
     <!--<v-toolbar color="primary">-->
@@ -170,6 +194,12 @@ export default {
         }
       },
       set: function (val) { this.drawerOpen = val }
+    },
+    developmentAgreed: {
+      get() {
+        console.log('DEVELOPMENT STATE', this.$store.state.user.developmentAgreed)
+        return !this.$store.state.user.developmentAgreed },
+      set(val) { this.$store.commit('USER_PROP', {key: "developmentAgreed", value: val }) }
     },
     menuPendingTransactions: {
       get() {
