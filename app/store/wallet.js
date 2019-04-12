@@ -205,12 +205,7 @@ export const actions = {
                 commit('setWalletProperty', {
                   address: wallet.address,
                   key: 'balance',
-                  value: response.balance
-                })
-                commit('setWalletProperty', {
-                  address: wallet.address,
-                  key: 'managedAddressesWithTokens',
-                  value: response.wallets
+                  value: response
                 })
                 commit('setWalletProperty', {
                   address: wallet.address,

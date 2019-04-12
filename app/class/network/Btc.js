@@ -10,9 +10,9 @@ export default class Btc extends Generic {
   getTransactionInfo(transactionHash) {
     return new Promise((resolve, reject) => {
       const address = this.blockchainInfoEndpoint + 'rawtx/' + transactionHash
+
       axios.get(address)
         .then(function (response) {
-          console.log(response)
           resolve(response.data)
         })
         .catch(function (error) {
@@ -41,6 +41,7 @@ export default class Btc extends Generic {
       const address = this.apiEndpoint + options.network.block_cypher_id + '/addrs/' + options.address + '/balance'
       axios.get(address)
         .then(function (response) {
+          console.log('Response from BTC Balance', response)
           resolve(response.data.balance)
         })
         .catch(function (error) {
@@ -81,7 +82,7 @@ export default class Btc extends Generic {
   }
   walletNew(options) {
     super.walletNew(options)
-    return new Promise(({resolve}) => {
+    return new Promise((resolve) => {
       const keyPair = bitcoin.ECPair.makeRandom({ network: bitcoin.networks[options.network.identifier] })
       const { address } = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey, network: bitcoin.networks[options.network.identifier] })
       const walletObject = {
@@ -180,8 +181,11 @@ export default class Btc extends Generic {
   transfer(options) {
     super.transfer(options)
     return new Promise((resolve, reject) => {
+
       const key =  bitcoin.ECPair.fromWIF(options.credentials.walletImportFormat, bitcoin.networks[options.source.network.identifier])
+      console.log('retrieved key OK', key)
       const transactionBuilder = new bitcoin.TransactionBuilder(bitcoin.networks[options.source.network.identifier])
+      console.log('Created Transaction builder ok')
       transactionBuilder.setVersion(1)
       // Find input transaction with money to use in this transaction
       for(let i = 0; i < options.source.transactions.length; i++) {

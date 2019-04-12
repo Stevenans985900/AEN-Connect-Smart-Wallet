@@ -5,7 +5,7 @@ export default class Genetic {
     this.services = {}
     this.pluginName = 'Abstract'
   }
-  balance(options) { Vue.$log.debug(this.pluginName+' plugin', options) }
+  balance(options) { Vue.$log.debug(this.pluginName+' plugin: Balance', options) }
   /**
    * Get details on an individual transaction
    * @param options

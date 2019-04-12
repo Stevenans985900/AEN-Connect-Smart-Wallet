@@ -25,7 +25,7 @@ export default class Contract extends Generic {
           // Work out where the decimal place should be
           const balance = response.toString()
           const balanceBreakpoint = balance.length - options.decimals
-          const finalBalance = Number(balance.slice(0, balanceBreakpoint) + '.' + balance.slice(balanceBreakpoint))
+          const finalBalance = Number(balance.slice(0, balanceBreakpoint) + '.' + balance.slice(balanceBreakpoint)).toFixed(2)
           resolve(finalBalance)
         })
           .catch((err) => {
