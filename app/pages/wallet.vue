@@ -70,22 +70,15 @@
                 <div slot="header" @click="accordionTogglingWallet(wallet)">
                   <v-layout row wrap>
                     <v-flex xs3 sm1 class="text-xs-left">
-                      <v-badge v-if="testNet(wallet)" left>
-                        <template v-slot:badge>
-                          <v-icon dark small>
-                            share
-                          </v-icon>
-                        </template>
-                        <span>
-                          <wallet-image :wallet="wallet" />
-                        </span>
-                      </v-badge>
-                      <wallet-image v-else :wallet="wallet" />
+                      <wallet-image :wallet="wallet" />
                     </v-flex>
                     <v-flex xs7 sm5 class="text-truncate">
                       <v-layout row wrap>
                         <v-flex xs12 sm6>
                           {{ wallet.name }}
+                          <p v-if="testNet(wallet)" class="testnet">
+                            TESTNET
+                          </p>
                         </v-flex>
                         <v-flex xs12 sm6>
                           <balance :wallet="wallet" />
@@ -283,6 +276,10 @@
   .apply-active-expansion .v-expansion-panel__container--active .v-table,
   .apply-active-expansion .v-expansion-panel__container--active .v-datatable__actions {
     background-color: var(--primary-dark-1) !important;
+  }
+  .testnet {
+    font-size: 0.6rem;
+    color: #b5b5b5;
   }
 </style>
 <script>
