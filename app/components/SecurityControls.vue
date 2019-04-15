@@ -74,9 +74,8 @@
           </h3>
           <!-- Global only options -->
           <v-checkbox v-if="walletAddress === 'global'" v-model="app_start" :label="$t('security.label.password_app_start')" />
-          <!-- Wallet specific options -->
-          <v-checkbox v-model="transaction_start" :label="$t('security.label.password_transaction_start')" />
           <v-checkbox v-model="wallet_open" :label="$t('security.label.password_wallet_open')" />
+          <v-checkbox v-model="transaction_start" :label="$t('security.label.password_transaction_start')" />
         </v-flex>
       </v-layout>
     </v-flex>

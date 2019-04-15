@@ -86,7 +86,7 @@ export default {
     },
     processAddress() {
       if (this.address !== '') {
-        this.contact.address = this.address
+        this.contact.address = this.address.toLowerCase()
   // Try and get details of the contact if existing
         if(this.$store.state.wallet.contacts.hasOwnProperty(this.address)) {
           this.contact.displayText = this.$store.state.wallet.contacts[this.address].displayText

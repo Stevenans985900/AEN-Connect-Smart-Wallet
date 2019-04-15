@@ -145,7 +145,7 @@ export default class Aen extends Generic {
 
       const walletObject = {
         publicKey: options.account.publicKey,
-        address: wallet.address.address,
+        address: wallet.address.address.toLowerCase(),
         addressObject: wallet.address,
         network: options.network,
         credentials: {
@@ -215,13 +215,16 @@ export default class Aen extends Generic {
    */
   transactionsUnconfirmed(options) {
     super.transactionsUnconfirmed(options)
-    this.$store.state.services.accountHttp.unconfirmedTransactions(
-      this.$store.state.publicAccount
-    )
-      .subscribe((transactions) => {
-        // TODO update here
-        Vue.$log.debug(transactions)
-      })
+    return new Promise((resolve) => {
+      const accountHttp = new AccountHttp(this.apiEndpoint)
+      const publicAccount = PublicAccount.createFromPublicKey(options.publicKey, options.network.byte)
+      accountHttp.unconfirmedTransactions(publicAccount)
+        .subscribe((transactions) => {
+          resolve(transactions)
+          // TODO update here
+          Vue.$log.debug(transactions)
+        })
+    })
   }
   /**
    *
