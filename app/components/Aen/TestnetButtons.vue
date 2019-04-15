@@ -1,17 +1,17 @@
 <template>
   <v-menu v-if="testnet" offset-y>
     <v-btn
-      slot="activator"
-      small
-      outline
+            slot="activator"
+            small
+            outline
     >
       {{ $t('network.label.testnet_functions') }}
       <v-icon>arrow_drop_down</v-icon>
     </v-btn>
     <v-list>
       <v-list-tile
-        :href="faucet.address + '?address=' + wallet.address"
-        target="_blank"
+              :href="faucet.address + '?address=' + wallet.address.toUpperCase()"
+              target="_blank"
       >
         <v-list-tile-title>{{ $t('network.action.goto_faucet') }}</v-list-tile-title>
       </v-list-tile>
@@ -21,25 +21,25 @@
 
 <script>
 
-export default {
-  props: {
-    wallet: {
-      type: Object,
-      default: function () {
-        return {}
-      }
+    export default {
+        props: {
+            wallet: {
+                type: Object,
+                default: function () {
+                    return {}
+                }
+            }
+        },
+        computed: {
+            faucet() {
+                return this.$g('aen.faucets')[0]
+            },
+            testnet() {
+                if (this.wallet.network.hasOwnProperty('testing')) {
+                    return true
+                }
+                return false
+            }
+        }
     }
-  },
-  computed: {
-    faucet() {
-      return this.$g('aen.faucets')[0]
-    },
-    testnet() {
-      if (this.wallet.network.hasOwnProperty('testing')) {
-        return true
-      }
-      return false
-    }
-  }
-}
 </script>
