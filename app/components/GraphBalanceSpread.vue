@@ -226,11 +226,7 @@ export default {
         this.$store
           .dispatch('wallet/balance', this.wallets[walletKey])
           .then((walletProcessed) => {
-            // const color = this.colorSchema[walletProcessed.type]
-            // Calculate the dollar value of the wallet
-
             exchangeRate = this.$g('exchange.' + walletProcessed.type)
-            this.$log.debug('Exchange rate for the current token (' + walletProcessed.type + ') is ' + exchangeRate, walletProcessed)
             if(exchangeRate) {
               const walletValue = (walletProcessed.balance ? walletProcessed.balance * Number(exchangeRate) : 0)
               this.totalValue += walletValue
