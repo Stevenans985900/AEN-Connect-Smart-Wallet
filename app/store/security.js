@@ -63,12 +63,21 @@ export const actions = {
     return new Promise((resolve) => {
       // Set global settings as the default
       let challengeUser = state.globalPolicy[options.challenge]
-      if(state.wallets[options.address].hasOwnProperty('policy')) {
-        challengeUser = state.wallets[options.address].policy[options.challenge]
+      if(state.walletPolicies.hasOwnProperty(options.address)) {
+        const policy = state.walletPolicies[options.address]
+        if(policy.hasOwnProperty(options.challenge)) {
+          challengeUser = policy[options.challenge]
+        }
       }
 
       // Check whether the user authenticated within the acceptable timeout period
       if (challengeUser === true) {
+
+        // Check whether the challenge isn't in grace period
+        if(state.wallets[options.address].lastPass > (Date.now() - Vue.prototype.$g('time_definitions.security_password_grace'))) {
+          resolve()
+        }
+
         commit('CONTEXT_PROPERTY', { key: 'validity', value: 'CHALLENGE' })
         commit('CONTEXT_PROPERTY', { key: 'requiredCheck', value: options.challenge })
         commit('CONTEXT_PROPERTY', { key: 'address', value: options.address })
@@ -89,6 +98,13 @@ export const actions = {
       }
     })
   },
+  /**
+   *
+   * @param state
+   * @param dispatch
+   * @param address
+   * @returns {Promise<any>}
+   */
   getCredentials({state, dispatch}, address) {
     Vue.$log.debug('Security Store: Get Credentials', address)
     return new Promise((resolve) => {
@@ -104,6 +120,13 @@ export const actions = {
       })
     })
   },
+  /**
+   *
+   * @param state
+   * @param commit
+   * @param password
+   * @returns {Promise<any>}
+   */
   checkPassword({state, commit}, password) {
     return new Promise((resolve, reject) => {
 
@@ -123,6 +146,11 @@ export const actions = {
 
       const hashedPassword = CryptoJS.SHA256(password + Vue.prototype.$g('salt')).toString()
       if (hashedPassword === state.wallets[state.context.address].password) {
+        commit('WALLET_PROP', {
+          address: state.context.address,
+          key: 'lastPass',
+          value: Date.now()
+        })
         commit('CONTEXT_PROPERTY', { key: 'authenticationAttempts', value: 0 })
         commit('CONTEXT_PROPERTY', { key: 'validity', value: 'VALID' })
         commit('CONTEXT_PROPERTY', { key: 'blocking', value: false })
@@ -135,14 +163,16 @@ export const actions = {
   },
   monitorWallet({commit}, wallet) {
 
+    Vue.$log.debug('Security Store: Monitor wallet', wallet)
     const credentials = CryptoJS.AES.encrypt(JSON.stringify(wallet.credentials), Vue.prototype.$g('salt')).toString()
     const hashedPassword = CryptoJS.SHA256(wallet.credentials.password + Vue.prototype.$g('salt')).toString()
 
     // TODO Fork handler depending on security rules. await further definition
-    commit('setWallet', {
+    commit('WALLET', {
       address: wallet.address,
       password: hashedPassword,
-      credentials: credentials
+      credentials: credentials,
+      lastPass: 1
     })
   }
 }
@@ -181,8 +211,14 @@ export const mutations = {
     }
     state.wallets[options.address].securityLevel = options
   },
+  WALLET(state, options) {
+    Vue.set(state.wallets, options.address, options)
+  },
   WALLET_POLICY(state, options) {
     Vue.set(state.walletPolicies, options.address, options.policy)
+  },
+  WALLET_PROP(state, options) {
+    state.wallets[options.address][options.key] = options.vale
   },
   setWalletPolicyProperty(state, options) {
     if(!state.walletPolicies.hasOwnProperty(options.address)) {

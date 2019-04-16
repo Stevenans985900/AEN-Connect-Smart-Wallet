@@ -1,5 +1,5 @@
 <template>
-  <v-btn v-clipboard:copy="data" v-clipboard:success="onCopy" :outline="showOutline" flat small>
+  <v-btn v-clipboard:copy="data" v-clipboard:success="onCopy" :outline="showOutline" flat small :class="{'evenSmaller': $vuetify.breakpoint.smAndDown}">
     <v-icon small>
       file_copy
     </v-icon>&nbsp;&nbsp;{{ display }}
@@ -14,6 +14,9 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     justify-content: start;
+  }
+  .evenSmaller {
+    font-size: 0.7rem !important;
   }
 </style>
 
