@@ -63,7 +63,7 @@
         </v-toolbar>
         <!-- Wallet Management -->
         <v-card class="apply-active-expansion">
-          <v-card-text v-if="haveWallet" style="max-height: 75vh">
+          <v-card-text v-if="haveWallet">
             <v-layout row wrap>
               <v-flex xs12>
                 <v-expansion-panel>
