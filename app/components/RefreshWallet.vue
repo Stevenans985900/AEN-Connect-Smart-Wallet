@@ -1,9 +1,11 @@
 <template>
-  <v-btn v-if="wallet.onChain === true" outline small @click="refresh">
+  <v-btn v-if="wallet.onChain === true" outline small :icon="$vuetify.breakpoint.smAndDown" @click="refresh">
     <v-icon>
       loop
     </v-icon>
-    {{ $t('common.label.synced') }} {{ lastSynced }}
+    <span v-if="$vuetify.breakpoint.mdAndUp">
+      {{ $t('common.label.synced') }} {{ lastSynced }}
+    </span>
   </v-btn>
   <wallet-check-on-chain v-else :wallet="wallet" />
 </template>

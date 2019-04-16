@@ -62,94 +62,87 @@
           </v-menu>
         </v-toolbar>
         <!-- Wallet Management -->
-        <v-card v-bar class="apply-active-expansion">
-          <v-card-text v-if="haveWallet" style="max-height: 75vh;">
-            <v-expansion-panel popout>
-              <v-expansion-panel-content v-for="(wallet, address) in wallets" :key="address">
-                <!-- Main Table Row -->
-                <div slot="header" @click="accordionTogglingWallet(wallet)">
-                  <v-layout row wrap>
-                    <v-flex xs3 sm1 class="text-xs-left">
-                      <wallet-image :wallet="wallet" />
-                    </v-flex>
-                    <v-flex xs7 sm5 class="text-truncate">
+        <v-card class="apply-active-expansion">
+          <v-card-text v-if="haveWallet" style="max-height: 75vh">
+            <v-layout row wrap>
+              <v-flex xs12>
+                <v-expansion-panel>
+                  <v-expansion-panel-content v-for="(wallet, address) in wallets" :key="address">
+                    <!-- Main Table Row -->
+                    <div slot="header" @click="accordionTogglingWallet(wallet)">
                       <v-layout row wrap>
-                        <v-flex xs12 sm6>
-                          {{ wallet.name }}
-                          <p v-if="testNet(wallet)" class="testnet">
-                            {{ $t('development.label.testnet') }}
-                          </p>
+                        <v-flex xs3 sm2 class="text-xs-left">
+                          <wallet-image :wallet="wallet" />
                         </v-flex>
-                        <v-flex xs12 sm6>
-                          <balance :wallet="wallet" />
+                        <v-flex xs7 class="text-truncate">
+                          <v-layout row wrap>
+                            <v-flex xs12 sm6>
+                              {{ wallet.name }}
+                              <p v-if="testNet(wallet)" class="testnet">
+                                {{ $t('development.label.testnet') }}
+                              </p>
+                            </v-flex>
+                            <v-flex xs12 sm6>
+                              <balance :wallet="wallet" />
+                            </v-flex>
+                          </v-layout>
+                        </v-flex>
+                        <!-- Wallet Controls -->
+                        <v-flex v-if="$vuetify.breakpoint.mdAndUp" xs2 sm6 class="text-xs-right">
+                          <v-btn v-if="wallet.onChain === true && wallet.type !== 'btc'" outline small @click="sendShow(wallet, $event)">
+                            {{ $t('common.action.send') }}
+                          </v-btn>
+                          <v-btn outline small @click="addressShow(wallet)">
+                            {{ $t('common.action.receive') }}
+                          </v-btn>
+                          <v-btn outline small @click="editShow(wallet, $event)">
+                            {{ $t('common.action.edit') }}
+                          </v-btn>
                         </v-flex>
                       </v-layout>
-                    </v-flex>
-                    <!-- Wallet Controls -->
-                    <v-flex v-if="$vuetify.breakpoint.mdAndUp" xs2 sm6 class="text-xs-right">
-                      <v-btn v-if="wallet.onChain === true && wallet.type !== 'btc'" outline small @click="sendShow(wallet, $event)">
-                        {{ $t('common.action.send') }}
-                      </v-btn>
-                      <v-btn outline small @click="addressShow(wallet)">
-                        {{ $t('common.action.receive') }}
-                      </v-btn>
-                      <v-btn outline small @click="editShow(wallet, $event)">
-                        {{ $t('common.action.edit') }}
-                      </v-btn>
-                    </v-flex>
-                    <!-- Mobile Button -->
-                    <v-flex v-else xs2 sm6 class="text-xs-right">
-                      <v-btn small icon @click="mobileMenuShow($event)">
-                        <v-icon>
-                          menu
-                        </v-icon>
-                      </v-btn>
+                    </div>
+                    <!-- Wallet expansion details. Only try to render the section if selected to avoid unnecessary proc -->
+                    <v-card v-if="selectedWalletAddress == address">
+                      <v-card-text>
 
-                      <v-menu
-                        v-model="menuMobile"
-                        :position-x="x"
-                        :position-y="y"
-                        offset-y
-                        absolute
-                      >
-                        <v-list>
-                          <v-list-tile v-if="wallet.onChain === true && wallet.type !== 'btc'" @click="sendShow(wallet, $event)">
-                            <v-list-tile-title>{{ $t('common.action.send') }}</v-list-tile-title>
-                          </v-list-tile>
-                          <v-list-tile @click="addressShow(wallet)">
-                            <v-list-tile-title>{{ $t('common.action.receive') }}</v-list-tile-title>
-                          </v-list-tile>
-                          <v-list-tile v-if="wallet.address !== mainWalletAddress" @click="editShow(wallet, $event)">
-                            <v-list-tile-title>{{ $t('common.action.edit') }}</v-list-tile-title>
-                          </v-list-tile>
-                        </v-list>
-                      </v-menu>
-                    </v-flex>
-                  </v-layout>
-                </div>
-                <!-- Wallet expansion details. Only try to render the section if selected to avoid unnecessary proc -->
-                <v-card v-if="selectedWalletAddress == address">
-                  <v-card-text>
-                    <v-layout row wrap>
-                      <v-flex xs12 md3>
-                        <refresh-wallet :wallet="wallet" />
-                      </v-flex>
-                      <v-flex xs12 md3>
-                        <testnet-buttons :wallet="wallet" />
-                      </v-flex>
-                      <v-flex xs12 md6>
-                        <address-render :address="wallet.address" :use-address-book="false" />
-                      </v-flex>
-                      <v-flex xs12>
-                        <tracked-transactions :wallet="wallet" />
-                        <wallet-history v-if="wallet.onChain === true" :wallet="wallet" />
-                        <activation v-else :wallet="wallet" />
-                      </v-flex>
-                    </v-layout>
-                  </v-card-text>
-                </v-card>
-              </v-expansion-panel-content>
-            </v-expansion-panel>
+                        <!-- DESKTOP MODE -->
+                        <v-layout row wrap>
+                          <v-flex xs2 md3 >
+                            <refresh-wallet :wallet="wallet" />
+                          </v-flex>
+                          <v-flex xs10 md3>
+                            <testnet-buttons :wallet="wallet" />
+                          </v-flex>
+                          <v-flex xs12 md6>
+                            <address-render :address="wallet.address" :use-address-book="false" />
+                          </v-flex>
+                          <v-flex xs4 v-if="$vuetify.breakpoint.smAndDown">
+                            <v-btn v-if="wallet.onChain === true && wallet.type !== 'btc'" outline small block @click="sendShow(wallet, $event)">
+                              {{ $t('common.action.send') }}
+                            </v-btn>
+                          </v-flex>
+                          <v-flex xs4 v-if="$vuetify.breakpoint.smAndDown">
+                            <v-btn outline small block @click="addressShow(wallet)">
+                              {{ $t('common.action.receive') }}
+                            </v-btn>
+                          </v-flex>
+                          <v-flex xs4 v-if="$vuetify.breakpoint.smAndDown">
+                            <v-btn outline small block @click="editShow(wallet, $event)">
+                              {{ $t('common.action.edit') }}
+                            </v-btn>
+                          </v-flex>
+                          <v-flex xs12>
+                            <tracked-transactions :wallet="wallet" />
+                            <wallet-history v-if="wallet.onChain === true" :wallet="wallet" />
+                            <activation v-else :wallet="wallet" />
+                          </v-flex>
+                        </v-layout>
+                      </v-card-text>
+                    </v-card>
+                  </v-expansion-panel-content>
+                </v-expansion-panel>
+              </v-flex>
+            </v-layout>
           </v-card-text>
           <v-card-text v-else>
             <v-alert outline type="info" :value="true">
@@ -282,6 +275,11 @@
     color: #b5b5b5;
     text-transform: uppercase;
   }
+
+  .mobile .v-expansion-panel__header {
+    padding: 0 !important;
+  }
+
 </style>
 <script>
 import Activation from '~/components/Activation'
