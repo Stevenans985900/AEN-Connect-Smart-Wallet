@@ -19,7 +19,8 @@
     "controller_poll": 500,
     "online_interval": 15000,
     "transaction_watch": 15000,
-    "wallet_update": 30000
+    "wallet_update": 30000,
+    "security_password_grace": 120000
   },
   "userExperience": {
     "notificationTimeout": 6000,

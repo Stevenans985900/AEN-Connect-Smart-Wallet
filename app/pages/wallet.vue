@@ -394,16 +394,6 @@ export default {
       function () {
         // Create a wallet index map to control accordion with
         clearInterval(preparationInterval)
-
-        // Set up some listeners to update balance of the wallets
-        for(let walletAddress in this.wallets) {
-          this.$store.dispatch('wallet/balance', this.wallets[walletAddress])
-          setInterval(() => {
-            this.$store.dispatch('wallet/balance', this.wallets[walletAddress])
-          }, this.$store.state.time_definitions.wallet_update)
-
-        }
-
         this.$store.commit('setLoading', { t: 'router', v: false })
       }.bind(this),
       this.$store.state.time_definitions.controller_poll

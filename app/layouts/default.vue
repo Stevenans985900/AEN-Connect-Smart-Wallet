@@ -68,12 +68,6 @@
         <v-toolbar-title>
           {{ $t('development.label.development_release') }}
         </v-toolbar-title>
-        <v-spacer />
-        <v-btn icon @click="developmentAgreed = true">
-          <v-icon>
-            close
-          </v-icon>
-        </v-btn>
       </v-toolbar>
       <v-card>
         <v-card-text>
@@ -331,6 +325,13 @@ export default {
       }.bind(this),
       this.$store.state.time_definitions.api_ranking
     )
+
+    setInterval(() => {
+      this.$store.dispatch('wallet/updateAll')
+    }, this.$store.state.time_definitions.wallet_update)
+
+    // Set up some listeners to update balance of the wallets
+
 
     // Perform an initial investigation in to state of each network
     //   this.$store.dispatch('wallet/queryApiNode', 'aen')

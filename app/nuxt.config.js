@@ -14,6 +14,7 @@ module.exports = {
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       { hid: 'description', name: 'description', content: pkg.description }
     ],
+    noscript: [{ innerHTML: 'This application requires JavaScript in order to run, please enable JavaScript or disable your blocker to proceed.' }],
     link: [{
                 rel: 'manifest',
                 href: '/manifest.json'

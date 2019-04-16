@@ -34,7 +34,7 @@
                   expand
                 >
                   <!-- Initial wallet creation screen -->
-                  <v-expansion-panel-content>
+                  <v-expansion-panel-content hide-actions>
                     <div slot="header">
                       <h2>
                         {{ $t('index.label.wallet_creation') }}
@@ -44,7 +44,7 @@
                   </v-expansion-panel-content>
 
                   <!-- Security configuration -->
-                  <v-expansion-panel-content>
+                  <v-expansion-panel-content hide-actions>
                     <div slot="header">
                       <h2>
                         {{ $t('index.label.security_features') }}
@@ -60,7 +60,7 @@
                   </v-expansion-panel-content>
 
                   <!-- License agreement -->
-                  <v-expansion-panel-content>
+                  <v-expansion-panel-content hide-actions>
                     <div slot="header">
                       <h2>
                         {{ $t('index.label.accept_end_user_license_agreement') }}

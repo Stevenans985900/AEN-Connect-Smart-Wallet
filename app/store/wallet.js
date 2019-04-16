@@ -767,6 +767,8 @@ export const actions = {
         case 'aen':
           networkHandler = getters['networkHandler']('aen')
           networkHandler.transfer(options).then((transfer) => {
+            console.log('RESPONSE FROM AEN transfer')
+            console.log(transfer)
             resolve(transfer)
           })
               .finally(() => { dispatch('busy', false, { root: true }) })
@@ -883,6 +885,27 @@ export const actions = {
     ) {
       check(currentRound)
     }
+  },
+
+  updateAll({commit, dispatch, state}) {
+
+    for(let walletAddress in state.wallets) {
+      const wallet = state.wallets[walletAddress]
+      if(wallet.onChain === true) {
+        dispatch('balance', state.wallets[walletAddress])
+        dispatch('transactionsHistorical', state.wallets[walletAddress])
+      } else {
+        dispatch('getLiveWallet', wallet).then((walletOnChain) => {
+          if (walletOnChain !== false) {
+            commit('WALLET_PROP', {
+              address: this.wallet.address,
+              key: 'onChain',
+              value: true
+            })
+          }
+        })
+      }
+    }
   }
 }
 
@@ -920,6 +943,9 @@ export const mutations = {
   },
   setEthProperty(state, options) {
     Vue.set(state.eth, options.key, options.value)
+  },
+  WALLET_PROP(state, options) {
+    state.wallets[options.address][options.key] = options.value
   },
   setWalletProperty(state, options) {
     state.wallets[options.address][options.key] = options.value
