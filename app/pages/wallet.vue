@@ -71,10 +71,10 @@
                     <!-- Main Table Row -->
                     <div slot="header" @click="accordionTogglingWallet(wallet)">
                       <v-layout row wrap>
-                        <v-flex xs3 sm2 class="text-xs-left">
+                        <v-flex xs3 md1 class="text-xs-left">
                           <wallet-image :wallet="wallet" />
                         </v-flex>
-                        <v-flex xs7 class="text-truncate">
+                        <v-flex xs7 md4 class="text-truncate">
                           <v-layout row wrap>
                             <v-flex xs12 sm6>
                               {{ wallet.name }}
@@ -88,7 +88,7 @@
                           </v-layout>
                         </v-flex>
                         <!-- Wallet Controls -->
-                        <v-flex v-if="$vuetify.breakpoint.mdAndUp" xs2 sm6 class="text-xs-right">
+                        <v-flex v-if="$vuetify.breakpoint.mdAndUp" xs2 md7 class="text-xs-right">
                           <v-btn v-if="wallet.onChain === true && wallet.type !== 'btc'" outline small @click="sendShow(wallet, $event)">
                             {{ $t('common.action.send') }}
                           </v-btn>
