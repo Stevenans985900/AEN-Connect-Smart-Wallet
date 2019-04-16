@@ -65,7 +65,7 @@ export default {
       return format((this.data.deadline.value), 'YYYY-MM-DD HH:mm')
     },
     direction() {
-      if (this.data.recipient.address === this.wallet.address) {
+      if (this.data.recipient.address.toLowerCase() === this.wallet.address.toLowerCase()) {
         return 'incoming'
       } else {
         return 'outgoing'
