@@ -1,5 +1,5 @@
 <template>
-  <v-btn v-clipboard:copy="data" v-clipboard:success="onCopy" :outline="showOutline" flat small :class="{'evenSmaller': $vuetify.breakpoint.smAndDown}">
+  <v-btn v-clipboard:copy="data" v-clipboard:success="onCopy" :outline="showOutline" flat small :block="wide" :class="{'evenSmaller': $vuetify.breakpoint.smAndDown}">
     <v-icon small>
       file_copy
     </v-icon>&nbsp;&nbsp;{{ display }}
@@ -34,6 +34,10 @@
       showOutline: {
         type: Boolean,
         default: true
+      },
+      wide: {
+          type: Boolean,
+          default: false
       }
     },
     computed: {

@@ -1,20 +1,14 @@
 <template>
-  <v-btn v-if="wallet.onChain === true" outline small :icon="$vuetify.breakpoint.smAndDown" @click="refresh">
+  <v-progress-circular v-if="loading === true" indeterminate :size="25" />
+  <v-btn v-else outline small icon @click="refresh($event)">
     <v-icon>
       loop
     </v-icon>
-    <span v-if="$vuetify.breakpoint.mdAndUp">
-      {{ $t('common.label.synced') }} {{ lastSynced }}
-    </span>
   </v-btn>
-  <wallet-check-on-chain v-else :wallet="wallet" />
 </template>
 <script>
-  import WalletCheckOnChain from "~/components/WalletCheckOnChain"
-
   import { format } from 'date-fns'
   export default {
-      components: { WalletCheckOnChain },
       props: {
           wallet: {
               type: Object,
@@ -31,13 +25,36 @@
             }
         }
       },
+      data() {
+        return {
+            loading: false
+        }
+      },
       methods: {
-          refresh() {
-            this.$store.commit('CACHE_SKIP', true)
-            this.$store.dispatch('wallet/transactionsHistorical', this.wallet).then(() => {
-                this.$store.commit('CACHE_SKIP', true)
-                this.$store.dispatch('wallet/balance', this.wallet)
-            })
+          async refresh(event) {
+              event.stopPropagation()
+              this.loading = true
+              if(this.wallet.onChain) {
+                  this.$store.commit('CACHE_SKIP', true)
+                  this.$store.dispatch('wallet/transactionsHistorical', this.wallet)
+                  this.$store.commit('CACHE_SKIP', true)
+                  await this.$store.dispatch('wallet/balance', this.wallet)
+                  this.loading = false
+              } else {
+                  const response = await this.$store.dispatch('wallet/getLiveWallet', this.wallet)
+                  if (response !== false) {
+                    // Just in case wallet has already been updated, save commit
+                    if(this.wallet.onChain === false) {
+                      this.$store.commit('wallet/setWalletProperty', {
+                        address: this.wallet.address,
+                        key: 'onChain',
+                        value: true
+                      })
+                    }
+                    await this.$store.dispatch('wallet/balance', this.wallet)
+                  }
+                  this.loading = false
+              }
 
         }
       }

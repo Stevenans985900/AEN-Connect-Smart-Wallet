@@ -89,14 +89,15 @@
                         </v-flex>
                         <!-- Wallet Controls -->
                         <v-flex v-if="$vuetify.breakpoint.mdAndUp" xs2 md7 class="text-xs-right">
-                          <v-btn v-if="wallet.onChain === true && wallet.type !== 'btc'" outline small @click="sendShow(wallet, $event)">
+                          <refresh-wallet :wallet="wallet" />
+                          <v-btn :disabled="wallet.onChain === false || wallet.type === 'btc'" outline small @click="sendShow(wallet, $event)">
                             {{ $t('common.action.send') }}
                           </v-btn>
                           <v-btn outline small @click="addressShow(wallet)">
                             {{ $t('common.action.receive') }}
                           </v-btn>
                           <v-btn outline small @click="editShow(wallet, $event)">
-                            {{ $t('common.action.edit') }}
+                            {{ $t('common.label.options') }}
                           </v-btn>
                         </v-flex>
                       </v-layout>
@@ -104,20 +105,12 @@
                     <!-- Wallet expansion details. Only try to render the section if selected to avoid unnecessary proc -->
                     <v-card v-if="selectedWalletAddress == address">
                       <v-card-text>
-
-                        <!-- DESKTOP MODE -->
                         <v-layout row wrap>
-                          <v-flex xs2 md3 >
-                            <refresh-wallet :wallet="wallet" />
-                          </v-flex>
-                          <v-flex xs10 md3>
-                            <testnet-buttons :wallet="wallet" />
-                          </v-flex>
                           <v-flex xs12 md6>
-                            <address-render :address="wallet.address" :use-address-book="false" />
+                            <address-render :address="wallet.address" :use-address-book="false" :wide="true" />
                           </v-flex>
                           <v-flex xs4 v-if="$vuetify.breakpoint.smAndDown">
-                            <v-btn v-if="wallet.onChain === true && wallet.type !== 'btc'" outline small block @click="sendShow(wallet, $event)">
+                            <v-btn :disabled="wallet.onChain === false || wallet.type === 'btc'" outline small block @click="sendShow(wallet, $event)">
                               {{ $t('common.action.send') }}
                             </v-btn>
                           </v-flex>
@@ -128,8 +121,12 @@
                           </v-flex>
                           <v-flex xs4 v-if="$vuetify.breakpoint.smAndDown">
                             <v-btn outline small block @click="editShow(wallet, $event)">
-                              {{ $t('common.action.edit') }}
+                              {{ $t('common.label.options') }}
                             </v-btn>
+                          </v-flex>
+                          <v-flex xs12>
+                            <testnet-buttons :wallet="wallet" />
+                            <refresh-wallet :wallet="wallet" v-if="$vuetify.breakpoint.smAndDown" />
                           </v-flex>
                           <v-flex xs12>
                             <tracked-transactions :wallet="wallet" />

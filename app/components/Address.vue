@@ -1,11 +1,7 @@
 <template>
   <v-layout row wrap>
-    <v-flex
-      v-if="address"
-      xs11
-      :class="{ 'text-xs-right': showAdd }"
-    >
-      <clipboard :data="address" :display-text="displayText" />
+    <v-flex :class="buttonWidth">
+      <clipboard :data="address" :display-text="displayText" :wide="$vuetify.breakpoint.smAndDown" />
     </v-flex>
     <v-flex
       v-if="address"
@@ -61,6 +57,7 @@ export default {
     }
   },
   computed: {
+    buttonWidth() { return this.showAdd ? 'xs11' : 'xs12' },
     processedAddress() {
       return this.address
     },
