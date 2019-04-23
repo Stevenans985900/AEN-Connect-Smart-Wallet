@@ -1,6 +1,3 @@
-
-
-
 <template>
   <vue-dropzone id="dropzone" ref="myVueDropzone"
                 :options="dropzoneOptions"
@@ -8,9 +5,14 @@
                 :use-custom-slot="true"
                 @vdropzone-file-added="fileUploaded"
   >
-    <v-btn>
+    <v-btn block style="white-space: normal;">
       <v-icon>attach_file</v-icon>
-      {{ $t('backup.label.file_choose') }}
+      <span v-if="$vuetify.breakpoint.mdAndUp">
+        {{ $t('backup.label.file_choose_drop') }}
+      </span>
+      <span v-else>
+        {{ $t('backup.label.file_choose') }}
+      </span>
     </v-btn>
   </vue-dropzone>
   <!--<upload-button :file-changed-callback="fileUploaded" :title="$t('backup.label.file_choose')">-->

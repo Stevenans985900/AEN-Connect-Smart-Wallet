@@ -24,7 +24,8 @@ import {
   mergeMap
 } from 'rxjs/operators'
 import Generic from './Generic.js'
-import {format} from "date-fns";
+import {format} from "date-fns"
+import axios from 'axios'
 
 export default class Aen extends Generic {
 
@@ -210,19 +211,70 @@ export default class Aen extends Generic {
         context.$store.state.userTransactions.outgoing = transactions
       })
   }
+
+  /**
+   *
+   */
+  transactionStatus(options) {
+    Vue.$log.debug('AEN Plugin: Transaction Status', options)
+    return new Promise((resolve, reject) => {
+      axios.get(this.apiEndpoint + '/transaction/' + options.txHash)
+        .then(async function (response) {
+          Vue.$log.debug('AEN: Transactions Status: Axios return object', response)
+          // let transactionsWorkingObject = {}
+          // let currentTransaction, timeKey
+          // const transactions = response.data.result
+          // for(let transactionCount = 0; transactionCount < transactions.length; transactionCount++) {
+          //   currentTransaction = transactions[transactionCount]
+          //   timeKey = format((currentTransaction.timeStamp * 1000), 'YYYY-MM-DD HH:mm')
+          //   transactionsWorkingObject[timeKey] = currentTransaction
+          // }
+          // Vue.$log.debug('ETH: Transactions Historical: Working Transactions object', transactionsWorkingObject)
+          resolve(false)
+        })
+        .catch(function (error) {
+          reject(error)
+        })
+    })
+  }
+
   /**
    *
    */
   transactionsUnconfirmed(options) {
     super.transactionsUnconfirmed(options)
+    let index, transaction
+    const processedTransactions = {}
     return new Promise((resolve) => {
       const accountHttp = new AccountHttp(this.apiEndpoint)
+      console.log('pass creating account http')
       const publicAccount = PublicAccount.createFromPublicKey(options.publicKey, options.network.byte)
+      console.log('pass creating public account')
       accountHttp.unconfirmedTransactions(publicAccount)
         .subscribe((transactions) => {
-          resolve(transactions)
-          // TODO update here
-          Vue.$log.debug(transactions)
+          console.log('pass getting transactions from the wire', transactions)
+          for (index in transactions) {
+            console.log('checking: '+ index)
+            transaction = transactions[index]
+            console.log('currently working over')
+            console.log(transaction)
+            // If recipient is this wallets address, then is incoming
+
+            const direction = transaction.recipient.address.toLowerCase() === options.address ? 'incoming' : 'outgoing'
+            const address = direction === 'incoming' ? transaction.signer.address.address : transaction.recipient.address
+            console.log('ADDRESS: ' + address)
+            processedTransactions[transaction.transactionInfo.hash] = {
+              txHash: transaction.transactionInfo.hash,
+              direction: direction,
+              address: address,
+              amount: transaction.mosaics[0].amount.lower,
+              type: options.type,
+              walletAddress: options.address,
+              network: options.network.identifier,
+              status: 'PENDING'
+            }
+          }
+          resolve(processedTransactions)
         })
     })
   }
@@ -251,7 +303,20 @@ export default class Aen extends Generic {
       const signedTransaction = account.sign(transferTransaction)
       transactionHttp
         .announce(signedTransaction)
-        .subscribe(x => resolve(x), err => Vue.$log.error(err))
+        .subscribe((transactionHash) => {
+          console.log(transactionHash)
+          const transaction = {
+            key: transactionHash,
+            direction: 'outgoing',
+            address: options.destination.address,
+            amount: options.destination.amount,
+            type: options.source.type,
+            walletAddress: options.source.address,
+            network: options.source.network.identifier,
+            status: 'PENDING'
+          }
+          resolve(transaction)
+        }, err => Vue.$log.error(err))
     })
   }
   /**

@@ -116,6 +116,9 @@ export const mutations = {
   setRuntimeProperty(state, options) {
     state.runtime[options.key] = options.value
   },
+  RUNTIME_PROP(state, options) {
+    state.runtime[options.key] = options.value
+  },
   setUserProperty(state, options) {
     state.user[options.key] = options.value
   },

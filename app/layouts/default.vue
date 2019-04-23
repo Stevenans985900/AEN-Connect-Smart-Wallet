@@ -81,6 +81,31 @@
       </v-card>
     </v-dialog>
 
+    <v-dialog v-model="dialogShowTermsConditions" persistent max-width="400px">
+      <v-toolbar>
+        <v-toolbar-title>
+          {{ $t('eula.label.please_agree_continue') }}
+        </v-toolbar-title>
+      </v-toolbar>
+      <v-card>
+          <v-card-text>
+              <p>
+                {{ $t('eula.message.eula_message') }}
+              </p>
+          </v-card-text>
+        <v-card-actions>
+          <help show-category="terms_and_conditions">
+            <v-btn flat @click="helpDialogShow = true">
+              {{ $t('eula.action.show_eula') }}
+            </v-btn>
+          </help>
+          <v-btn class="primary" @click="eulaAgreed = true">
+            {{ $t('common.action.accept')}}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <!-- Exit Dialog -->
     <!--<v-dialog v-if="dialogExit === true" v-model="dialogExit" persistent max-width="450px">-->
     <!--<v-toolbar color="primary">-->
@@ -181,6 +206,11 @@ export default {
    * COMPUTED
    */
   computed: {
+    helpDialogShow: {
+      get: function () { return this.$store.state.user.help },
+      set: function (val) { this.$store.commit('setUserProperty', {key: 'help', value: val}) }
+    },
+
     cDrawerOpen: {
       get: function() {
         if (this.$vuetify.breakpoint.mdAndUp === true) {
@@ -205,8 +235,17 @@ export default {
       },
       set(val) { this.pendingTransactionsClicked = val }
     },
+    dialogShowTermsConditions() {
+      if (this.$nuxt.$route.name !== 'index' && this.eulaAgreed === false) {
+        return true
+      }
+      return false
+    },
     haveTrackedTransactions() { return Object.keys(this.$store.state.wallet.trackedTransactions).length > 0 ? true : false },
-    eulaAgreed() { return this.$store.state.user.eulaAgree },
+    eulaAgreed: {
+      get: function () { return this.$store.state.user.eulaAgree },
+      set: function (val) { this.$store.commit('USER_PROP', {key: 'eulaAgree', value: val} )}
+    },
     isOnline() { return this.$store.state.runtime.isOnline },
     buildNumber() { return this.$g('build_number') },
     version() { return this.$g('version') },

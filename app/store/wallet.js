@@ -86,7 +86,7 @@ export const getters = {
   trackedTransactionsByWallet: (state) => (wallet) => {
     let transactions = []
     for (let transactionIndex in state.trackedTransactions) {
-      if(state.trackedTransactions[transactionIndex].walletAddress === wallet.address) {
+      if(state.trackedTransactions[transactionIndex].address === wallet.address) {
         transactions.push(state.trackedTransactions[transactionIndex])
       }
     }
@@ -730,17 +730,51 @@ export const actions = {
         }
       }
       const networkHandler = getters['networkHandler'](options)
-      networkHandler.transactionStatus(options.key).then((transaction) => {
+      networkHandler.transactionStatus(options).then((transaction) => {
         // If the transaction is being tracked, update the entry
-        if(state.trackedTransactions.hasOwnProperty(options.key)) {
+        if(state.trackedTransactions.hasOwnProperty(options.txHash)) {
           transaction = Object.assign({}, options, transaction)
           commit('TRANSACTION', transaction)
         }
+        if (transaction.status === 'CONFIRMED') { this.$store.commit('wallet/TRANSACTION_COMPLETE', transaction.key) }
         dispatch('busy', false, { root: true})
 
         resolve(transaction)
       })
     })
+  },
+
+  transactionsPending({commit, dispatch, getters, state}, wallet) {
+    Vue.$log.debug('Wallet Store: Transactions Pending', wallet)
+    return new Promise(async (resolve) => {
+      let networkHandler, transactions
+      switch (wallet.type) {
+          case 'aen':
+            networkHandler = getters['networkHandler']('aen')
+            transactions = await networkHandler.transactionsUnconfirmed(wallet)
+            Vue.$log.debug('Transactions back from network handler', transactions)
+            for(let transactionHash in transactions) {
+              if(!state.trackedTransactions.hasOwnProperty(transactionHash)) {
+                commit('TRANSACTION_TRACK', transactions[transactionHash])
+              }
+            }
+
+            dispatch('busy', false, { root: true })
+            resolve(transactions)
+            break
+          case 'btc':
+            networkHandler = getters['networkHandler']('btc')
+            break
+          case 'contract':
+            networkHandler = getters['networkHandler'](
+              { type: 'contract', network: wallet.network.identifier })
+            break
+          case 'eth':
+            networkHandler = getters['networkHandler'](
+              { type: 'eth', network: wallet.network.identifier })
+            break
+        }
+      })
   },
   /**
    *
@@ -766,10 +800,8 @@ export const actions = {
       switch (options.source.type) {
         case 'aen':
           networkHandler = getters['networkHandler']('aen')
-          networkHandler.transfer(options).then((transfer) => {
-            console.log('RESPONSE FROM AEN transfer')
-            console.log(transfer)
-            resolve(transfer)
+          networkHandler.transfer(options).then((transaction) => {
+            resolve(transaction)
           })
               .finally(() => { dispatch('busy', false, { root: true }) })
           break
@@ -791,19 +823,9 @@ export const actions = {
         case 'eth':
           networkHandler = getters['networkHandler'](
             { type: 'eth', network: options.source.network.identifier })
-          networkHandler.transfer(options).then((transactionHash) => {
-            const transaction = {
-              key: transactionHash,
-              direction: 'outgoing',
-              address: options.destination.address,
-              amount: options.destination.amount,
-              type: options.source.type,
-              walletAddress: options.source.address,
-              network: options.source.network.identifier,
-              status: 'PENDING'
-            }
+          networkHandler.transfer(options).then((transaction) => {
             // Add tracking reference to the transaction
-            commit('TRANSACTION', transaction)
+            commit('TRANSACTION_TRACK', transaction)
             resolve(transaction)
           })
           .catch((err) => {
@@ -888,12 +910,14 @@ export const actions = {
   },
 
   updateAll({commit, dispatch, state}) {
-
+    Vue.$log.debug('Wallet Store: Update All wallets')
     for(let walletAddress in state.wallets) {
       const wallet = state.wallets[walletAddress]
       if(wallet.onChain === true) {
         dispatch('balance', state.wallets[walletAddress])
         dispatch('transactionsHistorical', state.wallets[walletAddress])
+        dispatch('transactionsPending', state.wallets[walletAddress])
+        dispatch('transactionsTrackedProcess', state.wallets[walletAddress])
       } else {
         dispatch('getLiveWallet', wallet).then((walletOnChain) => {
           if (walletOnChain !== false) {
@@ -905,6 +929,15 @@ export const actions = {
           }
         })
       }
+    }
+  },
+
+  transactionsTrackedProcess({dispatch, getters}, wallet) {
+    Vue.$log.debug('Wallet Store: Transactions tracked process', wallet)
+    // Check whether any of the already existing transactions are no longer in the unconfirmed bin and mark complete
+    const trackedTransactions = getters['trackedTransactionsByWallet'](wallet)
+    for(let trackedTransactionHash in trackedTransactions) {
+      dispatch('transactionStatus', trackedTransactions[trackedTransactionHash])
     }
   }
 }
@@ -996,10 +1029,13 @@ export const mutations = {
     state.mosaics = input
   },
   TRANSACTION_COMPLETE(state, transactionHash) {
+    state.trackedTransactions[transactionHash] = 'complete'
+  },
+  TRANSACTION_REMOVE(state, transactionHash) {
     Vue.delete(state.trackedTransactions, transactionHash)
   },
-  TRANSACTION(state, input) {
-    Vue.set(state.trackedTransactions, input.key, input)
+  TRANSACTION_TRACK(state, input) {
+    Vue.set(state.trackedTransactions, input.txHash, input)
   }
 
 }

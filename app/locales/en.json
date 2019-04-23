@@ -24,7 +24,8 @@
       "choose_wallet": "Choose a wallet to backup"
     },
     "label": {
-      "file_choose": "Choose or drag a file here"
+      "file_choose_drop": "Choose or drag a file here",
+      "file_choose": "Choose File"
     },
     "message": {
       "import_bad_file": "The file you uploaded is invalid",
@@ -158,10 +159,15 @@
     "action": {
       "agree_eula": "I agree to the AEN EULA",
       "eula": "EULA",
-      "setup_wizard": "Setup wizard"
+      "setup_wizard": "Setup wizard",
+      "show_eula": "Click here to show the EULA"
+    },
+    "label": {
+      "please_agree_continue": "Please agree to terms and conditions"
     },
     "message": {
-      "introduction": "This is a first community release and should be treated as preview. Please do not use this wallet to store real accounts on. By continuing to use this application, you agree to the <a href='https://aencoin.com', target='_blank'>AEN Terms and Conditions</a>; certain functionality will be disabled until agreed"
+      "eula_message": "In order to continue using AEN Connect, please agree to the AEN End User License Agreement",
+      "introduction": "This is a first community release and should be treated as preview. Please do not use this wallet to store real accounts on."
     }
   },
   "feedback": {

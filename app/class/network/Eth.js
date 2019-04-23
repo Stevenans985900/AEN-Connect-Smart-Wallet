@@ -87,12 +87,11 @@ export default class Eth extends Generic {
    * @param transactionHash
    * @returns {Promise<{transactionBlock: number, currentBlock: number, transactionHash: *}>}
    */
-  async transactionStatus(transactionHash) {
-    Vue.$log.debug('ETH Plugin: Transaction Status', transactionHash)
-    const transaction = await this.web3.eth.getTransaction(transactionHash)
+  async transactionStatus(options) {
+    Vue.$log.debug('ETH Plugin: Transaction Status', options)
+    const transaction = await this.web3.eth.getTransaction(options.txHash)
     const currentBlock = await this.web3.eth.getBlockNumber()
     const result = {
-      transactionHash: transactionHash,
       currentBlock: currentBlock,
       transactionBlock: transaction.blockNumber
     }
@@ -132,7 +131,19 @@ export default class Eth extends Generic {
           this.web3.eth.sendSignedTransaction('0x'+serializedTx.toString('hex'))
             .on('transactionHash', function(hash){
               Vue.$log.debug('Have transaction hash from web3', hash)
-              resolve(hash)
+
+              const transaction = {
+                txHash: hash,
+                direction: 'outgoing',
+                address: options.destination.address,
+                amount: options.destination.amount,
+                type: options.source.type,
+                walletAddress: options.source.address,
+                network: options.source.network.identifier,
+                status: 'PENDING'
+              }
+
+              resolve(transaction)
             })
             .on('error', function(err){ Vue.$log.error(err) })
         })

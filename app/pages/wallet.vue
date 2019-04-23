@@ -99,6 +99,10 @@
                           <v-btn outline small @click="editShow(wallet, $event)">
                             {{ $t('common.label.options') }}
                           </v-btn>
+                          <v-btn outline small @click="unconfirmedTransactions(wallet, $event)">
+                            unconfirmed
+                          </v-btn>
+
                         </v-flex>
                       </v-layout>
                     </div>
@@ -416,6 +420,10 @@ export default {
       const transactions = this.$store.getters['wallet/trackedTransactionsByWallet'](wallet)
       return transactions
     },
+    unconfirmedTransactions(wallet, event) {
+      event.stopPropagation()
+      this.$store.dispatch('wallet/transactionsPending', wallet)
+    },
     accordionTogglingWallet(wallet) {
 
       // TODO Make this code simpler, shame on me xD
@@ -428,23 +436,21 @@ export default {
 
       this.contextWallet = wallet
       this.selectedWalletAddress = wallet.address
-      // Check whether the user security is ok
-      if(this.contextWallet.onChain === false) {
-        const walletLiveCheckInterval = setInterval(
-          function () {
-            this.$store.dispatch('wallet/getLiveWallet', this.contextWallet).then((response) => {
-              if(response !== false) {
-                this.$store.commit('wallet/setWalletProperty', {
-                  address: this.contextWallet.address,
-                  key: 'onChain',
-                  value: true
-                })
-                clearInterval(walletLiveCheckInterval)
-              }
+
+      // Update the wallet on demand
+      if(this.contextWallet.onChain ) {
+        this.$store.dispatch('wallet/balance', wallet)
+        this.$store.dispatch('wallet/transactionsHistorical', wallet)
+      } else {
+        this.$store.dispatch('wallet/getLiveWallet', wallet).then((walletOnChain) => {
+          if (walletOnChain !== false) {
+            this.$store.commit('wallet/WALLET_PROP', {
+              address: wallet.address,
+              key: 'onChain',
+              value: true
             })
-          }.bind(this),
-          this.$store.state.time_definitions.wallet_update
-        )
+          }
+        })
       }
       this.dialogWalletView = true
     },

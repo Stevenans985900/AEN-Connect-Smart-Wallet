@@ -16,6 +16,8 @@
                 v-model="destination.amount"
                 :label="$t('common.label.amount')"
                 suffix="AEN"
+                type="number"
+                :rules="[rules.amount.minimum]"
                 :error-messages="lessThanBalance()"
                 required
               />
@@ -73,7 +75,12 @@ export default {
         amount: '',
         message: ''
       },
-      transferValid: false
+      transferValid: false,
+      rules: {
+        amount: {
+          minimum: v => Number(v) > 0.0001 || 'Amount must be a positive number greater than 0.0001'
+        }
+      }
     }
   },
   computed: {

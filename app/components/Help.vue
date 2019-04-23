@@ -1,105 +1,106 @@
 <template>
-  <v-dialog
-    v-model="dialogShow"
-    fullscreen
-  >
-    <v-btn
-      slot="activator"
-      flat icon
+
+  <span>
+    <slot>
+      <v-btn flat icon @click="dialogShow = true">
+          <v-icon>
+            help
+          </v-icon>
+        </v-btn>
+    </slot>
+    <v-dialog
+      v-model="dialogShow"
+      fullscreen
     >
-      <v-icon>
-        help
-      </v-icon>
-    </v-btn>
-
-    <v-toolbar>
-      <v-img src="/logo.png" contain height="25" max-width="125px" />
-      <v-toolbar-title>{{ $t('common.label.help') }}</v-toolbar-title>
-      <v-spacer />
-      <network-diagnostics />
-      <v-btn small round outline :icon="$vuetify.breakpoint.smAndDown" @click="dialogShow = false">
-        <v-icon>
-          arrow_back
-        </v-icon>
-        <span v-if="$vuetify.breakpoint.mdAndUp">
-          {{ $t('help.message.click_to_return') }}
-        </span>
-      </v-btn>
-    </v-toolbar>
-    <v-card>
-      <v-layout row wrap>
-        <!-- Category Selection -->
-        <v-flex xs12 md3>
-          <v-list>
-            <template v-for="(faqCategory, categoryIndex) in help">
-              <v-list-tile
-                :key="categoryIndex"
-                avatar
-                :color="isActiveCategory(categoryIndex)"
-                @click="chooseCategory(categoryIndex)"
-              >
-                <v-list-tile-avatar v-if="faqCategory.icon">
-                  <v-icon>
-                    {{ faqCategory.icon }}
-                  </v-icon>
-                </v-list-tile-avatar>
-                <v-list-tile-content>
-                  <v-list-tile-title>
-                    {{ faqCategory.title }}
-                  </v-list-tile-title>
-                </v-list-tile-content>
-              </v-list-tile>
-            </template>
-          </v-list>
-        </v-flex>
-
-        <v-flex v-if="$vuetify.breakpoint.smAndDown === true" xs12>
-          <v-divider />
-        </v-flex>
-
-        <!-- If one of the categories themselves spin off in to a different component -->
-        <v-flex v-if="categoryComponent" xs12 md9>
-          <component :is="categoryComponent" />
-        </v-flex>
-
-        <!-- Entry Selection -->
-        <v-flex v-if="help[selectedCategory]" xs12 md3>
-          <v-list>
-            <template v-for="(faqEntry, faqIndex) in help[selectedCategory].faq">
-              <v-list-tile
-                :key="faqIndex"
-                avatar
-                :color="isActiveEntry(faqIndex)"
-                @click="selectedEntry = faqIndex"
-              >
-                <v-list-tile-content>
-                  <v-list-tile-title>
-                    {{ faqEntry.title }}
-                  </v-list-tile-title>
-                  <v-list-tile-sub-title v-if="faqEntry.subtitle">
-                    {{ faqEntry.subtitle }}
-                  </v-list-tile-sub-title>
-                </v-list-tile-content>
-              </v-list-tile>
-            </template>
-          </v-list>
-        </v-flex>
-
-        <!-- Entry Display -->
-        <v-flex xs12 md6>
-          <v-layout row>
-            <v-flex class="ma-2">
-              <component :is="component" v-if="component !== null" />
-              <template v-else>
-                <youtube v-if="youtubeVideo" :video-id="youtubeVideo" player-width="100%" />
-                <span v-html="displayText" />
+      <v-toolbar>
+        <v-img src="/logo.png" contain height="25" max-width="125px" />
+        <v-toolbar-title>{{ $t('common.label.help') }}</v-toolbar-title>
+        <v-spacer />
+        <network-diagnostics />
+        <v-btn small round outline :icon="$vuetify.breakpoint.smAndDown" @click="dialogShow = false">
+          <v-icon>
+            arrow_back
+          </v-icon>
+          <span v-if="$vuetify.breakpoint.mdAndUp">
+            {{ $t('help.message.click_to_return') }}
+          </span>
+        </v-btn>
+      </v-toolbar>
+      <v-card>
+        <v-layout row wrap>
+          <!-- Category Selection -->
+          <v-flex xs12 md3>
+            <v-list>
+              <template v-for="(faqCategory, categoryIndex) in help">
+                <v-list-tile
+                  :key="categoryIndex"
+                  avatar
+                  :color="isActiveCategory(categoryIndex)"
+                  @click="chooseCategory(categoryIndex)"
+                >
+                  <v-list-tile-avatar v-if="faqCategory.icon">
+                    <v-icon>
+                      {{ faqCategory.icon }}
+                    </v-icon>
+                  </v-list-tile-avatar>
+                  <v-list-tile-content>
+                    <v-list-tile-title>
+                      {{ faqCategory.title }}
+                    </v-list-tile-title>
+                  </v-list-tile-content>
+                </v-list-tile>
               </template>
-            </v-flex>
-          </v-layout>
-        </v-flex>
-      </v-layout>
-    </v-card>
-  </v-dialog>
+            </v-list>
+          </v-flex>
+
+          <v-flex v-if="$vuetify.breakpoint.smAndDown === true" xs12>
+            <v-divider />
+          </v-flex>
+
+          <!-- If one of the categories themselves spin off in to a different component -->
+          <v-flex v-if="categoryComponent" xs12 md9>
+            <component :is="categoryComponent" />
+          </v-flex>
+
+          <!-- Entry Selection -->
+          <v-flex v-if="help[selectedCategory]" xs12 md3>
+            <v-list>
+              <template v-for="(faqEntry, faqIndex) in help[selectedCategory].faq">
+                <v-list-tile
+                  :key="faqIndex"
+                  avatar
+                  :color="isActiveEntry(faqIndex)"
+                  @click="selectedEntry = faqIndex"
+                >
+                  <v-list-tile-content>
+                    <v-list-tile-title>
+                      {{ faqEntry.title }}
+                    </v-list-tile-title>
+                    <v-list-tile-sub-title v-if="faqEntry.subtitle">
+                      {{ faqEntry.subtitle }}
+                    </v-list-tile-sub-title>
+                  </v-list-tile-content>
+                </v-list-tile>
+              </template>
+            </v-list>
+          </v-flex>
+
+          <!-- Entry Display -->
+          <v-flex xs12 md6>
+            <v-layout row>
+              <v-flex class="ma-2">
+                <component :is="component" v-if="component !== null" />
+                <template v-else>
+                  <youtube v-if="youtubeVideo" :video-id="youtubeVideo" player-width="100%" />
+                  <span v-html="displayText" />
+                </template>
+              </v-flex>
+            </v-layout>
+          </v-flex>
+        </v-layout>
+      </v-card>
+    </v-dialog>
+  </span>
 </template>
 
 <script>
@@ -248,6 +249,16 @@
   }
 
   export default {
+    props: {
+      showCategory: {
+        type: String,
+        default: ''
+      },
+      showEntry: {
+        type: String,
+        default: ''
+      }
+    },
     components: { FeedbackForm, NetworkDiagnostics },
     data() { return initialDataState() },
     computed: {
@@ -285,6 +296,12 @@
       }
     },
       mounted() {
+        if(this.showCategory !== '') {
+          this.chooseCategory(this.showCategory)
+        }
+        if(this.showEntry !== '') {
+          this.selectedEntry = this.showEntry
+        }
         // Get up to date status for each network
         // this.$store.dispatch('wallet/queryApiNode', 'aen')
         // this.$store.dispatch('wallet/queryApiNode', 'btc')
