@@ -15,6 +15,11 @@
               default: null
           }
       },
+      data() {
+        return {
+            loading: false
+        }
+      },
       computed:
       {
         lastSynced() {
@@ -23,11 +28,6 @@
             } else {
                 return format(this.wallet.balanceLastSynced, 'D/M HH:mm')
             }
-        }
-      },
-      data() {
-        return {
-            loading: false
         }
       },
       methods: {

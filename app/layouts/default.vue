@@ -40,10 +40,14 @@
         <busy />
       </no-ssr>
       <development v-if="environment === 'development'" />
-      <v-menu v-if="haveTrackedTransactions" v-model="menuPendingTransactions" offset-y>
-        <v-btn slot="activator" color="green" icon small>
+      <v-menu
+        v-if="haveTrackedTransactions"
+        v-model="menuPendingTransactions"
+        :close-on-content-click="false"
+        offset-y>
+        <v-btn slot="activator" icon>
           <v-icon>
-            swap_horiz
+            history
           </v-icon>
         </v-btn>
         <tracked-transactions />
@@ -88,11 +92,11 @@
         </v-toolbar-title>
       </v-toolbar>
       <v-card>
-          <v-card-text>
-              <p>
-                {{ $t('eula.message.eula_message') }}
-              </p>
-          </v-card-text>
+        <v-card-text>
+          <p>
+            {{ $t('eula.message.eula_message') }}
+          </p>
+        </v-card-text>
         <v-card-actions>
           <help show-category="terms_and_conditions">
             <v-btn flat @click="helpDialogShow = true">
@@ -100,7 +104,7 @@
             </v-btn>
           </help>
           <v-btn class="primary" @click="eulaAgreed = true">
-            {{ $t('common.action.accept')}}
+            {{ $t('common.action.accept') }}
           </v-btn>
         </v-card-actions>
       </v-card>

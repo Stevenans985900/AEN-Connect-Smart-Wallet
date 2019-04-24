@@ -54,7 +54,8 @@ export default class Aen extends Generic {
   accountNew(options) {
     Vue.$log.debug(this.pluginName + ' Plugin: Account New', options)
     return new Promise((resolve) => {
-      const account = Account.generateNewAccount(options.network.identifier)
+
+      const account = Account.generateNewAccount(Vue.prototype.$g('aen.available_networks.' + options.network))
       resolve(account)
     })
   }
@@ -128,9 +129,10 @@ export default class Aen extends Generic {
    * @param options
    * @returns {SimpleWallet}
    */
-  walletNew(options) {
-    Vue.$log.debug('For AEN: Wallet new = Wallet Load')
-    return this.walletLoad(options)
+  async walletNew(options) {
+    super.walletLoad(options)
+    options.account = await this.accountNew(options)
+    return await this.walletLoad(options)
   }
   /**
      * @param options
@@ -143,7 +145,8 @@ export default class Aen extends Generic {
         options.name,
         new Password(options.password),
         options.account.privateKey,
-        options.network.byte)
+        Vue.prototype.$g('aen.available_networks.' + options.network).byte
+      )
 
       const walletObject = {
         publicKey: options.account.publicKey,
@@ -167,8 +170,9 @@ export default class Aen extends Generic {
     super.transactionsHistorical(options)
 
     return new Promise((resolve, reject) => {
+      const network = Vue.prototype.$g('aen.available_networks.' + options.network)
       const accountHttp = new AccountHttp(this.apiEndpoint)
-      const publicAccount = PublicAccount.createFromPublicKey(options.publicKey, options.network.byte)
+      const publicAccount = PublicAccount.createFromPublicKey(options.publicKey, network)
       // TODO Edit the page size to use a frontend customised value
       return accountHttp
         .transactions(publicAccount, new QueryParams(25))
@@ -230,23 +234,19 @@ export default class Aen extends Generic {
    */
   transactionStatus(options) {
     Vue.$log.debug('AEN Plugin: Transaction Status', options)
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       axios.get(this.apiEndpoint + '/transaction/' + options.txHash)
         .then(async function (response) {
           Vue.$log.debug('AEN: Transactions Status: Axios return object', response)
-          // let transactionsWorkingObject = {}
-          // let currentTransaction, timeKey
-          // const transactions = response.data.result
-          // for(let transactionCount = 0; transactionCount < transactions.length; transactionCount++) {
-          //   currentTransaction = transactions[transactionCount]
-          //   timeKey = format((currentTransaction.timeStamp * 1000), 'YYYY-MM-DD HH:mm')
-          //   transactionsWorkingObject[timeKey] = currentTransaction
-          // }
-          // Vue.$log.debug('ETH: Transactions Historical: Working Transactions object', transactionsWorkingObject)
-          resolve(false)
+          const transactionResponse = {
+            status: 'CONFIRMED',
+            fee: (response.data.transaction.fee.reduce((partial_sum, a) => partial_sum + a))
+          }
+          Object.assign(options, transactionResponse)
+          resolve(options)
         })
-        .catch(function (error) {
-          reject(error)
+        .catch(function () {
+          resolve(options)
         })
     })
   }
@@ -261,7 +261,8 @@ export default class Aen extends Generic {
     return new Promise((resolve) => {
       const accountHttp = new AccountHttp(this.apiEndpoint)
       console.log('pass creating account http')
-      const publicAccount = PublicAccount.createFromPublicKey(options.publicKey, options.network.byte)
+      const network = Vue.prototype.$g('aen.available_networks.' + options.network)
+      const publicAccount = PublicAccount.createFromPublicKey(options.publicKey, network)
       console.log('pass creating public account')
       accountHttp.unconfirmedTransactions(publicAccount)
         .subscribe((transactions) => {
@@ -283,7 +284,7 @@ export default class Aen extends Generic {
               amount: transaction.mosaics[0].amount.lower,
               type: options.type,
               walletAddress: options.address,
-              network: options.network.identifier,
+              network: network.identifier,
               status: 'PENDING'
             }
           }
@@ -300,17 +301,17 @@ export default class Aen extends Generic {
     return new Promise((resolve) => {
       // Transaction data preparation
       const recipientAddress = Address.createFromRawAddress(options.destination.address)
-      const account = Account.createFromPrivateKey(options.credentials.accountPrivateKey, options.source.network.byte)
+      const network = Vue.prototype.$g('aen.available_networks.' + options.source.network)
+      const account = Account.createFromPrivateKey(options.credentials.accountPrivateKey, network.byte)
       const transactionHttp = new TransactionHttp(this.apiEndpoint)
       const message = options.destination.message || ''
-
       // Prepare base transaction object
       const transferTransaction = TransferTransaction.create(
         Deadline.create(23),
         recipientAddress,
         [XEM.createRelative(parseInt(options.destination.amount))],
         PlainMessage.create(message),
-        options.source.network.byte)
+        network.byte)
 
       // Sign and send
       const signedTransaction = account.sign(transferTransaction)
@@ -325,8 +326,9 @@ export default class Aen extends Generic {
             amount: options.destination.amount,
             type: options.source.type,
             walletAddress: options.source.address,
-            network: options.source.network.identifier,
-            status: 'PENDING'
+            network: network.identifier,
+            status: 'PENDING',
+            message: options.destination.message
           }
           resolve(transaction)
         }, err => Vue.$log.error(err))

@@ -112,16 +112,17 @@ export default {
   watch: {
     priorityTransfer: function (val) {
       if (val === true) {
-        this.gasPrice = this.parentWallet.network.gasPrice.priority
+
+        this.gasPrice = this.$g(this.parentWallet.type + '.available_networks.' + this.parentWallet.network).gasPrice.priority
       } else {
-        this.gasPrice = this.parentWallet.network.gasPrice.normal
+        this.gasPrice = this.$g(this.parentWallet.type + '.available_networks.' + this.parentWallet.network).gasPrice.normal
       }
     }
   },
   created() {
-    this.normalGas = this.parentWallet.network.gasPrice.normal
-    this.priorityGas = this.parentWallet.network.gasPrice.priority
-    this.maximumGas = this.parentWallet.network.gasPrice.maximum
+    this.normalGas = this.$g(this.parentWallet.type + '.available_networks.' + this.parentWallet.network).gasPrice.normal
+    this.priorityGas = this.$g(this.parentWallet.type + '.available_networks.' + this.parentWallet.network).priority
+    this.maximumGas = this.$g(this.parentWallet.type + '.available_networks.' + this.parentWallet.network).maximum
   },
   methods: {
     lessThanBalance() {

@@ -1,31 +1,31 @@
 <template>
-  <v-layout row>
-    <v-flex :class="buttonWidth">
-      <clipboard :data="address" :display-text="displayText" :wide="$vuetify.breakpoint.smAndDown" />
-    </v-flex>
-    <v-flex
-      v-if="haveContact === false && showAdd === true"
-      xs1
-      class="text-xs-left"
-    >
+  <span>
+    <!--<v-flex :class="buttonWidth">-->
+    <clipboard :data="address" :display-text="displayText" :wide="$vuetify.breakpoint.smAndDown" />
+    <!--</v-flex>-->
+    <!--<v-flex-->
+      <!--v-if=""-->
+      <!--xs1-->
+      <!--class="text-xs-left"-->
+    <!--&gt;-->
       <!-- New transfer -->
-      <v-dialog v-model="dialog" persistent max-width="600px">
-        <v-btn slot="activator" small icon class="ml-0">
-          <v-icon>
-            add
-          </v-icon>
+    <v-dialog v-model="dialog" persistent max-width="600px" v-if="displayAddButton">
+      <v-btn slot="activator" small icon class="ml-0">
+        <v-icon>
+          add
+        </v-icon>
+      </v-btn>
+      <v-toolbar color="primary">
+        <v-toolbar-title>{{ $t('contact.action.add') }}</v-toolbar-title>
+        <v-spacer />
+        <v-btn small icon outline @click="dialog = false">
+          <v-icon>close</v-icon>
         </v-btn>
-        <v-toolbar color="primary">
-          <v-toolbar-title>{{ $t('contact.action.add') }}</v-toolbar-title>
-          <v-spacer />
-          <v-btn small icon outline @click="dialog = false">
-            <v-icon>close</v-icon>
-          </v-btn>
-        </v-toolbar>
-        <contact-edit :display-text="displayText" :address="address" @complete="contactAdded" />
-      </v-dialog>
-    </v-flex>
-  </v-layout>
+      </v-toolbar>
+      <contact-edit :display-text="displayText" :address="address" @complete="contactAdded" />
+    </v-dialog>
+    <!--</v-flex>-->
+  </span>
 </template>
 
 <script>
@@ -57,7 +57,7 @@ export default {
     }
   },
   computed: {
-    buttonWidth() { return (this.showAdd && this.haveContact === false) ? 'xs11' : 'xs12' },
+    buttonWidth() { return (this.showAdd && this.haveContact === false) ? '' : 'xs12' },
     processedAddress() {
       return this.address
     },
@@ -75,6 +75,13 @@ export default {
       } else {
         return this.processedAddress
       }
+    },
+    displayAddButton() {
+        return (
+            this.$vuetify.breakpoint.mdAndUp === true &&
+            this.haveContact === false &&
+            this.showAdd === true
+        ) ? true : false
     }
   },
   watch: {

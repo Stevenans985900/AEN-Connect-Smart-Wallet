@@ -100,10 +100,6 @@
                           <v-btn outline small @click="editShow(wallet, $event)">
                             {{ $t('common.label.options') }}
                           </v-btn>
-                          <v-btn outline small @click="unconfirmedTransactions(wallet, $event)">
-                            unconfirmed
-                          </v-btn>
-
                         </v-flex>
                       </v-layout>
                     </div>
@@ -114,20 +110,20 @@
                           <v-flex xs12 md6>
                             <address-render :address="wallet.address" :use-address-book="false" :wide="true" />
                           </v-flex>
-                          <v-flex md6 v-if="$vuetify.breakpoint.mdAndUp">
+                          <v-flex v-if="$vuetify.breakpoint.mdAndUp" md6>
                             <testnet-buttons :wallet="wallet" />
                           </v-flex>
-                          <v-flex xs4 v-if="$vuetify.breakpoint.smAndDown">
+                          <v-flex v-if="$vuetify.breakpoint.smAndDown" xs4>
                             <v-btn :disabled="wallet.onChain === false || wallet.type === 'btc'" outline small block @click="sendShow(wallet, $event)">
                               {{ $t('common.action.send') }}
                             </v-btn>
                           </v-flex>
-                          <v-flex xs4 v-if="$vuetify.breakpoint.smAndDown">
+                          <v-flex v-if="$vuetify.breakpoint.smAndDown" xs4>
                             <v-btn outline small block @click="addressShow(wallet)">
                               {{ $t('common.action.receive') }}
                             </v-btn>
                           </v-flex>
-                          <v-flex xs4 v-if="$vuetify.breakpoint.smAndDown">
+                          <v-flex v-if="$vuetify.breakpoint.smAndDown" xs4>
                             <v-btn outline small block @click="editShow(wallet, $event)">
                               {{ $t('common.label.options') }}
                             </v-btn>
@@ -182,10 +178,10 @@
             <v-card flat>
               <v-card-text>
                 <v-layout row wrap>
-                  <v-flex xs6 v-if="$vuetify.breakpoint.smAndDown">
-                    <refresh-wallet :wallet="contextWallet" v-if="$vuetify.breakpoint.smAndDown" />
+                  <v-flex v-if="$vuetify.breakpoint.smAndDown" xs6>
+                    <refresh-wallet v-if="$vuetify.breakpoint.smAndDown" :wallet="contextWallet" />
                   </v-flex>
-                  <v-flex xs6 v-if="$vuetify.breakpoint.smAndDown">
+                  <v-flex v-if="$vuetify.breakpoint.smAndDown" xs6>
                     <testnet-buttons :wallet="contextWallet" />
                   </v-flex>
                   <v-flex xs12>
@@ -396,6 +392,7 @@ export default {
     // Only start once global loading finished
     const preparationInterval = setInterval(
       function () {
+        this.$store.dispatch('wallet/updateAll')
         // Create a wallet index map to control accordion with
         clearInterval(preparationInterval)
         this.$store.commit('setLoading', { t: 'router', v: false })

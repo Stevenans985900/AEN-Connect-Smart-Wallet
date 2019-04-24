@@ -10,8 +10,8 @@
     </v-btn>
     <v-list>
       <v-list-tile
-              :href="faucet.address + '?address=' + wallet.address.toUpperCase()"
-              target="_blank"
+        :href="faucet.address + '?address=' + wallet.address.toUpperCase()"
+        target="_blank"
       >
         <v-list-tile-title>{{ $t('network.action.goto_faucet') }}</v-list-tile-title>
       </v-list-tile>
@@ -35,7 +35,7 @@
                 return this.$g('aen.faucets')[0]
             },
             testnet() {
-                if (this.wallet.network.hasOwnProperty('testing')) {
+                if (this.$g(this.wallet.type + '.available_networks.' + this.wallet.network).hasOwnProperty('testing')) {
                     return true
                 }
                 return false

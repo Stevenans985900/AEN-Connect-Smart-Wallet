@@ -1,12 +1,11 @@
 <template>
-
   <span>
     <slot>
       <v-btn flat icon @click="dialogShow = true">
-          <v-icon>
-            help
-          </v-icon>
-        </v-btn>
+        <v-icon>
+          help
+        </v-icon>
+      </v-btn>
     </slot>
     <v-dialog
       v-model="dialogShow"
@@ -249,6 +248,7 @@
   }
 
   export default {
+    components: { FeedbackForm, NetworkDiagnostics },
     props: {
       showCategory: {
         type: String,
@@ -259,7 +259,6 @@
         default: ''
       }
     },
-    components: { FeedbackForm, NetworkDiagnostics },
     data() { return initialDataState() },
     computed: {
       dialogShow: {

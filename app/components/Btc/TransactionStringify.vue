@@ -76,7 +76,7 @@ export default {
       const networkHandler = this.$store.getters['wallet/networkHandler']('btc')
       networkHandler.transactionInfo({
         hash: this.transaction.tx_hash,
-        network: this.wallet.network
+        network: this.$g(this.wallet.type + '.available_networks.' + this.wallet.network)
       }).then((transactionInformation) => {
         this.address = transactionInformation.addresses[0]
       })

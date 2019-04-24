@@ -140,19 +140,19 @@
     watch: {
       priorityTransfer: function(val) {
         if(val === true) {
-          this.gasPrice = this.wallet.network.gasPrice.priority
+          this.gasPrice = this.$g(this.wallet.type + '.available_networks.' + this.wallet.network).gasPrice.priority
         } else {
-          this.gasPrice = this.wallet.network.gasPrice.normal
+          this.gasPrice = this.$g(this.wallet.type + '.available_networks.' + this.wallet.network).gasPrice.normal
         }
       }
     },
     mounted() {
       this.selectedTransferDenomination = this.$g('exchange.base_denomination.eth')
-      this.normalGas = this.wallet.network.gasPrice.normal
+      this.normalGas = this.$g(this.wallet.type + '.available_networks.' + this.wallet.network).gasPrice.normal
       this.gas = this.normalGas
       this.gasPrice = this.normalGas
-      this.priorityGas = this.wallet.network.gasPrice.priority
-      this.maximumGas = this.wallet.network.gasPrice.maximum
+      this.priorityGas = this.$g(this.wallet.type + '.available_networks.' + this.wallet.network).gasPrice.priority
+      this.maximumGas = this.$g(this.wallet.type + '.available_networks.' + this.wallet.network).gasPrice.maximum
     },
     methods: {
       lessThanBalance() {

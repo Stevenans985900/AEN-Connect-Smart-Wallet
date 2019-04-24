@@ -513,6 +513,7 @@
 import EventEmitter from 'events'
 import CryptoJS from 'crypto-js'
 import vue2Dropzone from 'vue2-dropzone'
+import Vue from 'vue'
 
 export default {
   components: {
@@ -546,17 +547,11 @@ export default {
         'ready',
         function (walletData) {
           try {
-            const extension = walletData.fileName.split('.').pop()
             let walletInformation
-            if (extension === 'enc') {
-              const bytes = CryptoJS.AES.decrypt(walletData.data, this.$g('salt'))
-              walletInformation = JSON.parse(bytes.toString(CryptoJS.enc.Utf8))
-            } else {
-              walletInformation = JSON.parse(walletData.data)
-            }
+            walletInformation = JSON.parse(walletData.data)
             walletInformation.credentials = JSON.parse(CryptoJS.AES.decrypt(
                 walletInformation.credentials,
-                this.$g('salt')
+                Vue.prototype.$g('salt')
             ).toString(CryptoJS.enc.Utf8))
             // If prop states wallet is a main, force property in wallet
             if (this.main === true) {

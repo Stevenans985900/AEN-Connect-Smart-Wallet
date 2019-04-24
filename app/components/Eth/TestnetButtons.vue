@@ -30,7 +30,7 @@ export default {
       return this.$g('eth.faucets')[0]
     },
     testnet() {
-      if (this.wallet.network.hasOwnProperty('testing')) {
+      if (this.$g(this.wallet.type + '.available_networks.' + this.wallet.network).hasOwnProperty('testing')) {
         return true
       }
       return false

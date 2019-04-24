@@ -1,11 +1,8 @@
 <template>
   <span>
     <span v-if="display === 'all' || display === 'direction'">
-      <v-icon v-if="data.direction === 'IN'" :class="data.direction">
-        call_received
-      </v-icon>
-      <v-icon v-else :class="direction">
-        call_made
+      <v-icon :class="data.direction">
+        {{ icon }}
       </v-icon>
     </span>
     <span v-if="display === 'all' || display === 'date'">
@@ -54,6 +51,7 @@ export default {
   },
   computed: {
     symbol() { return this.$store.state.wallet.aen.displaySymbol },
+    icon() { return this.data.direction == 'IN' ? 'call_received' : 'call_made' },
     address() {
       if (this.data.direction === 'IN') {
         return this.data.sender

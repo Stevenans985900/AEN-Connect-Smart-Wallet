@@ -5,21 +5,14 @@
   "google_recaptcha_key": "NA",
   "internal": {
     "baseImagePath": "/",
-    "onlineInterval": "15000",
-    "controllerPollReadyInterval": 1000,
-    "commonTasksInterval": 900000,
-    "apiEndpointPingInterval": 10000,
-    "loggerEnabled": true,
-    "walletCheckInterval": 600000,
-    "exchangeRateUpdateInterval": 900000,
-    "walletRefreshGraceTime": 600000
+    "loggerEnabled": true
   },
   "time_definitions": {
     "api_ranking": 90000,
     "controller_poll": 500,
     "online_interval": 15000,
     "transaction_watch": 15000,
-    "wallet_update": 30000,
+    "wallet_update": 15000,
     "security_password_grace": 120000
   },
   "userExperience": {
@@ -44,9 +37,15 @@
       }
     ],
     "available_networks": {
-      "testnet": {
+      "PUBLIC_TEST": {
         "name": "TestNet",
         "identifier": "PUBLIC_TEST",
+        "byte": 152,
+        "testing": true
+      },
+      "MAIN_NET": {
+        "name": "nmain",
+        "identifier": "MAIN_NET",
         "byte": 152,
         "testing": true
       }
@@ -122,7 +121,7 @@
       "api_endpoint": "https://api-###NETWORK_IDENTIFIER###.etherscan.io/api"
     },
     "available_networks": {
-      "mainnet": {
+      "frontier": {
         "name": "MainNet",
         "identifier": "frontier",
         "network_id": 1,
