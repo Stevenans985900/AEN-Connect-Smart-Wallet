@@ -1,16 +1,16 @@
 <template>
-  <v-layout row wrap>
+  <v-layout row>
     <v-flex :class="buttonWidth">
       <clipboard :data="address" :display-text="displayText" :wide="$vuetify.breakpoint.smAndDown" />
     </v-flex>
     <v-flex
-      v-if="address"
+      v-if="haveContact === false && showAdd === true"
       xs1
       class="text-xs-left"
     >
       <!-- New transfer -->
-      <v-dialog v-if="haveContact === false && showAdd === true" v-model="dialog" persistent max-width="600px">
-        <v-btn slot="activator" small icon>
+      <v-dialog v-model="dialog" persistent max-width="600px">
+        <v-btn slot="activator" small icon class="ml-0">
           <v-icon>
             add
           </v-icon>
@@ -57,7 +57,7 @@ export default {
     }
   },
   computed: {
-    buttonWidth() { return this.showAdd ? 'xs11' : 'xs12' },
+    buttonWidth() { return (this.showAdd && this.haveContact === false) ? 'xs11' : 'xs12' },
     processedAddress() {
       return this.address
     },

@@ -23,13 +23,18 @@ export default class Eth extends Generic {
   }
 
   async erc20PublicMethod(options) {
-    Vue.$log.debug('ETH Plugin: ERC20 Method', options)
-    return new Promise((resolve) => {
+    Vue.$log.debug('Ethereum Plugin: ERC20 Method', options)
+    return new Promise((resolve, reject) => {
       import('~/class/network/contract/erc20').then((erc20Interface) => {
         const contract = new this.web3.eth.Contract(erc20Interface.abi, options.contractAddress)
-        contract.methods[options.method]().call().then((response) => {
-          resolve(response)
-        })
+        contract.methods[options.method]().call()
+            .then((response) => {
+              resolve(response)
+            })
+            .catch ((err) => {
+              Vue.$log.debug('ERC20 Method failed because', err)
+              reject(err)
+            })
       })
     })
   }
@@ -57,7 +62,8 @@ export default class Eth extends Generic {
           module: 'account',
           action: 'txlist',
           address: options.address,
-          startblock: options.startBlock || 0,
+          // startblock: options.startBlock || 0,
+          startblock: 0,
           endblock: 99999999,
           sort: 'desc',
           apikey: this.config.etherscan.api_key
@@ -65,13 +71,45 @@ export default class Eth extends Generic {
       })
         .then(async function (response) {
           Vue.$log.debug('ETH: Transactions Historical: Axios return object', response)
-          let transactionsWorkingObject = {}
+          let transactionsWorkingObject = {'origin':{}, 'contract':{}}
           let currentTransaction, timeKey
           const transactions = response.data.result
           for(let transactionCount = 0; transactionCount < transactions.length; transactionCount++) {
             currentTransaction = transactions[transactionCount]
-            timeKey = format((currentTransaction.timeStamp * 1000), 'YYYY-MM-DD HH:mm')
-            transactionsWorkingObject[timeKey] = currentTransaction
+            timeKey = format(currentTransaction.timeStamp, 'YYYY-MM-DD HH:mm:ss')
+            const holding = {
+                blockIncluded: currentTransaction.blockNumber,
+                hash: currentTransaction.hash,
+                fee: currentTransaction.gasUsed,
+                value: currentTransaction.value,
+                direction: (currentTransaction.recipient.address.toLowerCase() === options.address.toLowerCase() ? 'IN' : 'OUT'),
+                recipient: currentTransaction.to,
+                sender: currentTransaction.to,
+                type: 'Transfer'
+            }
+
+            if (currentTransaction.value === '0' && currentTransaction.contractAddress !== '') {
+              holding.type = 'Contract'
+              holding.contractAddress = currentTransaction.contractAddress
+              holding.contractName = await this.erc20PublicMethod({
+                contractAddress: currentTransaction.contractAddress,
+                method: 'name'
+              })
+              holding.decimals = await this.erc20PublicMethod({
+                contractAddress: currentTransaction.contractAddress,
+                method: 'decimals'
+              })
+              holding.symbol = await this.erc20PublicMethod({
+                contractAddress: currentTransaction.contractAddress,
+                method: 'symbol'
+              })
+
+              if(!transactionsWorkingObject.contract.hasOwnProperty(currentTransaction.contractAddress)) {
+                transactionsWorkingObject.contract[currentTransaction.contractAddress] = {}
+              }
+              transactionsWorkingObject.contract[currentTransaction.contractAddress][timeKey] = holding
+            }
+            transactionsWorkingObject.origin[timeKey] = holding
           }
           Vue.$log.debug('ETH: Transactions Historical: Working Transactions object', transactionsWorkingObject)
           resolve(transactionsWorkingObject)

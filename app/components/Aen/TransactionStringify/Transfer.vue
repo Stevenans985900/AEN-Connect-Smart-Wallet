@@ -1,7 +1,7 @@
 <template>
   <span>
     <span v-if="display === 'all' || display === 'direction'">
-      <v-icon v-if="direction === 'incoming'" :class="direction">
+      <v-icon v-if="data.direction === 'IN'" :class="data.direction">
         call_received
       </v-icon>
       <v-icon v-else :class="direction">
@@ -11,8 +11,8 @@
     <span v-if="display === 'all' || display === 'date'">
       {{ date }}
     </span>
-    <span v-if="display === 'all' || display === 'value'" :class="direction">
-      <token-value :symbol="symbol" :value="value" :type="wallet.type" />
+    <span v-if="display === 'all' || display === 'value'" :class="data.direction">
+      <token-value :symbol="symbol" :value="data.value" :type="wallet.type" />
     </span>
     <span v-if="display === 'all' || display === 'address'">
       <address-render :address="address" show-add />
@@ -21,10 +21,10 @@
 </template>
 
 <style scoped>
-  .incoming {
+  .IN {
     color: #4CAF50
   }
-  .outgoing {
+  .OUT {
     color: #F44336
   }
 </style>
@@ -55,25 +55,15 @@ export default {
   computed: {
     symbol() { return this.$store.state.wallet.aen.displaySymbol },
     address() {
-      if (this.direction === 'incoming') {
-        return this.data.signer.address.address
+      if (this.data.direction === 'IN') {
+        return this.data.sender
       } else {
-        return this.data.recipient.address
+        return this.data.recipient
       }
     },
     date() {
-      return format((this.data.deadline.value), 'YYYY-MM-DD HH:mm')
-    },
-    direction() {
-      if (this.data.recipient.address.toLowerCase() === this.wallet.address.toLowerCase()) {
-        return 'incoming'
-      } else {
-        return 'outgoing'
-      }
-    },
-    value() {
-      if (!this.data.hasOwnProperty('mosaics')) return 0
-      return (this.data.mosaics[0].amount.lower / 1000000)
+      const dateFormat = this.$vuetify.breakpoint.mdAndUp === true ? 'YYYY-MM-DD HH:mm' : 'YY-MM-DD HH:mm'
+      return format((this.data.time), dateFormat)
     }
   }
 }

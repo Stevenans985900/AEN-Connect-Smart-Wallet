@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container :class="{'pa-0': $vuetify.breakpoint.smAndDown}">
     <v-layout row justify-center align-center>
       <v-flex xs12>
         <v-toolbar class="primary mb-2">
@@ -34,11 +34,12 @@
             <v-btn
               slot="activator"
               small
-              icon
+              outline
             >
               <v-icon>
                 menu
               </v-icon>
+              {{ $t('common.label.options') }}
             </v-btn>
             <v-list>
               <v-list>
@@ -63,7 +64,7 @@
         </v-toolbar>
         <!-- Wallet Management -->
         <v-card class="apply-active-expansion">
-          <v-card-text v-if="haveWallet">
+          <v-card-text v-if="haveWallet" :class="{'pa-0': $vuetify.breakpoint.smAndDown}">
             <v-layout row wrap>
               <v-flex xs12>
                 <v-expansion-panel>
@@ -113,6 +114,9 @@
                           <v-flex xs12 md6>
                             <address-render :address="wallet.address" :use-address-book="false" :wide="true" />
                           </v-flex>
+                          <v-flex md6 v-if="$vuetify.breakpoint.mdAndUp">
+                            <testnet-buttons :wallet="wallet" />
+                          </v-flex>
                           <v-flex xs4 v-if="$vuetify.breakpoint.smAndDown">
                             <v-btn :disabled="wallet.onChain === false || wallet.type === 'btc'" outline small block @click="sendShow(wallet, $event)">
                               {{ $t('common.action.send') }}
@@ -127,10 +131,6 @@
                             <v-btn outline small block @click="editShow(wallet, $event)">
                               {{ $t('common.label.options') }}
                             </v-btn>
-                          </v-flex>
-                          <v-flex xs12>
-                            <testnet-buttons :wallet="wallet" />
-                            <refresh-wallet :wallet="wallet" v-if="$vuetify.breakpoint.smAndDown" />
                           </v-flex>
                           <v-flex xs12>
                             <tracked-transactions :wallet="wallet" />
@@ -175,7 +175,6 @@
           </v-btn>
         </v-toolbar>
         <v-tabs>
-          <!--v-model="active"-->
           <v-tab>
             Edit
           </v-tab>
@@ -183,6 +182,12 @@
             <v-card flat>
               <v-card-text>
                 <v-layout row wrap>
+                  <v-flex xs6 v-if="$vuetify.breakpoint.smAndDown">
+                    <refresh-wallet :wallet="contextWallet" v-if="$vuetify.breakpoint.smAndDown" />
+                  </v-flex>
+                  <v-flex xs6 v-if="$vuetify.breakpoint.smAndDown">
+                    <testnet-buttons :wallet="contextWallet" />
+                  </v-flex>
                   <v-flex xs12>
                     <v-text-field
                       v-model="modelWalletName"

@@ -176,6 +176,8 @@ export const actions = {
           networkHandler
               .balance(wallet)
               .then((response) => {
+
+                Vue.$log.debug('got the balance for AEN wallet', wallet, response)
                 commit('setWalletProperty', {
                   address: wallet.address,
                   key: 'balance',
@@ -268,7 +270,7 @@ export const actions = {
     })
   },
   transactionsHistorical({state, commit, dispatch, getters, rootState}, wallet) {
-    var contractHandler, networkHandler
+    var networkHandler
     return new Promise((resolve) => {
       // Use cache if offline or wallet not yet recognised on network
 
@@ -392,50 +394,15 @@ export const actions = {
         case 'eth':
           networkHandler = getters['networkHandler'](
             { type: 'eth', network: wallet.network.identifier })
-          contractHandler = getters['networkHandler'](
-            { type: 'contract', network: wallet.network.identifier })
-
           networkHandler.transactionsHistorical(wallet).then(async (headTransactions) => {
-            let transactionKey, contractDetails
-            let contractTransactions = {}
-
-            // Get the ERC20 handler
-            // const erc20Interface = await import('~/class/network/contract/erc20')
-            // const decoder = new ContractDataDecoder(erc20Interface.abi)
-
-            for (transactionKey in headTransactions) {
-
-              if (headTransactions[transactionKey].value === '0' && headTransactions[transactionKey].contractAddress !== '') {
-                Vue.$log.debug('getting information about the contract', headTransactions[transactionKey])
-                try {
-                  contractDetails = await contractHandler.contractInformation({
-                    contractAddress: headTransactions[transactionKey].contractAddress
-                  })
-                  // Parse the input
-                  // TODO Once have some more data around smart contracts to pull apart parameters, work from here
-                  // decodedInput = decoder.decodeData(headTransactions[transactionKey].input)
-                  // console.log(decodedInput)
-
-                  if(!contractTransactions.hasOwnProperty(headTransactions[transactionKey].contractAddress)) {
-                    contractTransactions[headTransactions[transactionKey].contractAddress] = {
-                      meta: contractDetails,
-                      transactions: []
-                    }
-                  }
-
-                  headTransactions[transactionKey] = Object.assign({}, headTransactions[transactionKey], contractDetails)
-                  contractTransactions[headTransactions[transactionKey].contractAddress].transactions.push(headTransactions[transactionKey])
-                } catch (err) {
-                  Vue.$log.error('Caught error when trying to get contract information', err)
-                }
-              }
-            }
-            if(Object.keys(headTransactions).length > 0) {
+            if(Object.keys(headTransactions.contract).length > 0) {
               // Write any contract details
-              for (let contractAddress in contractTransactions) {
+              let contractAddress, contractInfo
+              for (contractAddress in headTransactions.contract) {
 
-                // const contract = contractTransactions[contractAddress]
-                // Is the contract managed at all? If not, add it to the stack
+                // Get the first contract transaction to use as definition
+                contractInfo = headTransactions.contract[contractAddress][Object.keys(headTransactions.contract[contractAddress])[0]]
+
                 if (!state.wallets.hasOwnProperty(contractAddress)) {
                   let walletOptions = {
                     type: 'contract',
@@ -443,11 +410,11 @@ export const actions = {
                     network: wallet.network,
                     onChain: true,
                     managerWalletAddress: wallet.address.toLowerCase(),
-                    name: contractTransactions[contractAddress].meta.contractName,
-                    decimals: contractTransactions[contractAddress].meta.decimals,
-                    symbol: contractTransactions[contractAddress].meta.symbol,
+                    name: contractInfo.contractName,
+                    decimals: contractInfo.decimals,
+                    symbol: contractInfo.symbol,
                     transactionsLastSynced: Date.now(),
-                    transactions: contractTransactions[contractAddress].transactions
+                    transactions: headTransactions.contract[contractAddress]
                   }
                   dispatch('load', walletOptions)
                     .then((wallet) => {
@@ -464,7 +431,7 @@ export const actions = {
               commit('setWalletProperty', {
                 address: wallet.address,
                 key: 'transactions',
-                value: headTransactions
+                value: headTransactions.origin
               })
               commit('setWalletProperty', {
                 address: wallet.address,
