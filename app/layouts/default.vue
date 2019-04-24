@@ -248,74 +248,93 @@ export default {
    */
   async beforeMount() {
       this.$log.debug('Running window startup routines')
-    // Ensure some global variables are clean for start
-    this.$store.commit('CACHE_SKIP', false)
-    this.$store.commit('setAppMode', 'web')
-    const env = process.env.NODE_ENV || 'dev'
-    this.$store.commit('setRuntimeProperty', { key: 'environment', value: env })
+      // Ensure some global variables are clean for start
+      this.$store.commit('CACHE_SKIP', false)
+      this.$store.commit('setAppMode', 'web')
+      const env = process.env.NODE_ENV || 'dev'
+      this.$store.commit('setRuntimeProperty', {key: 'environment', value: env})
 
-    // If time intervals have not been set in the state yet
-    if(Object.keys(this.$store.state.time_definitions).length === 0) {
-      this.$store.commit('TIME_DEF', this.$g('time_definitions'))
-    }
+      // If time intervals have not been set in the state yet
+      if (Object.keys(this.$store.state.time_definitions).length === 0) {
+          this.$store.commit('TIME_DEF', this.$g('time_definitions'))
+      }
 
-    // Determine how to handle main navigation by default depending on device size
-    if(this.$vuetify.breakpoint.mdAndUp === true) {
-      this.drawerOpen = true
-      this.minifyDrawer = true
-    } else {
-      this.minifyDrawer = false
-      this.drawerOpen = false
-    }
+      // Determine how to handle main navigation by default depending on device size
+      if (this.$vuetify.breakpoint.mdAndUp === true) {
+          this.drawerOpen = true
+          this.minifyDrawer = true
+      } else {
+          this.minifyDrawer = false
+          this.drawerOpen = false
+      }
 
-    this.$store.commit('setLoading', {
-      t: 'global',
-      v: true,
-      m: 'Page Startup'
-    })
-    this.$store.commit('BUSY', false)
+      this.$store.commit('setLoading', {
+          t: 'global',
+          v: true,
+          m: 'Page Startup'
+      })
+      this.$store.commit('BUSY', false)
 
-    this.onlineCheck()
-    setInterval(
-      function () {
-        this.onlineCheck()
-      }.bind(this),
-      this.$store.state.time_definitions.online_interval
-    )
+      this.onlineCheck()
+      setInterval(
+          function () {
+              this.onlineCheck()
+          }.bind(this),
+          this.$store.state.time_definitions.online_interval
+      )
 
-    // Desktop app setup
-    // if (isElectron()) {
-    //   this.$store.commit('setAppMode', 'app')
-    //   // Electron specific code
-    //   console.log('P:Running from within Electron, checking if system services installed for running Chain Node')
-    //   const child = execFile('docker', ['-v'], (error, stdout, stderr) => {
-    //     if (error) {
-    //       console.error('stderr', stderr)
-    //       throw error
-    //     }
-    //     if (stdout.startsWith('Docker version')) {
-    //       console.log('P:Docker can be controlled by Electron')
-    //       this.$store.commit('setElectronProperty', { docker_present: true })
-    //     }
-    //   })
-    //   console.log(child)
-    // }
+      // Desktop app setup
+      // if (isElectron()) {
+      //   this.$store.commit('setAppMode', 'app')
+      //   // Electron specific code
+      //   console.log('P:Running from within Electron, checking if system services installed for running Chain Node')
+      //   const child = execFile('docker', ['-v'], (error, stdout, stderr) => {
+      //     if (error) {
+      //       console.error('stderr', stderr)
+      //       throw error
+      //     }
+      //     if (stdout.startsWith('Docker version')) {
+      //       console.log('P:Docker can be controlled by Electron')
+      //       this.$store.commit('setElectronProperty', { docker_present: true })
+      //     }
+      //   })
+      //   console.log(child)
+      // }
 
-    // Check network settings and create a set of defaults based from first available
-    // TODO Abstract this defaulting to a component of it's own which can pickup a "wallets available" setting
-      this.$store.commit('wallet/setAenProperty', { key: 'activeApiEndpoint', value: this.$g('aen.api_endpoints')[0].address })
-      this.$store.commit('wallet/setBtcProperty', { key: 'activeApiEndpoint', value: this.$g('btc.api_endpoints')[0].address })
-      this.$store.commit('wallet/setEthProperty', { key: 'activeApiEndpoint', value: this.$g('eth.api_endpoints')[0].address })
+      // Check network settings and create a set of defaults based from first available
+      // TODO Abstract this defaulting to a component of it's own which can pickup a "wallets available" setting
+      this.$store.commit('wallet/setAenProperty', {
+          key: 'activeApiEndpoint',
+          value: this.$g('aen.api_endpoints')[0].address
+      })
+      this.$store.commit('wallet/setBtcProperty', {
+          key: 'activeApiEndpoint',
+          value: this.$g('btc.api_endpoints')[0].address
+      })
+      this.$store.commit('wallet/setEthProperty', {
+          key: 'activeApiEndpoint',
+          value: this.$g('eth.api_endpoints')[0].address
+      })
 
       if (Object.keys(this.$store.state.wallet.aen.network).length === 0) {
-          this.$store.commit('wallet/setAenProperty', { key: 'network', value: this.$g('aen.available_networks')[0] })
+          this.$store.commit('wallet/setAenProperty', {
+              key: 'network',
+              value: this.$g('aen.available_networks')[Object.keys(this.$g('aen.available_networks'))[0]]
+          })
       }
-      if (Object.keys(this.$store.state.wallet.btc.network).length === 0) {
-          this.$store.commit('wallet/setBtcProperty', { key: 'network', value: this.$g('btc.available_networks')[0] })
 
+      if (Object.keys(this.$store.state.wallet.btc.network).length === 0) {
+          this.$store.commit('wallet/setBtcProperty', {
+              key: 'network',
+              value: this.$g('btc.available_networks')[Object.keys(this.$g('btc.available_networks'))[0]]
+          })
       }
+
       if (Object.keys(this.$store.state.wallet.eth.network).length === 0) {
-        this.$store.commit('wallet/setEthProperty', { key: 'network', value: this.$g('eth.available_networks')[0] })
+          this.$store.commit('wallet/setEthProperty', {
+              key: 'network',
+              value: this.$g('eth.available_networks')[Object.keys(this.$g('eth.available_networks'))[0]]
+          })
       }
 
     this.rankApiNodes()

@@ -135,7 +135,7 @@
       },
       mounted: function () {
         this.walletName = this.type + '-' +this.$store.state.wallet[this.type].walletCount
-        this.network = this.$g(this.type + '.available_networks')[0]
+        this.network = this.$store.state.wallet[this.type].network
       },
         methods: {
             back() {
@@ -152,7 +152,7 @@
                 }
                 const walletOptions = {
                     type: this.type,
-                    network: this.$store.state.wallet[this.type].network,
+                    network: this.network,
                     name: this.walletName,
                     password: this.walletPassword,
                     main: this.main

@@ -24,7 +24,8 @@ import {
   mergeMap
 } from 'rxjs/operators'
 import Generic from './Generic.js'
-import {format} from "date-fns";
+import { format } from 'date-fns'
+// import $g from '~/globals.json'
 
 export default class Aen extends Generic {
 
@@ -51,6 +52,7 @@ export default class Aen extends Generic {
      * @returns {Account}
      */
   accountNew(options) {
+    Vue.$log.debug(this.pluginName + ' Plugin: Account New', options)
     return new Promise((resolve) => {
       const account = Account.generateNewAccount(options.network.identifier)
       resolve(account)
@@ -76,7 +78,7 @@ export default class Aen extends Generic {
       )
       .subscribe(
         (mosaic) => {
-          resolve(mosaic.relativeAmount())
+          resolve(mosaic.relativeAmount() * 1000000)
         },
         (error) => {
           Vue.$log.error('Could not get balance', error)
@@ -175,9 +177,22 @@ export default class Aen extends Generic {
           let currentTransaction, timeKey
           for(let transactionCount = 0; transactionCount < transactions.length; transactionCount++) {
             currentTransaction = transactions[transactionCount]
-            timeKey = format(currentTransaction.deadline.value, 'YYYY-MM-DD HH:mm')
-            transactionsWorkingObject[timeKey] = currentTransaction
+            timeKey = format(currentTransaction.deadline.value, 'YYYY-MM-DD HH:mm:ss')
+            transactionsWorkingObject[timeKey] = {
+              type: 'Transfer',
+              blockIncluded: currentTransaction.transactionInfo.height.lower,
+              hash: currentTransaction.transactionInfo.hash,
+              fee: currentTransaction.fee.lower,
+              value: (currentTransaction.hasOwnProperty('mosaics') ? currentTransaction.mosaics[0].amount.lower : 0),
+              direction: (currentTransaction.recipient.address.toLowerCase() === options.address.toLowerCase() ? 'IN' : 'OUT'),
+              time: timeKey,
+              message: currentTransaction.message.payload,
+              recipient: currentTransaction.recipient.address.toLowerCase(),
+              sender: currentTransaction.signer.address.address.toLowerCase()
+            }
+            console.log(transactionsWorkingObject[currentTransaction.deadline.value])
           }
+
           resolve(transactionsWorkingObject)
         }, (err) => {
           reject(err)
