@@ -184,6 +184,11 @@
                   <v-flex v-if="$vuetify.breakpoint.smAndDown" xs6>
                     <testnet-buttons :wallet="contextWallet" />
                   </v-flex>
+                  <v-flex xs12 v-if="canBePrimary()">
+                    <v-btn @click="makeWalletPrimary">
+                      Set as Primary Wallet
+                    </v-btn>
+                  </v-flex>
                   <v-flex xs12>
                     <v-text-field
                       v-model="modelWalletName"
@@ -401,6 +406,16 @@ export default {
     )
   },
   methods: {
+      canBePrimary() {
+          return (
+              this.contextWallet.type === 'aen' &&
+              this.contextWallet.address !== this.$store.state.wallet.aen.mainAddress
+          ) ? true : false
+      },
+      makeWalletPrimary() {
+          this.$store.commit('wallet/AEN_PROP', {key: 'mainAddress', value: this.contextWallet.address })
+      },
+
     testNet(wallet) {
       // First check whether the wallet is a contract and using parent
       if(wallet.hasOwnProperty('managerWalletAddress')) {

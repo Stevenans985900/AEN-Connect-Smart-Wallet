@@ -55,7 +55,8 @@ export default class Eth extends Generic {
   transactionsHistorical(options) {
     super.transactionsHistorical(options)
 
-    const apiEndpoint = this.config.etherscan.api_endpoint.replace('###NETWORK_IDENTIFIER###', options.network.identifier)
+    console.log($g.eth.available_networks[options.network].identifier)
+    const apiEndpoint = this.config.etherscan.api_endpoint.replace('###NETWORK_IDENTIFIER###', $g.eth.available_networks[options.network].identifier)
     return new Promise((resolve, reject) => {
       axios.get(apiEndpoint, {
         params: {
@@ -76,16 +77,19 @@ export default class Eth extends Generic {
           const transactions = response.data.result
           for(let transactionCount = 0; transactionCount < transactions.length; transactionCount++) {
             currentTransaction = transactions[transactionCount]
-            timeKey = format(currentTransaction.timeStamp, 'YYYY-MM-DD HH:mm:ss')
+            timeKey = format((currentTransaction.timeStamp * 1000), 'YYYY-MM-DD HH:mm:ss')
+
+            console.log(currentTransaction)
             const holding = {
                 blockIncluded: currentTransaction.blockNumber,
-                hash: currentTransaction.hash,
+                txHash: currentTransaction.hash,
                 fee: currentTransaction.gasUsed,
                 value: currentTransaction.value,
-                direction: (currentTransaction.recipient.address.toLowerCase() === options.address.toLowerCase() ? 'IN' : 'OUT'),
+                direction: (currentTransaction.to.toLowerCase() === options.address.toLowerCase() ? 'IN' : 'OUT'),
                 recipient: currentTransaction.to,
-                sender: currentTransaction.to,
-                type: 'Transfer'
+                sender: currentTransaction.from,
+                type: 'Transfer',
+                time: timeKey
             }
 
             if (currentTransaction.value === '0' && currentTransaction.contractAddress !== '') {
@@ -177,7 +181,7 @@ export default class Eth extends Generic {
                 amount: options.destination.amount,
                 type: options.source.type,
                 walletAddress: options.source.address,
-                network: options.source.network.identifier,
+                network: $g.eth.available_networks[options.source.network].identifier,
                 status: 'PENDING'
               }
 

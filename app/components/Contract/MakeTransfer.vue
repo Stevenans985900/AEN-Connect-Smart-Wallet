@@ -64,9 +64,7 @@
 </template>
 
 <script>
-    import TokenValue from "~/components/TokenValue"
 export default {
-  components: { TokenValue },
   props: {
     wallet: {
       type: Object,

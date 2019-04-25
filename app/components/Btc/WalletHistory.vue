@@ -35,12 +35,7 @@
 </template>
 
 <script>
-import TransactionStringify from '~/components/Btc/TransactionStringify'
-
 export default {
-  components: {
-    TransactionStringify
-  },
   props: {
     wallet: {
       type: Object,

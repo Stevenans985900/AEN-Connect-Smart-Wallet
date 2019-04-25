@@ -139,11 +139,11 @@ export const getters = {
   }
 }
 
-function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)) }
+// function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)) }
 
 export const actions = {
   balance: ({state, commit, dispatch, getters, rootState}, wallet) => {
-    let networkHandler
+    let networkHandler, parentWallet
     // There are cases where this is actually undefined so perform a quick check before trying to proceed
     if(typeof this !== 'undefined') {
       if(this.hasOwnProperty('app')) {
@@ -219,8 +219,9 @@ export const actions = {
               .finally(() => { dispatch('busy', false, { root: true }) })
           break
         case 'contract':
+          parentWallet = state.wallets[wallet.managerWalletAddress]
           networkHandler = getters['networkHandler'](
-            { type: 'contract', network: state.wallets[wallet.managerWalletAddress].network.identifier })
+            { type: 'contract', network: $g.eth.available_networks[parentWallet.network].identifier })
           networkHandler
               .balance(wallet)
               .then((response) => {
@@ -243,7 +244,7 @@ export const actions = {
           break
         case 'eth':
           networkHandler = getters['networkHandler'](
-            { type: 'eth', network: wallet.network.identifier })
+            { type: 'eth', network: $g.eth.available_networks[wallet.network].identifier })
           networkHandler
               .balance(wallet)
               .then((response) => {
@@ -392,8 +393,9 @@ export const actions = {
           break
         case 'eth':
           networkHandler = getters['networkHandler'](
-            { type: 'eth', network: wallet.network.identifier })
+            { type: 'eth', network: $g.eth.available_networks[wallet.network].identifier })
           networkHandler.transactionsHistorical(wallet).then(async (headTransactions) => {
+
             if(Object.keys(headTransactions.contract).length > 0) {
               // Write any contract details
               let contractAddress, contractInfo
@@ -416,28 +418,28 @@ export const actions = {
                     transactions: headTransactions.contract[contractAddress]
                   }
                   dispatch('load', walletOptions)
-                    .then((wallet) => {
-                      commit('showNotification', {
-                        type: 'success',
-                        message: Vue.prototype.$t('wallet.message.contract_added') + ': ' + wallet.name
+                      .then((wallet) => {
+                        commit('showNotification', {
+                          type: 'success',
+                          message: Vue.prototype.$t('wallet.message.contract_added') + ': ' + wallet.name
+                        })
                       })
-                    })
                 }
               }
-
-              // Create a new transaction array
-              headTransactions = Object.assign({}, wallet.transactions, headTransactions)
-              commit('setWalletProperty', {
-                address: wallet.address,
-                key: 'transactions',
-                value: headTransactions.origin
-              })
-              commit('setWalletProperty', {
-                address: wallet.address,
-                key: 'transactionsLastSynced',
-                value: Date.now()
-              })
             }
+
+            // Create a new transaction array
+            commit('setWalletProperty', {
+              address: wallet.address,
+              key: 'transactions',
+              value: Object.assign({}, wallet.transactions, headTransactions.origin)
+            })
+            commit('setWalletProperty', {
+              address: wallet.address,
+              key: 'transactionsLastSynced',
+              value: Date.now()
+            })
+
             // Update the current block number so that future transaction lookups aren't duplicated
             networkHandler.getHeight().then((blockHeight) => {
               commit('setWalletProperty', {
@@ -455,7 +457,7 @@ export const actions = {
     })
   },
   getLiveWallet({dispatch, getters, state }, wallet) {
-    let networkHandler
+    let networkHandler, parentWallet
     return new Promise((resolve) => {
       // There are cases where this is actually undefined so perform a quick check before trying to proceed
       if(typeof this !== 'undefined') {
@@ -479,8 +481,9 @@ export const actions = {
               .finally(() => { dispatch('busy', false, { root: true }) })
           break
         case 'contract':
+          parentWallet = state.wallets[wallet.managerWalletAddress]
           networkHandler = getters['networkHandler'](
-            { type: 'contract', network: state.wallets[wallet.managerWalletAddress].network.identifier })
+              { type: 'contract', network: $g.eth.available_networks[parentWallet.network].identifier })
           networkHandler.getLiveWallet(wallet).then((response) => {
             resolve(response)
           })
@@ -488,7 +491,7 @@ export const actions = {
           break
         case 'eth':
           networkHandler = getters['networkHandler'](
-            { type: 'eth', network: wallet.network.identifier })
+            { type: 'eth', network: $g.eth.available_networks[wallet.network].identifier })
           networkHandler.getLiveWallet(wallet).then((response) => {
             resolve(response)
           })
@@ -506,6 +509,7 @@ export const actions = {
    * @returns {Promise<any>}
    */
   load({state, commit, getters, dispatch}, options) {
+    let parentWallet
     const typeRef = options.type[0].toUpperCase() + options.type.slice(1)
 
     // Check whether the name has already been used and add a random suffix if so
@@ -569,8 +573,9 @@ export const actions = {
           break
 
         case 'Contract':
+          parentWallet = state.wallets[options.managerWalletAddress]
           networkHandler = getters['networkHandler'](
-            { type: 'contract', network: state.wallets[options.managerWalletAddress].network.identifier })
+              { type: 'contract', network: $g.eth.available_networks[parentWallet.network].identifier })
           networkHandler.walletLoad(options).then((walletObject) => {
             Object.assign(wallet, walletObject)
             commit('setWallet', wallet)
@@ -580,9 +585,7 @@ export const actions = {
 
         case 'Eth':
           networkHandler = getters['networkHandler'](
-            { type: 'eth', network: options.network.identifier })
-          await sleep(1000)
-          Vue.$log.debug('Loading up existing wallet with the following network handler', networkHandler)
+              { type: 'eth', network: $g.eth.available_networks[options.network].identifier })
           networkHandler.walletLoad(options).then((walletObject) => {
             Object.assign(wallet, walletObject)
             dispatch('security/monitorWallet', wallet, {root:true})
@@ -657,7 +660,7 @@ export const actions = {
 
         case 'eth':
           networkHandler = getters['networkHandler'](
-            { type: 'eth', network: options.network.identifier })
+              { type: 'eth', network: $g.eth.available_networks[options.network].identifier })
           networkHandler.walletNew(options).then((walletObject) => {
             Object.assign(wallet, walletObject)
             dispatch('security/monitorWallet', wallet, {root:true})
@@ -724,11 +727,11 @@ export const actions = {
             break
           case 'contract':
             networkHandler = getters['networkHandler'](
-              { type: 'contract', network: wallet.network.identifier })
+              { type: 'contract', network: $g.eth.available_networks[wallet.network].identifier })
             break
           case 'eth':
             networkHandler = getters['networkHandler'](
-              { type: 'eth', network: wallet.network.identifier })
+              { type: 'eth', network: $g.eth.available_networks[wallet.network].identifier })
             break
         }
       })
@@ -742,7 +745,7 @@ export const actions = {
    */
   transfer({commit, dispatch, getters}, options) {
     return new Promise((resolve, reject) => {
-      let networkHandler
+      let networkHandler, parentWallet
 
       // Check whether the destination is using a contact from the address book
       if (typeof options.destination.address === 'object' && options.destination.address !== null) {
@@ -770,8 +773,10 @@ export const actions = {
               .finally(() => { dispatch('busy', false, { root: true }) })
           break
         case 'contract':
+          parentWallet = state.wallets[options.transfer.managerWalletAddress]
           networkHandler = getters['networkHandler'](
-            { type: 'contract', network: options.transfer.managerWallet.network.identifier })
+              { type: 'contract', network: $g.eth.available_networks[parentWallet.network].identifier })
+
           networkHandler.transfer(options).then((transfer) => {
             resolve(transfer)
           })
@@ -779,7 +784,7 @@ export const actions = {
           break
         case 'eth':
           networkHandler = getters['networkHandler'](
-            { type: 'eth', network: options.source.network.identifier })
+              { type: 'eth', network: $g.eth.available_networks[options.source.network].identifier })
           networkHandler.transfer(options).then((transaction) => {
             // Add tracking reference to the transaction
             commit('TRANSACTION_TRACK', transaction)
@@ -866,17 +871,19 @@ export const actions = {
     }
   },
 
-  updateAll({commit, dispatch, state}) {
+  async updateAll({commit, dispatch, state}) {
     Vue.$log.debug('Wallet Store: Update All wallets')
+    const now = Date.now()
+
     for(let walletAddress in state.wallets) {
       const wallet = state.wallets[walletAddress]
       if(wallet.onChain === true) {
-        dispatch('balance', state.wallets[walletAddress])
-        dispatch('transactionsHistorical', state.wallets[walletAddress])
-        dispatch('transactionsPending', state.wallets[walletAddress])
-        dispatch('transactionsTrackedProcess', state.wallets[walletAddress])
+        await dispatch('balance', state.wallets[walletAddress])
+        await dispatch('transactionsHistorical', state.wallets[walletAddress])
+        await dispatch('transactionsPending', state.wallets[walletAddress])
+        await dispatch('transactionsTrackedProcess', state.wallets[walletAddress])
       } else {
-        dispatch('getLiveWallet', wallet).then((walletOnChain) => {
+        await dispatch('getLiveWallet', wallet).then((walletOnChain) => {
           if (walletOnChain !== false) {
             commit('WALLET_PROP', {
               address: walletAddress,
@@ -886,6 +893,11 @@ export const actions = {
           }
         })
       }
+      commit('WALLET_PROP', {
+        address: walletAddress,
+        key: 'lastSynced',
+        value: now
+      })
     }
   },
 
@@ -913,6 +925,8 @@ export const mutations = {
     state.meta.wallet_present = status
   },
   setWallet(state, wallet) {
+    console.log('wallet from store')
+    console.log(wallet)
     Vue.set(state.wallets, wallet.address, wallet)
     if (wallet.type === 'aen') {
       state.aen.haveWallet = true

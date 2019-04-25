@@ -23,19 +23,16 @@
             <transaction-stringify :wallet="wallet" :transaction="props.item" display="address" />
           </td>
           <td>
-            <v-btn icon @click="transactionInfo(props.item)">
-              <v-icon>
-                info
-              </v-icon>
-            </v-btn>
+            <v-icon>
+              {{ rowExpandedIcon(props.expanded) }}
+            </v-icon>
           </td>
         </tr>
       </template>
       <template slot="expand" slot-scope="props">
         <v-card flat>
           <v-card-text>
-            Peek-a-boo!
-            {{ props }}
+            {{ props.item }}
           </v-card-text>
         </v-card>
       </template>
@@ -110,14 +107,10 @@
 
 <script>
     import Clipboard from '~/components/Clipboard'
-import TransactionStringify from '~/components/Aen/TransactionStringify'
-    import TokenValue from "../TokenValue";
 
 export default {
   components: {
-      TokenValue,
-    Clipboard,
-    TransactionStringify
+    Clipboard
   },
   props: {
     wallet: {
@@ -151,26 +144,6 @@ export default {
   },
     computed: {
       symbol() { return this.$store.state.wallet.aen.displaySymbol },
-      lastIndex() { return this.paginatedTransactions.length -1 },
-      paginatedTransactions() {
-          const startIndex = ((this.numberTransactions - 1) - (this.page * this.numberPerPage))
-          const endIndex = ((this.numberTransactions - 1) - (this.page * this.numberPerPage + this.numberPerPage))
-          this.$log.debug('paginated transactions', this.transactions, startIndex, endIndex)
-          return this.transactions.slice(startIndex, endIndex).reverse()
-
-
-          // console.log('HERE')
-          // console.log(this.transactions)
-          // if(this.page === 1) {
-          //     console.log('is page 1')
-          //     return (this.transactions.slice(0, (this.numberPerPage)))
-          // } else {
-          //     return this.transactions.slice(
-          //         (this.numberPerPage * this.page - 1),
-          //         (this.numberPerPage * this.page + (this.numberPerPage - 1))
-          //     ).reverse()
-          // }
-      },
       numberTransactions() { return this.transactions.length },
       transactions() { return Object.values(this.wallet.transactions) }
     },
@@ -182,6 +155,9 @@ export default {
     methods: {
       goToExplorer() {
         window.open(this.$g('aen.transaction_explorer') + this.contextTransaction.hash)
+      },
+      rowExpandedIcon(booleanExpanded) {
+          return booleanExpanded === true ? 'keyboard_arrow_down' : 'keyboard_arrow_up'
       },
       transactionInfo(transaction) {
           this.contextTransaction = transaction

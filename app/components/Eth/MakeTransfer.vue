@@ -73,10 +73,8 @@
 </template>
 
 <script>
-  import TokenValue from "~/components/TokenValue"
   import { mapGetters } from 'vuex'
   export default {
-    components: { TokenValue },
     props: {
       wallet: {
         type: Object,
@@ -165,8 +163,8 @@
             source: this.wallet,
             transfer: {
               gasPrice: this.gasPrice, // Cost per litre of gas (1 GWei = 1,000,000,000 Wei)
-              gas: this.$g("eth.available_networks")[0].gas.transfer, // litre of gas, mileage
-              gasLimit: this.$g("eth.available_networks")[0].gas.transfer + 4000 // full tank
+              gas: this.$g(this.wallet.type + '.available_networks.' + this.wallet.network).gas.transfer, // litre of gas, mileage
+              gasLimit: this.$g(this.wallet.type + '.available_networks.' + this.wallet.network).gas.transfer + 4000 // full tank
             },
             destination: {
               address: this.address,

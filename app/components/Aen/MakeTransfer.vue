@@ -56,10 +56,8 @@
 </template>
 
 <script>
-  import TokenValue from "~/components/TokenValue"
   import { mapGetters } from 'vuex'
 export default {
-    components: { TokenValue },
   props: {
     wallet: {
       type: Object,

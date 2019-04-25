@@ -1,5 +1,6 @@
 {
   "version": "0.1.0",
+  "migration_version": 1,
   "salt": "o/e|6)~AorFA$7y!.IJaD_{c;r.ZS>7v+dr4:LMxiSRFKu|0CICdj0vD#h~ZujU96BA)ya(xMw;pb3T+6f.A1N|_o>+&U)|aa3DD+`aWKz1",
   "build_number": "DEV",
   "google_recaptcha_key": "NA",
@@ -42,12 +43,6 @@
         "identifier": "PUBLIC_TEST",
         "byte": 152,
         "testing": true
-      },
-      "MAIN_NET": {
-        "name": "nmain",
-        "identifier": "MAIN_NET",
-        "byte": 152,
-        "testing": true
       }
     },
     "transaction_explorer": "https://api-2.aencoin.io/transaction/",
@@ -85,12 +80,7 @@
       "api_endpoint": "https://api.bitaps.com/btc/{network_identifier}/v1/"
     },
     "available_networks": {
-      "mainnet": {
-        "name": "MainNet",
-        "identifier": "main",
-        "block_cypher_id": "main"
-      },
-      "testnet3": {
+      "testnet": {
         "name": "TestNet3",
         "identifier": "testnet",
         "block_cypher_id": "test3",
@@ -121,19 +111,6 @@
       "api_endpoint": "https://api-###NETWORK_IDENTIFIER###.etherscan.io/api"
     },
     "available_networks": {
-      "frontier": {
-        "name": "MainNet",
-        "identifier": "frontier",
-        "network_id": 1,
-        "gasPrice": {
-          "normal": 5000000000,
-          "priority": 35000000000,
-          "maximum": 50000000000
-        },
-        "gas": {
-          "transfer": 210000
-        }
-      },
       "ropsten": {
         "name": "Ropsten",
         "identifier": "ropsten",

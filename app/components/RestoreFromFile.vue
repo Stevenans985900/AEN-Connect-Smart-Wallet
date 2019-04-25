@@ -1,25 +1,23 @@
 <template>
-  <vue-dropzone id="dropzone" ref="myVueDropzone"
-                :options="dropzoneOptions"
-                :duplicate-check="true"
-                :use-custom-slot="true"
-                @vdropzone-file-added="fileUploaded"
-  >
-    <v-btn block style="white-space: normal;">
-      <v-icon>attach_file</v-icon>
-      <span v-if="$vuetify.breakpoint.mdAndUp">
-        {{ $t('backup.label.file_choose_drop') }}
-      </span>
-      <span v-else>
-        {{ $t('backup.label.file_choose') }}
-      </span>
-    </v-btn>
-  </vue-dropzone>
-  <!--<upload-button :file-changed-callback="fileUploaded" :title="$t('backup.label.file_choose')">-->
-  <!--<template slot="icon">-->
-  <!--<v-icon>attach_file</v-icon>-->
-  <!--</template>-->
-  <!--</upload-button>-->
+  <span>
+    <vue-dropzone id="dropzone" ref="myVueDropzone"
+                  :options="dropzoneOptions"
+                  :duplicate-check="true"
+                  :use-custom-slot="true"
+                  @vdropzone-file-added="fileUploaded"
+    >
+      <v-btn block style="white-space: normal;">
+        <v-icon>attach_file</v-icon>
+        <span v-if="$vuetify.breakpoint.mdAndUp">
+          {{ $t('backup.label.file_choose_drop') }}
+        </span>
+        <span v-else>
+          {{ $t('backup.label.file_choose') }}
+        </span>
+      </v-btn>
+    </vue-dropzone>
+    <wallet-migrate v-if="performMigration" :wallet="workingWallet" @complete="accountMigrated" />
+  </span>
 </template>
 
 <style scoped>
@@ -513,11 +511,11 @@
 import EventEmitter from 'events'
 import CryptoJS from 'crypto-js'
 import vue2Dropzone from 'vue2-dropzone'
-import Vue from 'vue'
-
+import $g from '~/globals.json'
+import WalletMigrate from "~/components/WalletMigrate"
 export default {
   components: {
-    vueDropzone: vue2Dropzone
+    vueDropzone: vue2Dropzone, WalletMigrate
   },
   props: {
     // If network type specified, restrict import to this type
@@ -528,7 +526,8 @@ export default {
     // Forcee imported wallet to be considered main AEN wallet
     main: {
       type: Boolean,
-      default: false
+      default: false,
+      workingWallet: {}
     }
   },
   data() {
@@ -536,10 +535,17 @@ export default {
       dropzoneOptions: {
         url: "http://localhost/"
       },
-      wallet: {}
+      wallet: {},
+      performMigration: false,
+      salt: $g.salt
     }
   },
   methods: {
+    accountMigrated(processedWallet) {
+        this.$store.dispatch('wallet/load', processedWallet).then((wallet) => {
+            this.$emit('complete', wallet)
+        })
+    },
     fileUploaded(file) {
       // Create the construct to handle both app / browser situations
       const fileUploadedEmitter = new EventEmitter()
@@ -547,25 +553,29 @@ export default {
         'ready',
         function (walletData) {
           try {
-            let walletInformation
-            walletInformation = JSON.parse(walletData.data)
-            walletInformation.credentials = JSON.parse(CryptoJS.AES.decrypt(
-                walletInformation.credentials,
-                Vue.prototype.$g('salt')
-            ).toString(CryptoJS.enc.Utf8))
-            // If prop states wallet is a main, force property in wallet
-            if (this.main === true) {
-              walletInformation.wallet.main = true
-            }
+              // TODO Refactor this and also take in to account migration versions with backup
+              walletData = JSON.parse(walletData.data)
+              console.log(walletData)
+              const decrypted = CryptoJS.AES.decrypt(walletData.credentials, this.salt).toString(CryptoJS.enc.Utf8)
+              const credentials = JSON.parse(decrypted)
+              this.workingWallet = Object.assign({}, walletData.wallet, credentials)
 
-            const simplifiedData = Object.assign({}, walletInformation.wallet, walletInformation.credentials)
+              // If prop states wallet is a main, force property in wallet
+              if (this.main === true) { this.workingWallet.main = true }
+              if(this.type !== '' && this.type !== this.workingWallet.type) {
+                  throw 'Wallet type does not meet type requirement (' + this.type + ')'
+              }
 
-            if(this.type !== '' && this.type !== simplifiedData.type) {
-              throw 'Wallet type does not meet type requirement (' + this.type + ')'
-            }
-            this.$store.dispatch('wallet/load', simplifiedData).then((wallet) => {
-                this.$emit('complete', wallet)
-            })
+              // Check if there are any migrations to run on the backup
+              if(!this.workingWallet.hasOwnProperty('migration_version')) { this.workingWallet.migration_version = 0 }
+              if (this.workingWallet.migration_version !== $g.migration_version) {
+                  this.performMigration = true
+              } else {
+                  this.$store.dispatch('wallet/load', this.workingWallet).then((wallet) => {
+                      this.$emit('complete', wallet)
+                  })
+              }
+
           } catch (err) {
             this.$log.error(err)
             this.$store.commit('showNotification', {
