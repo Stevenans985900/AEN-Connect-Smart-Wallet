@@ -1,12 +1,13 @@
 <template>
   <v-card v-if="haveTrackedTransactions" flat>
-    <v-card-title>{{ $t('network.label.pending_transactions') }}</v-card-title>
     <v-card-text>
-      <v-layout v-for="transaction in trackedTransactions" :key="transaction.key" row wrap>
+      <v-layout v-for="(transaction, txHash) in trackedTransactions" :key="txHash" row wrap align-center>
         <v-flex xs2 sm1>
-          <v-icon>
-            {{ icon(transaction) }}
-          </v-icon>
+          <a target="_blank" :href="blockExplorerLink(transaction)">
+            <v-icon>
+              {{ icon(transaction) }}
+            </v-icon>
+          </a>
         </v-flex>
         <v-flex xs8 sm10>
           <a target="_blank" :href="blockExplorerLink(transaction)">
@@ -17,7 +18,7 @@
           </a>
         </v-flex>
         <v-flex xs2 sm1>
-          <v-btn icon @click="stopTracking(transaction)">
+          <v-btn icon @click="remove(transaction)">
             <v-icon>
               close
             </v-icon>
@@ -30,10 +31,16 @@
     </v-card-text>
   </v-card>
 </template>
+
+<style scoped>
+  a {
+    text-decoration: none !important;
+    display: block;
+    color: #fff;
+  }
+</style>
 <script>
-  import TokenValue from '~/components/TokenValue'
   export default {
-    components: { TokenValue },
     props: {
       wallet: {
         type: Object,
@@ -42,6 +49,7 @@
     },
     data() {
       return {
+        aenWallets: null,
         menuPendingTransactions: false
       }
     },
@@ -49,21 +57,13 @@
       haveTrackedTransactions() { return Object.keys(this.trackedTransactions).length > 0 ? true : false },
       trackedTransactions() {
         if(this.wallet !== null) {
+          console.log(this.$store.getters['wallet/trackedTransactionsByWallet'](this.wallet))
            return this.$store.getters['wallet/trackedTransactionsByWallet'](this.wallet)
         } else {
+          console.log(this.$store.state.wallet.trackedTransactions)
           return this.$store.state.wallet.trackedTransactions
         }
       }
-    },
-    mounted: function () {
-      this.$log.debug('Dashboard Startup')
-      // Only start once global loading finished
-      this.interval = setInterval(
-        function () {
-          this.processTrackedTransactions()
-        }.bind(this),
-        this.$store.state.time_definitions.transaction_watch
-      )
     },
     beforeDestroy() {
       clearInterval(this.interval)
@@ -72,34 +72,24 @@
       blockExplorerLink(transaction) {
         switch (transaction.type) {
           case 'aen':
-            return ''
+            return this.$g('aen.transaction_explorer') + transaction.txHash
           case 'btc':
-            return 'https://live.blockcypher.com/btc-testnet/tx/'+transaction.transactionHash+'/'
+            return 'https://live.blockcypher.com/btc-testnet/tx/'+transaction.txHash+'/'
           case 'eth':
-            return 'https://'+transaction.network+'.etherscan.io/address/' + transaction.transactionHash
+            return 'https://'+transaction.network+'.etherscan.io/address/' + transaction.txHash
         }
       },
-      processTrackedTransactions() {
-        if(this.haveTrackedTransactions === true) {
-          this.$log.debug('processing tracked transactions')
-          for(let transactionHash in this.trackedTransactions) {
-            this.$store.dispatch('wallet/transactionStatus', this.trackedTransactions[transactionHash]).then((transaction) => {
-              this.$log.debug('Transactions status returned', this.trackedTransactions[transactionHash],transaction, )
-              if (transaction.status === 'CONFIRMED') {
-                this.stopTracking(this.trackedTransactions[transactionHash])
-              }
-            })
-          }
-        }
-      },
-      stopTracking(transaction) {
-        this.$store.commit('wallet/TRANSACTION_COMPLETE', transaction.key)
+
+      remove(transaction) {
+        console.log('would stop tracking the following transaction if not for debug', transaction)
+        this.$store.commit('wallet/TRANSACTION_REMOVE', transaction.txHash)
       },
       icon(transaction) {
-        if(transaction.direction === 'outgoing') {
-          return 'call_made'
+        switch (transaction.status) {
+            case 'CONFIRMED': return 'done'
+            case 'PENDING': return 'hourglass_empty'
+            default: return 'help'
         }
-        return 'call_received'
       }
     }
   }

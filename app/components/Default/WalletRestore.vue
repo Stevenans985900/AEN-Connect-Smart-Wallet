@@ -7,11 +7,11 @@
     <v-layout row wrap>
       <v-flex v-if="multipleNetworks" xs12>
         <v-select
-          v-model="network"
           :items="availableNetworks"
-          return-object
+          v-model="network"
           item-text="name"
           label="Network"
+          return-object
         />
       </v-flex>
       <v-flex xs12>
@@ -106,36 +106,19 @@
         computed: {
             networks() { return this.$g(this.type + '.available_networks') },
             environment() { return this.$store.state.runtime.environment },
+            availableNetworks() { return Object.values(this.networks) },
             multipleNetworks() {
-                if (this.$g(this.type + '.available_networks').length > 1) {
+                if (Object.keys(this.networks).length > 1) {
                     return true
                 }
                 return false
             }
         },
-        watch: {
-          type: function () {
-            if(!this.multipleNetworks) {
-              this.network = this.$g(this.type + '.available_networks')[0]
-            }
-          }
-        },
         mounted: function () {
-          if(!this.multipleNetworks) {
-            this.network = this.$g(this.type + '.available_networks')[0]
-          }
+            this.reset()
+            this.network = this.$store.state.wallet[this.type].network
         },
         methods: {
-            /**
-             * Make sure the data is clean for adding a new wallet before trying to render the HTML.
-             * @param file
-             */
-            beforeMount() {
-                this.reset()
-                if(!this.multipleNetworks) {
-                    this.network = this.$store.state[this.type].defaultNetwork
-                }
-            },
             complete(wallet) {
                 this.$emit('complete', wallet)
                 this.reset()

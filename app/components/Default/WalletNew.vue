@@ -9,8 +9,8 @@
         <v-select
           v-model="network"
           :items="availableNetworks"
-          return-object
           item-text="name"
+          item-value="identifier"
           :label="$t('common.label.network')"
         />
       </v-flex>
@@ -121,21 +121,16 @@
             networks() { return this.$g(this.type + '.available_networks') },
             environment() { return this.$store.state.runtime.environment },
             multipleNetworks() {
-                if (this.$g(this.type + '.available_networks').length > 1) {
+                if (Object.keys(this.$g(this.type + '.available_networks')).length > 1) {
                     return true
                 }
                 return false
             },
-            availableNetworks() { return this.$g(this.type + '.available_networks') }
+            availableNetworks() { return Object.values(this.$g(this.type + '.available_networks')) }
         },
-      watch: {
-        type: function () {
-          this.network = this.$g(this.type + '.available_networks')[0]
-        }
-      },
       mounted: function () {
         this.walletName = this.type + '-' +this.$store.state.wallet[this.type].walletCount
-        this.network = this.$g(this.type + '.available_networks')[0]
+        this.network = this.$store.state.wallet[this.type].network.identifier
       },
         methods: {
             back() {
@@ -152,7 +147,7 @@
                 }
                 const walletOptions = {
                     type: this.type,
-                    network: this.$store.state.wallet[this.type].network,
+                    network: this.network,
                     name: this.walletName,
                     password: this.walletPassword,
                     main: this.main

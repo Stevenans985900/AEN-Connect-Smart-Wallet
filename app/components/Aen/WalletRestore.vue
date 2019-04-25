@@ -7,11 +7,11 @@
     <v-layout row wrap>
       <v-flex v-if="multipleNetworks" xs12>
         <v-select
-          v-model="network"
-          :items="availableNetworks"
-          return-object
-          item-text="name"
-          :label="$t('common.label.network')"
+                :items="availableNetworks"
+                v-model="network"
+                item-text="name"
+                item-value="identifier"
+                label="Network"
         />
       </v-flex>
       <v-flex xs12>
@@ -62,7 +62,7 @@
             walletName: '',
             walletPassword: '',
             password2: '',
-            network: {},
+            network: '',
             accountPrivateKey: '',
             proceedValid: false,
             showKey: false,
@@ -109,8 +109,9 @@
         computed: {
             networks() { return this.$g(this.type + '.available_networks') },
             environment() { return this.$store.state.runtime.environment },
+            availableNetworks() { return Object.values(this.networks) },
             multipleNetworks() {
-                if (this.$g(this.type + '.available_networks').length > 1) {
+                if (Object.keys(this.networks).length > 1) {
                     return true
                 }
                 return false
@@ -118,9 +119,7 @@
         },
         mounted: function() {
           this.reset()
-          if(!this.multipleNetworks) {
             this.network = this.$store.state.wallet[this.type].network
-          }
         },
         methods: {
             complete(wallet) {

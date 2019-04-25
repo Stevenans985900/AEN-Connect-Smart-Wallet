@@ -73,7 +73,6 @@ export default class Contract extends Generic {
         const contract = new this.web3.eth.Contract(erc20Interface.abi, options.contractAddress)
         contract.methods[options.method]().call()
         .then((response) => {
-          Vue.$log.debug('Contract Store: ERC20 Method Result ' + options.method + ' = ' + response)
           resolve(response)
         })
         .catch ((err) => {

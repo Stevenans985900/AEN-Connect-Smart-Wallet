@@ -12,6 +12,8 @@ export const initialState = {
   time_definitions: {},
   // High level app properties
   runtime: {
+    migration_version: '',
+    known_version: '',
     mode: 'web',
     environment: 'production',
     isOnline: false,
@@ -19,7 +21,8 @@ export const initialState = {
     // Even though Vue is reactive, some of the deep components use calculations along with computed properties. This
     // counter provides a simple way to watch for such events firing removing the need to watch deep
     renderCounter: 0,
-    skipCacheNextOp: false
+    // This option will tell the app to check if the wallet has been
+    debounce_wallet_updates: true
   },
   // When running as a desktop app
   electron: {
@@ -114,6 +117,9 @@ export const mutations = {
     state.internal[options.key] = options.value
   },
   setRuntimeProperty(state, options) {
+    state.runtime[options.key] = options.value
+  },
+  RUNTIME_PROP(state, options) {
     state.runtime[options.key] = options.value
   },
   setUserProperty(state, options) {

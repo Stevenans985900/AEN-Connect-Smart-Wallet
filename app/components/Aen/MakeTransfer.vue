@@ -16,6 +16,8 @@
                 v-model="destination.amount"
                 :label="$t('common.label.amount')"
                 suffix="AEN"
+                type="number"
+                :rules="[rules.amount.minimum]"
                 :error-messages="lessThanBalance()"
                 required
               />
@@ -54,10 +56,8 @@
 </template>
 
 <script>
-  import TokenValue from "~/components/TokenValue"
   import { mapGetters } from 'vuex'
 export default {
-    components: { TokenValue },
   props: {
     wallet: {
       type: Object,
@@ -73,7 +73,12 @@ export default {
         amount: '',
         message: ''
       },
-      transferValid: false
+      transferValid: false,
+      rules: {
+        amount: {
+          minimum: v => Number(v) > 0.0001 || 'Amount must be a positive number greater than 0.0001'
+        }
+      }
     }
   },
   computed: {

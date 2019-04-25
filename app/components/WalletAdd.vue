@@ -29,7 +29,9 @@
         <v-card v-if="addType == 'fileImport'">
           <v-card-text>
             <v-layout row wrap>
-              <restore-from-file :type="type" :main="main" @complete="walletRestoredFromFile" />
+              <v-flex xs12>
+                <restore-from-file :type="type" :main="main" @complete="walletRestoredFromFile" />
+              </v-flex>
             </v-layout>
           </v-card-text>
         </v-card>

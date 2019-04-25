@@ -1,25 +1,19 @@
 {
   "version": "0.1.0",
+  "migration_version": 1,
   "salt": "o/e|6)~AorFA$7y!.IJaD_{c;r.ZS>7v+dr4:LMxiSRFKu|0CICdj0vD#h~ZujU96BA)ya(xMw;pb3T+6f.A1N|_o>+&U)|aa3DD+`aWKz1",
   "build_number": "DEV",
   "google_recaptcha_key": "NA",
   "internal": {
     "baseImagePath": "/",
-    "onlineInterval": "15000",
-    "controllerPollReadyInterval": 1000,
-    "commonTasksInterval": 900000,
-    "apiEndpointPingInterval": 10000,
-    "loggerEnabled": true,
-    "walletCheckInterval": 600000,
-    "exchangeRateUpdateInterval": 900000,
-    "walletRefreshGraceTime": 600000
+    "loggerEnabled": true
   },
   "time_definitions": {
     "api_ranking": 90000,
     "controller_poll": 500,
     "online_interval": 15000,
     "transaction_watch": 15000,
-    "wallet_update": 30000,
+    "wallet_update": 15000,
     "security_password_grace": 120000
   },
   "userExperience": {
@@ -28,6 +22,7 @@
   },
   "aen": {
     "networkVersion": "0.1",
+    "decimal": 8,
     "api_endpoint_height": "/chain/height",
     "api_endpoints": [{
       "alias": "API-2",
@@ -42,12 +37,15 @@
         "address": "https://api-10.aencoin.io"
       }
     ],
-    "available_networks": [{
-      "name": "TestNet",
-      "identifier": "PUBLIC_TEST",
-      "byte": 152,
-      "testing": true
-    }],
+    "available_networks": {
+      "PUBLIC_TEST": {
+        "name": "TestNet",
+        "identifier": "PUBLIC_TEST",
+        "byte": 152,
+        "testing": true
+      }
+    },
+    "transaction_explorer": "https://api-2.aencoin.io/transaction/",
     "faucets": [{
       "name": "TestNet Faucet",
       "address": "http://faucet.aencoin.io/"
@@ -81,19 +79,14 @@
     "bitaps": {
       "api_endpoint": "https://api.bitaps.com/btc/{network_identifier}/v1/"
     },
-    "available_networks": [
-      {
-        "name": "MainNet",
-        "identifier": "main",
-        "block_cypher_id": "main"
-      },
-      {
+    "available_networks": {
+      "testnet": {
         "name": "TestNet3",
         "identifier": "testnet",
         "block_cypher_id": "test3",
         "testing": true
       }
-    ],
+    },
     "faucets": [
       {
         "name": "Bitcoin Testnet3 Faucet",
@@ -117,21 +110,8 @@
       "api_key": "IJQ88ERU7QH9HQNV2NX46G2XJAIEZ6EBPB",
       "api_endpoint": "https://api-###NETWORK_IDENTIFIER###.etherscan.io/api"
     },
-    "available_networks": [
-      {
-        "name": "MainNet",
-        "identifier": "frontier",
-        "network_id": 1,
-        "gasPrice": {
-          "normal": 5000000000,
-          "priority": 35000000000,
-          "maximum": 50000000000
-        },
-        "gas": {
-          "transfer": 210000
-        }
-      },
-      {
+    "available_networks": {
+      "ropsten": {
         "name": "Ropsten",
         "identifier": "ropsten",
         "network_id": 3,
@@ -145,7 +125,7 @@
           "transfer": 210000
         }
       }
-    ],
+    },
     "faucets": [
       {
         "name": "Kyber Faucet",
@@ -168,7 +148,7 @@
     },
     "divisibility": {
       "aen": {
-        "aen": 1
+        "aen": 1000000
       },
       "btc": {
         "bit": 0.001,

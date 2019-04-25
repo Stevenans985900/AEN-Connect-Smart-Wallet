@@ -124,6 +124,8 @@ module.exports = {
         ssr: false
     },
     '@/plugins/logger',
+    '@/plugins/tokenValue',
+    '@/plugins/transactionStringify',
     '@/plugins/vuebar',
     '@/plugins/vuetify',
     '@/plugins/walletImage',

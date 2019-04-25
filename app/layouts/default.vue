@@ -40,10 +40,14 @@
         <busy />
       </no-ssr>
       <development v-if="environment === 'development'" />
-      <v-menu v-if="haveTrackedTransactions" v-model="menuPendingTransactions" offset-y>
-        <v-btn slot="activator" color="green" icon small>
+      <v-menu
+        v-if="haveTrackedTransactions"
+        v-model="menuPendingTransactions"
+        :close-on-content-click="false"
+        offset-y>
+        <v-btn slot="activator" icon>
           <v-icon>
-            swap_horiz
+            history
           </v-icon>
         </v-btn>
         <tracked-transactions />
@@ -81,20 +85,30 @@
       </v-card>
     </v-dialog>
 
-    <!-- Exit Dialog -->
-    <!--<v-dialog v-if="dialogExit === true" v-model="dialogExit" persistent max-width="450px">-->
-    <!--<v-toolbar color="primary">-->
-    <!--<v-toolbar-title>{{ $t('common.message.are_you_sure') }}</v-toolbar-title>-->
-    <!--<v-spacer />-->
-    <!--<v-btn small icon outline @click="dialogExit = false">-->
-    <!--<v-icon>close</v-icon>-->
-    <!--</v-btn>-->
-    <!--</v-toolbar>-->
-    <!--<p>-->
-    <!---->
-    <!--</p>-->
-    <!--<make-transfer :wallet="contextWallet" @complete="transferComplete()" />-->
-    <!--</v-dialog>-->
+    <v-dialog v-model="dialogShowTermsConditions" persistent max-width="400px">
+      <v-toolbar>
+        <v-toolbar-title>
+          {{ $t('eula.label.please_agree_continue') }}
+        </v-toolbar-title>
+      </v-toolbar>
+      <v-card>
+        <v-card-text>
+          <p>
+            {{ $t('eula.message.eula_message') }}
+          </p>
+        </v-card-text>
+        <v-card-actions>
+          <help show-category="terms_and_conditions">
+            <v-btn flat @click="helpDialogShow = true">
+              {{ $t('eula.action.show_eula') }}
+            </v-btn>
+          </help>
+          <v-btn class="primary" @click="eulaAgreed = true">
+            {{ $t('common.action.accept') }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <!-- FOOTER AREA -->
     <v-footer app height="auto" color="primary">
@@ -104,6 +118,7 @@
         </v-toolbar-title>
         <v-spacer />
         {{ version }}#{{ buildNumber }}
+        <v-btn @click="resetMigrations">reset migration</v-btn>
       </v-toolbar>
     </v-footer>
   </v-app>
@@ -181,6 +196,17 @@ export default {
    * COMPUTED
    */
   computed: {
+      wallets() { return this.$store.state.wallet.wallets },
+      local_version: {
+          get() { return this.$store.state.runtime.migration_version },
+          set(val) { this.$store.commit('RUNTIME_PROP', {key: 'migration_version', value: val} )}
+      },
+
+    helpDialogShow: {
+      get: function () { return this.$store.state.user.help },
+      set: function (val) { this.$store.commit('setUserProperty', {key: 'help', value: val}) }
+    },
+
     cDrawerOpen: {
       get: function() {
         if (this.$vuetify.breakpoint.mdAndUp === true) {
@@ -205,8 +231,17 @@ export default {
       },
       set(val) { this.pendingTransactionsClicked = val }
     },
+    dialogShowTermsConditions() {
+      if (['index','migrations'].includes(this.$nuxt.$route.name) === false && this.eulaAgreed === false) {
+        return true
+      }
+      return false
+    },
     haveTrackedTransactions() { return Object.keys(this.$store.state.wallet.trackedTransactions).length > 0 ? true : false },
-    eulaAgreed() { return this.$store.state.user.eulaAgree },
+    eulaAgreed: {
+      get: function () { return this.$store.state.user.eulaAgree },
+      set: function (val) { this.$store.commit('USER_PROP', {key: 'eulaAgree', value: val} )}
+    },
     isOnline() { return this.$store.state.runtime.isOnline },
     buildNumber() { return this.$g('build_number') },
     version() { return this.$g('version') },
@@ -223,7 +258,12 @@ export default {
         })
       }
     },
-    showNav() { return this.$store.state.user.eulaAgree },
+    showNav() {
+          if (this.$nuxt.$route.name === 'migrations') {
+              return false
+          }
+          return this.$store.state.user.eulaAgree
+    },
     // notification details
     showNotification: {
       get: function () {
@@ -247,112 +287,148 @@ export default {
    *
    */
   async beforeMount() {
-      this.$log.debug('Running window startup routines')
-    // Ensure some global variables are clean for start
-    this.$store.commit('CACHE_SKIP', false)
-    this.$store.commit('setAppMode', 'web')
-    const env = process.env.NODE_ENV || 'dev'
-    this.$store.commit('setRuntimeProperty', { key: 'environment', value: env })
 
-    // If time intervals have not been set in the state yet
-    if(Object.keys(this.$store.state.time_definitions).length === 0) {
-      this.$store.commit('TIME_DEF', this.$g('time_definitions'))
-    }
+      // Are we on the migration page?
+      if(this.$nuxt.$route.name !== 'migrations') {
 
-    // Determine how to handle main navigation by default depending on device size
-    if(this.$vuetify.breakpoint.mdAndUp === true) {
-      this.drawerOpen = true
-      this.minifyDrawer = true
-    } else {
-      this.minifyDrawer = false
-      this.drawerOpen = false
-    }
+          // TODO Once wallet has been running with migrate system for a while, remove the following line. It is used to cater for the early evangelists who ran wallets without
+          if (this.$store.state.wallet.aen.mainAddress !== '' && this.$store.state.runtime.migration_version === '') {
+              // Set migration version so that will find a match
+              this.$store.commit('RUNTIME_PROP', {key: 'migration_version', value: 0})
+          }
 
-    this.$store.commit('setLoading', {
-      t: 'global',
-      v: true,
-      m: 'Page Startup'
-    })
-    this.$store.commit('BUSY', false)
+          if (this.$store.state.runtime.migration_version !== this.$g('migration_version')) {
+              console.log('migration to run')
+              this.$nuxt.$router.replace({path: '/migrations'})
+          }
 
-    this.onlineCheck()
-    setInterval(
-      function () {
-        this.onlineCheck()
-      }.bind(this),
-      this.$store.state.time_definitions.online_interval
-    )
+          this.$log.debug('Running window startup routines')
+          // Ensure some global variables are clean for start
+          this.$store.commit('CACHE_SKIP', false)
+          this.$store.commit('setAppMode', 'web')
+          const env = process.env.NODE_ENV || 'dev'
+          this.$store.commit('setRuntimeProperty', {key: 'environment', value: env})
 
-    // Desktop app setup
-    // if (isElectron()) {
-    //   this.$store.commit('setAppMode', 'app')
-    //   // Electron specific code
-    //   console.log('P:Running from within Electron, checking if system services installed for running Chain Node')
-    //   const child = execFile('docker', ['-v'], (error, stdout, stderr) => {
-    //     if (error) {
-    //       console.error('stderr', stderr)
-    //       throw error
-    //     }
-    //     if (stdout.startsWith('Docker version')) {
-    //       console.log('P:Docker can be controlled by Electron')
-    //       this.$store.commit('setElectronProperty', { docker_present: true })
-    //     }
-    //   })
-    //   console.log(child)
-    // }
+          // If time intervals have not been set in the state yet
+          if (Object.keys(this.$store.state.time_definitions).length === 0) {
+              this.$store.commit('TIME_DEF', this.$g('time_definitions'))
+          }
 
-    // Check network settings and create a set of defaults based from first available
-    // TODO Abstract this defaulting to a component of it's own which can pickup a "wallets available" setting
-      this.$store.commit('wallet/setAenProperty', { key: 'activeApiEndpoint', value: this.$g('aen.api_endpoints')[0].address })
-      this.$store.commit('wallet/setBtcProperty', { key: 'activeApiEndpoint', value: this.$g('btc.api_endpoints')[0].address })
-      this.$store.commit('wallet/setEthProperty', { key: 'activeApiEndpoint', value: this.$g('eth.api_endpoints')[0].address })
 
-      if (Object.keys(this.$store.state.wallet.aen.network).length === 0) {
-          this.$store.commit('wallet/setAenProperty', { key: 'network', value: this.$g('aen.available_networks')[0] })
-      }
-      if (Object.keys(this.$store.state.wallet.btc.network).length === 0) {
-          this.$store.commit('wallet/setBtcProperty', { key: 'network', value: this.$g('btc.available_networks')[0] })
+          // Determine how to handle main navigation by default depending on device size
+          if (this.$vuetify.breakpoint.mdAndUp === true) {
+              this.drawerOpen = true
+              this.minifyDrawer = true
+          } else {
+              this.minifyDrawer = false
+              this.drawerOpen = false
+          }
 
-      }
-      if (Object.keys(this.$store.state.wallet.eth.network).length === 0) {
-        this.$store.commit('wallet/setEthProperty', { key: 'network', value: this.$g('eth.available_networks')[0] })
-      }
+          this.$store.commit('setLoading', {
+              t: 'global',
+              v: true,
+              m: 'Page Startup'
+          })
+          this.$store.commit('BUSY', false)
 
-    this.rankApiNodes()
-    setInterval(
-      function () {
+          this.onlineCheck()
+          setInterval(
+              function () {
+                  this.onlineCheck()
+              }.bind(this),
+              this.$store.state.time_definitions.online_interval
+          )
+
+          // Desktop app setup
+          // if (isElectron()) {
+          //   this.$store.commit('setAppMode', 'app')
+          //   // Electron specific code
+          //   console.log('P:Running from within Electron, checking if system services installed for running Chain Node')
+          //   const child = execFile('docker', ['-v'], (error, stdout, stderr) => {
+          //     if (error) {
+          //       console.error('stderr', stderr)
+          //       throw error
+          //     }
+          //     if (stdout.startsWith('Docker version')) {
+          //       console.log('P:Docker can be controlled by Electron')
+          //       this.$store.commit('setElectronProperty', { docker_present: true })
+          //     }
+          //   })
+          //   console.log(child)
+          // }
+
+          // Check network settings and create a set of defaults based from first available
+          // TODO Abstract this defaulting to a component of it's own which can pickup a "wallets available" setting
+          this.$store.commit('wallet/setAenProperty', {
+              key: 'activeApiEndpoint',
+              value: this.$g('aen.api_endpoints')[0].address
+          })
+          this.$store.commit('wallet/setBtcProperty', {
+              key: 'activeApiEndpoint',
+              value: this.$g('btc.api_endpoints')[0].address
+          })
+          this.$store.commit('wallet/setEthProperty', {
+              key: 'activeApiEndpoint',
+              value: this.$g('eth.api_endpoints')[0].address
+          })
+
+          if (Object.keys(this.$store.state.wallet.aen.network).length === 0) {
+              this.$store.commit('wallet/setAenProperty', {
+                  key: 'network',
+                  value: this.$g('aen.available_networks')[Object.keys(this.$g('aen.available_networks'))[0]]
+              })
+          }
+
+          if (Object.keys(this.$store.state.wallet.btc.network).length === 0) {
+              this.$store.commit('wallet/setBtcProperty', {
+                  key: 'network',
+                  value: this.$g('btc.available_networks')[Object.keys(this.$g('btc.available_networks'))[0]]
+              })
+          }
+
+          if (Object.keys(this.$store.state.wallet.eth.network).length === 0) {
+              this.$store.commit('wallet/setEthProperty', {
+                  key: 'network',
+                  value: this.$g('eth.available_networks')[Object.keys(this.$g('eth.available_networks'))[0]]
+              })
+          }
+
           this.rankApiNodes()
-      }.bind(this),
-      this.$store.state.time_definitions.api_ranking
-    )
+          setInterval(
+              function () {
+                  this.rankApiNodes()
+              }.bind(this),
+              this.$store.state.time_definitions.api_ranking
+          )
 
-    setInterval(() => {
-      this.$store.dispatch('wallet/updateAll')
-    }, this.$store.state.time_definitions.wallet_update)
+          setInterval(() => {
+              this.$store.dispatch('wallet/updateAll')
+          }, this.$store.state.time_definitions.wallet_update)
 
-    // Set up some listeners to update balance of the wallets
+          // Set up some listeners to update balance of the wallets
 
 
-    // Perform an initial investigation in to state of each network
-    //   this.$store.dispatch('wallet/queryApiNode', 'aen')
-    //   this.$store.dispatch('wallet/queryApiNode', 'btc')
-    //   this.$store.dispatch('wallet/queryApiNode', 'eth')
+          // Perform an initial investigation in to state of each network
+          //   this.$store.dispatch('wallet/queryApiNode', 'aen')
+          //   this.$store.dispatch('wallet/queryApiNode', 'btc')
+          //   this.$store.dispatch('wallet/queryApiNode', 'eth')
 
-    // TODO Update currency exchange rates from binance. Due to CORS restriction, investigate web account or use proxy
-    // this.$store.dispatch('exchange/updateRates')
+          // TODO Update currency exchange rates from binance. Due to CORS restriction, investigate web account or use proxy
+          // this.$store.dispatch('exchange/updateRates')
 
-    this.$store.commit('setLoading', { t: 'global', v: false })
-    if (this.$store.state.wallet.aen.mainAddress !== '') {
-      this.$store.dispatch('security/addCheck', {
-          challenge: 'app_start',
-          address: this.$store.state.wallet.aen.mainAddress,
-          blocking: true
-        })
-    } else {
-      if (this.$nuxt.$route.name !== 'index') {
-        this.$nuxt.$router.replace({ path: '/' })
-      }
-    }
+          this.$store.commit('setLoading', {t: 'global', v: false})
+          if (this.$store.state.wallet.aen.mainAddress !== '') {
+              this.$store.dispatch('security/addCheck', {
+                  challenge: 'app_start',
+                  address: this.$store.state.wallet.aen.mainAddress,
+                  blocking: true
+              })
+          } else {
+              if (this.$nuxt.$route.name !== 'index') {
+                  this.$nuxt.$router.replace({path: '/'})
+              } // End if on landing page
+          } // End if have main AEN address
+      } // End if on migration page
   },
   methods: {
       ...mapActions({
@@ -378,6 +454,16 @@ export default {
       }
 
     },
+      resetMigrations() {
+          this.local_version = 0
+          for(let walletKey in this.wallets) {
+              this.$store.commit('wallet/WALLET_PROP', {
+                  address: walletKey,
+                  key: "migration_version",
+                  value: 0
+              })
+          }
+      },
     exit() {
       this.$log.debug('App is shutting down...')
 

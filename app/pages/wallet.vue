@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container :class="{'pa-0': $vuetify.breakpoint.smAndDown}">
     <v-layout row justify-center align-center>
       <v-flex xs12>
         <v-toolbar class="primary mb-2">
@@ -34,11 +34,12 @@
             <v-btn
               slot="activator"
               small
-              icon
+              outline
             >
               <v-icon>
                 menu
               </v-icon>
+              {{ $t('common.label.options') }}
             </v-btn>
             <v-list>
               <v-list>
@@ -63,7 +64,7 @@
         </v-toolbar>
         <!-- Wallet Management -->
         <v-card class="apply-active-expansion">
-          <v-card-text v-if="haveWallet">
+          <v-card-text v-if="haveWallet" :class="{'pa-0': $vuetify.breakpoint.smAndDown}">
             <v-layout row wrap>
               <v-flex xs12>
                 <v-expansion-panel>
@@ -109,24 +110,23 @@
                           <v-flex xs12 md6>
                             <address-render :address="wallet.address" :use-address-book="false" :wide="true" />
                           </v-flex>
-                          <v-flex xs4 v-if="$vuetify.breakpoint.smAndDown">
+                          <v-flex v-if="$vuetify.breakpoint.mdAndUp" md6>
+                            <testnet-buttons :wallet="wallet" />
+                          </v-flex>
+                          <v-flex v-if="$vuetify.breakpoint.smAndDown" xs4>
                             <v-btn :disabled="wallet.onChain === false || wallet.type === 'btc'" outline small block @click="sendShow(wallet, $event)">
                               {{ $t('common.action.send') }}
                             </v-btn>
                           </v-flex>
-                          <v-flex xs4 v-if="$vuetify.breakpoint.smAndDown">
+                          <v-flex v-if="$vuetify.breakpoint.smAndDown" xs4>
                             <v-btn outline small block @click="addressShow(wallet)">
                               {{ $t('common.action.receive') }}
                             </v-btn>
                           </v-flex>
-                          <v-flex xs4 v-if="$vuetify.breakpoint.smAndDown">
+                          <v-flex v-if="$vuetify.breakpoint.smAndDown" xs4>
                             <v-btn outline small block @click="editShow(wallet, $event)">
                               {{ $t('common.label.options') }}
                             </v-btn>
-                          </v-flex>
-                          <v-flex xs12>
-                            <testnet-buttons :wallet="wallet" />
-                            <refresh-wallet :wallet="wallet" v-if="$vuetify.breakpoint.smAndDown" />
                           </v-flex>
                           <v-flex xs12>
                             <tracked-transactions :wallet="wallet" />
@@ -171,7 +171,6 @@
           </v-btn>
         </v-toolbar>
         <v-tabs>
-          <!--v-model="active"-->
           <v-tab>
             Edit
           </v-tab>
@@ -179,6 +178,17 @@
             <v-card flat>
               <v-card-text>
                 <v-layout row wrap>
+                  <v-flex v-if="$vuetify.breakpoint.smAndDown" xs6>
+                    <refresh-wallet v-if="$vuetify.breakpoint.smAndDown" :wallet="contextWallet" />
+                  </v-flex>
+                  <v-flex v-if="$vuetify.breakpoint.smAndDown" xs6>
+                    <testnet-buttons :wallet="contextWallet" />
+                  </v-flex>
+                  <v-flex xs12 v-if="canBePrimary()">
+                    <v-btn @click="makeWalletPrimary">
+                      Set as Primary Wallet
+                    </v-btn>
+                  </v-flex>
                   <v-flex xs12>
                     <v-text-field
                       v-model="modelWalletName"
@@ -387,6 +397,7 @@ export default {
     // Only start once global loading finished
     const preparationInterval = setInterval(
       function () {
+        this.$store.dispatch('wallet/updateAll')
         // Create a wallet index map to control accordion with
         clearInterval(preparationInterval)
         this.$store.commit('setLoading', { t: 'router', v: false })
@@ -395,6 +406,16 @@ export default {
     )
   },
   methods: {
+      canBePrimary() {
+          return (
+              this.contextWallet.type === 'aen' &&
+              this.contextWallet.address !== this.$store.state.wallet.aen.mainAddress
+          ) ? true : false
+      },
+      makeWalletPrimary() {
+          this.$store.commit('wallet/AEN_PROP', {key: 'mainAddress', value: this.contextWallet.address })
+      },
+
     testNet(wallet) {
       // First check whether the wallet is a contract and using parent
       if(wallet.hasOwnProperty('managerWalletAddress')) {
@@ -416,6 +437,10 @@ export default {
       const transactions = this.$store.getters['wallet/trackedTransactionsByWallet'](wallet)
       return transactions
     },
+    unconfirmedTransactions(wallet, event) {
+      event.stopPropagation()
+      this.$store.dispatch('wallet/transactionsPending', wallet)
+    },
     accordionTogglingWallet(wallet) {
 
       // TODO Make this code simpler, shame on me xD
@@ -428,23 +453,21 @@ export default {
 
       this.contextWallet = wallet
       this.selectedWalletAddress = wallet.address
-      // Check whether the user security is ok
-      if(this.contextWallet.onChain === false) {
-        const walletLiveCheckInterval = setInterval(
-          function () {
-            this.$store.dispatch('wallet/getLiveWallet', this.contextWallet).then((response) => {
-              if(response !== false) {
-                this.$store.commit('wallet/setWalletProperty', {
-                  address: this.contextWallet.address,
-                  key: 'onChain',
-                  value: true
-                })
-                clearInterval(walletLiveCheckInterval)
-              }
+
+      // Update the wallet on demand
+      if(this.contextWallet.onChain ) {
+        this.$store.dispatch('wallet/balance', wallet)
+        this.$store.dispatch('wallet/transactionsHistorical', wallet)
+      } else {
+        this.$store.dispatch('wallet/getLiveWallet', wallet).then((walletOnChain) => {
+          if (walletOnChain !== false) {
+            this.$store.commit('wallet/WALLET_PROP', {
+              address: wallet.address,
+              key: 'onChain',
+              value: true
             })
-          }.bind(this),
-          this.$store.state.time_definitions.wallet_update
-        )
+          }
+        })
       }
       this.dialogWalletView = true
     },

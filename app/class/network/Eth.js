@@ -23,13 +23,18 @@ export default class Eth extends Generic {
   }
 
   async erc20PublicMethod(options) {
-    Vue.$log.debug('ETH Plugin: ERC20 Method', options)
-    return new Promise((resolve) => {
+    Vue.$log.debug('Ethereum Plugin: ERC20 Method', options)
+    return new Promise((resolve, reject) => {
       import('~/class/network/contract/erc20').then((erc20Interface) => {
         const contract = new this.web3.eth.Contract(erc20Interface.abi, options.contractAddress)
-        contract.methods[options.method]().call().then((response) => {
-          resolve(response)
-        })
+        contract.methods[options.method]().call()
+            .then((response) => {
+              resolve(response)
+            })
+            .catch ((err) => {
+              Vue.$log.debug('ERC20 Method failed because', err)
+              reject(err)
+            })
       })
     })
   }
@@ -50,14 +55,16 @@ export default class Eth extends Generic {
   transactionsHistorical(options) {
     super.transactionsHistorical(options)
 
-    const apiEndpoint = this.config.etherscan.api_endpoint.replace('###NETWORK_IDENTIFIER###', options.network.identifier)
+    console.log($g.eth.available_networks[options.network].identifier)
+    const apiEndpoint = this.config.etherscan.api_endpoint.replace('###NETWORK_IDENTIFIER###', $g.eth.available_networks[options.network].identifier)
     return new Promise((resolve, reject) => {
       axios.get(apiEndpoint, {
         params: {
           module: 'account',
           action: 'txlist',
           address: options.address,
-          startblock: options.startBlock || 0,
+          // startblock: options.startBlock || 0,
+          startblock: 0,
           endblock: 99999999,
           sort: 'desc',
           apikey: this.config.etherscan.api_key
@@ -65,13 +72,48 @@ export default class Eth extends Generic {
       })
         .then(async function (response) {
           Vue.$log.debug('ETH: Transactions Historical: Axios return object', response)
-          let transactionsWorkingObject = {}
+          let transactionsWorkingObject = {'origin':{}, 'contract':{}}
           let currentTransaction, timeKey
           const transactions = response.data.result
           for(let transactionCount = 0; transactionCount < transactions.length; transactionCount++) {
             currentTransaction = transactions[transactionCount]
-            timeKey = format((currentTransaction.timeStamp * 1000), 'YYYY-MM-DD HH:mm')
-            transactionsWorkingObject[timeKey] = currentTransaction
+            timeKey = format((currentTransaction.timeStamp * 1000), 'YYYY-MM-DD HH:mm:ss')
+
+            console.log(currentTransaction)
+            const holding = {
+                blockIncluded: currentTransaction.blockNumber,
+                txHash: currentTransaction.hash,
+                fee: currentTransaction.gasUsed,
+                value: currentTransaction.value,
+                direction: (currentTransaction.to.toLowerCase() === options.address.toLowerCase() ? 'IN' : 'OUT'),
+                recipient: currentTransaction.to,
+                sender: currentTransaction.from,
+                type: 'Transfer',
+                time: timeKey
+            }
+
+            if (currentTransaction.value === '0' && currentTransaction.contractAddress !== '') {
+              holding.type = 'Contract'
+              holding.contractAddress = currentTransaction.contractAddress
+              holding.contractName = await this.erc20PublicMethod({
+                contractAddress: currentTransaction.contractAddress,
+                method: 'name'
+              })
+              holding.decimals = await this.erc20PublicMethod({
+                contractAddress: currentTransaction.contractAddress,
+                method: 'decimals'
+              })
+              holding.symbol = await this.erc20PublicMethod({
+                contractAddress: currentTransaction.contractAddress,
+                method: 'symbol'
+              })
+
+              if(!transactionsWorkingObject.contract.hasOwnProperty(currentTransaction.contractAddress)) {
+                transactionsWorkingObject.contract[currentTransaction.contractAddress] = {}
+              }
+              transactionsWorkingObject.contract[currentTransaction.contractAddress][timeKey] = holding
+            }
+            transactionsWorkingObject.origin[timeKey] = holding
           }
           Vue.$log.debug('ETH: Transactions Historical: Working Transactions object', transactionsWorkingObject)
           resolve(transactionsWorkingObject)
@@ -87,12 +129,11 @@ export default class Eth extends Generic {
    * @param transactionHash
    * @returns {Promise<{transactionBlock: number, currentBlock: number, transactionHash: *}>}
    */
-  async transactionStatus(transactionHash) {
-    Vue.$log.debug('ETH Plugin: Transaction Status', transactionHash)
-    const transaction = await this.web3.eth.getTransaction(transactionHash)
+  async transactionStatus(options) {
+    Vue.$log.debug('ETH Plugin: Transaction Status', options)
+    const transaction = await this.web3.eth.getTransaction(options.txHash)
     const currentBlock = await this.web3.eth.getBlockNumber()
     const result = {
-      transactionHash: transactionHash,
       currentBlock: currentBlock,
       transactionBlock: transaction.blockNumber
     }
@@ -132,7 +173,19 @@ export default class Eth extends Generic {
           this.web3.eth.sendSignedTransaction('0x'+serializedTx.toString('hex'))
             .on('transactionHash', function(hash){
               Vue.$log.debug('Have transaction hash from web3', hash)
-              resolve(hash)
+
+              const transaction = {
+                txHash: hash,
+                direction: 'outgoing',
+                address: options.destination.address,
+                amount: options.destination.amount,
+                type: options.source.type,
+                walletAddress: options.source.address,
+                network: $g.eth.available_networks[options.source.network].identifier,
+                status: 'PENDING'
+              }
+
+              resolve(transaction)
             })
             .on('error', function(err){ Vue.$log.error(err) })
         })
