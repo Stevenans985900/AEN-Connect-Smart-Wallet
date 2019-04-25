@@ -52,6 +52,7 @@
             completedMigrations(val) {
               if(val === Object.keys(this.wallets).length) {
                 this.status = 'complete'
+                  this.local_version = this.app_migration_version
               }
             },
             status(val) {
