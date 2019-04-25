@@ -14,8 +14,11 @@
         Migration Complete
       </h3>
       <p>
-        You will shortly be redirected to the dashboard
+        You will shortly be redirected to the dashboard. If you aren't, you can use the button below
       </p>
+      <v-btn to="/dashboard" class="primary">
+        Goto Dashboard
+      </v-btn>
     </v-flex>
   </v-layout>
 </template>
@@ -52,6 +55,7 @@
             completedMigrations(val) {
               if(val === Object.keys(this.wallets).length) {
                 this.status = 'complete'
+                  this.local_version = this.app_migration_version
               }
             },
             status(val) {
@@ -62,6 +66,12 @@
                   }.bind(this), 3000);
               }
             }
+        },
+        created() {
+          // Just in case the migrations have already been run but, user lands on page
+          if(this.local_version === this.app_migration_version) {
+              this.$nuxt.$router.replace({path: '/dashboard'})
+          }
         },
         methods: {
             accountMigrationsCompleted(processedWallet) {

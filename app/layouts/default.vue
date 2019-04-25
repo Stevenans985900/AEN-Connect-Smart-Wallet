@@ -298,7 +298,6 @@ export default {
           }
 
           if (this.$store.state.runtime.migration_version !== this.$g('migration_version')) {
-              console.log('migration to run')
               this.$nuxt.$router.replace({path: '/migrations'})
           }
 
