@@ -72,7 +72,7 @@
       blockExplorerLink(transaction) {
         switch (transaction.type) {
           case 'aen':
-            return this.$g('aen.transaction_explorer') + transaction.txHash
+            return this.$g('aen.transaction_explorer') + transaction.aenNetworkId
           case 'btc':
             return 'https://live.blockcypher.com/btc-testnet/tx/'+transaction.txHash+'/'
           case 'eth':

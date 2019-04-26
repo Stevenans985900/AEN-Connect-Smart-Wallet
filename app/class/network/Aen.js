@@ -181,11 +181,13 @@ export default class Aen extends Generic {
           let currentTransaction, timeKey
           for(let transactionCount = 0; transactionCount < transactions.length; transactionCount++) {
             currentTransaction = transactions[transactionCount]
+            console.log(currentTransaction)
             timeKey = format(currentTransaction.deadline.value, 'YYYY-MM-DD HH:mm:ss')
             transactionsWorkingObject[timeKey] = {
               type: 'Transfer',
               blockIncluded: currentTransaction.transactionInfo.height.lower,
-              hash: currentTransaction.transactionInfo.hash,
+              txHash: currentTransaction.transactionInfo.hash,
+              aenNetworkId: currentTransaction.transactionInfo.id,
               fee: currentTransaction.fee.lower,
               value: (currentTransaction.hasOwnProperty('mosaics') ? currentTransaction.mosaics[0].amount.lower : 0),
               direction: (currentTransaction.recipient.address.toLowerCase() === options.address.toLowerCase() ? 'IN' : 'OUT'),
