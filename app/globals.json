@@ -24,10 +24,7 @@
     "networkVersion": "0.1",
     "decimal": 8,
     "api_endpoint_height": "/chain/height",
-    "api_endpoints": [{
-      "alias": "API-2",
-      "address": "https://api-2.aencoin.io"
-    },
+    "api_endpoints": [
       {
         "alias": "API-5",
         "address": "https://api-5.aencoin.io"
@@ -45,7 +42,7 @@
         "testing": true
       }
     },
-    "transaction_explorer": "https://api-2.aencoin.io/transaction/",
+    "transaction_explorer": "http://block-explorer.aencoin.io/#/transfer/",
     "faucets": [{
       "name": "TestNet Faucet",
       "address": "http://faucet.aencoin.io/"

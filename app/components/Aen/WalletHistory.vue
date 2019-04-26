@@ -154,7 +154,7 @@ export default {
     },
     methods: {
       goToExplorer() {
-        window.open(this.$g('aen.transaction_explorer') + this.contextTransaction.hash)
+        window.open(this.$g('aen.transaction_explorer') + this.contextTransaction.aenNetworkId)
       },
       rowExpandedIcon(booleanExpanded) {
           return booleanExpanded === true ? 'keyboard_arrow_down' : 'keyboard_arrow_up'
