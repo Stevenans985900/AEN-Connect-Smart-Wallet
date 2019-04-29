@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "nuxt",
     "build": "nuxt build --no-lock",
+    "build-android": "cross-env BUILD_TARGET=android nuxt generate --no-lock",
     "electron-dev": "cross-env NODE_ENV=DEV electron .",
     "electron-build": "nuxt build && electron-builder",
     "start": "nuxt start",

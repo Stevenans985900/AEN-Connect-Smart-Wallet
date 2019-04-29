@@ -1,6 +1,6 @@
 <template>
   <span>
-    <component :is="migrationComponent" v-if="migrationComponent" :wallet="workingWallet" @complete="migrationCompleted"/>
+    <component :is="migrationComponent" v-if="migrationComponent" :wallet="workingWallet" @complete="migrationCompleted" />
   </span>
 </template>
 

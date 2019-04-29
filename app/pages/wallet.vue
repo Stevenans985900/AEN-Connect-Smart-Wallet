@@ -184,7 +184,7 @@
                   <v-flex v-if="$vuetify.breakpoint.smAndDown" xs6>
                     <testnet-buttons :wallet="contextWallet" />
                   </v-flex>
-                  <v-flex xs12 v-if="canBePrimary()">
+                  <v-flex v-if="canBePrimary()" xs12>
                     <v-btn @click="makeWalletPrimary">
                       Set as Primary Wallet
                     </v-btn>

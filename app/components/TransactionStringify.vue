@@ -1,10 +1,10 @@
 <template>
   <component
-          :is="component"
-          v-if="component"
-          :transaction="transaction"
-          :wallet="wallet"
-          :display="display"
+    :is="component"
+    v-if="component"
+    :transaction="transaction"
+    :wallet="wallet"
+    :display="display"
   />
 </template>
 <script>

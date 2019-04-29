@@ -4,12 +4,12 @@
     <clipboard :data="address" :display-text="displayText" :wide="$vuetify.breakpoint.smAndDown" />
     <!--</v-flex>-->
     <!--<v-flex-->
-      <!--v-if=""-->
-      <!--xs1-->
-      <!--class="text-xs-left"-->
+    <!--v-if=""-->
+    <!--xs1-->
+    <!--class="text-xs-left"-->
     <!--&gt;-->
-      <!-- New transfer -->
-    <v-dialog v-model="dialog" persistent max-width="600px" v-if="displayAddButton">
+    <!-- New transfer -->
+    <v-dialog v-if="displayAddButton" v-model="dialog" persistent max-width="600px">
       <v-btn slot="activator" small icon class="ml-0">
         <v-icon>
           add

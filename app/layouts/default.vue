@@ -44,7 +44,8 @@
         v-if="haveTrackedTransactions"
         v-model="menuPendingTransactions"
         :close-on-content-click="false"
-        offset-y>
+        offset-y
+      >
         <v-btn slot="activator" icon>
           <v-icon>
             history
@@ -118,7 +119,9 @@
         </v-toolbar-title>
         <v-spacer />
         {{ version }}#{{ buildNumber }}
-        <v-btn @click="resetMigrations">reset migration</v-btn>
+        <v-btn @click="resetMigrations">
+          reset migration
+        </v-btn>
       </v-toolbar>
     </v-footer>
   </v-app>

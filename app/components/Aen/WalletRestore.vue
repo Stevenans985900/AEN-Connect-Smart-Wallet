@@ -7,11 +7,11 @@
     <v-layout row wrap>
       <v-flex v-if="multipleNetworks" xs12>
         <v-select
-                :items="availableNetworks"
-                v-model="network"
-                item-text="name"
-                item-value="identifier"
-                label="Network"
+          v-model="network"
+          :items="availableNetworks"
+          item-text="name"
+          item-value="identifier"
+          label="Network"
         />
       </v-flex>
       <v-flex xs12>

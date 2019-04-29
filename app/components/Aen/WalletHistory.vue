@@ -70,7 +70,7 @@
         </v-flex>
       </template>
     </v-data-iterator>
-    <v-dialog v-model="dialogTransactionInfo" v-if="contextTransaction" max-width="400px">
+    <v-dialog v-if="contextTransaction" v-model="dialogTransactionInfo" max-width="400px">
       <v-toolbar>
         <v-toolbar-title>
           Transaction Info
