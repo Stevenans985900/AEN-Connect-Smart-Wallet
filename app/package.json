@@ -10,10 +10,11 @@
   ],
   "scripts": {
     "bla": "cross-env BUILD_TARGET=android nuxt generate --no-lock",
+    "clean": "rimraf www",
     "dev": "nuxt",
-    "android-build": "cross-env BUILD_TARGET=android nuxt generate --no-lock && replace --recursive '/nuxt/' 'nuxt/' www && cordova build android",
-    "android-dev": "cross-env BUILD_TARGET=android nuxt generate --no-lock && replace --recursive '/nuxt/' 'nuxt/' www && cordova emulate android",
-    "build": "nuxt build --no-lock",
+    "android-build": "npm run clean && cross-env BUILD_TARGET=android nuxt generate --no-lock && replace --recursive '/nuxt/' 'nuxt/' www && cordova build android",
+    "android-dev": "npm run clean && cross-env BUILD_TARGET=android nuxt generate --no-lock && replace --recursive '/nuxt/' 'nuxt/' www && cordova emulate android",
+    "build": "npm run clean && nuxt build --no-lock",
     "electron-dev": "cross-env NODE_ENV=DEV electron .",
     "electron-build": "nuxt build && electron-builder",
     "start": "nuxt start",
@@ -100,6 +101,7 @@
     "require-extension-hooks": "^0.3.3",
     "require-extension-hooks-babel": "^0.1.1",
     "require-extension-hooks-vue": "^2.0.0",
+    "rimraf": "^2.6.3",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
     "vue-template-compiler": "^2.6.10"
