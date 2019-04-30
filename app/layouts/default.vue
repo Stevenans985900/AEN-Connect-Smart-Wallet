@@ -31,7 +31,7 @@
     <v-toolbar fixed app>
       <v-toolbar-side-icon v-if="showNav" @click="toggleNav" />
       <v-btn flat to="/" active-class="">
-        <v-img src="/logo.png" contain height="25" max-width="125px" />
+        <v-img :src="imageBasePath + 'logo.png'" contain height="25" max-width="125px" />
       </v-btn>
       <v-toolbar-title class="hidden-sm-and-down text-xs-left" v-text="$t('common.label.app_name')" />
       <v-spacer />
@@ -199,6 +199,10 @@ export default {
    * COMPUTED
    */
   computed: {
+    imageBasePath() {
+      console.log('from default, the image base path collected from globals object is as follows')
+      console.log(this.$g('internal.baseImagePath'))
+      return this.$g('internal.baseImagePath') },
       wallets() { return this.$store.state.wallet.wallets },
       local_version: {
           get() { return this.$store.state.runtime.migration_version },

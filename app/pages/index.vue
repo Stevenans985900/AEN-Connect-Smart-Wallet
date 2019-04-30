@@ -14,7 +14,7 @@
                 <p v-html="$t('index.message.instruction')" />
               </v-flex>
               <v-flex md6>
-                <v-img src="/logo-800.png" contain />
+                <v-img :src="imageBasePath + 'logo-800.png'" contain />
               </v-flex>
             </v-layout>
           </v-card-text>

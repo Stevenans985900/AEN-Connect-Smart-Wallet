@@ -42,7 +42,7 @@ export default {
   },
   data() {
     return {
-      imageData: '',
+      imageData: null,
       showPrivateKey: false
     }
   },

@@ -5,7 +5,7 @@
   "build_number": "DEV",
   "google_recaptcha_key": "NA",
   "internal": {
-    "baseImagePath": "/",
+    "baseImagePath": "",
     "loggerEnabled": true
   },
   "time_definitions": {

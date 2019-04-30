@@ -30,7 +30,7 @@
   </v-data-table>
   <span v-else>
     <h1>No Transactions</h1>
-    <img src="/nothing.png" alt="nothing">
+    <img :src="imageBasePath + 'nothing.png'" alt="nothing">
   </span>
 </template>
 
@@ -56,6 +56,7 @@ export default {
     }
   },
   computed: {
+    imageBasePath() { return this.$g('internal.baseImagePath') },
     transactions() { return Object.values(this.wallet.transactions) }
   }
 }

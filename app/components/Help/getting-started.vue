@@ -8,13 +8,13 @@
         <v-card-text>
           <p>
             Choose to Create a new wallet right now and click continue
-            <img src="/help/introduction_getting-started_choose-wallet-add.png">
+            <img :src="imageBasePath + 'help/introduction_getting-started_choose-wallet-add.png'">
           </p>
           <p>
             Enter a name for the wallet and a password (repeating the password for verification) that is at least 8 characters
             long. There is a password strength meter that will change as you type to indicate how secure your password is from
             attack
-            <img src="/help/introduction_getting-started_wallet-name-password.png">
+            <img :src="imageBasePath + 'help/introduction_getting-started_wallet-name-password.png'">
           </p>
           <p>
             With your wallet created, you will be shown a screen instructs you to to back up your wallet. This step is optional
@@ -28,7 +28,7 @@
             <li>Your private key in masked format. To reveal the private key, click the eye icon</li>
             <li>Your address in QR code format</li>
           </ul>
-          <img src="/help/introduction_getting-started_wallet-review.png">
+          <img :src="imageBasePath + 'help/introduction_getting-started_wallet-review.png'">
         </v-card-text>
       </v-card>
     </v-expansion-panel-content>
@@ -43,7 +43,7 @@
             want. As such, there is a global security policy setting which determines the amount of challenges you will face
             when performing certain actions. For the sake of this guide, we'll use default settings.
           </p>
-          <img src="/help/introduction_getting-started_security-selection.png">
+          <img :src="imageBasePath + 'help/introduction_getting-started_security-selection.png'">
         </v-card-text>
       </v-card>
     </v-expansion-panel-content>
@@ -61,7 +61,7 @@
             get started from the Faucet. Clicking the faucet button will take you to an external service, populating the
             required fields for you in the process meaning, you only have to click the claim button.
           </p>
-          <img src="/help/introduction_getting-started_eula.png">
+          <img :src="imageBasePath + 'help/introduction_getting-started_eula.png'">
         </v-card-text>
       </v-card>
     </v-expansion-panel-content>

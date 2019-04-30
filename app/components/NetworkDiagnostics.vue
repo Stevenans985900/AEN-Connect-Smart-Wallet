@@ -16,7 +16,7 @@
               <template v-slot:header>
                 <v-list-tile avatar>
                   <v-list-tile-avatar>
-                    <img src="/wallet/aen.png">
+                    <img :src="imageBasePath + 'wallet/aen.png'">
                   </v-list-tile-avatar>
                   <v-list-tile-content>
                     <v-list-tile-title>{{ $t('network.label.aen') }} ({{ aenPing }}ms)</v-list-tile-title>
@@ -43,7 +43,7 @@
               <template v-slot:header>
                 <v-list-tile avatar>
                   <v-list-tile-avatar>
-                    <img src="/wallet/btc.png">
+                    <img :src="imageBasePath + 'wallet/btc.png'">
                   </v-list-tile-avatar>
                   <v-list-tile-content>
                     <v-list-tile-title>{{ $t('network.label.aen') }} ({{ btcPing }}ms)</v-list-tile-title>
@@ -63,7 +63,7 @@
               <template v-slot:header>
                 <v-list-tile avatar>
                   <v-list-tile-avatar>
-                    <img src="/wallet/eth.png">
+                    <img :src="imageBasePath + 'wallet/eth.png'">
                   </v-list-tile-avatar>
                   <v-list-tile-content>
                     <v-list-tile-title>{{ $t('network.label.eth') }} ({{ ethPing }}ms)</v-list-tile-title>
@@ -93,12 +93,13 @@ export default {
     }
   },
   computed: {
-      aenHeight() { return this.$store.state.wallet.aen.apiHeight },
-      aenPing() { return this.$store.state.wallet.aen.apiPing },
-      btcHeight() { return this.$store.state.wallet.btc.apiHeight },
-      btcPing() { return this.$store.state.wallet.btc.apiPing },
-      ethHeight() { return this.$store.state.wallet.eth.apiHeight },
-      ethPing() { return this.$store.state.wallet.eth.apiPing },
+    aenHeight() { return this.$store.state.wallet.aen.apiHeight },
+    aenPing() { return this.$store.state.wallet.aen.apiPing },
+    btcHeight() { return this.$store.state.wallet.btc.apiHeight },
+    btcPing() { return this.$store.state.wallet.btc.apiPing },
+    ethHeight() { return this.$store.state.wallet.eth.apiHeight },
+    ethPing() { return this.$store.state.wallet.eth.apiPing },
+    imageBasePath() { return this.$g('internal.baseImagePath') },
     color() {
       if(this.$store.state.runtime.isOnline === false) {
         return 'red'

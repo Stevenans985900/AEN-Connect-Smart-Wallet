@@ -12,7 +12,7 @@
       fullscreen
     >
       <v-toolbar>
-        <v-img src="/logo.png" contain height="25" max-width="125px" />
+        <v-img :src="imageBasePath + 'logo.png'" contain height="25" max-width="125px" />
         <v-toolbar-title>{{ $t('common.label.help') }}</v-toolbar-title>
         <v-spacer />
         <network-diagnostics />
@@ -265,6 +265,7 @@
         get: function () { return this.$store.state.user.help },
         set: function (val) { this.$store.commit('setUserProperty', {key: 'help', value: val}) }
       },
+      imageBasePath() { return this.$g('internal.baseImagePath') },
       rawRouteName() { return this.$route.name }
     },
     watch: {

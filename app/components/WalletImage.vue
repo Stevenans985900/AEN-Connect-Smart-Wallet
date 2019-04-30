@@ -1,5 +1,5 @@
 <template>
-  <img :src="imagePath" :alt="wallet.name" onError="this.onerror=null;this.src='/question.png';">
+  <img :src="imagePath" :alt="wallet.name" onError="this.onerror=null;this.src='question.png';">
 </template>
 
 <style scoped>
@@ -9,8 +9,6 @@
   }
 </style>
 <script>
-
-import $g from '~/globals.json'
 
 export default {
   props: {
@@ -27,12 +25,15 @@ export default {
       imagePath: ''
     }
   },
+  computed: {
+    imageBasePath() { return this.$g('internal.baseImagePath') }
+  },
   beforeMount: function () {
     // If the image is a contract type, load by address otherwise use the plain network image
     if (this.wallet.type === 'contract') {
-      this.imagePath = $g.internal.baseImagePath + 'wallet/' + this.wallet.address + '.png'
+      this.imagePath =  this.imageBasePath + 'wallet/' + this.wallet.address + '.png'
     } else {
-      this.imagePath = $g.internal.baseImagePath + 'wallet/' + this.wallet.type + '.png'
+      this.imagePath = this.imageBasePath + 'wallet/' + this.wallet.type + '.png'
     }
   }
 }
