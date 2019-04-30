@@ -200,15 +200,15 @@ export default {
   },
   mounted() {
     this.processWallets()
-
-    this.interval = setInterval(
-      function () {
-        // Create a wallet index map to control accordion with
-        this.processWallets()
-      }.bind(this),
-      this.$store.state.time_definitions.wallet_update
-    )
-
+    if (process.client) {
+      this.interval = setInterval(
+        function () {
+          // Create a wallet index map to control accordion with
+          this.processWallets()
+        }.bind(this),
+        this.$store.state.time_definitions.wallet_update
+      )
+    }
   },
   beforeDestroy() {
     clearInterval(this.interval)
@@ -223,21 +223,15 @@ export default {
       let walletKey
       // this.reset()
       for (walletKey in this.wallets) {
-        this.$store
-          .dispatch('wallet/balance', this.wallets[walletKey])
-          .then((walletProcessed) => {
-            exchangeRate = this.$g('exchange.' + walletProcessed.type)
-            if(exchangeRate) {
-              const walletValue = (walletProcessed.balance ? walletProcessed.balance * Number(exchangeRate) : 0)
-              this.totalValue += walletValue
-              this.graphData[walletProcessed.name] = walletValue
-              this.chartTitle = 'USD $' + this.toSmallestDenomination(this.totalValue)
-            }
-            this.processedWallets++
-          })
-          .catch((err) => {
-              this.$log.error(err)
-          })
+        const wallet = this.wallets[walletKey]
+        exchangeRate = this.$g('exchange.' + wallet.type)
+        if(exchangeRate) {
+          const walletValue = (wallet.balance ? wallet.balance * Number(exchangeRate) : 0)
+          this.totalValue += walletValue
+          this.graphData[wallet.name] = walletValue
+          this.chartTitle = 'USD $' + this.toSmallestDenomination(this.totalValue)
+        }
+        this.processedWallets++
       }
     },
     percentageWorth(wallet) {

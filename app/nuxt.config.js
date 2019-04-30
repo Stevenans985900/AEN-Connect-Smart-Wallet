@@ -12,7 +12,8 @@ module.exports = {
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: pkg.description }
+      { hid: 'description', name: 'description', content: pkg.description },
+      { "cache-control": "no-cache;" }
     ],
     noscript: [{ innerHTML: 'This application requires JavaScript in order to run, please enable JavaScript or disable your blocker to proceed.' }],
     link: [{
@@ -155,13 +156,20 @@ module.exports = {
   generate: {
     dir: 'www'
   },
+  router: {
+      mode: 'hash'
+  },
   /*
   ** Build configuration
   */
   build: {
+    babel: {
+      babelrc: true
+    },
+    quiet: false,
     cache: true,
     parallel: true,
-    transpile: ['vuetify/lib'], 
+    transpile: ['vuetify/lib'],
     plugins: [new VuetifyLoaderPlugin()],
     publicPath: '/nuxt/',
     loaders: {
@@ -196,6 +204,7 @@ module.exports = {
 
       // Run ESLint on save
       if (ctx.isDev && ctx.isClient) {
+        console.log('compiling eslit code')
         config.module.rules.push({
           enforce: 'pre',
           test: /\.(js|vue)$/,
@@ -205,8 +214,14 @@ module.exports = {
       }
 
       if(process.env.hasOwnProperty('BUILD_TARGET') && process.env.BUILD_TARGET === 'android') {
-        console.log('BUILDING FOR ANDROID, EDITING PUBLIC PATHS')
-        config.output.publicPath = '.nuxt/'
+        console.log('BUILDING FOR ANDROID')
+        config.module.rules.push({
+          enforce: 'pre',
+          test: /\.(js|vue)$/,
+          loader: 'eslint-loader',
+          exclude: /(node_modules)/
+        })
+        // config.output.publicPath = '/nuxt/'
       }
 
       // Check if we're in Electron and change the renderer if so

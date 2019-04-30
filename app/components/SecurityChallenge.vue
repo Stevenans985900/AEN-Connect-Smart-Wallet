@@ -57,6 +57,7 @@
 
 function initialDataState() {
   return {
+    timeoutMessage: false,
     formPasswordValid: false,
     message: null,
     password: '',
@@ -98,6 +99,9 @@ export default {
       }
     }
   },
+  beforeDestroy() {
+    clearTimeout(this.timeoutMessage)
+  },
   methods: {
     appWipe() {
       this.$store.commit("reset")
@@ -125,11 +129,12 @@ export default {
           }
 
           // Clear the message after a short time
-          setTimeout(function() {
-            this.message = null
-          }.bind(this), 5000)
+          if(process.client) {
+            this.timeoutMessage = setTimeout(function () {
+              this.message = null
+            }.bind(this), 5000)
+          }
         })
-
     }
   }
 }

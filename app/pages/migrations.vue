@@ -28,6 +28,7 @@
 
     function initialDataState() {
         return {
+          timeoutMigrationComplete: false,
             completedMigrations: 0,
             currentMigration: 0,
             status: 'initial',
@@ -59,11 +60,12 @@
               }
             },
             status(val) {
-                console.log('status: ' + val)
               if(val === 'complete') {
-                  setTimeout(function(){
-                      this.$nuxt.$router.replace({path: '/dashboard'})
-                  }.bind(this), 3000);
+                if(process.client) {
+                  this.timeoutMigrationComplete = setTimeout(function () {
+                    this.$nuxt.$router.replace({path: '/dashboard'})
+                  }.bind(this), 3000)
+                }
               }
             }
         },
@@ -73,6 +75,9 @@
               this.$nuxt.$router.replace({path: '/dashboard'})
           }
         },
+      beforeDestroy() {
+        clearTimeout(this.timeoutMigrationComplete)
+      },
         methods: {
             accountMigrationsCompleted(processedWallet) {
                 this.$log.debug('migrations complete', processedWallet)

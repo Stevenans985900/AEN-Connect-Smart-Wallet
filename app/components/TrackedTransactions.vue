@@ -65,9 +65,6 @@
         }
       }
     },
-    beforeDestroy() {
-      clearInterval(this.interval)
-    },
     methods: {
       blockExplorerLink(transaction) {
         switch (transaction.type) {

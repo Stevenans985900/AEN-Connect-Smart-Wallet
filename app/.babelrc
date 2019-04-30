@@ -1,3 +1,8 @@
 {
-  "presets": ["@babel/preset-env"]
+  "presets": [
+    "@nuxt/babel-preset-app"
+  ],
+  "plugins": [
+    "transform-es2015-spread"
+  ]
 }

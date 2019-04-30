@@ -85,14 +85,15 @@ export const actions = {
         if(options.hasOwnProperty('blocking')) {
           commit('CONTEXT_PROPERTY', { key: 'blocking', value: true })
         }
-        
-        const preparationInterval = setInterval(
+        if(process.client) {
+          const preparationInterval = setInterval(
             function () {
               if (state.context.validity === 'VALID') {
                 clearInterval(preparationInterval)
                 resolve(true)
               }
             }, 200)
+        }
       } else {
         resolve()
       }
@@ -135,10 +136,12 @@ export const actions = {
 
       // Check if the number of attempts made by user is over the limit and deny
       if (state.context.authenticationAttempts >= state.authenticationAttemptLimit) {
-        setInterval(function() {
-          commit('CONTEXT_PROPERTY', { key: 'lockedUntil', value: null })
-          commit('CONTEXT_PROPERTY', { key: 'authenticationAttempts', value: 0 })
-        }, state.lockoutDuration)
+        if(process.client) {
+          setInterval(function() {
+            commit('CONTEXT_PROPERTY', { key: 'lockedUntil', value: null })
+            commit('CONTEXT_PROPERTY', { key: 'authenticationAttempts', value: 0 })
+          }, state.lockoutDuration)
+        }
         commit('CONTEXT_PROPERTY', { key: 'validity', value: 'INVALID' })
         commit('CONTEXT_PROPERTY', { key: 'lockedUntil', value: (Date.now() + state.lockoutDuration) })
         reject('TOO_MANY_ATTEMPTS')
