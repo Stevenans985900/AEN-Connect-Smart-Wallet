@@ -17,7 +17,6 @@ export const initialState = {
     mode: 'web',
     environment: 'production',
     isOnline: false,
-    intervalTimers: {},
     // Even though Vue is reactive, some of the deep components use calculations along with computed properties. This
     // counter provides a simple way to watch for such events firing removing the need to watch deep
     renderCounter: 0,

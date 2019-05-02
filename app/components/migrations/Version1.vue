@@ -37,7 +37,7 @@
         /**
          * MOUNTED
          */
-        created: function () {
+        mounted: function () {
             const workingWallet = Object.assign({}, this.wallet)
 
             switch(workingWallet.type) {

@@ -12,7 +12,8 @@ module.exports = {
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: pkg.description }
+      { hid: 'description', name: 'description', content: pkg.description },
+      { "cache-control": "no-cache;" }
     ],
     noscript: [{ innerHTML: 'This application requires JavaScript in order to run, please enable JavaScript or disable your blocker to proceed.' }],
     link: [{
@@ -139,7 +140,7 @@ module.exports = {
     // Doc: https://axios.nuxtjs.org/usage
     '@nuxtjs/axios',
     ['nuxt-matomo', {
-      matomoUrl: '//stats.aencoin.com/',
+      matomoUrl: 'https://stats.aencoin.com/',
       // trackerUrl: 'https://stats.aencoin.com/matomo.php',
       siteId: 6,
       debug: false,
@@ -152,15 +153,25 @@ module.exports = {
   axios: {
     rejectUnauthorized: false
   },
-
+  generate: {
+    dir: 'www'
+  },
+  router: {
+      mode: 'hash'
+  },
   /*
   ** Build configuration
   */
   build: {
+    babel: {
+      babelrc: true
+    },
+    quiet: false,
     cache: true,
     parallel: true,
     transpile: ['vuetify/lib'],
     plugins: [new VuetifyLoaderPlugin()],
+    publicPath: '/nuxt/',
     loaders: {
       stylus: {
         import: ['~assets/style/variables.styl']
@@ -180,14 +191,37 @@ module.exports = {
             child_process: 'empty'
         }
       }
+
+      config.module.rules.push({
+        test: /\.(png|jpeg|gif|svg)$/i,
+        loader: 'url-loader',
+        options: {
+          limit: 8192,
+          name: 'img/[name].[hash:7].[ext]',
+          outputPath: "img/"
+        }
+      })
+
       // Run ESLint on save
       if (ctx.isDev && ctx.isClient) {
+        console.log('compiling eslit code')
         config.module.rules.push({
           enforce: 'pre',
           test: /\.(js|vue)$/,
           loader: 'eslint-loader',
           exclude: /(node_modules)/
         })
+      }
+
+      if(process.env.hasOwnProperty('BUILD_TARGET') && process.env.BUILD_TARGET === 'android') {
+        console.log('BUILDING FOR ANDROID')
+        config.module.rules.push({
+          enforce: 'pre',
+          test: /\.(js|vue)$/,
+          loader: 'eslint-loader',
+          exclude: /(node_modules)/
+        })
+        // config.output.publicPath = '/nuxt/'
       }
 
       // Check if we're in Electron and change the renderer if so

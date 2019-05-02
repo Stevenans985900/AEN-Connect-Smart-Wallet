@@ -7,8 +7,8 @@
     <v-layout row wrap>
       <v-flex v-if="multipleNetworks" xs12>
         <v-select
-          :items="availableNetworks"
           v-model="network"
+          :items="availableNetworks"
           item-text="name"
           label="Network"
           return-object

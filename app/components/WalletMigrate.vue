@@ -1,6 +1,6 @@
 <template>
   <span>
-    <component :is="migrationComponent" v-if="migrationComponent" :wallet="workingWallet" @complete="migrationCompleted"/>
+    <component :is="migrationComponent" v-if="migrationComponent" :wallet="workingWallet" @complete="migrationCompleted" />
   </span>
 </template>
 
@@ -39,7 +39,6 @@
         watch: {
           // Watch to check if all migrations have been run
           trackedMigrationVersion: function(versionNumber) {
-              console.log(versionNumber)
               if(versionNumber === this.app_migration_version) {
                   this.status = 'complete'
                   this.$emit('complete', this.workingWallet)
@@ -48,7 +47,7 @@
               }
           }
         },
-        created: function() {
+        mounted: function() {
           // If the component is being loaded to run migrations on only a single wallet, execute that pipeline
           this.workingWallet = Object.assign({}, this.wallet)
           this.trackedMigrationVersion = 1

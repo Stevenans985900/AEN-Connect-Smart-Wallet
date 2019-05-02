@@ -1,13 +1,13 @@
 <template>
   <v-layout row wrap>
-    <v-flex xs12 v-for="(wallet, index) in wallets" :key="index">
+    <v-flex v-for="(wallet, index) in wallets" :key="index" xs12>
       <h3>
         {{ index }} - {{ migrationsStatus(wallet) }} - Version: {{ wallet.migration_version || 0 }} of {{ app_migration_version }}
       </h3>
       <wallet-migrate :wallet="wallet" @complete="accountMigrationsCompleted" />
     </v-flex>
     <v-flex v-if="status === 'incomplete'">
-      <v-progress-linear :indeterminate="true"></v-progress-linear>
+      <v-progress-linear :indeterminate="true" />
     </v-flex>
     <v-flex v-else>
       <h3>
@@ -28,6 +28,7 @@
 
     function initialDataState() {
         return {
+          timeoutMigrationComplete: false,
             completedMigrations: 0,
             currentMigration: 0,
             status: 'initial',
@@ -59,11 +60,12 @@
               }
             },
             status(val) {
-                console.log('status: ' + val)
               if(val === 'complete') {
-                  setTimeout(function(){
-                      this.$nuxt.$router.replace({path: '/dashboard'})
-                  }.bind(this), 3000);
+                if(process.client) {
+                  this.timeoutMigrationComplete = setTimeout(function () {
+                    this.$nuxt.$router.replace({path: '/dashboard'})
+                  }.bind(this), 3000)
+                }
               }
             }
         },
@@ -73,6 +75,9 @@
               this.$nuxt.$router.replace({path: '/dashboard'})
           }
         },
+      beforeDestroy() {
+        clearTimeout(this.timeoutMigrationComplete)
+      },
         methods: {
             accountMigrationsCompleted(processedWallet) {
                 this.$log.debug('migrations complete', processedWallet)

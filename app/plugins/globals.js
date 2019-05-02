@@ -3,7 +3,6 @@ import globals from '~/globals.json'
 import _get from 'lodash.get'
 
 Vue.prototype.$g = (key) => {
-  const val = _get(globals, key, '')
-  if (!val) console.warn(key, ' is empty in $g')
-  return val || false
+  const val = _get(globals, key, false)
+  return val
 }

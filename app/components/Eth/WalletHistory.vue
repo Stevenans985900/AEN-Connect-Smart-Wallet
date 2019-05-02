@@ -49,14 +49,14 @@
       </template>
     </v-data-table>
     <v-data-iterator
-            v-else
-            :items="transactions"
-            :must-sort="true"
-            :pagination.sync="paginationOptions"
-            :rows-per-page-items="[4,8,12]"
-            content-tag="v-layout"
-            row
-            wrap
+      v-else
+      :items="transactions"
+      :must-sort="true"
+      :pagination.sync="paginationOptions"
+      :rows-per-page-items="[4,8,12]"
+      content-tag="v-layout"
+      row
+      wrap
     >
       <template v-slot:item="props">
         <v-flex xs12>
@@ -81,7 +81,7 @@
         </v-flex>
       </template>
     </v-data-iterator>
-    <v-dialog v-model="dialogTransactionInfo" v-if="contextTransaction" max-width="400px">
+    <v-dialog v-if="contextTransaction" v-model="dialogTransactionInfo" max-width="400px">
       <v-toolbar>
         <v-toolbar-title>
           Transaction Info

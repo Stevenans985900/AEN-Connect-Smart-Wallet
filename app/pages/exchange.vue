@@ -44,15 +44,17 @@
     mounted: function () {
       this.$log.debug('Dashboard Startup')
       // Only start once global loading finished
-      this.interval = setInterval(
-        function () {
-          if (this.$store.getters.booting === false) {
-            clearInterval(this.interval)
-            this.$store.commit('setLoading', { t: 'router', v: false })
-          }
-        }.bind(this),
-        this.$store.state.time_definitions.controller_poll
-      )
+      if (process.client) {
+        this.interval = setInterval(
+          function () {
+            if (this.$store.getters.booting === false) {
+              clearInterval(this.interval)
+              this.$store.commit('setLoading', { t: 'router', v: false })
+            }
+          }.bind(this),
+          this.$store.state.time_definitions.controller_poll
+        )
+      }
     },
     beforeDestroy() {
       clearInterval(this.interval)

@@ -14,7 +14,7 @@
                 <p v-html="$t('index.message.instruction')" />
               </v-flex>
               <v-flex md6>
-                <v-img src="/logo-800.png" contain />
+                <v-img :src="imageBasePath + 'logo-800.png'" contain />
               </v-flex>
             </v-layout>
           </v-card-text>
@@ -90,13 +90,7 @@ function initialDataState() {
     interval: null,
     panel: [true, false, false],
     dialogEulaAgree: false,
-    wallet: null,
-    seasons: [
-      'Winter',
-      'Spring',
-      'Summer',
-      'Fall'
-    ]
+    wallet: null
   }
 }
 export default {
@@ -125,13 +119,6 @@ export default {
   computed: {
     network() {
       return this.$store.state.wallet.aen.network.name
-    },
-    testnet() {
-      try {
-        return this.wallet.network.testing
-      } catch (e) {
-        return false
-      }
     }
   },
   /**
@@ -140,19 +127,21 @@ export default {
   mounted: function () {
     this.$log.debug('Dashboard Startup')
     // Only start once global loading finished
-    this.interval = setInterval(
-      function () {
-        if (this.$store.getters.booting === false) {
-          if (this.$store.getters["wallet/haveWalletType"]('aen') === true) {
-            this.$log.debug('Redirecting user to the dashboard')
-            this.$nuxt.$router.replace({ path: '/dashboard' })
+    if (process.client) {
+      this.interval = setInterval(
+        function () {
+          if (this.$store.getters.booting === false) {
+            if (this.$store.getters["wallet/haveWalletType"]('aen') === true) {
+              this.$log.debug('Redirecting user to the dashboard')
+              this.$nuxt.$router.replace({path: '/dashboard'})
+            }
+            clearInterval(this.interval)
+            this.$store.commit('setLoading', {t: 'router', v: false})
           }
-          clearInterval(this.interval)
-          this.$store.commit('setLoading', { t: 'router', v: false })
-        }
-      }.bind(this),
-      this.$store.state.time_definitions.controller_poll
-    )
+        }.bind(this),
+        this.$store.state.time_definitions.controller_poll
+      )
+    }
   },
   beforeDestroy() {
     clearInterval(this.interval)
@@ -173,9 +162,6 @@ export default {
     },
     setupComplete: function () {
       this.dialogEulaAgree = true
-    },
-    goToFaucet: function () {
-      window.open(this.$g('aen.faucets')[0].address + '?address=' + this.wallet.address)
     },
     acceptAndProceed: function () {
       this.$store.commit('setUserProperty', { key: 'eulaAgree', value: true })

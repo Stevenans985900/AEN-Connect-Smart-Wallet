@@ -184,7 +184,7 @@
                   <v-flex v-if="$vuetify.breakpoint.smAndDown" xs6>
                     <testnet-buttons :wallet="contextWallet" />
                   </v-flex>
-                  <v-flex xs12 v-if="canBePrimary()">
+                  <v-flex v-if="canBePrimary()" xs12>
                     <v-btn @click="makeWalletPrimary">
                       Set as Primary Wallet
                     </v-btn>
@@ -302,6 +302,7 @@ import WalletAdd from '~/components/WalletAdd'
 
 function initialDataState() {
   return {
+    pageLoadInterval: null,
     accordionOpen: false,
     dialogWalletAdd: false,
     dialogWalletView: false,
@@ -395,15 +396,20 @@ export default {
   },
   mounted: function () {
     // Only start once global loading finished
-    const preparationInterval = setInterval(
-      function () {
-        this.$store.dispatch('wallet/updateAll')
-        // Create a wallet index map to control accordion with
-        clearInterval(preparationInterval)
-        this.$store.commit('setLoading', { t: 'router', v: false })
-      }.bind(this),
-      this.$store.state.time_definitions.controller_poll
-    )
+    if (process.client) {
+      this.pageLoadInterval = setInterval(
+        function () {
+          this.$store.dispatch('wallet/updateAll')
+          // Create a wallet index map to control accordion with
+          clearInterval(this.pageLoadInterval)
+          this.$store.commit('setLoading', { t: 'router', v: false })
+        }.bind(this),
+        this.$store.state.time_definitions.controller_poll
+      )
+    }
+  },
+  beforeDestroy() {
+    clearInterval(this.pageLoadInterval)
   },
   methods: {
       canBePrimary() {

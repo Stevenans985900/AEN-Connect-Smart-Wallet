@@ -31,7 +31,7 @@
     <v-toolbar fixed app>
       <v-toolbar-side-icon v-if="showNav" @click="toggleNav" />
       <v-btn flat to="/" active-class="">
-        <v-img src="/logo.png" contain height="25" max-width="125px" />
+        <v-img :src="imageBasePath + 'logo.png'" contain height="25" max-width="125px" />
       </v-btn>
       <v-toolbar-title class="hidden-sm-and-down text-xs-left" v-text="$t('common.label.app_name')" />
       <v-spacer />
@@ -44,7 +44,8 @@
         v-if="haveTrackedTransactions"
         v-model="menuPendingTransactions"
         :close-on-content-click="false"
-        offset-y>
+        offset-y
+      >
         <v-btn slot="activator" icon>
           <v-icon>
             history
@@ -118,7 +119,6 @@
         </v-toolbar-title>
         <v-spacer />
         {{ version }}#{{ buildNumber }}
-        <v-btn @click="resetMigrations">reset migration</v-btn>
       </v-toolbar>
     </v-footer>
   </v-app>
@@ -141,6 +141,9 @@ if (isElectron()) {
 
 function initialDataState() {
   return {
+    intervalApiRanking: false,
+    intervalOnlineCheck: false,
+    intervalWalletUpdate: false,
     dialogExit: false,
     minifyDrawer: false,
     drawerOpen: false,
@@ -196,6 +199,10 @@ export default {
    * COMPUTED
    */
   computed: {
+    imageBasePath() {
+      console.log('from default, the image base path collected from globals object is as follows')
+      console.log(this.$g('internal.baseImagePath'))
+      return this.$g('internal.baseImagePath') },
       wallets() { return this.$store.state.wallet.wallets },
       local_version: {
           get() { return this.$store.state.runtime.migration_version },
@@ -286,11 +293,10 @@ export default {
   /**
    *
    */
-  async beforeMount() {
+  async mounted() {
 
       // Are we on the migration page?
       if(this.$nuxt.$route.name !== 'migrations') {
-
           // TODO Once wallet has been running with migrate system for a while, remove the following line. It is used to cater for the early evangelists who ran wallets without
           if (this.$store.state.wallet.aen.mainAddress !== '' && this.$store.state.runtime.migration_version === '') {
               // Set migration version so that will find a match
@@ -313,7 +319,6 @@ export default {
               this.$store.commit('TIME_DEF', this.$g('time_definitions'))
           }
 
-
           // Determine how to handle main navigation by default depending on device size
           if (this.$vuetify.breakpoint.mdAndUp === true) {
               this.drawerOpen = true
@@ -331,12 +336,14 @@ export default {
           this.$store.commit('BUSY', false)
 
           this.onlineCheck()
-          setInterval(
+          if (process.client) {
+            this.intervalOnlineCheck = setInterval(
               function () {
-                  this.onlineCheck()
+                this.onlineCheck()
               }.bind(this),
               this.$store.state.time_definitions.online_interval
-          )
+            )
+          }
 
           // Desktop app setup
           // if (isElectron()) {
@@ -393,16 +400,20 @@ export default {
           }
 
           this.rankApiNodes()
-          setInterval(
+          if (process.client) {
+            this.intervalApiRanking = setInterval(
               function () {
-                  this.rankApiNodes()
+                this.rankApiNodes()
               }.bind(this),
               this.$store.state.time_definitions.api_ranking
-          )
+            )
+          }
 
-          setInterval(() => {
+          if (process.client) {
+            this.intervalWalletUpdate = setInterval(() => {
               this.$store.dispatch('wallet/updateAll')
-          }, this.$store.state.time_definitions.wallet_update)
+            }, this.$store.state.time_definitions.wallet_update)
+          }
 
           // Set up some listeners to update balance of the wallets
 
@@ -429,6 +440,11 @@ export default {
           } // End if have main AEN address
       } // End if on migration page
   },
+  beforeDestroy() {
+    clearInterval(this.intervalApiRanking)
+    clearInterval(this.intervalOnlineCheck)
+    clearInterval(this.intervalWalletUpdate)
+  },
   methods: {
       ...mapActions({
           rankApiNodes: 'wallet/rankApiNodes'
@@ -453,16 +469,6 @@ export default {
       }
 
     },
-      resetMigrations() {
-          this.local_version = 0
-          for(let walletKey in this.wallets) {
-              this.$store.commit('wallet/WALLET_PROP', {
-                  address: walletKey,
-                  key: "migration_version",
-                  value: 0
-              })
-          }
-      },
     exit() {
       this.$log.debug('App is shutting down...')
 
