@@ -200,8 +200,6 @@ export default {
    */
   computed: {
     imageBasePath() {
-      console.log('from default, the image base path collected from globals object is as follows')
-      console.log(this.$g('internal.baseImagePath'))
       return this.$g('internal.baseImagePath') },
       wallets() { return this.$store.state.wallet.wallets },
       local_version: {

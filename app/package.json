@@ -12,8 +12,8 @@
     "bla": "cross-env BUILD_TARGET=android nuxt generate --no-lock",
     "clean": "rimraf www",
     "dev": "nuxt",
-    "android-build": "npm run clean && cross-env BUILD_TARGET=android nuxt generate --no-lock && replace --recursive '/nuxt/' 'nuxt/' www && cordova build android",
-    "android-dev": "npm run clean && cross-env BUILD_TARGET=android nuxt generate --no-lock && replace --recursive '/nuxt/' 'nuxt/' www && cordova emulate android",
+    "mobile-prepare": "npm run clean && cross-env BUILD_TARGET=android nuxt generate --no-lock && replace --recursive '/nuxt/' 'nuxt/' www",
+    "cordova-build": "npm run mobile-prepare && cordova build",
     "build": "npm run clean && nuxt build --no-lock",
     "electron-dev": "cross-env NODE_ENV=DEV electron .",
     "electron-build": "nuxt build && electron-builder",
@@ -32,6 +32,7 @@
     "chain-js-sdk": "^0.1.0",
     "chart.js": "^2.8.0",
     "cordova-android": "^8.0.0",
+    "cordova-ios": "^5.0.1",
     "cross-env": "^5.2.0",
     "crypto-js": "^3.1.9-1",
     "date-fns": "^1.30.1",
@@ -111,7 +112,8 @@
       "cordova-plugin-whitelist": {}
     },
     "platforms": [
-      "android"
+      "android",
+      "ios"
     ]
   }
 }

@@ -117,6 +117,7 @@ export default {
    * COMPUTED
    */
   computed: {
+    imageBasePath() { return this.$g('internal.baseImagePath') },
     network() {
       return this.$store.state.wallet.aen.network.name
     }
